@@ -155,7 +155,7 @@ func outputNormalMode(cred *vault.Credential, vaultService *vault.VaultService, 
 	}
 
 	if cred.Category != "" {
-		fmt.Printf("🏷️  Category: %s\n", cred.Category)
+		fmt.Printf("🏷️ Category: %s\n", cred.Category)
 	}
 
 	if cred.URL != "" {
