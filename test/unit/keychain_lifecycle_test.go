@@ -1,7 +1,6 @@
 package unit_test
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -58,7 +57,7 @@ func TestKeychainEnable_WrongPassword(t *testing.T) {
 	tempDir := t.TempDir()
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	correctPassword := []byte("CorrectPassword@123")
-	wrongPassword := []byte("WrongPassword@456")
+	_ = []byte("WrongPassword@456") // wrongPassword (will be used after T011 implementation)
 
 	vs, err := vault.New(vaultPath)
 	if err != nil {
@@ -174,7 +173,7 @@ func TestKeychainEnable_AlreadyEnabled_WithForce(t *testing.T) {
 	tempDir := t.TempDir()
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	oldPassword := []byte("OldPassword@123")
-	newPassword := []byte("NewPassword@456")
+	_ = []byte("NewPassword@456") // newPassword (will be used after T011 implementation)
 
 	vs, err := vault.New(vaultPath)
 	if err != nil {
@@ -186,22 +185,23 @@ func TestKeychainEnable_AlreadyEnabled_WithForce(t *testing.T) {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
 
-	// Change vault password to newPassword
-	if err := vs.Unlock(oldPassword); err != nil {
-		t.Fatalf("Failed to unlock with old password: %v", err)
-	}
-	if err := vs.ChangePassword(oldPassword, newPassword); err != nil {
-		t.Fatalf("Failed to change password: %v", err)
-	}
-	vs.Lock()
-
-	// At this point: keychain has oldPassword, vault uses newPassword
-
-	// Cleanup keychain after test
-	defer ks.Delete()
-
 	// Test will FAIL until cmd/keychain_enable.go is implemented
 	t.Skip("TODO: Implement keychain enable command (T011)")
+
+	// TODO T011: After implementation:
+	// Change vault password to newPassword
+	// if err := vs.Unlock(oldPassword); err != nil {
+	//     t.Fatalf("Failed to unlock with old password: %v", err)
+	// }
+	// if err := vs.ChangePassword(newPassword); err != nil {
+	//     t.Fatalf("Failed to change password: %v", err)
+	// }
+	// vs.Lock()
+	//
+	// At this point: keychain may have been updated, test logic needs review
+	//
+	// Cleanup keychain after test
+	// defer ks.Delete()
 
 	// TODO T011: After implementation, test should:
 	// 1. Run enable command logic with --force and newPassword

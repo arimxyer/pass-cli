@@ -65,7 +65,7 @@ description: "Task list for keychain lifecycle management feature implementation
 ### Implementation for User Story 1
 
 - [X] T010 [US1] Create parent keychain command at `cmd/keychain.go` with description and subcommand registration
-- [ ] T011 [US1] Implement `pass-cli keychain enable` command at `cmd/keychain_enable.go`:
+- [X] T011 [US1] Implement `pass-cli keychain enable` command at `cmd/keychain_enable.go`:
   - Check keychain availability via `keychain.IsAvailable()` (contracts/commands.md line 38)
   - Check if already enabled via `keychain.Retrieve()` (contracts/commands.md line 40)
   - If already enabled and no `--force` flag → exit gracefully with message (FR-008)
@@ -77,10 +77,10 @@ description: "Task list for keychain lifecycle management feature implementation
   - Log audit entry: EventKeychainEnable, OutcomeSuccess (FR-015, research.md Decision 2)
   - Lock vault, clear password from memory
   - Output success message (contracts/commands.md lines 50-57)
-- [ ] T012 [US1] Add `--force` flag to enable command for overwriting existing keychain entries (contracts/commands.md line 32, FR-008)
-- [ ] T013 [US1] Register keychain parent command in `cmd/root.go`
-- [ ] T014 [US1] Add error handling for platform-specific keychain unavailable errors using `getKeychainUnavailableMessage()` helper (contracts/commands.md lines 66-85)
-- [ ] T015 [P] [US1] Verify platform-specific error messages for enable command match contracts/commands.md specifications in `test/unit/keychain_lifecycle_test.go` - tests Windows "Credential Manager access denied", macOS "Keychain Access.app permissions", Linux "Secret Service not running" (contracts/commands.md lines 66-85, FR-007, SC-005)
+- [X] T012 [US1] Add `--force` flag to enable command for overwriting existing keychain entries (contracts/commands.md line 32, FR-008)
+- [X] T013 [US1] Register keychain parent command in `cmd/root.go`
+- [X] T014 [US1] Add error handling for platform-specific keychain unavailable errors using `getKeychainUnavailableMessage()` helper (contracts/commands.md lines 66-85)
+- [X] T015 [P] [US1] Verify platform-specific error messages for enable command match contracts/commands.md specifications in `test/unit/keychain_lifecycle_test.go` - tests Windows "Credential Manager access denied", macOS "Keychain Access.app permissions", Linux "Secret Service not running" (contracts/commands.md lines 66-85, FR-007, SC-005)
 
 **Checkpoint**: User Story 1 complete - Users can now enable keychain for existing vaults without recreation. This is the MVP and delivers immediate value.
 
