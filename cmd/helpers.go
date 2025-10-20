@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/howeyc/gopass"
 	"golang.org/x/term"
@@ -54,4 +55,35 @@ func getVaultID(vaultPath string) string {
 		return vaultPath // Fallback to relative path
 	}
 	return absPath
+}
+
+// getKeychainUnavailableMessage returns platform-specific error message when keychain is unavailable
+// Per research.md Decision 5 and FR-007 (clear, actionable error messages)
+func getKeychainUnavailableMessage() string {
+	unavailableMessages := map[string]string{
+		"windows": "System keychain not available: Windows Credential Manager access denied.\nTroubleshooting: Check user permissions for Credential Manager access.",
+		"darwin":  "System keychain not available: macOS Keychain access denied.\nTroubleshooting: Check Keychain Access.app permissions for pass-cli.",
+		"linux":   "System keychain not available: Linux Secret Service not running or accessible.\nTroubleshooting: Ensure gnome-keyring or KWallet is installed and running.",
+	}
+
+	msg, ok := unavailableMessages[runtime.GOOS]
+	if !ok {
+		return "System keychain not available on this platform."
+	}
+	return msg
+}
+
+// getKeychainBackendName returns the display name for the system keychain backend
+// Used by keychain status command to show platform-specific information
+func getKeychainBackendName() string {
+	switch runtime.GOOS {
+	case "windows":
+		return "Windows Credential Manager"
+	case "darwin":
+		return "macOS Keychain"
+	case "linux":
+		return "Linux Secret Service"
+	default:
+		return "Unknown"
+	}
 }

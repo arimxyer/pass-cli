@@ -37,6 +37,11 @@ const (
 	EventCredentialUpdate    = "credential_update"     // FR-020
 	// #nosec G101 -- False positive: event type name, not actual credentials
 	EventCredentialDelete    = "credential_delete"     // FR-020
+
+	// Keychain lifecycle events (011-keychain-lifecycle-management)
+	EventKeychainEnable = "keychain_enable" // FR-015
+	EventKeychainStatus = "keychain_status" // FR-015
+	EventVaultRemove    = "vault_remove"    // FR-015
 )
 
 // Outcome constants

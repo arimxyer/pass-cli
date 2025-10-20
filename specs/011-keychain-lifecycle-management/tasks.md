@@ -27,9 +27,9 @@ description: "Task list for keychain lifecycle management feature implementation
 
 **Purpose**: Add new audit event types and verify existing infrastructure
 
-- [ ] T001 [P] Add keychain lifecycle event type constants to `internal/security/audit.go` (EventKeychainEnable, EventKeychainStatus, EventVaultRemove per research.md Decision 2)
-- [ ] T002 [P] Add platform-specific error message helper to `cmd/helpers.go` or create `cmd/keychain_helpers.go` with `getKeychainUnavailableMessage()` function (research.md Decision 5)
-- [ ] T003 [P] Verify existing keychain Delete/Clear methods are functional at `internal/keychain/keychain.go:94-105`
+- [X] T001 [P] Add keychain lifecycle event type constants to `internal/security/audit.go` (EventKeychainEnable, EventKeychainStatus, EventVaultRemove per research.md Decision 2)
+- [X] T002 [P] Add platform-specific error message helper to `cmd/helpers.go` or create `cmd/keychain_helpers.go` with `getKeychainUnavailableMessage()` function (research.md Decision 5)
+- [X] T003 [P] Verify existing keychain Delete/Clear methods are functional at `internal/keychain/keychain.go:94-105`
 
 ---
 
