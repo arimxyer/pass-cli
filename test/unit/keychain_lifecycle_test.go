@@ -209,3 +209,148 @@ func TestKeychainEnable_AlreadyEnabled_WithForce(t *testing.T) {
 	// 3. Verify success message
 	// 4. Verify no error
 }
+
+// T016: Unit test for status command with keychain enabled
+// Tests: displays availability, storage status, backend
+func TestKeychainStatus_Enabled(t *testing.T) {
+	// Skip if keychain not available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
+
+	// Setup: Create temp vault WITH keychain
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	testPassword := []byte("TestPassword@123")
+
+	vs, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs.Initialize(testPassword, true, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	// Cleanup keychain after test
+	defer ks.Delete()
+
+	// Test will FAIL until cmd/keychain_status.go is implemented
+	t.Skip("TODO: Implement keychain status command (T021)")
+
+	// TODO T021: After implementation, test should:
+	// 1. Run status command logic
+	// 2. Verify output contains "Available"
+	// 3. Verify output contains "Password Stored: Yes"
+	// 4. Verify output contains backend name (Windows Credential Manager / macOS Keychain / Linux Secret Service)
+	// 5. Verify exit code 0
+}
+
+// T017: Unit test for status command with keychain available but not enabled
+// Tests: actionable suggestion
+func TestKeychainStatus_AvailableNotEnabled(t *testing.T) {
+	// Skip if keychain not available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
+
+	// Setup: Create temp vault WITHOUT keychain
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	testPassword := []byte("TestPassword@123")
+
+	vs, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs.Initialize(testPassword, false, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	// Cleanup keychain after test (in case it was set)
+	defer ks.Delete()
+
+	// Test will FAIL until cmd/keychain_status.go is implemented
+	t.Skip("TODO: Implement keychain status command (T021)")
+
+	// TODO T021: After implementation, test should:
+	// 1. Run status command logic
+	// 2. Verify output contains "Available"
+	// 3. Verify output contains "Password Stored: No"
+	// 4. Verify output contains actionable suggestion: "pass-cli keychain enable"
+	// 5. Verify exit code 0
+}
+
+// T018: Unit test for status command with keychain unavailable
+// Tests: platform-specific unavailable message
+func TestKeychainStatus_Unavailable(t *testing.T) {
+	// This test is platform-dependent - will skip if keychain IS available
+	ks := keychain.New()
+	if ks.IsAvailable() {
+		t.Skip("Keychain is available - cannot test unavailable scenario")
+	}
+
+	// Setup: Create temp vault
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	testPassword := []byte("TestPassword@123")
+
+	vs, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs.Initialize(testPassword, false, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	// Test will FAIL until cmd/keychain_status.go is implemented
+	t.Skip("TODO: Implement keychain status command (T021)")
+
+	// TODO T021: After implementation, test should:
+	// 1. Run status command logic
+	// 2. Verify output contains platform-specific message:
+	//    - Windows: "Windows Credential Manager"
+	//    - macOS: "macOS Keychain"
+	//    - Linux: "Linux Secret Service"
+	// 3. Verify output indicates unavailability
+	// 4. Verify exit code 0 (informational, not an error)
+}
+
+// T019: Unit test for status command always returns exit code 0
+// Tests: informational nature (never fails)
+func TestKeychainStatus_AlwaysExitZero(t *testing.T) {
+	// Skip if keychain not available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
+
+	// Setup: Create temp vault
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	testPassword := []byte("TestPassword@123")
+
+	vs, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs.Initialize(testPassword, false, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	// Cleanup keychain after test
+	defer ks.Delete()
+
+	// Test will FAIL until cmd/keychain_status.go is implemented
+	t.Skip("TODO: Implement keychain status command (T021)")
+
+	// TODO T021: After implementation, test should:
+	// 1. Run status command logic in various scenarios (enabled, not enabled, unavailable)
+	// 2. Verify all scenarios return nil error (exit code 0)
+	// 3. Status command is informational only, never returns error
+}

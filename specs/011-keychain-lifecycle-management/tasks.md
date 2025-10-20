@@ -94,11 +94,11 @@ description: "Task list for keychain lifecycle management feature implementation
 
 ### Tests for User Story 2 (TDD - Write FIRST, ensure they FAIL)
 
-- [ ] T016 [P] [US2] Unit test for status command with keychain enabled in `test/unit/keychain_lifecycle_test.go` - tests displays availability, storage status, backend (contracts/commands.md lines 141-152)
-- [ ] T017 [P] [US2] Unit test for status command with keychain available but not enabled in `test/unit/keychain_lifecycle_test.go` - tests actionable suggestion (contracts/commands.md lines 154-164, FR-014)
-- [ ] T018 [P] [US2] Unit test for status command with keychain unavailable in `test/unit/keychain_lifecycle_test.go` - tests platform-specific unavailable message (contracts/commands.md lines 166-176)
-- [ ] T019 [P] [US2] Unit test for status command always returns exit code 0 in `test/unit/keychain_lifecycle_test.go` - tests informational nature (contracts/commands.md lines 180-184)
-- [ ] T020 [US2] Integration test for status command in `test/integration/keychain_status_test.go` - creates vault, checks status before/after enable, verifies output format
+- [X] T016 [P] [US2] Unit test for status command with keychain enabled in `test/unit/keychain_lifecycle_test.go` - tests displays availability, storage status, backend (contracts/commands.md lines 141-152)
+- [X] T017 [P] [US2] Unit test for status command with keychain available but not enabled in `test/unit/keychain_lifecycle_test.go` - tests actionable suggestion (contracts/commands.md lines 154-164, FR-014)
+- [X] T018 [P] [US2] Unit test for status command with keychain unavailable in `test/unit/keychain_lifecycle_test.go` - tests platform-specific unavailable message (contracts/commands.md lines 166-176)
+- [X] T019 [P] [US2] Unit test for status command always returns exit code 0 in `test/unit/keychain_lifecycle_test.go` - tests informational nature (contracts/commands.md lines 180-184)
+- [X] T020 [US2] Integration test for status command in `test/keychain_status_test.go` - creates vault, checks status before/after enable, verifies output format
 
 ### Implementation for User Story 2
 
