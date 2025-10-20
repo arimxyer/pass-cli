@@ -148,18 +148,3 @@ If you think the spec is wrong, unclear, or could be improved:
 
 **When in doubt**: Read the spec docs, check existing patterns, and ask the user a question if the information isn't 100% clear according to the existing documentation.
 
----
-
-## Active Technologies
-
-- Go 1.21+ (existing codebase) (011-vault-and-keychain)
-- Encrypted vault files (vault.enc) with JSON structure, OS-native keychain for master passwords (per-vault entries using service name format "pass-cli:/absolute/path/to/vault.enc" per spec.md FR-023) (011-vault-and-keychain)
-
-## Recent Changes
-
-- 011-vault-and-keychain: Added Go 1.21+ (existing codebase)
-
-<!-- MANUAL ADDITIONS START -->
-<!-- MANUAL ADDITIONS END -->
-
-**Last updated**: 2025-10-20
