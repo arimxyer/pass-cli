@@ -322,6 +322,100 @@ function Add-SpeckitSectionsToFile {
     return $true
 }
 
+function Ensure-CompleteTemplateSections {
+    <#
+    .SYNOPSIS
+    Ensures existing agent files have all template sections (Project Structure, Commands, Code Style)
+
+    .DESCRIPTION
+    Checks if an agent file has the three optional template sections and backfills them if missing.
+    Preserves existing content and inserts missing sections in the correct order.
+    Called after Add-SpeckitSectionsToFile to ensure files created before template expansion have all sections.
+
+    .PARAMETER TargetFile
+    Path to the agent file to check and update
+
+    .RETURNS
+    $true if sections were added or already present, $false on error
+    #>
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$TargetFile
+    )
+
+    if (-not (Test-Path $TargetFile)) { return $false }
+
+    $content = Get-Content -LiteralPath $TargetFile -Raw -Encoding utf8
+
+    # Check which sections are missing
+    $hasProjectStructure = $content -match '##\s+Project Structure'
+    $hasCommands = $content -match '##\s+Commands'
+    $hasCodeStyle = $content -match '##\s+Code Style'
+
+    # If all sections present, nothing to do
+    if ($hasProjectStructure -and $hasCommands -and $hasCodeStyle) {
+        return $true
+    }
+
+    Write-WarningMsg "Agent file missing template sections - backfilling..."
+
+    $lines = Get-Content -LiteralPath $TargetFile -Encoding utf8
+    $output = New-Object System.Collections.Generic.List[string]
+    $insertedSections = $false
+
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        $line = $lines[$i]
+
+        # Insert missing sections BEFORE "## Active Technologies"
+        if ($line -match '^##\s+Active Technologies' -and -not $insertedSections) {
+            # Add missing Project Structure section
+            if (-not $hasProjectStructure) {
+                $output.Add('## Project Structure')
+                $output.Add('')
+                $output.Add('[TODO: Add project directory structure and architecture notes]')
+                $output.Add('')
+            }
+
+            # Add missing Commands section
+            if (-not $hasCommands) {
+                $output.Add('## Commands')
+                $output.Add('')
+                $output.Add('[TODO: Add language/framework-specific commands]')
+                $output.Add('')
+            }
+
+            # Add missing Code Style section
+            if (-not $hasCodeStyle) {
+                $output.Add('## Code Style')
+                $output.Add('')
+                $output.Add('[TODO: Add coding conventions and style guidelines]')
+                $output.Add('')
+            }
+
+            # Add separator before Active Technologies
+            $output.Add('---')
+            $output.Add('')
+
+            $insertedSections = $true
+        }
+
+        $output.Add($line)
+    }
+
+    Set-Content -LiteralPath $TargetFile -Value ($output -join [Environment]::NewLine) -Encoding utf8
+
+    $addedSections = @()
+    if (-not $hasProjectStructure) { $addedSections += "Project Structure" }
+    if (-not $hasCommands) { $addedSections += "Commands" }
+    if (-not $hasCodeStyle) { $addedSections += "Code Style" }
+
+    if ($addedSections.Count -gt 0) {
+        Write-Success "Backfilled missing sections: $($addedSections -join ', ')"
+    }
+
+    return $true
+}
+
 function Update-ExistingAgentFile {
     param(
         [Parameter(Mandatory=$true)]
@@ -336,6 +430,11 @@ function Update-ExistingAgentFile {
         if (-not (Add-SpeckitSectionsToFile -TargetFile $TargetFile -Date $Date)) {
             return $false
         }
+    }
+
+    # Ensure file has all template sections (Project Structure, Commands, Code Style)
+    if (-not (Ensure-CompleteTemplateSections -TargetFile $TargetFile)) {
+        Write-WarningMsg "Failed to backfill template sections, continuing anyway..."
     }
 
     $techStack = Format-TechnologyStack -Lang $NEW_LANG -Framework $NEW_FRAMEWORK
