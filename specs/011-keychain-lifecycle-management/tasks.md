@@ -80,6 +80,7 @@ description: "Task list for keychain lifecycle management feature implementation
 - [ ] T012 [US1] Add `--force` flag to enable command for overwriting existing keychain entries (contracts/commands.md line 32, FR-008)
 - [ ] T013 [US1] Register keychain parent command in `cmd/root.go`
 - [ ] T014 [US1] Add error handling for platform-specific keychain unavailable errors using `getKeychainUnavailableMessage()` helper (contracts/commands.md lines 66-85)
+- [ ] T015 [P] [US1] Verify platform-specific error messages for enable command match contracts/commands.md specifications in `test/unit/keychain_lifecycle_test.go` - tests Windows "Credential Manager access denied", macOS "Keychain Access.app permissions", Linux "Secret Service not running" (contracts/commands.md lines 66-85, FR-007, SC-005)
 
 **Checkpoint**: User Story 1 complete - Users can now enable keychain for existing vaults without recreation. This is the MVP and delivers immediate value.
 
@@ -93,15 +94,15 @@ description: "Task list for keychain lifecycle management feature implementation
 
 ### Tests for User Story 2 (TDD - Write FIRST, ensure they FAIL)
 
-- [ ] T015 [P] [US2] Unit test for status command with keychain enabled in `test/unit/keychain_lifecycle_test.go` - tests displays availability, storage status, backend (contracts/commands.md lines 141-152)
-- [ ] T016 [P] [US2] Unit test for status command with keychain available but not enabled in `test/unit/keychain_lifecycle_test.go` - tests actionable suggestion (contracts/commands.md lines 154-164, FR-014)
-- [ ] T017 [P] [US2] Unit test for status command with keychain unavailable in `test/unit/keychain_lifecycle_test.go` - tests platform-specific unavailable message (contracts/commands.md lines 166-176)
-- [ ] T018 [P] [US2] Unit test for status command always returns exit code 0 in `test/unit/keychain_lifecycle_test.go` - tests informational nature (contracts/commands.md lines 180-184)
-- [ ] T019 [P] [US2] Integration test for status command in `test/integration/keychain_status_test.go` - creates vault, checks status before/after enable, verifies output format
+- [ ] T016 [P] [US2] Unit test for status command with keychain enabled in `test/unit/keychain_lifecycle_test.go` - tests displays availability, storage status, backend (contracts/commands.md lines 141-152)
+- [ ] T017 [P] [US2] Unit test for status command with keychain available but not enabled in `test/unit/keychain_lifecycle_test.go` - tests actionable suggestion (contracts/commands.md lines 154-164, FR-014)
+- [ ] T018 [P] [US2] Unit test for status command with keychain unavailable in `test/unit/keychain_lifecycle_test.go` - tests platform-specific unavailable message (contracts/commands.md lines 166-176)
+- [ ] T019 [P] [US2] Unit test for status command always returns exit code 0 in `test/unit/keychain_lifecycle_test.go` - tests informational nature (contracts/commands.md lines 180-184)
+- [ ] T020 [US2] Integration test for status command in `test/integration/keychain_status_test.go` - creates vault, checks status before/after enable, verifies output format
 
 ### Implementation for User Story 2
 
-- [ ] T020 [US2] Implement `pass-cli keychain status` command at `cmd/keychain_status.go`:
+- [ ] T021 [US2] Implement `pass-cli keychain status` command at `cmd/keychain_status.go`:
   - Check keychain availability via `keychain.IsAvailable()` (contracts/commands.md line 133)
   - Check if password is stored via `keychain.Retrieve()` - existence check only, discard retrieved password (contracts/commands.md line 134)
   - Determine backend name based on `runtime.GOOS` (Windows Credential Manager / macOS Keychain / Linux Secret Service) (contracts/commands.md line 135)
@@ -109,8 +110,8 @@ description: "Task list for keychain lifecycle management feature implementation
   - Log audit entry: EventKeychainStatus, OutcomeSuccess (FR-015)
   - **Important**: MUST NOT unlock vault (FR-011, contracts/commands.md line 139)
   - Always return exit code 0 (informational command, contracts/commands.md lines 180-184)
-- [ ] T021 [US2] Add backend name detection logic based on platform (data-model.md lines 85-91)
-- [ ] T022 [US2] Implement actionable suggestion logic - suggest enable command if keychain available but not enabled (FR-014, contracts/commands.md line 163)
+- [ ] T022 [US2] Add backend name detection logic based on platform (data-model.md lines 85-91)
+- [ ] T023 [US2] Implement actionable suggestion logic - suggest enable command if keychain available but not enabled (FR-014, contracts/commands.md line 163)
 
 **Checkpoint**: User Story 2 complete - Users can now diagnose keychain issues with clear status information
 
@@ -124,16 +125,16 @@ description: "Task list for keychain lifecycle management feature implementation
 
 ### Tests for User Story 3 (TDD - Write FIRST, ensure they FAIL)
 
-- [ ] T023 [P] [US3] Unit test for remove command success - both deleted in `test/unit/keychain_lifecycle_test.go` - tests file + keychain deletion (contracts/commands.md lines 394-401)
-- [ ] T024 [P] [US3] Unit test for remove command - file missing, keychain exists in `test/unit/keychain_lifecycle_test.go` - tests FR-012 orphan cleanup (contracts/commands.md lines 394-401)
-- [ ] T025 [P] [US3] Unit test for remove command - user cancels confirmation in `test/unit/keychain_lifecycle_test.go` - tests no deletion on cancel (contracts/commands.md lines 394-401)
-- [ ] T026 [P] [US3] Unit test for remove command with --yes flag in `test/unit/keychain_lifecycle_test.go` - tests skip prompt (contracts/commands.md lines 394-401)
-- [ ] T027 [P] [US3] Unit test for remove command - audit log BEFORE deletion in `test/unit/keychain_lifecycle_test.go` - tests FR-015 logging order (contracts/commands.md line 400)
-- [ ] T028 [P] [US3] Integration test for remove command in `test/integration/vault_remove_test.go` - creates vault with keychain, removes, verifies 95% success rate across multiple runs (SC-003, contracts/commands.md lines 414-420)
+- [ ] T024 [P] [US3] Unit test for remove command success - both deleted in `test/unit/keychain_lifecycle_test.go` - tests file + keychain deletion (contracts/commands.md lines 394-401)
+- [ ] T025 [P] [US3] Unit test for remove command - file missing, keychain exists in `test/unit/keychain_lifecycle_test.go` - tests FR-012 orphan cleanup (contracts/commands.md lines 394-401)
+- [ ] T026 [P] [US3] Unit test for remove command - user cancels confirmation in `test/unit/keychain_lifecycle_test.go` - tests no deletion on cancel (contracts/commands.md lines 394-401)
+- [ ] T027 [P] [US3] Unit test for remove command with --yes flag in `test/unit/keychain_lifecycle_test.go` - tests skip prompt (contracts/commands.md lines 394-401)
+- [ ] T028 [P] [US3] Unit test for remove command - audit log BEFORE deletion in `test/unit/keychain_lifecycle_test.go` - tests FR-015 logging order (contracts/commands.md line 400)
+- [ ] T029 [P] [US3] Integration test for remove command in `test/integration/vault_remove_test.go` - creates vault with keychain, removes, verifies 95% success rate across multiple runs (SC-003, contracts/commands.md lines 414-420)
 
 ### Implementation for User Story 3
 
-- [ ] T029 [US3] Implement `pass-cli vault remove <path>` command at `cmd/vault_remove.go`:
+- [ ] T030 [US3] Implement `pass-cli vault remove <path>` command at `cmd/vault_remove.go`:
   - Parse vault path argument (required, contracts/commands.md line 211)
   - Check if confirmation flag (`--yes` or `--force`) is set (contracts/commands.md line 217-221)
   - If not set → Prompt for confirmation (y/n) (contracts/commands.md line 227)
@@ -146,10 +147,10 @@ description: "Task list for keychain lifecycle management feature implementation
   - If keychain unavailable → Continue (not an error, contracts/commands.md line 235)
   - If entry not found → Continue (not an error per FR-012, contracts/commands.md line 235)
   - Report results with appropriate warnings for partial success (contracts/commands.md lines 238-272)
-- [ ] T030 [US3] Add `--yes` and `--force` flags as aliases for confirmation bypass (FR-006, contracts/commands.md line 217-221)
-- [ ] T031 [US3] Implement confirmation prompt logic with y/n validation (contracts/commands.md lines 242-247)
-- [ ] T032 [US3] Handle partial failure scenarios - file missing but keychain exists (FR-012, contracts/commands.md lines 250-258)
-- [ ] T033 [US3] Add exit code mapping: 0 for success, 1 for user error (cancel), 2 for system error (contracts/commands.md lines 296-302)
+- [ ] T031 [US3] Add `--yes` and `--force` flags as aliases for confirmation bypass (FR-006, contracts/commands.md line 217-221)
+- [ ] T032 [US3] Implement confirmation prompt logic with y/n validation (contracts/commands.md lines 242-247)
+- [ ] T033 [US3] Handle partial failure scenarios - file missing but keychain exists (FR-012, contracts/commands.md lines 250-258)
+- [ ] T034 [US3] Add exit code mapping: 0 for success, 1 for user error (cancel), 2 for system error (contracts/commands.md lines 296-302)
 
 **Checkpoint**: User Story 3 complete - Users can now cleanly remove vaults without orphaned keychain entries
 
@@ -159,19 +160,19 @@ description: "Task list for keychain lifecycle management feature implementation
 
 **Purpose**: Ensure all commands follow common patterns and constitution principles
 
-- [ ] T034 [P] Verify all commands respect `--vault` flag for non-default vault locations (FR-013, plan.md line 66)
-- [ ] T035 [P] Verify all commands use common vault path resolution via `GetVaultPath()` helper (contracts/commands.md lines 317-322)
-- [ ] T036 [P] Verify all commands use common keychain service name generation pattern (contracts/commands.md lines 325-332)
-- [ ] T037 [P] Verify all commands clear passwords from memory using `defer crypto.ClearBytes()` (research.md Decision 1, contracts/commands.md lines 427-434)
-- [ ] T038 [P] Verify all commands log audit entries correctly with empty CredentialName field for vault-level ops (contracts/commands.md lines 336-346)
-- [ ] T039 [P] Verify all commands have platform-specific error messages (Windows/macOS/Linux) (contracts/commands.md lines 350-355)
-- [ ] T040 [P] Run full integration test suite across all three user stories in sequence
-- [ ] T041 [P] Run security tests to verify FR-015 audit logging works correctly (data-model.md lines 315-318)
-- [ ] T042 [P] Verify backward compatibility - existing `pass-cli init --use-keychain` and `pass-cli change-password` keychain updates still work (contracts/commands.md lines 454-461)
-- [ ] T043 Run golangci-lint and fix any issues
-- [ ] T044 Run gosec security scanner and address findings
-- [ ] T045 Generate coverage report and ensure >80% coverage for new code
-- [ ] T046 Update CLAUDE.md with any new patterns or conventions discovered during implementation
+- [ ] T035 [P] Verify all commands respect `--vault` flag for non-default vault locations (FR-013, plan.md line 66)
+- [ ] T036 [P] Verify all commands use common vault path resolution via `GetVaultPath()` helper (contracts/commands.md lines 317-322)
+- [ ] T037 [P] Verify all commands use common keychain service name generation pattern (contracts/commands.md lines 325-332)
+- [ ] T038 [P] Verify all commands clear passwords from memory using `defer crypto.ClearBytes()` (research.md Decision 1, contracts/commands.md lines 427-434)
+- [ ] T039 [P] Verify all commands log audit entries correctly with empty CredentialName field for vault-level ops (contracts/commands.md lines 336-346)
+- [ ] T040 [P] Verify all commands have platform-specific error messages (Windows/macOS/Linux) (contracts/commands.md lines 350-355)
+- [ ] T041 [P] Run full integration test suite across all three user stories in sequence
+- [ ] T042 [P] Run security tests to verify FR-015 audit logging works correctly (data-model.md lines 315-318)
+- [ ] T043 [P] Verify backward compatibility - existing `pass-cli init --use-keychain` and `pass-cli change-password` keychain updates still work (contracts/commands.md lines 454-461)
+- [ ] T044 Run golangci-lint and fix any issues
+- [ ] T045 Run gosec security scanner and address findings
+- [ ] T046 Generate coverage report and ensure >80% coverage for new code
+- [ ] T047 Update CLAUDE.md with any new patterns or conventions discovered during implementation
 
 ---
 
@@ -257,19 +258,19 @@ Implement all phases for complete keychain lifecycle management.
 
 ## Summary
 
-- **Total Tasks**: 46
+- **Total Tasks**: 47
 - **Setup Tasks**: 3 (Phase 1)
 - **Foundational Tasks**: 0 (Phase 2 - infrastructure already exists)
-- **User Story 1 Tasks**: 11 (6 tests + 5 implementation)
+- **User Story 1 Tasks**: 12 (7 tests + 5 implementation)
 - **User Story 2 Tasks**: 8 (5 tests + 3 implementation)
 - **User Story 3 Tasks**: 10 (6 tests + 4 implementation)
 - **Polish Tasks**: 13 (Phase 6)
-- **Parallel Opportunities**: 34 tasks marked [P] can run in parallel within their phase
+- **Parallel Opportunities**: 35 tasks marked [P] can run in parallel within their phase
 - **Independent Test Criteria**: Each user story has clear acceptance tests and can be verified independently
-- **MVP Scope**: Phase 1 + Phase 2 + Phase 3 (19 tasks total for US1 enable command)
+- **MVP Scope**: Phase 1 + Phase 2 + Phase 3 (20 tasks total for US1 enable command)
 
 ### Test Coverage
-- **Unit Tests**: 18 (6 per user story)
+- **Unit Tests**: 19 (7 for US1, 6 for US2, 6 for US3)
 - **Integration Tests**: 3 (1 per user story)
 - **Security Tests**: 1 (audit logging verification)
 - **Backward Compatibility Tests**: 1

@@ -30,7 +30,7 @@ Pass-cli currently supports creating vaults with keychain integration (`--use-ke
 
 ### User Story 1 - Enable Keychain for Existing Vaults (Priority: P1) 🎯 MVP
 
-Users who created vaults without keychain integration want to enable it later without recreating their vault and losing all stored credentials. When a user runs the enable command and provides their vault password, the system should store it in the system keychain so future commands don't require password entry.
+Users who created vaults without system keychain integration want to enable it later without recreating their vault and losing all stored credentials. When a user runs the enable command and provides their vault password, the system should store it in the system keychain so future commands don't require password entry.
 
 **Why this priority**: This is the highest-value improvement. Users currently must destroy and recreate vaults to enable keychain, losing all credentials and usage history in the process. This is the most requested missing functionality and directly improves daily UX for all users who initially opted out of keychain.
 
@@ -38,9 +38,9 @@ Users who created vaults without keychain integration want to enable it later wi
 
 **Acceptance Scenarios**:
 
-1. **Given** a user has an existing vault created without keychain, **When** they run the enable command and provide their vault password, **Then** the password is stored in system keychain and subsequent vault operations don't prompt for password
-2. **Given** keychain is already enabled for a vault, **When** user runs enable command, **Then** system displays message "Keychain already enabled for this vault" and exits gracefully
-3. **Given** system keychain is unavailable (e.g., headless SSH session), **When** user runs enable command, **Then** system displays clear error message explaining keychain is not available on this system
+1. **Given** a user has an existing vault created without system keychain, **When** they run the enable command and provide their vault password, **Then** the password is stored in system keychain and subsequent vault operations don't prompt for password
+2. **Given** system keychain is already enabled for a vault, **When** user runs enable command, **Then** system displays message "Keychain already enabled for this vault" and exits gracefully
+3. **Given** system keychain is unavailable (e.g., headless SSH session), **When** user runs enable command, **Then** system displays clear error message explaining system keychain is not available on this system
 4. **Given** user provides incorrect vault password during enable, **When** password verification fails, **Then** system displays error and allows retry without storing incorrect password
 5. **Given** a user runs any keychain lifecycle command (enable, status, remove), **When** the operation completes (success or failure), **Then** the operation is logged to the audit log with timestamp, operation type, vault path, and outcome
 
@@ -48,7 +48,7 @@ Users who created vaults without keychain integration want to enable it later wi
 
 ### User Story 2 - Inspect Keychain Status (Priority: P2)
 
-Users need visibility into keychain state to troubleshoot issues when they're unexpectedly prompted for passwords or want to verify keychain is working correctly. When a user runs the status command, they should see whether system keychain is available, whether their vault has a stored password, and which keychain backend is in use.
+Users need visibility into system keychain state to troubleshoot issues when they're unexpectedly prompted for passwords or want to verify system keychain is working correctly. When a user runs the status command, they should see whether system keychain is available, whether their vault has a stored password, and which keychain backend is in use.
 
 **Why this priority**: This is critical for troubleshooting but doesn't block daily operations. Users who encounter keychain issues (password prompts when unexpected) need diagnostic information to understand what's wrong. Rated P2 because it enables self-service troubleshooting but isn't needed for basic vault operations.
 
@@ -56,16 +56,16 @@ Users need visibility into keychain state to troubleshoot issues when they're un
 
 **Acceptance Scenarios**:
 
-1. **Given** keychain is enabled for current vault, **When** user runs status command, **Then** system displays: keychain availability (yes/no), password stored status (yes/no for current vault), backend in use (Windows Credential Manager, macOS Keychain, or Linux Secret Service)
+1. **Given** system keychain is enabled for current vault, **When** user runs status command, **Then** system displays: system keychain availability (yes/no), password stored status (yes/no for current vault), backend in use (Windows Credential Manager, macOS Keychain, or Linux Secret Service)
 2. **Given** system keychain is unavailable, **When** user runs status command, **Then** system displays message "System keychain not available on this platform" with helpful context
-3. **Given** multiple vaults exist with keychain enabled, **When** user runs status command with `--vault` flag, **Then** system displays keychain status for the specified vault path
-4. **Given** keychain is not enabled for current vault, **When** user runs status command, **Then** system displays "Keychain not enabled for this vault" and suggests running enable command
+3. **Given** multiple vaults exist with system keychain enabled, **When** user runs status command with `--vault` flag, **Then** system displays system keychain status for the specified vault path
+4. **Given** system keychain is not enabled for current vault, **When** user runs status command, **Then** system displays "Keychain not enabled for this vault" and suggests running enable command
 
 ---
 
 ### User Story 3 - Clean Vault Removal (Priority: P3)
 
-Users who want to remove test vaults or permanently delete vaults need a clean removal process that doesn't leave orphaned credentials in their system keychain. When a user runs the remove command with explicit confirmation, both the vault file and its keychain entry should be deleted.
+Users who want to remove test vaults or permanently delete vaults need a clean removal process that doesn't leave orphaned credentials in their system keychain. When a user runs the remove command with explicit confirmation, both the vault file and its system keychain entry should be deleted.
 
 **Why this priority**: This prevents security hygiene issues but doesn't affect daily usage. Orphaned keychain entries are a cleanup problem, not an immediate usability crisis. Rated P3 because it's important for complete lifecycle management but users can function without it (manual vault deletion still works, just leaves orphaned entries).
 
@@ -73,8 +73,8 @@ Users who want to remove test vaults or permanently delete vaults need a clean r
 
 **Acceptance Scenarios**:
 
-1. **Given** a vault exists with keychain enabled, **When** user runs remove command and confirms the action, **Then** both vault file and keychain entry are deleted completely
-2. **Given** a vault exists without keychain, **When** user runs remove command and confirms, **Then** vault file is deleted and system confirms no keychain entry existed
+1. **Given** a vault exists with system keychain enabled, **When** user runs remove command and confirms the action, **Then** both vault file and system keychain entry are deleted completely
+2. **Given** a vault exists without system keychain, **When** user runs remove command and confirms, **Then** vault file is deleted and system confirms no system keychain entry existed
 3. **Given** user runs remove command without confirmation flag, **When** system prompts for confirmation, **Then** vault is only removed after user explicitly confirms (prevents accidental deletion)
 4. **Given** vault file doesn't exist but keychain entry does, **When** user runs remove command, **Then** system removes keychain entry and displays warning that vault file was not found
 5. **Given** user attempts to remove the default vault location while it's locked, **When** remove command executes, **Then** system deletes vault file and keychain entry without requiring unlock
@@ -121,9 +121,9 @@ Users who want to remove test vaults or permanently delete vaults need a clean r
 
 ### Measurable Outcomes
 
-- **SC-001**: Users can enable keychain for existing vault in under 1 minute without recreating vault or losing credentials
+- **SC-001**: Users can enable keychain for existing vault in 45-60 seconds (measured on reference hardware: 2GHz CPU, SSD) without recreating vault or losing credentials
 - **SC-002**: Users can diagnose keychain issues within 30 seconds using status command output
-- **SC-003**: 95% of vault removal operations successfully delete both vault file and keychain entry (no orphaned entries)
+- **SC-003**: 95% of vault removal operations successfully delete both vault file and keychain entry (minimum 20 test runs per platform, no orphaned entries)
 - **SC-004**: All keychain lifecycle commands work correctly on Windows, macOS, and Linux (100% platform coverage)
 - **SC-005**: Users receive clear, actionable error messages when keychain is unavailable (no generic errors or crashes)
 - **SC-006**: Enable command prevents accidental password overwrites (rejects operation if keychain already enabled without `--force` flag)
