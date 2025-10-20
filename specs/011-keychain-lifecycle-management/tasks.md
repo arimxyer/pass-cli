@@ -102,7 +102,7 @@ description: "Task list for keychain lifecycle management feature implementation
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Implement `pass-cli keychain status` command at `cmd/keychain_status.go`:
+- [X] T021 [US2] Implement `pass-cli keychain status` command at `cmd/keychain_status.go`:
   - Check keychain availability via `keychain.IsAvailable()` (contracts/commands.md line 133)
   - Check if password is stored via `keychain.Retrieve()` - existence check only, discard retrieved password (contracts/commands.md line 134)
   - Determine backend name based on `runtime.GOOS` (Windows Credential Manager / macOS Keychain / Linux Secret Service) (contracts/commands.md line 135)
@@ -110,8 +110,8 @@ description: "Task list for keychain lifecycle management feature implementation
   - Log audit entry: EventKeychainStatus, OutcomeSuccess (FR-015)
   - **Important**: MUST NOT unlock vault (FR-011, contracts/commands.md line 139)
   - Always return exit code 0 (informational command, contracts/commands.md lines 180-184)
-- [ ] T022 [US2] Add backend name detection logic based on platform (data-model.md lines 85-91)
-- [ ] T023 [US2] Implement actionable suggestion logic - suggest enable command if keychain available but not enabled (FR-014, contracts/commands.md line 163)
+- [X] T022 [US2] Add backend name detection logic based on platform (data-model.md lines 85-91)
+- [X] T023 [US2] Implement actionable suggestion logic - suggest enable command if keychain available but not enabled (FR-014, contracts/commands.md line 163)
 
 **Checkpoint**: User Story 2 complete - Users can now diagnose keychain issues with clear status information
 
