@@ -280,7 +280,7 @@ function Add-SpeckitSectionsToFile {
         [datetime]$Date
     )
 
-    Write-WarningMsg "CLAUDE.md missing speckit sections - appending them to preserve custom content"
+    Write-WarningMsg "CLAUDE.md missing speckit sections - adding header and appending sections to preserve custom content"
 
     $techStack = Format-TechnologyStack -Lang $NEW_LANG -Framework $NEW_FRAMEWORK
     $techEntries = @()
@@ -295,30 +295,45 @@ function Add-SpeckitSectionsToFile {
         $changeEntry = "- ${CURRENT_BRANCH}: Added ${NEW_DB}"
     }
 
-    $speckitSections = @()
-    $speckitSections += ''
-    $speckitSections += '---'
-    $speckitSections += ''
-    $speckitSections += '## Active Technologies'
-    $speckitSections += ''
-    if ($techEntries.Count -gt 0) {
-        $techEntries | ForEach-Object { $speckitSections += $_ }
-    }
-    $speckitSections += ''
-    $speckitSections += '## Recent Changes'
-    $speckitSections += ''
-    if ($changeEntry) { $speckitSections += $changeEntry }
-    $speckitSections += ''
-    $speckitSections += '<!-- MANUAL ADDITIONS START -->'
-    $speckitSections += '<!-- MANUAL ADDITIONS END -->'
-    $speckitSections += ''
-    $speckitSections += "**Last updated**: $($Date.ToString('yyyy-MM-dd'))"
-
     $existingContent = Get-Content -LiteralPath $TargetFile -Encoding utf8
-    $newContent = $existingContent + $speckitSections
-    Set-Content -LiteralPath $TargetFile -Value ($newContent -join [Environment]::NewLine) -Encoding utf8
+    $projectName = Split-Path $REPO_ROOT -Leaf
 
-    Write-Success "Added speckit sections to existing file"
+    # Check if file already has a title header
+    $hasHeader = $existingContent[0] -match '^#\s+'
+
+    $output = New-Object System.Collections.Generic.List[string]
+
+    # Add header at top if missing
+    if (-not $hasHeader) {
+        $output.Add("# $projectName Development Guidelines")
+        $output.Add('')
+        $output.Add("Auto-generated from all feature plans. Last updated: $($Date.ToString('yyyy-MM-dd'))")
+        $output.Add('')
+    }
+
+    # Add existing content
+    $existingContent | ForEach-Object { $output.Add($_) }
+
+    # Append speckit sections at bottom
+    $output.Add('')
+    $output.Add('---')
+    $output.Add('')
+    $output.Add('## Active Technologies')
+    $output.Add('')
+    if ($techEntries.Count -gt 0) {
+        $techEntries | ForEach-Object { $output.Add($_) }
+    }
+    $output.Add('')
+    $output.Add('## Recent Changes')
+    $output.Add('')
+    if ($changeEntry) { $output.Add($changeEntry) }
+    $output.Add('')
+    $output.Add('<!-- MANUAL ADDITIONS START -->')
+    $output.Add('<!-- MANUAL ADDITIONS END -->')
+
+    Set-Content -LiteralPath $TargetFile -Value ($output -join [Environment]::NewLine) -Encoding utf8
+
+    Write-Success "Added header and speckit sections to existing file"
     return $true
 }
 
@@ -485,7 +500,8 @@ function Update-ExistingAgentFile {
             if ($existingChanges -lt 2) { $output.Add($line); $existingChanges++ }
             continue
         }
-        if ($line -match '\*\*Last updated\*\*: .*\d{4}-\d{2}-\d{2}') {
+        # Update "Last updated:" date in header (line 3 of template)
+        if ($line -match '^Auto-generated from all feature plans\. Last updated: \d{4}-\d{2}-\d{2}$') {
             $output.Add(($line -replace '\d{4}-\d{2}-\d{2}',$Date.ToString('yyyy-MM-dd')))
             continue
         }
