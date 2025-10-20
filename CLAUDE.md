@@ -151,10 +151,8 @@ If you think the spec is wrong, unclear, or could be improved:
 ---
 
 ## Active Technologies
-- Encrypted vault files (vault.enc) with JSON structure, OS-native keychain for master passwords (per-vault entries using service name format "pass-cli:/absolute/path/to/vault.enc" per spec.md FR-003) (011-keychain-lifecycle-management)
-
 - Go 1.21+ (existing codebase) (011-vault-and-keychain)
-- Encrypted vault files (vault.enc) with JSON structure, OS-native keychain for master passwords (per-vault entries using service name format "pass-cli:/absolute/path/to/vault.enc" per spec.md FR-023) (011-vault-and-keychain)
+- Encrypted vault files (vault.enc) with JSON structure, OS-native keychain for master passwords (per-vault entries using service name format "pass-cli:/absolute/path/to/vault.enc" per spec.md FR-003) (011-keychain-lifecycle-management)
 
 ## Recent Changes
 
