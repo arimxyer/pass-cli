@@ -407,9 +407,21 @@ function Ensure-CompleteTemplateSections {
                 $output.Add('')
             }
 
-            # Add separator before Active Technologies
-            $output.Add('---')
-            $output.Add('')
+            # Add separator before Active Technologies only if not already present
+            # Check if last non-empty line is already a separator
+            $needsSeparator = $true
+            for ($j = $output.Count - 1; $j -ge 0; $j--) {
+                if (-not [string]::IsNullOrWhiteSpace($output[$j])) {
+                    if ($output[$j] -eq '---') {
+                        $needsSeparator = $false
+                    }
+                    break
+                }
+            }
+            if ($needsSeparator) {
+                $output.Add('---')
+                $output.Add('')
+            }
 
             $insertedSections = $true
         }
