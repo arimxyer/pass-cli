@@ -55,16 +55,16 @@ description: "Task list for keychain lifecycle management feature implementation
 
 ### Tests for User Story 1 (TDD - Write FIRST, ensure they FAIL)
 
-- [ ] T004 [P] [US1] Unit test for enable command success path in `test/unit/keychain_lifecycle_test.go` - tests correct password, keychain stores, audit logs
-- [ ] T005 [P] [US1] Unit test for enable command wrong password in `test/unit/keychain_lifecycle_test.go` - tests error, password cleared, no keychain modification
-- [ ] T006 [P] [US1] Unit test for enable command keychain unavailable in `test/unit/keychain_lifecycle_test.go` - tests platform-specific error message (contracts/commands.md lines 66-85)
-- [ ] T007 [P] [US1] Unit test for enable command already enabled without --force in `test/unit/keychain_lifecycle_test.go` - tests graceful no-op (contracts/commands.md lines 59-64)
-- [ ] T008 [P] [US1] Unit test for enable command already enabled with --force in `test/unit/keychain_lifecycle_test.go` - tests overwrite behavior
-- [ ] T009 [P] [US1] Integration test for enable command end-to-end in `test/integration/keychain_enable_test.go` - creates vault without keychain, runs enable, verifies subsequent commands don't prompt (contracts/commands.md lines 407-412)
+- [X] T004 [P] [US1] Unit test for enable command success path in `test/unit/keychain_lifecycle_test.go` - tests correct password, keychain stores, audit logs
+- [X] T005 [P] [US1] Unit test for enable command wrong password in `test/unit/keychain_lifecycle_test.go` - tests error, password cleared, no keychain modification
+- [X] T006 [P] [US1] Unit test for enable command keychain unavailable in `test/unit/keychain_lifecycle_test.go` - tests platform-specific error message (contracts/commands.md lines 66-85)
+- [X] T007 [P] [US1] Unit test for enable command already enabled without --force in `test/unit/keychain_lifecycle_test.go` - tests graceful no-op (contracts/commands.md lines 59-64)
+- [X] T008 [P] [US1] Unit test for enable command already enabled with --force in `test/unit/keychain_lifecycle_test.go` - tests overwrite behavior
+- [X] T009 [P] [US1] Integration test for enable command end-to-end in `test/keychain_enable_test.go` - creates vault without keychain, runs enable, verifies subsequent commands don't prompt (contracts/commands.md lines 407-412)
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Create parent keychain command at `cmd/keychain.go` with description and subcommand registration
+- [X] T010 [US1] Create parent keychain command at `cmd/keychain.go` with description and subcommand registration
 - [ ] T011 [US1] Implement `pass-cli keychain enable` command at `cmd/keychain_enable.go`:
   - Check keychain availability via `keychain.IsAvailable()` (contracts/commands.md line 38)
   - Check if already enabled via `keychain.Retrieve()` (contracts/commands.md line 40)
