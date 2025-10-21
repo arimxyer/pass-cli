@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -15,9 +16,12 @@ import (
 )
 
 var (
-	listFormat string
-	listUnused bool
-	listDays   int
+	listFormat    string
+	listUnused    bool
+	listDays      int
+	listByProject bool   // T029: --by-project flag
+	listLocation  string // T042: --location flag (for User Story 3)
+	listRecursive bool   // T043: --recursive flag (for User Story 3)
 )
 
 var listCmd = &cobra.Command{
@@ -32,7 +36,13 @@ Output formats:
 
 The --unused flag filters credentials that haven't been accessed recently
 or have never been accessed. Use --days to configure the threshold
-(default: 30 days).`,
+(default: 30 days).
+
+The --by-project flag groups credentials by git repository context,
+showing which credentials are used in which projects.
+
+The --location flag filters credentials accessed from a specific directory.
+Use --recursive to include subdirectories.`,
 	Example: `  # List all credentials as table
   pass-cli list
 
@@ -46,7 +56,19 @@ or have never been accessed. Use --days to configure the threshold
   pass-cli list --unused
 
   # Show credentials unused for >90 days
-  pass-cli list --unused --days 90`,
+  pass-cli list --unused --days 90
+
+  # Group credentials by project
+  pass-cli list --by-project
+
+  # Group by project with JSON output
+  pass-cli list --by-project --format json
+
+  # Filter by location
+  pass-cli list --location /path/to/project
+
+  # Filter by location (recursive) and group by project
+  pass-cli list --location /path/to/project --recursive --by-project`,
 	RunE: runList,
 }
 
@@ -55,6 +77,9 @@ func init() {
 	listCmd.Flags().StringVarP(&listFormat, "format", "f", "table", "output format: table, json, simple")
 	listCmd.Flags().BoolVar(&listUnused, "unused", false, "show only unused or rarely used credentials")
 	listCmd.Flags().IntVar(&listDays, "days", 30, "days threshold for --unused flag")
+	listCmd.Flags().BoolVar(&listByProject, "by-project", false, "group credentials by git repository") // T029
+	listCmd.Flags().StringVar(&listLocation, "location", "", "filter credentials by directory path")       // T042
+	listCmd.Flags().BoolVar(&listRecursive, "recursive", false, "include subdirectories with --location")  // T043
 }
 
 func runList(cmd *cobra.Command, args []string) error {
@@ -88,6 +113,29 @@ func runList(cmd *cobra.Command, args []string) error {
 		metadata = filterUnused(metadata, listDays)
 	}
 
+	// T044-T048: Filter by location if requested (User Story 3)
+	if listLocation != "" {
+		filtered, err := filterCredentialsByLocation(metadata, listLocation, listRecursive)
+		if err != nil {
+			return fmt.Errorf("failed to filter by location: %w", err)
+		}
+		metadata = filtered
+
+		// T050: Handle empty results
+		if len(metadata) == 0 {
+			fmt.Printf("No credentials found for location: %s\n", listLocation)
+			return nil
+		}
+	}
+
+	// T030-T034: Handle --by-project mode (User Story 2)
+	// T048: Works with --location (filter first, then group)
+	if listByProject {
+		projects := groupCredentialsByProject(metadata)
+		return outputByProject(projects, listFormat)
+	}
+
+	// Standard list mode (existing behavior)
 	// Sort by service name
 	sort.Slice(metadata, func(i, j int) bool {
 		return metadata[i].Service < metadata[j].Service
@@ -118,6 +166,54 @@ func filterUnused(metadata []vault.CredentialMetadata, days int) []vault.Credent
 	}
 
 	return filtered
+}
+
+// T044: filterCredentialsByLocation filters credentials by access location
+// T045: Resolves relative paths to absolute
+// T046: Exact match by default
+// T047: Prefix match with recursive flag
+func filterCredentialsByLocation(metadata []vault.CredentialMetadata, location string, recursive bool) ([]vault.CredentialMetadata, error) {
+	// T045: Resolve relative path to absolute
+	absLocation, err := filepath.Abs(location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve path: %w", err)
+	}
+
+	filtered := make([]vault.CredentialMetadata, 0)
+
+	for _, meta := range metadata {
+		// Check if this credential was accessed from the specified location
+		for _, credLocation := range meta.Locations {
+			// Convert credential location to absolute path for comparison
+			absCredLocation, err := filepath.Abs(credLocation)
+			if err != nil {
+				// If we can't resolve the credential location, skip it
+				continue
+			}
+
+			matched := false
+
+			if recursive {
+				// T047: Recursive mode - check if credential location is under the specified location
+				// Use filepath.HasPrefix logic (check if credLocation starts with location)
+				if absCredLocation == absLocation || strings.HasPrefix(absCredLocation, absLocation+string(filepath.Separator)) {
+					matched = true
+				}
+			} else {
+				// T046: Exact match mode - credential location must exactly match
+				if absCredLocation == absLocation {
+					matched = true
+				}
+			}
+
+			if matched {
+				filtered = append(filtered, meta)
+				break // Found a match, no need to check other locations for this credential
+			}
+		}
+	}
+
+	return filtered, nil
 }
 
 func outputSimple(metadata []vault.CredentialMetadata) error {
@@ -193,33 +289,130 @@ func outputTable(metadata []vault.CredentialMetadata) error {
 	return nil
 }
 
-func formatRelativeTime(t time.Time) string {
-	if t.IsZero() {
-		return "Never"
+// T030: groupCredentialsByProject groups credentials by git repository
+// Returns map of project name → sorted list of credential service names
+func groupCredentialsByProject(metadata []vault.CredentialMetadata) map[string][]string {
+	projects := make(map[string]map[string]bool) // project → set of credentials
+
+	for _, meta := range metadata {
+		// Get git repositories for this credential
+		repos := meta.GitRepositories
+
+		// If no git repository found, mark as "Ungrouped" (T034)
+		if len(repos) == 0 {
+			repos = []string{"Ungrouped"}
+		}
+
+		// Add credential to each project it belongs to
+		for _, project := range repos {
+			if projects[project] == nil {
+				projects[project] = make(map[string]bool)
+			}
+			projects[project][meta.Service] = true
+		}
 	}
 
-	duration := time.Since(t)
-
-	if duration < time.Minute {
-		return "Just now"
-	}
-	if duration < time.Hour {
-		mins := int(duration.Minutes())
-		return fmt.Sprintf("%d min ago", mins)
-	}
-	if duration < 24*time.Hour {
-		hours := int(duration.Hours())
-		return fmt.Sprintf("%d hr ago", hours)
-	}
-	if duration < 7*24*time.Hour {
-		days := int(duration.Hours() / 24)
-		return fmt.Sprintf("%d day ago", days)
-	}
-	if duration < 30*24*time.Hour {
-		weeks := int(duration.Hours() / 24 / 7)
-		return fmt.Sprintf("%d wk ago", weeks)
+	// Convert map[string]bool to []string and sort
+	result := make(map[string][]string)
+	for project, credSet := range projects {
+		creds := make([]string, 0, len(credSet))
+		for cred := range credSet {
+			creds = append(creds, cred)
+		}
+		sort.Strings(creds)
+		result[project] = creds
 	}
 
-	// For older dates, show actual date
-	return t.Format("2006-01-02")
+	return result
+}
+
+// outputByProject dispatches to format-specific output functions
+func outputByProject(projects map[string][]string, format string) error {
+	switch strings.ToLower(format) {
+	case "json":
+		return outputByProjectJSON(projects) // T032
+	case "simple":
+		return outputByProjectSimple(projects) // T033
+	case "table":
+		return outputByProjectTable(projects) // T031
+	default:
+		return fmt.Errorf("invalid format: %s (valid: table, json, simple)", format)
+	}
+}
+
+// T031: outputByProjectTable displays grouped credentials in table format
+func outputByProjectTable(projects map[string][]string) error {
+	if len(projects) == 0 {
+		fmt.Println("No credentials found.")
+		return nil
+	}
+
+	// Sort project names alphabetically
+	projectNames := make([]string, 0, len(projects))
+	for project := range projects {
+		projectNames = append(projectNames, project)
+	}
+	sort.Strings(projectNames)
+
+	// Display each project group
+	for _, project := range projectNames {
+		creds := projects[project]
+		credCount := len(creds)
+
+		// Plural handling
+		plural := "credentials"
+		if credCount == 1 {
+			plural = "credential"
+		}
+
+		// Project header
+		fmt.Printf("%s (%d %s):\n", project, credCount, plural)
+
+		// List credentials (indented)
+		for _, cred := range creds {
+			fmt.Printf("  %s\n", cred)
+		}
+
+		fmt.Println() // Blank line between groups
+	}
+
+	return nil
+}
+
+// T032: outputByProjectJSON displays grouped credentials in JSON format
+func outputByProjectJSON(projects map[string][]string) error {
+	output := map[string]interface{}{
+		"projects": projects,
+	}
+
+	data, err := json.MarshalIndent(output, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal JSON: %w", err)
+	}
+
+	fmt.Println(string(data))
+	return nil
+}
+
+// T033: outputByProjectSimple displays grouped credentials in simple format
+// Format: "project-name: cred1 cred2 cred3"
+func outputByProjectSimple(projects map[string][]string) error {
+	if len(projects) == 0 {
+		return nil
+	}
+
+	// Sort project names alphabetically
+	projectNames := make([]string, 0, len(projects))
+	for project := range projects {
+		projectNames = append(projectNames, project)
+	}
+	sort.Strings(projectNames)
+
+	// Output each project on one line
+	for _, project := range projectNames {
+		creds := projects[project]
+		fmt.Printf("%s: %s\n", project, strings.Join(creds, " "))
+	}
+
+	return nil
 }

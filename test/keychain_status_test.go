@@ -4,7 +4,6 @@
 package test
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"os"

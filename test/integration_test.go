@@ -44,8 +44,15 @@ func TestMain(m *testing.M) {
 
 	binaryPath = filepath.Join("..", binaryName)
 
-	// Create temporary test directory
+	// Convert to absolute path (needed for tests that change directories)
 	var err error
+	binaryPath, err = filepath.Abs(binaryPath)
+	if err != nil {
+		fmt.Printf("Failed to get absolute path for binary: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Create temporary test directory
 	testDir, err = os.MkdirTemp("", "pass-cli-integration-*")
 	if err != nil {
 		fmt.Printf("Failed to create temp dir: %v\n", err)
