@@ -15,12 +15,6 @@ var configCmd = &cobra.Command{
 	Short: "Manage Pass-CLI configuration",
 	Long: `Manage Pass-CLI configuration settings for terminal warnings and keyboard shortcuts.
 
-Subcommands:
-  init     - Create a new configuration file with examples
-  edit     - Open the configuration file in your default editor
-  validate - Check configuration file for errors
-  reset    - Reset configuration to defaults (creates backup)
-
 Configuration file location:
   Linux:   ~/.config/pass-cli/config.yml
   macOS:   ~/Library/Application Support/pass-cli/config.yml
