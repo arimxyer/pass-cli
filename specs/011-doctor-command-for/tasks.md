@@ -41,18 +41,18 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] **T004** [Foundational] Define `HealthChecker` interface in `internal/health/checker.go`
+- [X] **T004** [Foundational] Define `HealthChecker` interface in `internal/health/checker.go`
   - Interface with `Name() string` and `Run(ctx context.Context) CheckResult` methods
   - Define `CheckResult`, `CheckStatus`, `HealthReport`, `HealthSummary` structs per data-model.md
   - Define exit code constants: `ExitHealthy=0`, `ExitWarnings=1`, `ExitErrors=2`
 
-- [ ] **T005** [Foundational] Implement `RunChecks()` orchestrator in `internal/health/checker.go`
+- [X] **T005** [Foundational] Implement `RunChecks()` orchestrator in `internal/health/checker.go`
   - Accepts context and CheckOptions
   - Runs all registered health checkers
   - Aggregates results into HealthReport
   - Determines exit code from summary (errors → 2, warnings → 1, else → 0)
 
-- [ ] **T006** [P] [Foundational] Create health check detail structs in `internal/health/types.go`
+- [X] **T006** [P] [Foundational] Create health check detail structs in `internal/health/types.go`
   - `VersionCheckDetails`, `VaultCheckDetails`, `ConfigCheckDetails`
   - `KeychainCheckDetails` (with `KeychainEntry`), `BackupCheckDetails` (with `BackupFile`)
   - All per data-model.md specifications
