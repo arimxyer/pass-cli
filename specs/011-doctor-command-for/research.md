@@ -37,12 +37,16 @@
 **Decision**:
 - **Primary**: Query GitHub API with 1-second timeout
 - **Fallback**: If network unavailable, skip version check (report "Unable to check for updates (offline)")
-- **Embedded version**: Use build-time `ldflags` to inject version into binary (existing pattern)
+- **Current Version Source**: Build-time injection via `-ldflags "-X main.version=$(VERSION)"` (not a manifest file)
+  - Version variable location: `cmd/version.go` or `main.go` (verify existing setup)
+  - GoReleaser or Makefile handles injection automatically
+  - No embedded manifest file needed (version is compiled into binary)
 
 **Implementation Notes**:
 - Use `net/http.Client` with `Timeout: 1 * time.Second`
 - Handle network errors gracefully (don't fail entire doctor run)
 - Compare semantic versions (e.g., `v1.2.3` vs `v1.2.4`)
+- Access current version via `version` package variable (e.g., `var version string` set by ldflags)
 
 **References**:
 - `cmd/version.go`: Existing version command (likely has embedded version)
@@ -78,6 +82,14 @@
 - `zalando/go-keyring` library: Supports listing entries (need to verify API)
 
 **NEEDS VERIFICATION**: Check if `go-keyring` supports listing all entries with a prefix. If not, may need to track vault paths in config file.
+
+---
+
+**T031 Investigation Result** (to be filled during implementation):
+- **Library Support**: [YES/NO - go-keyring supports keyring.List()]
+- **Chosen Approach**: [Direct API / Config-based tracking / Platform-specific extension]
+- **Implementation Notes**: [Details from T031a]
+- **Date Resolved**: [YYYY-MM-DD]
 
 ---
 

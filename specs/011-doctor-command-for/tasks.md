@@ -25,8 +25,13 @@
 - [ ] **T001** [P] [Setup] Create `internal/health/` directory for health check library
 - [ ] **T002** [P] [Setup] Create `test/` files: `doctor_test.go`, `firstrun_test.go` for integration tests
 - [ ] **T003** [P] [Setup] Create `specs/011-doctor-command-for/contracts/` directory (already exists, verify)
+- [ ] **T003a** [P] [Setup] Verify build process injects version via ldflags in `Makefile` or `.goreleaser.yml`
+  - Confirm `-ldflags "-X main.version=$(VERSION)"` or equivalent exists
+  - If missing, add version injection to build commands
+  - Document version variable location (e.g., `cmd/version.go` or `main.go`)
+  - **Acceptance**: `go build -ldflags "-X main.version=v1.2.3" && ./pass-cli version` outputs v1.2.3
 
-**Checkpoint**: Directory structure ready for implementation
+**Checkpoint**: Directory structure and build configuration ready for implementation
 
 ---
 
@@ -154,14 +159,32 @@
   - Detect unknown keys (typo detection)
   - Return CheckResult with ConfigCheckDetails including specific ConfigErrors
 
-- [ ] **T031** [P] [US1] Implement keychain checker in `internal/health/keychain.go`
+- [ ] **T031** [P] [US1] Investigate keychain listing API in `zalando/go-keyring`
+  - Check if library supports listing all entries with prefix pattern
+  - **If supported**: Document API usage (e.g., `keyring.List("pass-cli")`)
+  - **If not supported**: Determine alternative approach:
+    - Option A: Track vault paths in `~/.pass-cli/config.yaml` under `known_vaults: []`
+    - Option B: Extend `internal/keychain/` with platform-specific listing (Windows: CredEnumerate, macOS: security find-generic-password, Linux: Secret Service API)
+  - Document decision in research.md Section 3
+  - **Blocker for T031a**
+
+- [ ] **T031a** [US1] Implement keychain listing support (conditional on T031 findings)
+  - **If go-keyring supports listing**: Use library API directly
+  - **If config-based tracking**:
+    - Update `internal/config/` to manage `known_vaults` array
+    - Update `cmd/init.go` and `cmd/vault.go` to register/deregister vaults
+  - **If platform-specific extension needed**:
+    - Implement in `internal/keychain/list.go` with platform build tags
+    - Follow existing cross-platform abstraction pattern
+  - **Acceptance**: Can retrieve list of all `pass-cli:*` keychain entries
+
+- [ ] **T031b** [P] [US1] Implement keychain checker in `internal/health/keychain.go`
   - `NewKeychainChecker(defaultVaultPath string) HealthChecker`
-  - Query keychain for all entries with `pass-cli:*` prefix
+  - Use keychain listing implementation from T031a
   - Extract vault path from each entry key
   - Check if vault file exists at extracted path via `os.Stat()`
   - Entries for non-existent vaults → orphaned, include in error report
   - Return CheckResult with KeychainCheckDetails
-  - **Note**: May need to extend `internal/keychain/` to support listing entries
 
 - [ ] **T032** [P] [US1] Implement backup checker in `internal/health/backup.go`
   - `NewBackupChecker(vaultDir string) HealthChecker`

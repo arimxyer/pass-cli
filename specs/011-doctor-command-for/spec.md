@@ -79,7 +79,7 @@ As a new pass-cli user, I want a friendly guided experience when initializing my
 - **FR-003**: Doctor command MUST verify vault file presence at default location and report accessibility status
 - **FR-004**: Doctor command MUST validate configuration file syntax and values, reporting specific errors if found
 - **FR-005**: Doctor command MUST check keychain status: availability, stored password presence, and backend type (Windows/macOS/Linux)
-- **FR-006**: Doctor command MUST detect orphaned keychain entries (entries for deleted or non-existent vaults) and offer cleanup
+- **FR-006**: Doctor command MUST detect orphaned keychain entries (entries for deleted or non-existent vaults) and offer interactive cleanup (user confirmation required before deletion)
 - **FR-007**: Doctor command MUST check for backup file presence and report status (abandoned backup, recent backup, no backup)
 - **FR-008**: Doctor command MUST display results in clear, prioritized format showing: passed checks (green), warnings (yellow), errors (red)
 - **FR-009**: Doctor command MUST provide actionable recommendations for each detected issue (e.g., "Run 'pass-cli init' to create vault")
@@ -112,7 +112,7 @@ As a new pass-cli user, I want a friendly guided experience when initializing my
 
 ## Assumptions
 
-- Binary version check will use GitHub API to fetch latest release information (or read from embedded manifest if offline)
+- Binary version check will use GitHub API to fetch latest release information (current version is embedded at build time via ldflags, not a manifest file)
 - Vault accessibility check will attempt to open and read vault file metadata without requiring master password
 - Config file validation will check YAML syntax and known configuration keys against expected schema
 - Orphaned keychain detection will compare keychain entries against vault files on disk

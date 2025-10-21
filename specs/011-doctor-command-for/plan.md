@@ -1,6 +1,6 @@
 # Implementation Plan: Doctor Command and First-Run Guided Initialization
 
-**Branch**: `011-doctor-command-for` | **Date**: 2025-10-21 | **Spec**: [spec.md](spec.md)
+**Branch**: `011-doctor-command-for` | **Date**: 2025-10-21 | **Status**: Planning Complete | **Spec**: [spec.md](spec.md)
 **Input**: Feature specification from `/specs/011-doctor-command-for/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
@@ -26,6 +26,11 @@ Implement `doctor` command for comprehensive vault health verification (binary v
 - SC-001: Doctor command completes in <5 seconds
 - SC-003: First-run guided initialization completes in <2 minutes
 - Version check: <1 second (with network), instant fallback (offline)
+
+**Build Configuration**:
+- Version injection: `-ldflags "-X main.version=$(VERSION)"` or `-ldflags "-X cmd.version=$(VERSION)"`
+- Version variable: Defined in `cmd/version.go` or `main.go` (verify existing location)
+- Build tools: Standard `go build` or GoReleaser (existing setup)
 
 **Constraints**:
 - Offline-first: Doctor must work without network (skip version check gracefully)
