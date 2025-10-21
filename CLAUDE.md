@@ -1,4 +1,4 @@
-### 1. Communication Standards
+﻿### 1. Communication Standards
 
 **Be concise and direct**:
 - Avoid preamble like "Great!", "Sure!", "Let me help"
@@ -155,6 +155,8 @@ If you think the spec is wrong, unclear, or could be improved:
 Auto-generated from all feature plans. Last updated: 2025-10-20
 
 ## Active Technologies
+- Go 1.21+ (existing codebase) + Go standard library (`encoding/json`, `os`, `path/filepath`) (012-vault-metadata-for)
+- File-based (vault.meta JSON files, existing audit.log) (012-vault-metadata-for)
 
 - Go 1.21+ (existing codebase) (011-keychain-lifecycle-management)
 
@@ -276,6 +278,7 @@ gosec ./...
 - Footer: `Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>`
 
 ## Recent Changes
+- 012-vault-metadata-for: Added Go 1.21+ (existing codebase) + Go standard library (`encoding/json`, `os`, `path/filepath`)
 
 - 011-keychain-lifecycle-management: Added Go 1.21+ (existing codebase)
 
