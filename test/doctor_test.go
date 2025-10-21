@@ -34,7 +34,7 @@ audit_enabled: true
 	}
 
 	// Run doctor command
-	cmd := exec.Command("pass-cli", "doctor", "--vault", vaultPath, "--config", configPath)
+	cmd := exec.Command(binaryPath, "doctor", "--vault", vaultPath, "--config", configPath)
 	output, err := cmd.CombinedOutput()
 
 	// Assertions
@@ -66,7 +66,7 @@ func TestDoctorCommand_JSON(t *testing.T) {
 	}
 
 	// Run doctor command with JSON output
-	cmd := exec.Command("pass-cli", "doctor", "--json", "--vault", vaultPath)
+	cmd := exec.Command(binaryPath, "doctor", "--json", "--vault", vaultPath)
 	output, err := cmd.CombinedOutput()
 
 	// Should not fail
@@ -119,7 +119,7 @@ func TestDoctorCommand_Quiet(t *testing.T) {
 	}
 
 	// Run doctor command with quiet mode
-	cmd := exec.Command("pass-cli", "doctor", "--quiet", "--vault", vaultPath)
+	cmd := exec.Command(binaryPath, "doctor", "--quiet", "--vault", vaultPath)
 	output, err := cmd.CombinedOutput()
 
 	// Check exit code (should be 0, 1, or 2)
@@ -154,7 +154,7 @@ func TestDoctorCommand_Offline(t *testing.T) {
 	}
 
 	// Run doctor command (version check will timeout/fail gracefully)
-	cmd := exec.Command("pass-cli", "doctor", "--vault", vaultPath)
+	cmd := exec.Command(binaryPath, "doctor", "--vault", vaultPath)
 	output, err := cmd.CombinedOutput()
 
 	// Should not crash - exit code 0 or 1 is acceptable
@@ -181,7 +181,7 @@ func TestDoctorCommand_NoVault(t *testing.T) {
 	vaultPath := filepath.Join(tmpDir, "nonexistent-vault.enc")
 
 	// Run doctor command with non-existent vault
-	cmd := exec.Command("pass-cli", "doctor", "--vault", vaultPath)
+	cmd := exec.Command(binaryPath, "doctor", "--vault", vaultPath)
 	output, err := cmd.CombinedOutput()
 
 	// Should exit with code 2 (errors)
