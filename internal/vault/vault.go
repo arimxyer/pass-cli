@@ -8,12 +8,28 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"runtime"
 
 	"pass-cli/internal/crypto"
 	"pass-cli/internal/keychain"
 	"pass-cli/internal/security"
 	"pass-cli/internal/storage"
 )
+
+// KeychainStatus represents the state of keychain integration.
+type KeychainStatus struct {
+	Available      bool
+	PasswordStored bool
+	BackendName    string
+}
+
+// RemoveVaultResult holds the results of a vault removal operation.
+type RemoveVaultResult struct {
+	FileDeleted      bool
+	KeychainDeleted  bool
+	FileNotFound     bool
+	KeychainNotFound bool
+}
 
 var (
 	// ErrVaultLocked indicates the vault is not unlocked
@@ -24,6 +40,8 @@ var (
 	ErrCredentialExists = errors.New("credential already exists")
 	// ErrInvalidCredential indicates the credential data is invalid
 	ErrInvalidCredential = errors.New("invalid credential")
+	// ErrKeychainAlreadyEnabled indicates that the keychain is already enabled for the vault.
+	ErrKeychainAlreadyEnabled = errors.New("keychain is already enabled")
 )
 
 // UsageRecord tracks where and when a credential was accessed
@@ -145,9 +163,10 @@ func (v *VaultService) DisableAudit() {
 	v.auditLogger = nil
 }
 
-// T074: logAudit logs an audit event with graceful degradation (FR-026)
+// T074: LogAudit logs an audit event with graceful degradation (FR-026)
 // Per FR-026: System MUST continue operation even if audit logging fails
-func (v *VaultService) logAudit(eventType, outcome, credentialName string) {
+// Exported for use by keychain lifecycle commands (FR-015)
+func (v *VaultService) LogAudit(eventType, outcome, credentialName string) {
 	if !v.auditEnabled || v.auditLogger == nil {
 		return // Audit not enabled
 	}
@@ -248,7 +267,7 @@ func (v *VaultService) Initialize(masterPassword []byte, useKeychain bool, audit
 	}
 
 	// T067: Log vault creation event (FR-019)
-	v.logAudit(security.EventVaultUnlock, security.OutcomeSuccess, "")
+	v.LogAudit(security.EventVaultUnlock, security.OutcomeSuccess, "")
 
 	return nil
 }
@@ -307,7 +326,7 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 	data, err := v.storageService.LoadVault(masterPasswordStr)
 	if err != nil {
 		// T068: Log unlock failure (FR-019)
-		v.logAudit(security.EventVaultUnlock, security.OutcomeFailure, "")
+		v.LogAudit(security.EventVaultUnlock, security.OutcomeFailure, "")
 		return fmt.Errorf("failed to unlock vault: %w", err)
 	}
 
@@ -342,7 +361,7 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 	}
 
 	// T068: Log unlock success (FR-019)
-	v.logAudit(security.EventVaultUnlock, security.OutcomeSuccess, "")
+	v.LogAudit(security.EventVaultUnlock, security.OutcomeSuccess, "")
 
 	return nil
 }
@@ -366,7 +385,7 @@ func (v *VaultService) UnlockWithKeychain() error {
 // T069: Added audit logging (FR-019)
 func (v *VaultService) Lock() {
 	// T069: Log lock event before clearing state (FR-019)
-	v.logAudit(security.EventVaultLock, security.OutcomeSuccess, "")
+	v.LogAudit(security.EventVaultLock, security.OutcomeSuccess, "")
 
 	v.unlocked = false
 
@@ -455,7 +474,7 @@ func (v *VaultService) AddCredential(service, username string, password []byte, 
 	}
 
 	// T071: Log credential add (FR-020)
-	v.logAudit(security.EventCredentialAdd, security.OutcomeSuccess, service)
+	v.LogAudit(security.EventCredentialAdd, security.OutcomeSuccess, service)
 	return nil
 }
 
@@ -476,7 +495,7 @@ func (v *VaultService) GetCredential(service string, trackUsage bool) (*Credenti
 	// with the specific field being accessed (password, username, etc.)
 
 	// T071: Log credential access (FR-020)
-	v.logAudit(security.EventCredentialAccess, security.OutcomeSuccess, service)
+	v.LogAudit(security.EventCredentialAccess, security.OutcomeSuccess, service)
 
 	// Return a copy to prevent external modification
 	cred := credential
@@ -693,7 +712,7 @@ func (v *VaultService) UpdateCredential(service string, opts UpdateOpts) error {
 	}
 
 	// T071: Log credential update (FR-020)
-	v.logAudit(security.EventCredentialUpdate, security.OutcomeSuccess, service)
+	v.LogAudit(security.EventCredentialUpdate, security.OutcomeSuccess, service)
 	return nil
 }
 
@@ -740,7 +759,7 @@ func (v *VaultService) DeleteCredential(service string) error {
 	}
 
 	// T071: Log credential delete (FR-020)
-	v.logAudit(security.EventCredentialDelete, security.OutcomeSuccess, service)
+	v.LogAudit(security.EventCredentialDelete, security.OutcomeSuccess, service)
 	return nil
 }
 
@@ -838,7 +857,113 @@ func (v *VaultService) ChangePassword(newPassword []byte) error {
 	}
 
 	// T070: Log password change (FR-019)
-	v.logAudit(security.EventVaultPasswordChange, security.OutcomeSuccess, "")
+	v.LogAudit(security.EventVaultPasswordChange, security.OutcomeSuccess, "")
 
 	return nil
+}
+
+// EnableKeychain enables keychain integration for the vault.
+func (v *VaultService) EnableKeychain(password []byte, force bool) error {
+	if !v.keychainService.IsAvailable() {
+		return keychain.ErrKeychainUnavailable
+	}
+
+	_, err := v.keychainService.Retrieve()
+	if err == nil && !force {
+		return ErrKeychainAlreadyEnabled
+	}
+
+	// Unlock the vault to verify the password.
+	if err := v.Unlock(password); err != nil {
+		v.LogAudit(security.EventKeychainEnable, security.OutcomeFailure, "")
+		return fmt.Errorf("failed to unlock vault: %w", err)
+	}
+	defer v.Lock()
+
+	if err := v.keychainService.Store(string(password)); err != nil {
+		v.LogAudit(security.EventKeychainEnable, security.OutcomeFailure, "")
+		return fmt.Errorf("failed to store password in keychain: %w", err)
+	}
+
+	v.LogAudit(security.EventKeychainEnable, security.OutcomeSuccess, "")
+	return nil
+}
+
+// GetKeychainStatus returns the current status of keychain integration.
+func (v *VaultService) GetKeychainStatus() *KeychainStatus {
+	available := v.keychainService.IsAvailable()
+	var passwordStored bool
+	if available {
+		_, err := v.keychainService.Retrieve()
+		passwordStored = (err == nil)
+	}
+
+	// This is a bit of a violation, as the backend name is a UI concern.
+	// However, it's a small one, and keeps the cmd layer thinner.
+	var backendName string
+	switch runtime.GOOS {
+	case "windows":
+		backendName = "Windows Credential Manager"
+	case "darwin":
+		backendName = "macOS Keychain"
+	case "linux":
+		backendName = "Secret Service API (gnome-keyring/kwallet)"
+	default:
+		backendName = "unknown"
+	}
+
+	v.LogAudit(security.EventKeychainStatus, security.OutcomeSuccess, "")
+
+	return &KeychainStatus{
+		Available:      available,
+		PasswordStored: passwordStored,
+		BackendName:    backendName,
+	}
+}
+
+// RemoveVault permanently deletes the vault file and its keychain entry.
+func (v *VaultService) RemoveVault(force bool) (*RemoveVaultResult, error) {
+	v.LogAudit(security.EventVaultRemove, security.OutcomeAttempt, v.vaultPath)
+
+	result := &RemoveVaultResult{}
+
+	// Attempt to delete vault file
+	err := os.Remove(v.vaultPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			result.FileNotFound = true
+		} else if os.IsPermission(err) && !force {
+			return nil, fmt.Errorf("vault file is in use or permission denied. Use --force to override")
+		} else if !force {
+			return nil, fmt.Errorf("failed to delete vault file: %w", err)
+		}
+		// If --force is set, continue even on errors
+	} else {
+		result.FileDeleted = true
+	}
+
+	// Attempt to delete keychain entry
+	if v.keychainService.IsAvailable() {
+		err = v.keychainService.Delete()
+		if err != nil {
+			if err == keychain.ErrPasswordNotFound {
+				result.KeychainNotFound = true
+			} else {
+				// Keychain delete failed for other reason - warn but continue
+				fmt.Fprintf(os.Stderr, "Warning: failed to delete keychain entry: %v\n", err)
+			}
+		} else {
+			result.KeychainDeleted = true
+		}
+	} else {
+		result.KeychainNotFound = true
+	}
+
+	if result.FileDeleted || result.KeychainDeleted {
+		v.LogAudit(security.EventVaultRemove, security.OutcomeSuccess, v.vaultPath)
+	} else {
+		v.LogAudit(security.EventVaultRemove, security.OutcomeFailure, v.vaultPath)
+	}
+
+	return result, nil
 }

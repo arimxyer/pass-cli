@@ -48,6 +48,7 @@ const (
 const (
 	OutcomeSuccess = "success"
 	OutcomeFailure = "failure"
+	OutcomeAttempt = "attempt"
 )
 
 // T059: AuditLogger manages tamper-evident audit logging

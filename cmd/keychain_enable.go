@@ -49,25 +49,6 @@ func runKeychainEnable(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("vault does not exist at %s\nInitialize a vault with: pass-cli init", vaultPath)
 	}
 
-	// Create keychain service
-	ks := keychain.New()
-
-	// contracts/commands.md line 38: Check keychain availability
-	if !ks.IsAvailable() {
-		// T002: Platform-specific error message (research.md Decision 5)
-		return fmt.Errorf("%s", getKeychainUnavailableMessage())
-	}
-
-	// contracts/commands.md line 40: Check if already enabled
-	_, err := ks.Retrieve()
-	if err == nil && !forceKeychainEnable {
-		// FR-008: Graceful no-op if already enabled without --force
-		// contracts/commands.md lines 59-64
-		fmt.Println("Keychain already enabled for this vault.")
-		fmt.Println("Use --force to overwrite existing entry.")
-		return nil
-	}
-
 	// research.md Decision 4: Prompt for password using readPassword()
 	fmt.Print("Master password: ")
 	password, err := readPassword()
@@ -84,23 +65,18 @@ func runKeychainEnable(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create vault service: %w", err)
 	}
 
-	// FR-002, data-model.md lines 281-285: Unlock vault to validate password
-	if err := vaultService.Unlock(password); err != nil {
-		// contracts/commands.md line 90: If unlock fails, return error
-		return fmt.Errorf("failed to unlock vault: %w", err)
+	if err := vaultService.EnableKeychain(password, forceKeychainEnable); err != nil {
+		if err == vault.ErrKeychainAlreadyEnabled {
+			// FR-008: Graceful no-op if already enabled without --force
+			fmt.Println("Keychain already enabled for this vault.")
+			fmt.Println("Use --force to overwrite existing entry.")
+			return nil
+		}
+		if err == keychain.ErrKeychainUnavailable {
+			return fmt.Errorf("%s", getKeychainUnavailableMessage())
+		}
+		return err
 	}
-	defer vaultService.Lock()
-
-	// contracts/commands.md line 50: Store password in keychain
-	if err := ks.Store(string(password)); err != nil {
-		return fmt.Errorf("failed to store password in keychain: %w", err)
-	}
-
-	// TODO FR-015: Audit logging for keychain_enable
-	// VaultService.logAudit is unexported. Need to either:
-	// 1. Add public LogAudit method to VaultService, or
-	// 2. Handle audit logging in vault service for keychain operations
-	// For now, audit logging is skipped for keychain commands
 
 	// contracts/commands.md lines 50-57: Output success message
 	fmt.Printf("✅ Keychain integration enabled for vault at %s\n\n", vaultPath)

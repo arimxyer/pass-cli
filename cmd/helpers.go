@@ -72,18 +72,3 @@ func getKeychainUnavailableMessage() string {
 	}
 	return msg
 }
-
-// getKeychainBackendName returns the display name for the system keychain backend
-// Used by keychain status command to show platform-specific information
-func getKeychainBackendName() string {
-	switch runtime.GOOS {
-	case "windows":
-		return "Windows Credential Manager"
-	case "darwin":
-		return "macOS Keychain"
-	case "linux":
-		return "Linux Secret Service"
-	default:
-		return "Unknown"
-	}
-}
