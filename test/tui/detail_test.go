@@ -13,10 +13,10 @@ import (
 func TestSortUsageLocations_OrderByTimestamp(t *testing.T) {
 	// Create usage records with different timestamps
 	records := map[string]vault.UsageRecord{
-		"/path/one":   CreateTestUsageRecord("/path/one", 1, "", 5, 0),     // 1 hour ago
-		"/path/two":   CreateTestUsageRecord("/path/two", 24, "repo1", 3, 0), // 1 day ago
+		"/path/one":   CreateTestUsageRecord("/path/one", 1, "", 5, 0),         // 1 hour ago
+		"/path/two":   CreateTestUsageRecord("/path/two", 24, "repo1", 3, 0),   // 1 day ago
 		"/path/three": CreateTestUsageRecord("/path/three", 72, "repo2", 1, 0), // 3 days ago
-		"/path/four":  CreateTestUsageRecord("/path/four", 168, "", 2, 0),   // 7 days ago (1 week)
+		"/path/four":  CreateTestUsageRecord("/path/four", 168, "", 2, 0),      // 7 days ago (1 week)
 	}
 
 	// Sort the records
@@ -53,10 +53,10 @@ func TestSortUsageLocations_OrderByTimestamp(t *testing.T) {
 // T039: Test formatTimestamp() hybrid logic (<7 days relative, ≥7 days absolute)
 func TestFormatTimestamp_HybridLogic(t *testing.T) {
 	tests := []struct {
-		name          string
-		hoursAgo      int
-		wantContains  string
-		wantFormat    string // "relative" or "absolute"
+		name         string
+		hoursAgo     int
+		wantContains string
+		wantFormat   string // "relative" or "absolute"
 	}{
 		{"30 minutes ago", 0, "minutes ago", "relative"},
 		{"2 hours ago", 2, "hours ago", "relative"},
@@ -316,7 +316,7 @@ func TestFormatUsageLocations_OutputStructure(t *testing.T) {
 
 	// Expected structure checks
 	expectedElements := []string{
-		"Usage Locations", // Header (without colon due to color tags)
+		"Usage Locations",    // Header (without colon due to color tags)
 		"/home/user/project", // Path
 		"myrepo",             // Git repo
 		"ago",                // Timestamp indicator

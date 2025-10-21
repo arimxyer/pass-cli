@@ -12,6 +12,8 @@ Pass-CLI is a fast, secure password and API key manager that stores credentials 
 - **🔐 System Keychain Integration**: Seamless integration with Windows Credential Manager, macOS Keychain, and Linux Secret Service
 - **🛡️ Password Policy Enforcement**: Complexity requirements for vault and credential passwords
 - **📝 Tamper-Evident Audit Logging**: Optional HMAC-signed audit trail for vault operations
+- **🏥 Health Checks**: Built-in `doctor` command for vault verification and troubleshooting
+- **🎯 First-Run Guided Setup**: Automatic vault initialization with interactive prompts
 - **⚡ Lightning Fast**: Sub-100ms credential retrieval, ~50-100ms vault unlock on modern CPUs
 - **🖥️ Cross-Platform**: Single binary for Windows, macOS (Intel/ARM), and Linux (amd64/arm64)
 - **📋 Clipboard Support**: Automatic credential copying with security timeouts
@@ -55,7 +57,11 @@ sudo mv pass-cli /usr/local/bin/  # macOS/Linux
 ### First Steps
 
 ```bash
-# Initialize your vault
+# Option 1: Guided initialization (automatic on first use)
+pass-cli list
+# If no vault exists, you'll be guided through setup interactively
+
+# Option 2: Manual initialization
 pass-cli init
 
 # Add your first credential
@@ -68,6 +74,8 @@ pass-cli get github
 # Use in scripts (quiet mode)
 export API_KEY=$(pass-cli get myservice --quiet --field password)
 ```
+
+**First-Run Detection**: When you run vault-requiring commands (add, get, list, etc.) for the first time, pass-cli automatically detects this and offers guided vault setup. Simply answer the prompts to create your vault with your preferred settings (keychain storage, audit logging).
 
 ## 🎨 Interactive TUI Mode
 
@@ -231,6 +239,30 @@ pass-cli version
 # Verbose version info
 pass-cli version --verbose
 ```
+
+### Health Checks
+
+Run comprehensive health checks on your pass-cli installation:
+
+```bash
+# Check vault health (human-readable output)
+pass-cli doctor
+
+# JSON output for scripting
+pass-cli doctor --json | jq
+
+# Quiet mode (exit code only)
+pass-cli doctor --quiet
+```
+
+The doctor command verifies:
+- Binary version (checks for updates)
+- Vault file accessibility and permissions
+- Configuration file validity
+- Keychain integration status
+- Backup file status
+
+Exit codes: 0 = healthy, 1 = warnings, 2 = errors
 
 ## 🔐 Security
 
@@ -621,6 +653,8 @@ See [docs/development/](docs/development/) for development guidelines and setup.
 - [x] Clipboard support
 - [x] Usage tracking
 - [x] Atomic vault operations with rollback
+- [x] Health check command (doctor)
+- [x] First-run guided initialization
 - [ ] Import from other password managers
 - [ ] Export functionality
 - [ ] Credential sharing (encrypted)

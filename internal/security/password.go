@@ -10,21 +10,21 @@ import (
 
 // T041 [US3]: PasswordPolicy struct defines password requirements
 type PasswordPolicy struct {
-	MinLength         int
-	RequireUppercase  bool
-	RequireLowercase  bool
-	RequireDigit      bool
-	RequireSymbol     bool
+	MinLength        int
+	RequireUppercase bool
+	RequireLowercase bool
+	RequireDigit     bool
+	RequireSymbol    bool
 }
 
 // T042 [US3]: DefaultPasswordPolicy constant (12 chars, all requirements true)
 // FR-016: Minimum 12 characters with uppercase, lowercase, digit, and symbol
 var DefaultPasswordPolicy = PasswordPolicy{
-	MinLength:         12,
-	RequireUppercase:  true,
-	RequireLowercase:  true,
-	RequireDigit:      true,
-	RequireSymbol:     true,
+	MinLength:        12,
+	RequireUppercase: true,
+	RequireLowercase: true,
+	RequireDigit:     true,
+	RequireSymbol:    true,
 }
 
 // PasswordStrength represents the strength level of a password

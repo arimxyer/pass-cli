@@ -242,7 +242,7 @@ func (s *StorageService) SetIterations(iterations int) error {
 	}
 
 	encryptedVault.Metadata.Iterations = iterations
-	
+
 	// Note: The updated iterations will be persisted on next SaveVault call
 	// We don't save immediately to avoid double-write overhead
 	return nil
@@ -437,7 +437,7 @@ func (s *StorageService) preflightChecks() error {
 
 	// Check disk space (need 2x vault size for backup + new vault)
 	requiredSpace := vaultSize * 2
-	
+
 	// Get disk usage info (platform-specific)
 	availableSpace, err := s.getAvailableDiskSpace(vaultDir)
 	if err != nil {
@@ -465,11 +465,11 @@ func (s *StorageService) getAvailableDiskSpace(path string) (int64, error) {
 	// Platform-specific disk space check
 	// On Windows, syscall.Statfs_t is not available
 	// This is a best-effort check - we'll continue with a warning if it fails
-	
+
 	// Try to use platform-specific approach
 	// For Windows: Could use golang.org/x/sys/windows.GetDiskFreeSpaceEx
 	// For Unix: Could use syscall.Statfs
-	
+
 	// For now, return error to indicate we can't check (will trigger warning in preflightChecks)
 	// This is acceptable per FR-012 - disk space check is a safety measure, not a hard requirement
 	return 0, fmt.Errorf("disk space check not implemented for this platform")

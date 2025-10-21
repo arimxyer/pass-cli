@@ -483,7 +483,7 @@ func TestCryptoService_PBKDF2Consistency(t *testing.T) {
 func TestCryptoService_KeyDerivationTiming(t *testing.T) {
 	// T036b: Verify key derivation timing meets FR-009 constraint (500-1000ms target)
 	// Note: Per Spec Assumption 1, faster timing on modern hardware is acceptable
-	
+
 	cs := NewCryptoService()
 	password := []byte("test-password-for-timing-benchmark")
 	salt := make([]byte, SaltLength)

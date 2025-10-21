@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
-	"runtime"
 
 	"pass-cli/internal/crypto"
 	"pass-cli/internal/keychain"
@@ -57,16 +57,16 @@ type UsageRecord struct {
 // Credential represents a stored credential with usage tracking
 // T020c: Password field changed from string to []byte for secure memory handling
 type Credential struct {
-	Service      string                 `json:"service"`
-	Username     string                 `json:"username"`
-	Password     []byte                 `json:"password"` // T020c: Changed to []byte for memory security
-	Category     string                 `json:"category,omitempty"`
-	URL          string                 `json:"url,omitempty"`
-	Notes        string                 `json:"notes"`
-	CreatedAt    time.Time              `json:"created_at"`
-	UpdatedAt    time.Time              `json:"updated_at"`
-	ModifiedCount int                   `json:"modified_count"` // Number of times credential has been modified
-	UsageRecord  map[string]UsageRecord `json:"usage_records"`  // Map of location -> UsageRecord
+	Service       string                 `json:"service"`
+	Username      string                 `json:"username"`
+	Password      []byte                 `json:"password"` // T020c: Changed to []byte for memory security
+	Category      string                 `json:"category,omitempty"`
+	URL           string                 `json:"url,omitempty"`
+	Notes         string                 `json:"notes"`
+	CreatedAt     time.Time              `json:"created_at"`
+	UpdatedAt     time.Time              `json:"updated_at"`
+	ModifiedCount int                    `json:"modified_count"` // Number of times credential has been modified
+	UsageRecord   map[string]UsageRecord `json:"usage_records"`  // Map of location -> UsageRecord
 }
 
 // VaultData is the decrypted vault structure
@@ -74,7 +74,7 @@ type VaultData struct {
 	Credentials map[string]Credential `json:"credentials"` // Map of service name -> Credential
 	Version     int                   `json:"version"`
 	// Audit configuration persistence (fix for DISC-013)
-	AuditEnabled bool   `json:"audit_enabled,omitempty"` // Whether audit logging is enabled
+	AuditEnabled bool   `json:"audit_enabled,omitempty"`  // Whether audit logging is enabled
 	AuditLogPath string `json:"audit_log_path,omitempty"` // Path to audit log file
 	VaultID      string `json:"vault_id,omitempty"`       // Vault identifier for audit key
 }
@@ -122,7 +122,7 @@ func New(vaultPath string) (*VaultService, error) {
 		storageService:  storageService,
 		keychainService: keychain.New(),
 		unlocked:        false,
-		auditEnabled:    false,      // T066: Default disabled per FR-025
+		auditEnabled:    false,                               // T066: Default disabled per FR-025
 		rateLimiter:     security.NewValidationRateLimiter(), // T051a: Initialize rate limiter
 	}
 
@@ -237,11 +237,11 @@ func (v *VaultService) Initialize(masterPassword []byte, useKeychain bool, audit
 	// T045 [US3]: Validate master password against policy (FR-016)
 	// Import security package required at top of file
 	passwordPolicy := &security.PasswordPolicy{
-		MinLength:         12,
-		RequireUppercase:  true,
-		RequireLowercase:  true,
-		RequireDigit:      true,
-		RequireSymbol:     true,
+		MinLength:        12,
+		RequireUppercase: true,
+		RequireLowercase: true,
+		RequireDigit:     true,
+		RequireSymbol:    true,
 	}
 	if err := passwordPolicy.Validate(masterPassword); err != nil {
 		// T051a: Record failure and check rate limit
@@ -676,8 +676,8 @@ func (v *VaultService) ListCredentials() ([]string, error) {
 // Use pointers to distinguish between "don't change" (nil) and "set to empty/value" (non-nil)
 // T020d: Password changed to *[]byte for memory security
 type UpdateOpts struct {
-	Username *string  // nil = don't change, non-nil = set to value (even if empty)
-	Password *[]byte  // T020d: Changed to *[]byte for memory security
+	Username *string // nil = don't change, non-nil = set to value (even if empty)
+	Password *[]byte // T020d: Changed to *[]byte for memory security
 	Category *string
 	URL      *string
 	Notes    *string
@@ -895,11 +895,11 @@ func (v *VaultService) ChangePassword(newPassword []byte) error {
 
 	// T046 [US3]: Validate new password against policy (FR-016)
 	passwordPolicy := &security.PasswordPolicy{
-		MinLength:         12,
-		RequireUppercase:  true,
-		RequireLowercase:  true,
-		RequireDigit:      true,
-		RequireSymbol:     true,
+		MinLength:        12,
+		RequireUppercase: true,
+		RequireLowercase: true,
+		RequireDigit:     true,
+		RequireSymbol:    true,
 	}
 	if err := passwordPolicy.Validate(newPassword); err != nil {
 		// T051a: Record failure and check rate limit
@@ -916,7 +916,7 @@ func (v *VaultService) ChangePassword(newPassword []byte) error {
 	// Use configurable iterations from env var if set (T034)
 	targetIterations := crypto.GetIterations()
 	currentIterations := v.storageService.GetIterations()
-	
+
 	needsMigration := currentIterations < targetIterations
 	if needsMigration {
 		// Migration opportunity: upgrade to stronger KDF

@@ -77,9 +77,9 @@ func init() {
 	listCmd.Flags().StringVarP(&listFormat, "format", "f", "table", "output format: table, json, simple")
 	listCmd.Flags().BoolVar(&listUnused, "unused", false, "show only unused or rarely used credentials")
 	listCmd.Flags().IntVar(&listDays, "days", 30, "days threshold for --unused flag")
-	listCmd.Flags().BoolVar(&listByProject, "by-project", false, "group credentials by git repository") // T029
-	listCmd.Flags().StringVar(&listLocation, "location", "", "filter credentials by directory path")       // T042
-	listCmd.Flags().BoolVar(&listRecursive, "recursive", false, "include subdirectories with --location")  // T043
+	listCmd.Flags().BoolVar(&listByProject, "by-project", false, "group credentials by git repository")   // T029
+	listCmd.Flags().StringVar(&listLocation, "location", "", "filter credentials by directory path")      // T042
+	listCmd.Flags().BoolVar(&listRecursive, "recursive", false, "include subdirectories with --location") // T043
 }
 
 func runList(cmd *cobra.Command, args []string) error {

@@ -1400,6 +1400,152 @@ pass-cli usage <service>
 pass-cli usage <service> --format json
 ```
 
+### Doctor and First-Run FAQ
+
+#### How do I know if my vault is healthy?
+
+**Solution**: Run the `doctor` command to check vault health:
+
+```bash
+pass-cli doctor
+```
+
+The doctor command performs 5 comprehensive health checks:
+1. **Version Check**: Compares installed version with latest release
+2. **Vault Check**: Verifies file accessibility, permissions, and integrity
+3. **Config Check**: Validates configuration syntax and settings
+4. **Keychain Check**: Tests OS keychain integration status
+5. **Backup Check**: Verifies backup files exist and are accessible
+
+**Exit Codes**:
+- `0` = All checks passed (HEALTHY)
+- `1` = Warnings detected (review recommended)
+- `2` = Errors detected (action required)
+
+**Example Output**:
+```
+Health Check Results
+====================
+
+✓ Version: v1.2.3 (up to date)
+✓ Vault: vault.enc accessible (600 permissions)
+✓ Config: Valid configuration
+✓ Keychain: Integration active
+✓ Backup: 3 backup files found
+
+Overall Status: HEALTHY
+```
+
+See [doctor-command.md](doctor-command.md) for detailed documentation and troubleshooting.
+
+#### Why does doctor report orphaned keychain entries?
+
+**Symptom**: Doctor reports "⚠ Keychain: Orphaned entry detected"
+
+**Causes**:
+- Vault file was deleted/moved but keychain entry remains
+- Vault path changed but old keychain entry wasn't cleaned up
+- Multiple vaults were created and old entries weren't removed
+
+**Impact**: Low - orphaned entries don't affect current vault operations, but clutter the keychain
+
+**Solutions**:
+
+**Option 1: Clean up manually** (macOS):
+```bash
+# Open Keychain Access
+open -a "Keychain Access"
+
+# Search for "pass-cli"
+# Delete old/orphaned entries
+```
+
+**Option 2: Clean up manually** (Windows):
+```powershell
+# Open Credential Manager
+control /name Microsoft.CredentialManager
+
+# Navigate to "Windows Credentials"
+# Remove old "pass-cli" entries
+```
+
+**Option 3: Clean up manually** (Linux):
+```bash
+# List all pass-cli keychain entries
+secret-tool search service pass-cli
+
+# Delete specific entry
+secret-tool clear service pass-cli vault /old/path/vault.enc
+```
+
+**Prevention**: When deleting or moving vaults, remove the keychain entry first:
+```bash
+# Before deleting vault
+pass-cli change-password --no-keychain  # Disables keychain
+# OR manually remove from OS keychain
+```
+
+#### What if first-run detection doesn't trigger?
+
+**Expected Behavior**: When running vault-requiring commands (`add`, `get`, `list`, `update`, `delete`) for the first time without an existing vault, pass-cli offers guided initialization.
+
+**Scenarios where first-run detection is skipped**:
+
+1. **Vault already exists**:
+   ```bash
+   # Check if vault exists
+   ls ~/.pass/vault.enc
+   ```
+   **Solution**: First-run detection is not needed - your vault is already set up.
+
+2. **Custom vault flag used**:
+   ```bash
+   # This skips first-run detection
+   pass-cli list --vault /custom/path.enc
+   ```
+   **Solution**: Initialize custom vault manually: `pass-cli init --vault /custom/path.enc`
+
+3. **Non-TTY environment** (scripts, pipes, CI/CD):
+   ```bash
+   # This environment doesn't support interactive prompts
+   echo "list" | pass-cli list
+   ```
+   **Solution**: Initialize vault manually in interactive session first, or use `pass-cli init` explicitly:
+   ```bash
+   # In CI/CD or scripts
+   pass-cli init --vault vault.enc < password-input.txt
+   ```
+
+4. **Command doesn't require vault**:
+   ```bash
+   # These commands don't trigger first-run detection
+   pass-cli version
+   pass-cli doctor
+   pass-cli help
+   ```
+   **Solution**: Run a vault-requiring command: `pass-cli list` or `pass-cli init`
+
+**Manual initialization**: If first-run detection doesn't trigger and you need to create a vault:
+```bash
+pass-cli init
+```
+
+This provides the same guided setup as automatic first-run detection.
+
+**Troubleshooting**: If first-run detection should trigger but doesn't:
+```bash
+# Verify no vault exists
+ls ~/.pass/vault.enc
+
+# Check if running in TTY
+tty  # Should show /dev/pts/X or similar, not "not a tty"
+
+# Try explicit init
+pass-cli init
+```
+
+See [getting-started.md](getting-started.md) for complete first-run documentation.
+
 ## Getting Help
 
 - Run any command with `--help` flag

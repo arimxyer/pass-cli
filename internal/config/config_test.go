@@ -46,10 +46,10 @@ func TestGetConfigPath(t *testing.T) {
 // T015: Unit test for TerminalConfig validation (positive/negative values, range checks)
 func TestTerminalConfigValidation(t *testing.T) {
 	tests := []struct {
-		name          string
-		config        TerminalConfig
-		expectValid   bool
-		expectErrors  int
+		name           string
+		config         TerminalConfig
+		expectValid    bool
+		expectErrors   int
 		expectWarnings int
 	}{
 		{
@@ -182,10 +182,10 @@ func TestTerminalConfigValidation(t *testing.T) {
 // T016: Unit test for terminal config merging with defaults
 func TestTerminalConfigMerging(t *testing.T) {
 	tests := []struct {
-		name           string
-		yamlContent    map[string]interface{}
-		expectedWidth  int
-		expectedHeight int
+		name            string
+		yamlContent     map[string]interface{}
+		expectedWidth   int
+		expectedHeight  int
 		expectedEnabled bool
 	}{
 		{
@@ -203,7 +203,7 @@ func TestTerminalConfigMerging(t *testing.T) {
 				},
 			},
 			expectedWidth:   100,
-			expectedHeight:  30, // default
+			expectedHeight:  30,   // default
 			expectedEnabled: true, // default
 		},
 		{

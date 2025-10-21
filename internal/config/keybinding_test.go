@@ -11,12 +11,12 @@ import (
 
 func TestParseKeybinding(t *testing.T) {
 	tests := []struct {
-		name       string
-		input      string
-		wantKey    tcell.Key
-		wantRune   rune
-		wantMod    tcell.ModMask
-		wantErr    bool
+		name        string
+		input       string
+		wantKey     tcell.Key
+		wantRune    rune
+		wantMod     tcell.ModMask
+		wantErr     bool
 		errContains string
 	}{
 		// Simple keys
@@ -283,17 +283,17 @@ func findSubstring(s, substr string) bool {
 // T026: Unit tests for keybinding conflict detection
 func TestDetectKeybindingConflicts(t *testing.T) {
 	tests := []struct {
-		name      string
-		bindings  map[string]string
+		name          string
+		bindings      map[string]string
 		wantConflicts bool
 		conflictPairs [][2]string // Pairs of actions that conflict
 	}{
 		{
 			name: "no conflicts - all unique keys",
 			bindings: map[string]string{
-				"quit":             "q",
-				"add_credential":   "a",
-				"edit_credential":  "e",
+				"quit":              "q",
+				"add_credential":    "a",
+				"edit_credential":   "e",
 				"delete_credential": "d",
 			},
 			wantConflicts: false,
@@ -301,9 +301,9 @@ func TestDetectKeybindingConflicts(t *testing.T) {
 		{
 			name: "no conflicts - modifiers make keys unique",
 			bindings: map[string]string{
-				"quit":            "q",
-				"quick_save":      "ctrl+q",
-				"search":          "alt+q",
+				"quit":       "q",
+				"quick_save": "ctrl+q",
+				"search":     "alt+q",
 			},
 			wantConflicts: false,
 		},
@@ -321,7 +321,7 @@ func TestDetectKeybindingConflicts(t *testing.T) {
 		{
 			name: "conflict - same modifier+key",
 			bindings: map[string]string{
-				"save":  "ctrl+s",
+				"save":   "ctrl+s",
 				"search": "ctrl+s",
 			},
 			wantConflicts: true,
@@ -396,9 +396,9 @@ func TestDetectKeybindingConflicts(t *testing.T) {
 // T027: Unit tests for unknown action validation
 func TestValidateActions(t *testing.T) {
 	tests := []struct {
-		name          string
-		bindings      map[string]string
-		wantValid     bool
+		name           string
+		bindings       map[string]string
+		wantValid      bool
 		unknownActions []string
 	}{
 		{
@@ -438,7 +438,7 @@ func TestValidateActions(t *testing.T) {
 		{
 			name: "multiple unknown actions",
 			bindings: map[string]string{
-				"quit":    "q",
+				"quit":     "q",
 				"unknown1": "a",
 				"unknown2": "b",
 			},

@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/term"
+	"pass-cli/internal/vault"
 )
 
 var (
@@ -48,6 +50,7 @@ Examples:
   pass-cli list
 
 For more information, visit: https://github.com/username/pass-cli`,
+		PersistentPreRunE: checkFirstRun,
 	}
 )
 
@@ -95,6 +98,35 @@ func GetVaultPath() string {
 // IsVerbose returns whether verbose mode is enabled
 func IsVerbose() bool {
 	return verbose || viper.GetBool("verbose")
+}
+
+// checkFirstRun detects first-run scenarios and triggers guided initialization
+// T065: PersistentPreRunE hook for first-run detection
+func checkFirstRun(cmd *cobra.Command, args []string) error {
+	// Get vault path from flag (or empty string if not set)
+	vaultFlag := ""
+	if vaultPath != "" {
+		vaultFlag = vaultPath
+	}
+
+	// Detect first-run scenario
+	state := vault.DetectFirstRun(cmd.Name(), vaultFlag)
+
+	// If guided init should be triggered
+	if state.ShouldPrompt {
+		// Check if running in TTY
+		isTTY := term.IsTerminal(int(os.Stdin.Fd()))
+
+		// Get actual vault path (flag or default)
+		actualVaultPath := GetVaultPath()
+
+		// Run guided initialization
+		if err := vault.RunGuidedInit(actualVaultPath, isTTY); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // initConfig reads in config file and ENV variables if set.

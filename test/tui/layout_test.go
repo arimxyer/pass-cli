@@ -10,7 +10,7 @@ import (
 // TestSidebarToggleCycles verifies sidebar toggle cycles through nil → false → true → nil
 func TestSidebarToggleCycles(t *testing.T) {
 	app := SimulateApp(t)
-	appState := models.NewAppState(nil) // nil vault for testing
+	appState := models.NewAppState(nil)               // nil vault for testing
 	lm := layout.NewLayoutManager(app, appState, nil) // nil config for testing
 
 	// Initial state should be Auto (nil)
@@ -83,39 +83,39 @@ func TestSidebarManualOverridePersistsAcrossResize(t *testing.T) {
 // TestShouldShowSidebarLogic verifies shouldShowSidebar() respects override precedence
 func TestShouldShowSidebarLogic(t *testing.T) {
 	tests := []struct {
-		name            string
-		width           int
+		name             string
+		width            int
 		mediumBreakpoint int
-		override        *bool
-		expectedShow    bool
+		override         *bool
+		expectedShow     bool
 	}{
 		{
-			name:            "Auto mode - narrow terminal",
-			width:           60,
+			name:             "Auto mode - narrow terminal",
+			width:            60,
 			mediumBreakpoint: 80,
-			override:        nil,
-			expectedShow:    false,
+			override:         nil,
+			expectedShow:     false,
 		},
 		{
-			name:            "Auto mode - wide terminal",
-			width:           100,
+			name:             "Auto mode - wide terminal",
+			width:            100,
 			mediumBreakpoint: 80,
-			override:        nil,
-			expectedShow:    true,
+			override:         nil,
+			expectedShow:     true,
 		},
 		{
-			name:            "Force hide - wide terminal",
-			width:           150,
+			name:             "Force hide - wide terminal",
+			width:            150,
 			mediumBreakpoint: 80,
-			override:        boolPtr(false),
-			expectedShow:    false,
+			override:         boolPtr(false),
+			expectedShow:     false,
 		},
 		{
-			name:            "Force show - narrow terminal",
-			width:           60,
+			name:             "Force show - narrow terminal",
+			width:            60,
 			mediumBreakpoint: 80,
-			override:        boolPtr(true),
-			expectedShow:    true,
+			override:         boolPtr(true),
+			expectedShow:     true,
 		},
 	}
 

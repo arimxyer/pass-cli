@@ -15,12 +15,12 @@ import (
 )
 
 const (
-	KeyLength        = 32     // AES-256 key length
-	NonceLength      = 12     // GCM nonce length
-	SaltLength       = 32     // PBKDF2 salt length
+	KeyLength         = 32     // AES-256 key length
+	NonceLength       = 12     // GCM nonce length
+	SaltLength        = 32     // PBKDF2 salt length
 	DefaultIterations = 600000 // PBKDF2 iterations for new vaults (OWASP 2023, T029)
-	MinIterations    = 600000 // Minimum allowed iterations (T029)
-	LegacyIterations = 100000 // Legacy iteration count for backward compatibility
+	MinIterations     = 600000 // Minimum allowed iterations (T029)
+	LegacyIterations  = 100000 // Legacy iteration count for backward compatibility
 )
 
 var (

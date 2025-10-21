@@ -14,12 +14,12 @@ func TestLoadTerminalConfigFromYAML(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	tests := []struct {
-		name            string
-		yamlContent     string
-		expectValid     bool
-		expectWidth     int
-		expectHeight    int
-		expectEnabled   bool
+		name             string
+		yamlContent      string
+		expectValid      bool
+		expectWidth      int
+		expectHeight     int
+		expectEnabled    bool
 		expectErrorCount int
 	}{
 		{

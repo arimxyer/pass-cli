@@ -30,13 +30,13 @@ const (
 	EventVaultLock           = "vault_lock"            // FR-019
 	EventVaultPasswordChange = "vault_password_change" // FR-019
 	// #nosec G101 -- False positive: event type name, not actual credentials
-	EventCredentialAccess    = "credential_access"     // FR-020 (get)
+	EventCredentialAccess = "credential_access" // FR-020 (get)
 	// #nosec G101 -- False positive: event type name, not actual credentials
-	EventCredentialAdd       = "credential_add"        // FR-020
+	EventCredentialAdd = "credential_add" // FR-020
 	// #nosec G101 -- False positive: event type name, not actual credentials
-	EventCredentialUpdate    = "credential_update"     // FR-020
+	EventCredentialUpdate = "credential_update" // FR-020
 	// #nosec G101 -- False positive: event type name, not actual credentials
-	EventCredentialDelete    = "credential_delete"     // FR-020
+	EventCredentialDelete = "credential_delete" // FR-020
 
 	// Keychain lifecycle events (011-keychain-lifecycle-management)
 	EventKeychainEnable = "keychain_enable" // FR-015

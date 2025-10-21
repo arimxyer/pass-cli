@@ -11,10 +11,10 @@ import (
 
 func TestKeybindingIntegration_LoadAndValidate(t *testing.T) {
 	tests := []struct {
-		name        string
-		configData  map[string]string
-		wantValid   bool
-		wantErrors  int
+		name       string
+		configData map[string]string
+		wantValid  bool
+		wantErrors int
 	}{
 		{
 			name: "valid custom keybindings",
@@ -24,7 +24,7 @@ func TestKeybindingIntegration_LoadAndValidate(t *testing.T) {
 				"edit_credential":   "e",
 				"delete_credential": "d",
 			},
-			wantValid: true,
+			wantValid:  true,
 			wantErrors: 0,
 		},
 		{
@@ -34,7 +34,7 @@ func TestKeybindingIntegration_LoadAndValidate(t *testing.T) {
 				"add_credential": "ctrl+n",
 				"help":           "f1",
 			},
-			wantValid: true,
+			wantValid:  true,
 			wantErrors: 0,
 		},
 		{
@@ -66,10 +66,10 @@ func TestKeybindingIntegration_LoadAndValidate(t *testing.T) {
 		{
 			name: "multiple errors detected",
 			configData: map[string]string{
-				"quit":           "unknownkey", // Invalid key
-				"invalid_action": "x",          // Unknown action
-				"add_credential": "d",
-				"delete_credential": "d",       // Conflict
+				"quit":              "unknownkey", // Invalid key
+				"invalid_action":    "x",          // Unknown action
+				"add_credential":    "d",
+				"delete_credential": "d", // Conflict
 			},
 			wantValid:  false,
 			wantErrors: 3, // All 3 errors should be detected

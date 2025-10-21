@@ -12,11 +12,11 @@ import (
 // Stored in vault.meta file alongside vault.enc to enable audit logging
 // for operations that don't unlock the vault (keychain status, vault remove).
 type VaultMetadata struct {
-	VaultID      string    `json:"vault_id"`        // Absolute path to vault.enc
-	AuditEnabled bool      `json:"audit_enabled"`   // Whether audit logging is enabled
-	AuditLogPath string    `json:"audit_log_path"`  // Absolute path to audit.log
-	CreatedAt    time.Time `json:"created_at"`      // Metadata creation timestamp
-	Version      int       `json:"version"`         // Metadata format version (currently 1)
+	VaultID      string    `json:"vault_id"`       // Absolute path to vault.enc
+	AuditEnabled bool      `json:"audit_enabled"`  // Whether audit logging is enabled
+	AuditLogPath string    `json:"audit_log_path"` // Absolute path to audit.log
+	CreatedAt    time.Time `json:"created_at"`     // Metadata creation timestamp
+	Version      int       `json:"version"`        // Metadata format version (currently 1)
 }
 
 // LoadMetadata reads vault.meta file and returns VaultMetadata.
