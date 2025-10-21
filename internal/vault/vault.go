@@ -685,17 +685,18 @@ type UpdateOpts struct {
 
 // CredentialMetadata contains non-sensitive credential information for listing
 type CredentialMetadata struct {
-	Service       string
-	Username      string
-	Category      string
-	URL           string
-	Notes         string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	ModifiedCount int       // Number of times credential has been modified
-	UsageCount    int       // Total usage count across all locations
-	LastAccessed  time.Time // Most recent access time
-	Locations     []string  // List of locations where accessed
+	Service         string
+	Username        string
+	Category        string
+	URL             string
+	Notes           string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	ModifiedCount   int       // Number of times credential has been modified
+	UsageCount      int       // Total usage count across all locations
+	LastAccessed    time.Time // Most recent access time
+	Locations       []string  // List of locations where accessed
+	GitRepositories []string  // List of unique git repositories where accessed (for --by-project grouping)
 }
 
 // ListCredentialsWithMetadata returns all credentials with metadata (no passwords)
@@ -721,6 +722,7 @@ func (v *VaultService) ListCredentialsWithMetadata() ([]CredentialMetadata, erro
 		var totalCount int
 		var lastAccessed time.Time
 		locations := make([]string, 0, len(cred.UsageRecord))
+		gitRepos := make(map[string]bool) // Use map to track unique repos
 
 		for loc, record := range cred.UsageRecord {
 			totalCount += record.Count
@@ -728,11 +730,22 @@ func (v *VaultService) ListCredentialsWithMetadata() ([]CredentialMetadata, erro
 			if record.Timestamp.After(lastAccessed) {
 				lastAccessed = record.Timestamp
 			}
+			// Collect unique git repositories
+			if record.GitRepo != "" {
+				gitRepos[record.GitRepo] = true
+			}
+		}
+
+		// Convert git repos map to slice
+		gitReposList := make([]string, 0, len(gitRepos))
+		for repo := range gitRepos {
+			gitReposList = append(gitReposList, repo)
 		}
 
 		meta.UsageCount = totalCount
 		meta.LastAccessed = lastAccessed
 		meta.Locations = locations
+		meta.GitRepositories = gitReposList
 
 		metadata = append(metadata, meta)
 	}
