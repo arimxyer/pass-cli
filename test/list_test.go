@@ -244,11 +244,12 @@ func TestListByProject(t *testing.T) {
 		}
 	})
 
-	// T028: Integration test - list --by-project --location combines filter and grouping (Acceptance Scenario 5)
-	t.Run("T028_ByProject_With_Location_Filter", func(t *testing.T) {
-		// This test requires --location filtering which is implemented in Phase 5 (User Story 3)
-		// Skip for now - will be enabled after T042-T052 are complete
-		t.Skip("TODO: Implement --location filtering in Phase 5 (T042-T052)")
+	// T041a: Integration test - list --by-project --location combines filter and grouping
+	// MOVED from Phase 4 (was T028) to Phase 5 - validates T048 implementation
+	// This is an integration test requiring both --by-project (Phase 4) and --location (Phase 5)
+	t.Run("T041a_ByProject_With_Location_Filter", func(t *testing.T) {
+		// Skip until Phase 5 implements --location filtering (T042-T048)
+		t.Skip("TODO: Implement --location filtering in Phase 5 (T042-T048), then enable this integration test")
 
 		// This test verifies that --location filters first, then groups
 		// We'll filter by my-web-app directory location

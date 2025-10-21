@@ -95,7 +95,6 @@
 - [x] T025 [P] [US2] Integration test: `list --by-project` shows "Ungrouped" for credentials with no repository in `test/list_test.go` (Acceptance Scenario 2)
 - [x] T026 [P] [US2] Integration test: `list --by-project --format json` outputs grouped data in `test/list_test.go` (Acceptance Scenario 3)
 - [x] T027 [P] [US2] Integration test: `list --by-project` groups credentials from same repo at different paths in `test/list_test.go` (Acceptance Scenario 4)
-- [ ] T028 [P] [US2] Integration test: `list --by-project --location <path>` combines filter and grouping in `test/list_test.go` (Acceptance Scenario 5) - **DEFERRED to Phase 5** (requires --location implementation)
 
 ### Implementation for User Story 2
 
@@ -106,7 +105,7 @@
 - [x] T033 [US2] Implement simple format output for `--by-project` in `cmd/list.go`: one line per group with space-separated credentials
 - [x] T034 [US2] Handle "Ungrouped" section for credentials with no repository context in `cmd/list.go`
 - [x] T035 [US2] Update help text for `list` command to document `--by-project` flag in `cmd/list.go`
-- [x] T036 [US2] Verify all T024-T027 tests pass (TDD validation) - T028 deferred to Phase 5
+- [x] T036 [US2] Verify all T024-T027 tests pass (TDD validation)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - `usage` command works, `list --by-project` works
 
@@ -125,6 +124,7 @@
 - [ ] T039 [P] [US3] Integration test: `list --location <path> --recursive` includes subdirectories in `test/list_test.go` (Acceptance Scenario 3)
 - [ ] T040 [P] [US3] Integration test: `list --location <nonexistent>` displays "No credentials found" message in `test/list_test.go` (Acceptance Scenario 4)
 - [ ] T041 [P] [US3] Integration test: `list --location <path> --format json` outputs filtered results in `test/list_test.go` (Acceptance Scenario 5)
+- [ ] T041a [P] [INTEGRATION] Integration test: `list --by-project --location <path>` combines filter and grouping in `test/list_test.go` (validates T048 - moved from Phase 4 T028)
 
 ### Implementation for User Story 3
 
@@ -138,7 +138,7 @@
 - [ ] T049 [US3] Add table/JSON/simple format outputs for location filter in `cmd/list.go` per contract
 - [ ] T050 [US3] Handle empty results case with "No credentials found for location" message in `cmd/list.go`
 - [ ] T051 [US3] Update help text for `list` command to document `--location` and `--recursive` flags in `cmd/list.go`
-- [ ] T052 [US3] Verify all T037-T041 tests pass (TDD validation)
+- [ ] T052 [US3] Verify all T037-T041a tests pass (TDD validation - includes integration test T041a)
 
 **Checkpoint**: All user stories should now be independently functional - `usage`, `list --by-project`, `list --location`, and combined flags all work
 
