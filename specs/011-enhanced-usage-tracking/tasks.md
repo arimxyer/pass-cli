@@ -95,7 +95,7 @@
 - [x] T025 [P] [US2] Integration test: `list --by-project` shows "Ungrouped" for credentials with no repository in `test/list_test.go` (Acceptance Scenario 2)
 - [x] T026 [P] [US2] Integration test: `list --by-project --format json` outputs grouped data in `test/list_test.go` (Acceptance Scenario 3)
 - [x] T027 [P] [US2] Integration test: `list --by-project` groups credentials from same repo at different paths in `test/list_test.go` (Acceptance Scenario 4)
-- [x] T028 [P] [US2] Integration test: `list --by-project --location <path>` combines filter and grouping in `test/list_test.go` (Acceptance Scenario 5) - SKIPPED pending Phase 5
+- [ ] T028 [P] [US2] Integration test: `list --by-project --location <path>` combines filter and grouping in `test/list_test.go` (Acceptance Scenario 5) - **DEFERRED to Phase 5** (requires --location implementation)
 
 ### Implementation for User Story 2
 
@@ -106,7 +106,7 @@
 - [x] T033 [US2] Implement simple format output for `--by-project` in `cmd/list.go`: one line per group with space-separated credentials
 - [x] T034 [US2] Handle "Ungrouped" section for credentials with no repository context in `cmd/list.go`
 - [x] T035 [US2] Update help text for `list` command to document `--by-project` flag in `cmd/list.go`
-- [x] T036 [US2] Verify all T024-T028 tests pass (TDD validation)
+- [x] T036 [US2] Verify all T024-T027 tests pass (TDD validation) - T028 deferred to Phase 5
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - `usage` command works, `list --by-project` works
 
