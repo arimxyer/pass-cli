@@ -56,28 +56,28 @@
 
 **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T005 [P] [US1] Integration test: `usage` command with credential that has usage history in `test/usage_test.go` (Acceptance Scenario 1)
-- [ ] T006 [P] [US1] Integration test: `usage` command with credential that has never been accessed in `test/usage_test.go` (Acceptance Scenario 2)
-- [ ] T007 [P] [US1] Integration test: `usage` command shows git repository name in `test/usage_test.go` (Acceptance Scenario 3)
-- [ ] T008 [P] [US1] Integration test: `usage` command with `--format json` flag in `test/usage_test.go` (Acceptance Scenario 4)
-- [ ] T009 [P] [US1] Integration test: `usage` command with non-existent credential in `test/usage_test.go` (Acceptance Scenario 5)
-- [ ] T010 [P] [US1] Integration test: `usage` command with 50+ locations uses default limit in `test/usage_test.go` (Acceptance Scenario 6)
-- [ ] T011 [P] [US1] Integration test: `usage` command with `--limit 10` flag in `test/usage_test.go` (Acceptance Scenario 7)
-- [ ] T012 [P] [US1] Integration test: `usage` command with `--limit 0` shows all locations in `test/usage_test.go` (Acceptance Scenario 8)
-- [ ] T013 [P] [US1] Integration test: `usage` command in table format hides deleted paths in `test/usage_test.go` (Acceptance Scenario 9)
-- [ ] T014 [P] [US1] Integration test: `usage` command in JSON format includes deleted paths with `path_exists: false` in `test/usage_test.go` (Acceptance Scenario 10)
+- [x] T005 [P] [US1] Integration test: `usage` command with credential that has usage history in `test/usage_test.go` (Acceptance Scenario 1)
+- [x] T006 [P] [US1] Integration test: `usage` command with credential that has never been accessed in `test/usage_test.go` (Acceptance Scenario 2)
+- [x] T007 [P] [US1] Integration test: `usage` command shows git repository name in `test/usage_test.go` (Acceptance Scenario 3)
+- [x] T008 [P] [US1] Integration test: `usage` command with `--format json` flag in `test/usage_test.go` (Acceptance Scenario 4)
+- [x] T009 [P] [US1] Integration test: `usage` command with non-existent credential in `test/usage_test.go` (Acceptance Scenario 5)
+- [x] T010 [P] [US1] Integration test: `usage` command with 50+ locations uses default limit in `test/usage_test.go` (Acceptance Scenario 6)
+- [x] T011 [P] [US1] Integration test: `usage` command with `--limit 10` flag in `test/usage_test.go` (Acceptance Scenario 7)
+- [x] T012 [P] [US1] Integration test: `usage` command with `--limit 0` shows all locations in `test/usage_test.go` (Acceptance Scenario 8)
+- [x] T013 [P] [US1] Integration test: `usage` command in table format hides deleted paths in `test/usage_test.go` (Acceptance Scenario 9)
+- [x] T014 [P] [US1] Integration test: `usage` command in JSON format includes deleted paths with `path_exists: false` in `test/usage_test.go` (Acceptance Scenario 10)
 
 ### Implementation for User Story 1
 
-- [ ] T015 [US1] Create `cmd/usage.go` with Cobra command structure (imports, command definition, flags)
-- [ ] T016 [US1] Implement `runUsage()` function in `cmd/usage.go`: vault loading, credential lookup, error handling
-- [ ] T017 [US1] Implement table format output in `cmd/usage.go`: iterate UsageRecords, sort by timestamp descending, format with formatUsageTable()
-- [ ] T018 [US1] Implement `--limit` flag logic in `cmd/usage.go`: default 20, truncate sorted records, append "... and N more" footer
-- [ ] T019 [US1] Implement JSON format output in `cmd/usage.go`: marshal UsageRecords with path_exists field per contract
-- [ ] T020 [US1] Implement simple format output in `cmd/usage.go`: newline-separated location paths
-- [ ] T021 [US1] Add `usage` command to root command in `cmd/root.go`
-- [ ] T022 [US1] Add help text and usage examples to `usage` command in `cmd/usage.go`
-- [ ] T023 [US1] Verify all T005-T014 tests pass (TDD validation)
+- [x] T015 [US1] Create `cmd/usage.go` with Cobra command structure (imports, command definition, flags)
+- [x] T016 [US1] Implement `runUsage()` function in `cmd/usage.go`: vault loading, credential lookup, error handling
+- [x] T017 [US1] Implement table format output in `cmd/usage.go`: iterate UsageRecords, sort by timestamp descending, format with formatUsageTable()
+- [x] T018 [US1] Implement `--limit` flag logic in `cmd/usage.go`: default 20, truncate sorted records, append "... and N more" footer
+- [x] T019 [US1] Implement JSON format output in `cmd/usage.go`: marshal UsageRecords with path_exists field per contract
+- [x] T020 [US1] Implement simple format output in `cmd/usage.go`: newline-separated location paths
+- [x] T021 [US1] Add `usage` command to root command in `cmd/root.go`
+- [x] T022 [US1] Add help text and usage examples to `usage` command in `cmd/usage.go`
+- [x] T023 [US1] Verify all T005-T014 tests pass (TDD validation)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - `pass-cli usage <service>` works with all flags and formats
 
