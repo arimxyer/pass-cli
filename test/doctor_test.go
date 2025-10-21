@@ -71,7 +71,7 @@ func TestDoctorCommand_JSON(t *testing.T) {
 
 	// Should not fail
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
+		if _, ok := err.(*exec.ExitError); ok {
 			// Exit code 1 or 2 is OK for JSON output (indicates warnings/errors)
 			// Only fail if we can't get output
 			if len(output) == 0 {

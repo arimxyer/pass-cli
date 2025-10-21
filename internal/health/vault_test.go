@@ -9,6 +9,11 @@ import (
 
 // T010: TestVaultCheck_Exists - Vault present, readable, 0600 permissions → Pass status
 func TestVaultCheck_Exists(t *testing.T) {
+	// Skip on Windows - Windows doesn't support Unix file permissions
+	if os.Getenv("OS") == "Windows_NT" {
+		t.Skip("Skipping Unix permission test on Windows")
+	}
+
 	// Create temporary vault file with correct permissions
 	tmpDir := t.TempDir()
 	vaultPath := filepath.Join(tmpDir, "vault.enc")
