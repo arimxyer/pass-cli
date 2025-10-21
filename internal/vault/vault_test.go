@@ -1341,6 +1341,11 @@ func TestEnableKeychain(t *testing.T) {
 	vault, _, cleanup := setupTestVault(t)
 	defer cleanup()
 
+	// Skip if keychain is not available (e.g., Linux CI)
+	if !vault.keychainService.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
+
 	_ = vault.keychainService.Delete()
 	password := "TestPassword123!"
 
@@ -1365,6 +1370,11 @@ func TestEnableKeychain(t *testing.T) {
 func TestEnableKeychainAlreadyEnabled(t *testing.T) {
 	vault, _, cleanup := setupTestVault(t)
 	defer cleanup()
+
+	// Skip if keychain is not available (e.g., Linux CI)
+	if !vault.keychainService.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
 
 	_ = vault.keychainService.Delete()
 	password := "TestPassword123!"
@@ -1409,6 +1419,11 @@ func TestGetKeychainStatus(t *testing.T) {
 	vault, _, cleanup := setupTestVault(t)
 	defer cleanup()
 
+	// Skip if keychain is not available (e.g., Linux CI)
+	if !vault.keychainService.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
+
 	_ = vault.keychainService.Delete()
 	password := "TestPassword123!"
 
@@ -1439,6 +1454,11 @@ func TestGetKeychainStatus(t *testing.T) {
 func TestRemoveVault(t *testing.T) {
 	vault, vaultPath, cleanup := setupTestVault(t)
 	defer cleanup()
+
+	// Skip if keychain is not available (e.g., Linux CI)
+	if !vault.keychainService.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
 
 	_ = vault.keychainService.Delete()
 	password := "TestPassword123!"
