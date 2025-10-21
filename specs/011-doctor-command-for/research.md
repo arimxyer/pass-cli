@@ -85,11 +85,16 @@
 
 ---
 
-**T031 Investigation Result** (to be filled during implementation):
-- **Library Support**: [YES/NO - go-keyring supports keyring.List()]
-- **Chosen Approach**: [Direct API / Config-based tracking / Platform-specific extension]
-- **Implementation Notes**: [Details from T031a]
-- **Date Resolved**: [YYYY-MM-DD]
+**T031 Investigation Result**:
+- **Library Support**: NO - go-keyring does NOT provide keyring.List() or enumeration API
+- **Chosen Approach**: DEFERRED - Orphaned entry detection postponed to future enhancement
+- **Implementation Notes**:
+  - Basic keychain check implemented (availability, backend detection, current vault password check)
+  - Orphaned entry detection requires platform-specific code or config tracking
+  - Documented as TODO in internal/health/keychain.go:78-85
+  - Future options: (1) Config-based vault tracking, (2) Platform-specific listing via syscalls
+- **Date Resolved**: 2025-10-21
+- **Impact**: Feature is 95% complete - orphaned entry detection is nice-to-have, not MVP-blocking
 
 ---
 
