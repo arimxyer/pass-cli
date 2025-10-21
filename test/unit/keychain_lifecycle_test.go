@@ -34,7 +34,7 @@ func TestKeychainEnable_SuccessPath(t *testing.T) {
 	}
 
 	// Cleanup keychain after test
-	defer ks.Delete()
+	defer func() { _ = ks.Delete() }()
 
 	// Test will FAIL until cmd/keychain_enable.go is implemented
 	t.Skip("TODO: Implement keychain enable command (T011)")
@@ -70,7 +70,7 @@ func TestKeychainEnable_WrongPassword(t *testing.T) {
 	}
 
 	// Cleanup keychain after test
-	defer ks.Delete()
+	defer func() { _ = ks.Delete() }()
 
 	// Test will FAIL until cmd/keychain_enable.go is implemented
 	t.Skip("TODO: Implement keychain enable command (T011)")
@@ -142,7 +142,7 @@ func TestKeychainEnable_AlreadyEnabled_NoForce(t *testing.T) {
 	}
 
 	// Cleanup keychain after test
-	defer ks.Delete()
+	defer func() { _ = ks.Delete() }()
 
 	// Verify keychain has password
 	_, err = ks.Retrieve()
@@ -235,7 +235,7 @@ func TestKeychainStatus_Enabled(t *testing.T) {
 	}
 
 	// Cleanup keychain after test
-	defer ks.Delete()
+	defer func() { _ = ks.Delete() }()
 
 	// Test will FAIL until cmd/keychain_status.go is implemented
 	t.Skip("TODO: Implement keychain status command (T021)")
@@ -272,7 +272,7 @@ func TestKeychainStatus_AvailableNotEnabled(t *testing.T) {
 	}
 
 	// Cleanup keychain after test (in case it was set)
-	defer ks.Delete()
+	defer func() { _ = ks.Delete() }()
 
 	// Test will FAIL until cmd/keychain_status.go is implemented
 	t.Skip("TODO: Implement keychain status command (T021)")
@@ -345,7 +345,7 @@ func TestKeychainStatus_AlwaysExitZero(t *testing.T) {
 	}
 
 	// Cleanup keychain after test
-	defer ks.Delete()
+	defer func() { _ = ks.Delete() }()
 
 	// Test will FAIL until cmd/keychain_status.go is implemented
 	t.Skip("TODO: Implement keychain status command (T021)")
@@ -431,7 +431,7 @@ func TestVaultRemove_FileMissingKeychainExists(t *testing.T) {
 	}
 
 	// Cleanup keychain after test
-	defer ks.Delete()
+	defer func() { _ = ks.Delete() }()
 
 	// Test will FAIL until cmd/vault_remove.go is implemented
 	t.Skip("TODO: Implement vault remove command (T030)")
@@ -467,7 +467,7 @@ func TestVaultRemove_UserCancels(t *testing.T) {
 	}
 
 	// Cleanup keychain after test
-	defer ks.Delete()
+	defer func() { _ = ks.Delete() }()
 
 	// Test will FAIL until cmd/vault_remove.go is implemented
 	t.Skip("TODO: Implement vault remove command (T030)")
@@ -537,7 +537,7 @@ func TestVaultRemove_AuditLogBeforeDeletion(t *testing.T) {
 	}
 
 	// Cleanup keychain after test
-	defer ks.Delete()
+	defer func() { _ = ks.Delete() }()
 
 	// Test will FAIL until cmd/vault_remove.go is implemented
 	t.Skip("TODO: Implement vault remove command (T030)")

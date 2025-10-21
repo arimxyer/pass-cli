@@ -160,19 +160,19 @@ description: "Task list for keychain lifecycle management feature implementation
 
 **Purpose**: Ensure all commands follow common patterns and constitution principles
 
-- [ ] T035 [P] Verify all commands respect `--vault` flag for non-default vault locations (FR-013, plan.md line 66)
-- [ ] T036 [P] Verify all commands use common vault path resolution via `GetVaultPath()` helper (contracts/commands.md lines 317-322)
-- [ ] T037 [P] Verify all commands use common keychain service name generation pattern (contracts/commands.md lines 325-332)
-- [ ] T038 [P] Verify all commands clear passwords from memory using `defer crypto.ClearBytes()` (research.md Decision 1, contracts/commands.md lines 427-434)
-- [ ] T039 [P] Verify all commands log audit entries correctly with empty CredentialName field for vault-level ops (contracts/commands.md lines 336-346)
-- [ ] T040 [P] Verify all commands have platform-specific error messages (Windows/macOS/Linux) (contracts/commands.md lines 350-355)
-- [ ] T041 [P] Run full integration test suite across all three user stories in sequence
-- [ ] T042 [P] Run security tests to verify FR-015 audit logging works correctly (data-model.md lines 315-318)
-- [ ] T043 [P] Verify backward compatibility - existing `pass-cli init --use-keychain` and `pass-cli change-password` keychain updates still work (contracts/commands.md lines 454-461)
-- [ ] T044 Run golangci-lint and fix any issues
-- [ ] T045 Run gosec security scanner and address findings
-- [ ] T046 Generate coverage report and ensure >80% coverage for new code
-- [ ] T047 Update CLAUDE.md with any new patterns or conventions discovered during implementation
+- [X] T035 [P] Verify all commands respect `--vault` flag for non-default vault locations (FR-013, plan.md line 66)
+- [X] T036 [P] Verify all commands use common vault path resolution via `GetVaultPath()` helper (contracts/commands.md lines 317-322)
+- [X] T037 [P] Verify all commands use common keychain service name generation pattern (contracts/commands.md lines 325-332)
+- [X] T038 [P] Verify all commands clear passwords from memory using `defer crypto.ClearBytes()` (research.md Decision 1, contracts/commands.md lines 427-434)
+- [X] T039 [P] Verify all commands log audit entries correctly with empty CredentialName field for vault-level ops (contracts/commands.md lines 336-346)
+- [X] T040 [P] Verify all commands have platform-specific error messages (Windows/macOS/Linux) (contracts/commands.md lines 350-355)
+- [X] T041 [P] Run full integration test suite across all three user stories in sequence
+- [X] T042 [P] Run security tests to verify FR-015 audit logging works correctly (data-model.md lines 315-318)
+- [X] T043 [P] Verify backward compatibility - existing `pass-cli init --use-keychain` and `pass-cli change-password` keychain updates still work (contracts/commands.md lines 454-461)
+- [X] T044 Run golangci-lint and fix any issues
+- [X] T045 Run gosec security scanner and address findings
+- [X] T046 Generate coverage report and ensure >80% coverage for new code
+- [X] T047 Update CLAUDE.md with any new patterns or conventions discovered during implementation
 
 ---
 
