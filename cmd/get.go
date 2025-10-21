@@ -172,6 +172,16 @@ func outputNormalMode(cred *vault.Credential, vaultService *vault.VaultService, 
 		fmt.Printf("📅 Updated: %s\n", cred.UpdatedAt.Format("2006-01-02 15:04:05"))
 	}
 
+	// Track field access for displayed credential (normal mode shows password + username)
+	if cred.Username != "" {
+		if err := vaultService.RecordFieldAccess(service, "username"); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to track username access: %v\n", err)
+		}
+	}
+	if err := vaultService.RecordFieldAccess(service, "password"); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to track password access: %v\n", err)
+	}
+
 	// Copy to clipboard unless disabled
 	if !getNoClipboard {
 		// T020g: Convert []byte to string for clipboard, then immediately zero the byte slice
@@ -180,11 +190,6 @@ func outputNormalMode(cred *vault.Credential, vaultService *vault.VaultService, 
 		if err := clipboard.WriteAll(passwordStr); err != nil {
 			fmt.Fprintf(os.Stderr, "\n⚠️  Warning: failed to copy to clipboard: %v\n", err)
 		} else {
-			// Track password access (copy to clipboard = usage)
-			if err := vaultService.RecordFieldAccess(service, "password"); err != nil {
-				// Log warning but don't fail the operation
-				fmt.Fprintf(os.Stderr, "Warning: failed to track password access: %v\n", err)
-			}
 
 			// T020g: Zero the password bytes immediately after clipboard write
 			// Note: This only zeros the source []byte in cred, not the string copy

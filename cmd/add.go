@@ -150,12 +150,12 @@ func unlockVault(vaultService *vault.VaultService) error {
 	}
 
 	// Prompt for master password
-	fmt.Print("Master password: ")
+	fmt.Fprint(os.Stderr, "Master password: ")
 	password, err := readPassword()
 	if err != nil {
 		return fmt.Errorf("failed to read password: %w", err)
 	}
-	fmt.Println() // newline after password input
+	fmt.Fprintln(os.Stderr) // newline after password input
 
 	if err := vaultService.Unlock(password); err != nil {
 		return fmt.Errorf("failed to unlock vault: %w", err)
