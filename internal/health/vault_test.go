@@ -4,16 +4,12 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
 // T010: TestVaultCheck_Exists - Vault present, readable, 0600 permissions → Pass status
 func TestVaultCheck_Exists(t *testing.T) {
-	// Skip on Windows - Windows doesn't support Unix file permissions
-	if os.Getenv("OS") == "Windows_NT" {
-		t.Skip("Skipping Unix permission test on Windows")
-	}
-
 	// Create temporary vault file with correct permissions
 	tmpDir := t.TempDir()
 	vaultPath := filepath.Join(tmpDir, "vault.enc")
@@ -52,7 +48,11 @@ func TestVaultCheck_Exists(t *testing.T) {
 		t.Errorf("Expected size %d, got %d", len(content), details.Size)
 	}
 	if details.Permissions != "0600" {
-		t.Errorf("Expected permissions 0600, got %s", details.Permissions)
+		if runtime.GOOS == "windows" {
+			t.Logf("Note: Permissions are %s (expected 0600) - normal on Windows", details.Permissions)
+		} else {
+			t.Errorf("Expected permissions 0600, got %s", details.Permissions)
+		}
 	}
 }
 
@@ -93,11 +93,6 @@ func TestVaultCheck_Missing(t *testing.T) {
 
 // T012: TestVaultCheck_PermissionsWarning - Vault with 0644 permissions → Warning status
 func TestVaultCheck_PermissionsWarning(t *testing.T) {
-	// Skip on Windows (different permission model)
-	if os.Getenv("OS") == "Windows_NT" {
-		t.Skip("Skipping Unix permission test on Windows")
-	}
-
 	// Create temporary vault file with overly permissive permissions
 	tmpDir := t.TempDir()
 	vaultPath := filepath.Join(tmpDir, "vault.enc")
@@ -113,15 +108,23 @@ func TestVaultCheck_PermissionsWarning(t *testing.T) {
 	// Execute check
 	result := checker.Run(context.Background())
 
-	// Assertions
-	if result.Status != CheckWarning {
-		t.Errorf("Expected status %s, got %s", CheckWarning, result.Status)
-	}
-	if result.Message == "" {
-		t.Error("Expected warning message about permissions")
-	}
-	if result.Recommendation == "" {
-		t.Error("Expected recommendation to fix permissions")
+	// Assertions - platform-specific expectations
+	if runtime.GOOS == "windows" {
+		// On Windows, permission checks are skipped (ACLs used instead)
+		if result.Status != CheckPass {
+			t.Errorf("Expected status %s on Windows, got %s", CheckPass, result.Status)
+		}
+	} else {
+		// On Unix, 0644 permissions should trigger a warning
+		if result.Status != CheckWarning {
+			t.Errorf("Expected status %s, got %s", CheckWarning, result.Status)
+		}
+		if result.Message == "" {
+			t.Error("Expected warning message about permissions")
+		}
+		if result.Recommendation == "" {
+			t.Error("Expected recommendation to fix permissions")
+		}
 	}
 
 	details, ok := result.Details.(VaultCheckDetails)
@@ -132,6 +135,10 @@ func TestVaultCheck_PermissionsWarning(t *testing.T) {
 		t.Error("Expected Exists to be true")
 	}
 	if details.Permissions != "0644" {
-		t.Errorf("Expected permissions 0644, got %s", details.Permissions)
+		if runtime.GOOS == "windows" {
+			t.Logf("Note: Permissions are %s (expected 0644) - normal on Windows", details.Permissions)
+		} else {
+			t.Errorf("Expected permissions 0644, got %s", details.Permissions)
+		}
 	}
 }

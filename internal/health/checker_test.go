@@ -2,6 +2,8 @@ package health
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -9,18 +11,32 @@ import (
 func TestRunChecks_AllPass(t *testing.T) {
 	// Create temporary test environment
 	tmpDir := t.TempDir()
+	vaultPath := filepath.Join(tmpDir, "vault.enc")
+	configPath := filepath.Join(tmpDir, "config.yaml")
 
 	// Setup options pointing to test environment
 	opts := CheckOptions{
 		CurrentVersion: "v1.2.3",
 		GitHubRepo:     "test/pass-cli",
-		VaultPath:      tmpDir + "/vault.enc",
+		VaultPath:      vaultPath,
 		VaultDir:       tmpDir,
-		ConfigPath:     tmpDir + "/config.yaml",
+		ConfigPath:     configPath,
 	}
 
-	// Create minimal valid vault and config
-	// (will need helper functions in actual implementation)
+	// Create minimal valid vault
+	vaultContent := []byte(`{"version":1,"salt":"test","data":"encrypted"}`)
+	if err := os.WriteFile(vaultPath, vaultContent, 0600); err != nil {
+		t.Fatalf("Failed to create test vault: %v", err)
+	}
+
+	// Create minimal valid config
+	configContent := []byte(`vault_path: ` + vaultPath + `
+clipboard_timeout: 30
+audit_enabled: false
+`)
+	if err := os.WriteFile(configPath, configContent, 0644); err != nil {
+		t.Fatalf("Failed to create test config: %v", err)
+	}
 
 	// Execute all checks
 	report := RunChecks(context.Background(), opts)
@@ -62,13 +78,30 @@ func TestRunChecks_WithWarnings(t *testing.T) {
 	// For example: old backup file, or config value out of range
 
 	tmpDir := t.TempDir()
+	vaultPath := filepath.Join(tmpDir, "vault.enc")
+	configPath := filepath.Join(tmpDir, "config.yaml")
 
 	opts := CheckOptions{
 		CurrentVersion: "v1.2.3",
 		GitHubRepo:     "test/pass-cli",
-		VaultPath:      tmpDir + "/vault.enc",
+		VaultPath:      vaultPath,
 		VaultDir:       tmpDir,
-		ConfigPath:     tmpDir + "/config.yaml",
+		ConfigPath:     configPath,
+	}
+
+	// Create minimal valid vault
+	vaultContent := []byte(`{"version":1,"salt":"test","data":"encrypted"}`)
+	if err := os.WriteFile(vaultPath, vaultContent, 0600); err != nil {
+		t.Fatalf("Failed to create test vault: %v", err)
+	}
+
+	// Create config with a warning (clipboard_timeout > 300)
+	configContent := []byte(`vault_path: ` + vaultPath + `
+clipboard_timeout: 500
+audit_enabled: false
+`)
+	if err := os.WriteFile(configPath, configContent, 0644); err != nil {
+		t.Fatalf("Failed to create test config: %v", err)
 	}
 
 	// Execute all checks

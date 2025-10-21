@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
 )
 
 // VaultChecker checks vault file accessibility
@@ -66,7 +67,8 @@ func (v *VaultChecker) Run(ctx context.Context) CheckResult {
 
 	// Check if permissions are too permissive (group/other can read)
 	// On Unix: mode & 0077 != 0 means group or other has permissions
-	if perms&0077 != 0 {
+	// On Windows: Skip this check as Windows uses ACLs instead of Unix permissions
+	if runtime.GOOS != "windows" && perms&0077 != 0 {
 		return CheckResult{
 			Name:           v.Name(),
 			Status:         CheckWarning,
