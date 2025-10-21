@@ -452,3 +452,279 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 
 	t.Logf("✓ Old vaults work without metadata (backward compatible)")
 }
+
+// T032: Integration test for metadata deleted, fallback self-discovery succeeds
+// Tests that VaultService uses fallback when metadata file is deleted
+func TestIntegration_MetadataDeletedFallback(t *testing.T) {
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available")
+	}
+
+	testPassword := "DeletedMeta-Pass@123"
+	vaultDir := filepath.Join(testDir, "deleted-meta-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	auditLogPath := filepath.Join(vaultDir, "audit.log")
+
+	defer cleanupKeychain(t, ks)
+	defer os.RemoveAll(vaultDir)
+
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create directory: %v", err)
+	}
+
+	// Create vault with audit
+	input := testPassword + "\n" + testPassword + "\n"
+	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd.Stdin = strings.NewReader(input)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Init failed: %v", err)
+	}
+
+	// Verify audit.log exists
+	if _, err := os.Stat(auditLogPath); os.IsNotExist(err) {
+		t.Fatal("Audit log should exist")
+	}
+
+	// Delete metadata file
+	metaPath := filepath.Join(vaultDir, "vault.meta")
+	if err := os.Remove(metaPath); err != nil {
+		t.Fatalf("Failed to delete metadata: %v", err)
+	}
+
+	// Run keychain status (should use fallback self-discovery)
+	cmd = exec.Command(binaryPath, "--vault", vaultPath, "keychain", "status")
+	stdout.Reset()
+	stderr.Reset()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Keychain status should work with fallback: %v", err)
+	}
+
+	// Verify audit entry written via fallback
+	data, err := os.ReadFile(auditLogPath)
+	if err != nil {
+		t.Fatalf("Failed to read audit log: %v", err)
+	}
+
+	if len(data) == 0 {
+		t.Error("Audit log should have entries from fallback")
+	}
+
+	t.Logf("✓ Fallback self-discovery succeeded when metadata deleted")
+}
+
+// T033: Integration test for metadata corrupted (invalid JSON), fallback succeeds
+// Already covered in T014, this is an alias/duplicate test for US3 completeness
+func TestIntegration_CorruptedMetadataFallbackUS3(t *testing.T) {
+	// This is the same as T014 but categorized under US3
+	// See TestIntegration_CorruptedMetadataFallback for implementation
+	t.Skip("Covered by T014 (TestIntegration_CorruptedMetadataFallback)")
+}
+
+// T034: Integration test for audit.log exists but no metadata, best-effort logging
+// Tests that system finds audit.log via self-discovery when no metadata exists
+func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available")
+	}
+
+	testPassword := "NoMeta-Pass@123"
+	vaultDir := filepath.Join(testDir, "no-meta-audit-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	auditLogPath := filepath.Join(vaultDir, "audit.log")
+
+	defer cleanupKeychain(t, ks)
+	defer os.RemoveAll(vaultDir)
+
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create directory: %v", err)
+	}
+
+	// Create vault with audit
+	input := testPassword + "\n" + testPassword + "\n"
+	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd.Stdin = strings.NewReader(input)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Init failed: %v", err)
+	}
+
+	// Delete metadata but keep audit.log
+	metaPath := filepath.Join(vaultDir, "vault.meta")
+	if err := os.Remove(metaPath); err != nil {
+		t.Fatalf("Failed to delete metadata: %v", err)
+	}
+
+	// Verify audit.log still exists
+	if _, err := os.Stat(auditLogPath); os.IsNotExist(err) {
+		t.Fatal("Audit log should still exist")
+	}
+
+	// Get initial audit log size
+	initialData, _ := os.ReadFile(auditLogPath)
+	initialSize := len(initialData)
+
+	// Run command (should discover audit.log and use it)
+	cmd = exec.Command(binaryPath, "--vault", vaultPath, "keychain", "status")
+	stdout.Reset()
+	stderr.Reset()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Command should work with audit.log present: %v", err)
+	}
+
+	// Verify audit log grew (new entry written)
+	finalData, err := os.ReadFile(auditLogPath)
+	if err != nil {
+		t.Fatalf("Failed to read audit log: %v", err)
+	}
+
+	if len(finalData) <= initialSize {
+		t.Error("Audit log should have new entries via best-effort logging")
+	}
+
+	t.Logf("✓ Best-effort logging succeeded with audit.log but no metadata")
+}
+
+// T035: Integration test for metadata indicates audit but audit.log missing, creates new log
+// Tests graceful handling when metadata says audit enabled but log file is missing
+func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available")
+	}
+
+	testPassword := "MissingLog-Pass@123"
+	vaultDir := filepath.Join(testDir, "missing-log-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	auditLogPath := filepath.Join(vaultDir, "audit.log")
+
+	defer cleanupKeychain(t, ks)
+	defer os.RemoveAll(vaultDir)
+
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create directory: %v", err)
+	}
+
+	// Create vault with audit
+	input := testPassword + "\n" + testPassword + "\n"
+	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd.Stdin = strings.NewReader(input)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Init failed: %v", err)
+	}
+
+	// Delete audit.log but keep metadata
+	if err := os.Remove(auditLogPath); err != nil {
+		t.Fatalf("Failed to delete audit log: %v", err)
+	}
+
+	// Verify metadata still exists
+	metaPath := filepath.Join(vaultDir, "vault.meta")
+	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
+		t.Fatal("Metadata should still exist")
+	}
+
+	// Run command (should create new audit.log per FR-013)
+	cmd = exec.Command(binaryPath, "--vault", vaultPath, "keychain", "status")
+	stdout.Reset()
+	stderr.Reset()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Command should work even with missing audit.log: %v", err)
+	}
+
+	// Verify audit.log was recreated
+	if _, err := os.Stat(auditLogPath); os.IsNotExist(err) {
+		t.Error("Audit log should be recreated when missing")
+	}
+
+	// Verify it has entries
+	data, err := os.ReadFile(auditLogPath)
+	if err != nil {
+		t.Fatalf("Failed to read recreated audit log: %v", err)
+	}
+
+	if len(data) == 0 {
+		t.Error("Recreated audit log should have entries")
+	}
+
+	t.Logf("✓ New audit log created when missing (FR-013)")
+}
+
+// T036: Integration test for unknown metadata version number, logs warning and attempts parsing
+// Tests forward compatibility with future metadata versions
+func TestIntegration_UnknownMetadataVersion(t *testing.T) {
+	testPassword := "UnknownVer-Pass@123"
+	vaultDir := filepath.Join(testDir, "unknown-version-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+
+	defer os.RemoveAll(vaultDir)
+
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create directory: %v", err)
+	}
+
+	// Create vault with audit
+	input := testPassword + "\n" + testPassword + "\n"
+	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd.Stdin = strings.NewReader(input)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Init failed: %v", err)
+	}
+
+	// Read metadata and change version to 99
+	metaPath := filepath.Join(vaultDir, "vault.meta")
+	data, err := os.ReadFile(metaPath)
+	if err != nil {
+		t.Fatalf("Failed to read metadata: %v", err)
+	}
+
+	// Replace version 1 with version 99
+	modifiedData := strings.Replace(string(data), `"version": 1`, `"version": 99`, 1)
+	if err := os.WriteFile(metaPath, []byte(modifiedData), 0644); err != nil {
+		t.Fatalf("Failed to write modified metadata: %v", err)
+	}
+
+	// Run command (should log warning but continue)
+	cmd = exec.Command(binaryPath, "--vault", vaultPath, "keychain", "status")
+	stdout.Reset()
+	stderr.Reset()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Command should work despite unknown version: %v", err)
+	}
+
+	// Verify warning message in stderr
+	stderrOutput := stderr.String()
+	if !strings.Contains(stderrOutput, "Warning") && !strings.Contains(stderrOutput, "version") {
+		t.Error("Expected warning about unknown metadata version")
+	}
+
+	t.Logf("✓ Unknown version handled gracefully (FR-017)")
+}

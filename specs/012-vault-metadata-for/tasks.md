@@ -114,19 +114,19 @@
 
 ### Tests for User Story 3 (TDD)
 
-- [ ] T032 [P] [US3] Write test for metadata deleted, fallback self-discovery succeeds in `test/vault_metadata_test.go`
-- [ ] T033 [P] [US3] Write test for metadata corrupted (invalid JSON), fallback succeeds in `test/vault_metadata_test.go`
-- [ ] T034 [P] [US3] Write test for audit.log exists but no metadata, best-effort logging in `test/vault_metadata_test.go`
-- [ ] T035 [P] [US3] Write test for metadata indicates audit but audit.log missing, creates new log in `test/vault_metadata_test.go`
-- [ ] T036 [P] [US3] Write test for unknown metadata version number, logs warning and attempts parsing in `test/vault_metadata_test.go`
+- [X] T032 [P] [US3] Write test for metadata deleted, fallback self-discovery succeeds in `test/vault_metadata_test.go`
+- [X] T033 [P] [US3] Write test for metadata corrupted (invalid JSON), fallback succeeds in `test/vault_metadata_test.go`
+- [X] T034 [P] [US3] Write test for audit.log exists but no metadata, best-effort logging in `test/vault_metadata_test.go`
+- [X] T035 [P] [US3] Write test for metadata indicates audit but audit.log missing, creates new log in `test/vault_metadata_test.go`
+- [X] T036 [P] [US3] Write test for unknown metadata version number, logs warning and attempts parsing in `test/vault_metadata_test.go`
 
 ### Implementation for User Story 3
 
-- [ ] T037 [US3] Add metadata corruption handling in LoadMetadata in `internal/vault/metadata.go` (return error, trigger fallback)
-- [ ] T038 [US3] Add unknown version warning in LoadMetadata in `internal/vault/metadata.go` (log warning, attempt best-effort parse per FR-017)
-- [ ] T039 [US3] Add graceful handling for missing audit.log in VaultService in `internal/vault/vault.go` (create new log, continue per FR-013)
-- [ ] T040 [US3] Add metadata file permission error handling in SaveMetadata in `internal/vault/metadata.go` (log warning, graceful degradation per FR-016)
-- [ ] T041 [US3] Run integration tests T032-T036 and verify all pass (TDD validation)
+- [X] T037 [US3] Add metadata corruption handling in LoadMetadata in `internal/vault/metadata.go` (return error, trigger fallback) [COMPLETED IN FOUNDATIONAL]
+- [X] T038 [US3] Add unknown version warning in LoadMetadata in `internal/vault/metadata.go` (log warning, attempt best-effort parse per FR-017) [COMPLETED IN FOUNDATIONAL]
+- [X] T039 [US3] Add graceful handling for missing audit.log in VaultService in `internal/vault/vault.go` (create new log, continue per FR-013) [COMPLETED IN FOUNDATIONAL]
+- [X] T040 [US3] Add metadata file permission error handling in SaveMetadata in `internal/vault/metadata.go` (log warning, graceful degradation per FR-016) [COMPLETED IN FOUNDATIONAL]
+- [X] T041 [US3] Run integration tests T032-T036 and verify all pass (TDD validation)
 
 **Checkpoint**: User Story 3 complete. All resilience scenarios handled gracefully. Zero crashes on corrupted metadata (SC-006).
 
