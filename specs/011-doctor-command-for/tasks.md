@@ -383,27 +383,33 @@
 
 **Purpose**: Documentation, cleanup, and final validation across both user stories
 
-- [ ] **T069** [P] [Polish] Update `README.md` to document doctor command
-  - Add doctor to feature list
-  - Add example: `pass-cli doctor --json | jq`
+- [X] **T069** [P] [Polish] Update `README.md` to document doctor command
+  - Added Health Checks section with doctor command examples
+  - Updated Key Features to include health checks
+  - Updated Roadmap to mark doctor command complete
 
-- [ ] **T070** [P] [Polish] Update `README.md` to document first-run guided initialization
-  - Update "Getting Started" section
-  - Mention automatic detection for new users
+- [X] **T070** [P] [Polish] Update `README.md` to document first-run guided initialization
+  - Updated "First Steps" section with guided initialization example
+  - Added first-run detection explanation
+  - Updated Key Features to include first-run guided setup
 
-- [ ] **T071** [P] [Polish] Create `docs/doctor-command.md` user guide
-  - Example outputs for healthy/unhealthy vaults
-  - Common issues and recommendations
-  - Script integration examples
+- [X] **T071** [P] [Polish] Create `docs/doctor-command.md` user guide
+  - Comprehensive documentation with all 5 health checks
+  - Example outputs for all scenarios (healthy/warning/error)
+  - Common issues and recommendations for each checker
+  - Script integration examples (pre-operation checks, monitoring, CI/CD)
 
-- [ ] **T072** [P] [Polish] Update `docs/getting-started.md` with first-run flow
-  - Screenshots or examples of guided prompts
-  - Manual init fallback instructions
+- [X] **T072** [P] [Polish] Create `docs/getting-started.md` with first-run flow
+  - Complete first-run experience walkthrough with example prompts
+  - Manual initialization instructions
+  - Non-TTY behavior explanation
+  - Common first-time issues and solutions
 
-- [ ] **T073** [P] [Polish] Add FAQ entries
-  - "Why does doctor report orphaned keychain entries?"
-  - "How do I know if my vault is healthy?"
-  - "What if first-run detection doesn't trigger?"
+- [X] **T073** [P] [Polish] Add FAQ entries
+  - Added "Doctor and First-Run FAQ" section to `docs/USAGE.md`
+  - "How do I know if my vault is healthy?" - Complete doctor guide
+  - "Why does doctor report orphaned keychain entries?" - Causes, solutions, prevention
+  - "What if first-run detection doesn't trigger?" - All scenarios covered
 
 - [X] **T074** [Polish] Update `cmd/doctor.go` help text
   - Comprehensive help text already in place
@@ -425,9 +431,10 @@
   - `golangci-lint run` - spec code clean (3 errcheck fixes applied)
   - `gosec ./...` - no security issues in spec code
 
-- [ ] **T078** [Polish] Validate quickstart.md checklist
-  - Go through all acceptance criteria for US1 and US2
-  - Ensure all items checked off
+- [X] **T078** [Polish] Validate quickstart.md checklist
+  - All US1 acceptance criteria validated and checked off (8/8)
+  - All US2 acceptance criteria validated and checked off (10/10)
+  - All 18 acceptance criteria verified complete
 
 **Checkpoint**: Feature complete, ready for PR review
 

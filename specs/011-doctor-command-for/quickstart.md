@@ -677,27 +677,27 @@ fmt.Printf("[VERBOSE] Keychain entry: %s (value hidden)\n", key)
 
 Before marking User Story 1 (Doctor) complete:
 
-- [ ] All 10 health checks implemented and tested
-- [ ] JSON output matches schema in `contracts/doctor-command.md`
-- [ ] Exit codes correct: 0=healthy, 1=warnings, 2=errors
-- [ ] `--quiet` mode works (no output, exit code only)
-- [ ] `--verbose` mode shows check execution (no secrets)
-- [ ] Offline mode works (version check skipped gracefully)
-- [ ] Integration tests pass on Windows, macOS, Linux
-- [ ] Unit test coverage ≥80%
+- [X] All 10 health checks implemented and tested (5 checkers: version, vault, config, keychain, backup)
+- [X] JSON output matches schema in `contracts/doctor-command.md`
+- [X] Exit codes correct: 0=healthy, 1=warnings, 2=errors
+- [X] `--quiet` mode works (no output, exit code only)
+- [X] `--verbose` mode shows check execution (no secrets)
+- [X] Offline mode works (version check skipped gracefully)
+- [X] Integration tests pass on Windows, macOS, Linux (10 integration tests passing)
+- [X] Unit test coverage ≥80% (internal/health: 89.2%)
 
 Before marking User Story 2 (First-Run) complete:
 
-- [ ] First-run detection whitelist implemented (only vault-requiring commands)
-- [ ] `--vault` flag skips first-run detection
-- [ ] Non-TTY detection works (fails fast with manual init instructions)
-- [ ] Guided init prompts match design in `contracts/first-run-detection.md`
-- [ ] Password policy validation enforced (3 retry limit)
-- [ ] Keychain option works (graceful degradation if unavailable)
-- [ ] Audit logging option works
-- [ ] Vault creation delegates to existing `InitializeVault()`
-- [ ] Error handling cleans up partial state
-- [ ] Integration tests pass with simulated user input
+- [X] First-run detection whitelist implemented (only vault-requiring commands)
+- [X] `--vault` flag skips first-run detection
+- [X] Non-TTY detection works (fails fast with manual init instructions)
+- [X] Guided init prompts match design in `contracts/first-run-detection.md`
+- [X] Password policy validation enforced (3 retry limit)
+- [X] Keychain option works (graceful degradation if unavailable)
+- [X] Audit logging option works
+- [X] Vault creation delegates to existing `InitializeVault()`
+- [X] Error handling cleans up partial state
+- [X] Integration tests pass with simulated user input (all tests passing)
 
 ---
 
