@@ -134,7 +134,7 @@ description: "Task list for keychain lifecycle management feature implementation
 
 ### Implementation for User Story 3
 
-- [ ] T030 [US3] Implement `pass-cli vault remove <path>` command at `cmd/vault_remove.go`:
+- [X] T030 [US3] Implement `pass-cli vault remove <path>` command at `cmd/vault_remove.go`:
   - Parse vault path argument (required, contracts/commands.md line 211)
   - Check if confirmation flag (`--yes` or `--force`) is set (contracts/commands.md line 217-221)
   - If not set → Prompt for confirmation (y/n) (contracts/commands.md line 227)
@@ -147,10 +147,10 @@ description: "Task list for keychain lifecycle management feature implementation
   - If keychain unavailable → Continue (not an error, contracts/commands.md line 235)
   - If entry not found → Continue (not an error per FR-012, contracts/commands.md line 235)
   - Report results with appropriate warnings for partial success (contracts/commands.md lines 238-272)
-- [ ] T031 [US3] Add `--yes` and `--force` flags as aliases for confirmation bypass (FR-006, contracts/commands.md line 217-221)
-- [ ] T032 [US3] Implement confirmation prompt logic with y/n validation (contracts/commands.md lines 242-247)
-- [ ] T033 [US3] Handle partial failure scenarios - file missing but keychain exists (FR-012, contracts/commands.md lines 250-258)
-- [ ] T034 [US3] Add exit code mapping: 0 for success, 1 for user error (cancel), 2 for system error (contracts/commands.md lines 296-302)
+- [X] T031 [US3] Add `--yes` and `--force` flags as aliases for confirmation bypass (FR-006, contracts/commands.md line 217-221)
+- [X] T032 [US3] Implement confirmation prompt logic with y/n validation (contracts/commands.md lines 242-247)
+- [X] T033 [US3] Handle partial failure scenarios - file missing but keychain exists (FR-012, contracts/commands.md lines 250-258)
+- [X] T034 [US3] Add exit code mapping: 0 for success, 1 for user error (cancel), 2 for system error (contracts/commands.md lines 296-302)
 
 **Checkpoint**: User Story 3 complete - Users can now cleanly remove vaults without orphaned keychain entries
 
