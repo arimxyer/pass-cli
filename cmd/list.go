@@ -179,6 +179,13 @@ func filterCredentialsByLocation(metadata []vault.CredentialMetadata, location s
 		return nil, fmt.Errorf("failed to resolve path: %w", err)
 	}
 
+	// Resolve symlinks to get canonical path (fixes macOS /var -> /private/var symlink issue)
+	canonicalLocation, err := filepath.EvalSymlinks(absLocation)
+	if err != nil {
+		// If symlink resolution fails (e.g., path doesn't exist), use absolute path
+		canonicalLocation = absLocation
+	}
+
 	filtered := make([]vault.CredentialMetadata, 0)
 
 	for _, meta := range metadata {
@@ -191,17 +198,24 @@ func filterCredentialsByLocation(metadata []vault.CredentialMetadata, location s
 				continue
 			}
 
+			// Resolve symlinks to get canonical path
+			canonicalCredLocation, err := filepath.EvalSymlinks(absCredLocation)
+			if err != nil {
+				// If symlink resolution fails, use absolute path
+				canonicalCredLocation = absCredLocation
+			}
+
 			matched := false
 
 			if recursive {
 				// T047: Recursive mode - check if credential location is under the specified location
 				// Use filepath.HasPrefix logic (check if credLocation starts with location)
-				if absCredLocation == absLocation || strings.HasPrefix(absCredLocation, absLocation+string(filepath.Separator)) {
+				if canonicalCredLocation == canonicalLocation || strings.HasPrefix(canonicalCredLocation, canonicalLocation+string(filepath.Separator)) {
 					matched = true
 				}
 			} else {
 				// T046: Exact match mode - credential location must exactly match
-				if absCredLocation == absLocation {
+				if canonicalCredLocation == canonicalLocation {
 					matched = true
 				}
 			}

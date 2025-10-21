@@ -611,10 +611,17 @@ func (v *VaultService) RecordFieldAccess(service, field string) error {
 		return ErrCredentialNotFound
 	}
 
-	// Get current working directory
+	// Get current working directory and resolve symlinks for canonical path
+	// (fixes macOS /var -> /private/var symlink matching issue)
 	location, err := os.Getwd()
 	if err != nil {
 		location = "unknown"
+	} else {
+		// Resolve symlinks to canonical path
+		if canonical, err := filepath.EvalSymlinks(location); err == nil {
+			location = canonical
+		}
+		// If symlink resolution fails, keep the original path
 	}
 
 	// Try to get git repo info
