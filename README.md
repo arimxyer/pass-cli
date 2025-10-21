@@ -359,25 +359,98 @@ steps:
 
 ## 📊 Usage Tracking
 
-Pass-CLI automatically tracks where credentials are accessed based on your current working directory:
+Pass-CLI automatically tracks where and when credentials are accessed. View this data through three powerful commands:
+
+### View Detailed Credential Usage
+
+See all locations where a credential has been accessed:
 
 ```bash
-# Access from different directories
-cd ~/project-a
-pass-cli get database
-
-cd ~/project-b
-pass-cli get database
-
-# View usage information with list command
-pass-cli list --unused --days 30
+# View usage history for a credential
+pass-cli usage github
 ```
 
-This helps you:
-- Identify which projects use which credentials
-- Track credential usage patterns
-- Audit credential access
+**Output**:
+```
+Location                              Repository      Last Used        Count   Fields
+────────────────────────────────────────────────────────────────────────────────────
+/home/user/projects/web-app          my-web-app      2 hours ago      7       password:5, username:2
+/home/user/projects/api               my-api          5 days ago       3       password:3
+```
+
+**JSON output for scripting**:
+```bash
+# Export usage data
+pass-cli usage github --format json
+
+# Count locations
+pass-cli usage github --format json | jq '.usage_locations | length'
+```
+
+### Group Credentials by Project
+
+Organize credentials by git repository context:
+
+```bash
+# Group all credentials by repository
+pass-cli list --by-project
+```
+
+**Output**:
+```
+my-web-app (3 credentials):
+  github
+  aws-dev
+  postgres
+
+my-api (2 credentials):
+  heroku
+  redis
+
+Ungrouped (1 credential):
+  local-db
+```
+
+### Filter Credentials by Location
+
+Find credentials used in a specific directory:
+
+```bash
+# Show credentials from current directory
+pass-cli list --location .
+
+# Show credentials from specific path
+pass-cli list --location /home/user/projects/web-app
+
+# Include subdirectories
+pass-cli list --location /home/user/projects --recursive
+```
+
+### Combined Workflows
+
+```bash
+# Combine location filter with project grouping
+pass-cli list --location ~/work --by-project --recursive
+
+# Find unused credentials
+pass-cli list --unused --days 30
+
+# Script-friendly output
+pass-cli list --location . --format simple | wc -l
+```
+
+**What gets tracked**:
+- Location (absolute path where credential accessed)
+- Git repository name (if accessed from git repo)
+- Access timestamps and counts
+- Field-level usage (which fields accessed)
+
+**Use cases**:
+- Audit credential usage before rotation
+- Discover project-specific credentials
+- Track credential access patterns
 - Find unused credentials for cleanup
+- Understand credential organization across projects
 
 ## 🛠️ Advanced Usage
 

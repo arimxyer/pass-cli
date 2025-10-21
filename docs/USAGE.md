@@ -1096,29 +1096,144 @@ Press `q` or `Ctrl+C` at any time to quit the TUI and return to shell.
 
 ## Usage Tracking
 
-Pass-CLI automatically tracks where credentials are accessed based on your current working directory.
+Pass-CLI automatically tracks where and when credentials are accessed, enabling powerful organization and discovery features.
 
 ### How It Works
+
+Usage data is recorded automatically whenever you access a credential:
 
 ```bash
 # Access from project directory
 cd ~/projects/my-app
 pass-cli get testservice
 
-# Usage tracking is automatic based on current directory
+# Usage tracking captures:
+# - Location (absolute path to current directory)
+# - Git repository (if in a git repo)
+# - Timestamp and access count
+# - Which fields were accessed
+```
+
+### Commands
+
+#### View Detailed Usage: `pass-cli usage <service>`
+
+See all locations where a credential has been accessed:
+
+```bash
+# View usage history
+pass-cli usage github
+
+# JSON output for scripting
+pass-cli usage github --format json
+
+# Limit results
+pass-cli usage github --limit 10
+```
+
+**Output shows**:
+- Location paths where credential was accessed
+- Git repository name (if applicable)
+- Last access timestamp from each location
+- Access count from each location
+- Field-level usage (which fields accessed)
+
+#### Group by Project: `pass-cli list --by-project`
+
+Organize credentials by git repository context:
+
+```bash
+# Group all credentials by repository
+pass-cli list --by-project
+
+# JSON output
+pass-cli list --by-project --format json
+
+# Simple format (one line per project)
+pass-cli list --by-project --format simple
+```
+
+**Output shows**:
+- Credentials grouped by git repository
+- Ungrouped section for non-git-tracked credentials
+
+#### Filter by Location: `pass-cli list --location <path>`
+
+Find credentials used in a specific directory:
+
+```bash
+# Show credentials from current directory
+pass-cli list --location .
+
+# Specific path
+pass-cli list --location /home/user/projects/web-app
+
+# Include subdirectories
+pass-cli list --location /home/user/projects --recursive
+
+# Combine with project grouping
+pass-cli list --location ~/work --by-project --recursive
+```
+
+### Organizing Credentials by Context
+
+Pass-CLI uses a **single-vault model** where one vault contains all your credentials, organized by usage context rather than separate vaults per project.
+
+**Benefits**:
+- **Discover credentials by location**: See which credentials are used in each project
+- **Cross-project visibility**: Understand credential reuse across projects
+- **Machine-independent organization**: `--by-project` groups by git repo name (works across different machines)
+- **Location-aware access**: `--location` filters by directory path (machine-specific)
+
+**Example workflow**:
+
+```bash
+# Start working on a project
+cd ~/projects/web-app
+
+# Discover which credentials are used here
+pass-cli list --location .
+
+# Or see project overview
+pass-cli list --by-project
+
+# View detailed usage for a specific credential
+pass-cli usage github
 ```
 
 ### Use Cases
 
-- **Audit**: See which projects use which credentials
-- **Cleanup**: Identify unused credentials
-- **Documentation**: Auto-document credential dependencies
+- **Credential Auditing**: Before rotating credentials, see all locations where they're used
+- **Project Onboarding**: New team member discovers project credentials via `--location`
+- **Cross-Project Analysis**: Identify shared credentials with `--by-project`
+- **Cleanup**: Find unused credentials with `--unused --days 90`
+- **Script Integration**: JSON output for automated credential analysis
 
-### Viewing Usage
+### Examples
 
+**Audit before rotation**:
 ```bash
-# List unused credentials
-pass-cli list --unused --days 30
+# See all locations using aws-prod credential
+pass-cli usage aws-prod
+
+# Export for team review
+pass-cli usage aws-prod --format json > aws-audit.json
+```
+
+**Discover project credentials**:
+```bash
+# Which credentials does this project use?
+cd ~/projects/new-project
+pass-cli list --location . --recursive
+```
+
+**Multi-project workflow**:
+```bash
+# Overview of all projects and their credentials
+pass-cli list --by-project
+
+# Filter to work directory only
+pass-cli list --location ~/work --by-project --recursive
 ```
 
 ## Best Practices
@@ -1197,6 +1312,92 @@ pass-cli update testservice --password "$NEW_PWD"
 
 # Use new password
 echo "$NEW_PWD" | some-service-update-command
+```
+
+## Troubleshooting
+
+### Usage Tracking FAQ
+
+#### Why is my usage data empty?
+
+**Problem**: Running `pass-cli usage <service>` shows "No usage history available"
+
+**Causes**:
+- Credential was added but never accessed via `get` command
+- Credential was only accessed before usage tracking was implemented
+- Usage data cleared or vault migrated
+
+**Solution**:
+```bash
+# Access the credential once to generate usage data
+pass-cli get <service>
+
+# Usage data will now be available
+pass-cli usage <service>
+```
+
+#### Why doesn't `--location` show any credentials?
+
+**Problem**: Running `pass-cli list --location <path>` returns no results
+
+**Causes**:
+- Path doesn't match exactly (unless using `--recursive`)
+- Credentials haven't been accessed from that location
+- Path is specified incorrectly (relative vs. absolute)
+
+**Solutions**:
+```bash
+# Use current directory
+pass-cli list --location .
+
+# Include subdirectories
+pass-cli list --location /path/to/project --recursive
+
+# Check what locations exist
+pass-cli list --by-project
+pass-cli usage <service>
+```
+
+#### Why do I see different paths on different machines?
+
+**Expected Behavior**: Location paths are absolute and machine-specific (e.g., `/home/user/project` on Linux, `C:\Users\user\project` on Windows)
+
+**Solution**: Use `--by-project` for machine-independent view (groups by git repository name):
+```bash
+# Machine-independent view
+pass-cli list --by-project
+```
+
+#### What does "Ungrouped" mean in `--by-project` output?
+
+**Explanation**: Credentials accessed from non-git directories are grouped under "Ungrouped"
+
+**Solution**:
+- Access credentials from within git repositories to enable project grouping
+- Or continue using location-based filtering with `--location`
+
+#### How do I clean up old usage data?
+
+**Problem**: Want to remove usage data for deleted projects or old locations
+
+**Current Limitation**: Usage data is append-only and cannot be selectively deleted
+
+**Workaround**:
+- Use `--location` to filter to current directories
+- Historical data doesn't affect performance
+
+#### Why does usage show deleted directories?
+
+**Table Format**: Deleted paths are automatically hidden for clean output
+
+**JSON Format**: All paths shown with `path_exists: false` field for complete data
+
+```bash
+# Table format (hides deleted)
+pass-cli usage <service>
+
+# JSON format (shows all with path_exists field)
+pass-cli usage <service> --format json
 ```
 
 ## Getting Help

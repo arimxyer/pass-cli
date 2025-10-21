@@ -148,19 +148,19 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T053 [P] Add usage examples to README.md showcasing all three user stories
-- [ ] T054 [P] Validate quickstart.md examples work correctly (run all commands from quickstart)
-- [ ] T055 [P] Performance validation: Test `usage` command with 50+ locations (should be < 3 seconds per SC-001)
-- [ ] T056 [P] Performance validation: Test `list --by-project` with 100+ credentials (should be < 2 seconds per SC-003)
-- [ ] T057 [P] Performance validation: Test `list --location` with 100+ credentials (should be < 2 seconds per SC-004)
-- [ ] T058 [P] Security audit: Verify no credential values displayed (only metadata) across all commands
-- [ ] T059 [P] Edge case testing: Deleted directories, renamed repositories, network paths, 50+ locations
-- [ ] T060 Code cleanup: Remove debug logging, optimize sorting/filtering logic
-- [ ] T061 Final integration test: Verify all three user stories work together without conflicts
-- [ ] T062 Documentation: Update user guide with "Organizing Credentials by Context" section
-- [ ] T063 [P] Update `list` command help text to document `--by-project` and `--location` flags (per spec.md Documentation Updates)
-- [ ] T064 [P] Add user guide section "Organizing Credentials by Context" explaining single-vault model (per spec.md Documentation Updates)
-- [ ] T065 [P] Add troubleshooting FAQ section for common usage tracking questions: "Why is my usage data empty?" (per spec.md Documentation Updates)
+- [x] T053 [P] Add usage examples to README.md showcasing all three user stories
+- [x] T054 [P] Validate quickstart.md examples work correctly (run all commands from quickstart)
+- [x] T055 [P] Performance validation: Test `usage` command with 50+ locations (should be < 3 seconds per SC-001)
+- [x] T056 [P] Performance validation: Test `list --by-project` with 100+ credentials (should be < 2 seconds per SC-003)
+- [x] T057 [P] Performance validation: Test `list --location` with 100+ credentials (should be < 2 seconds per SC-004)
+- [x] T058 [P] Security audit: Verify no credential values displayed (only metadata) across all commands
+- [x] T059 [P] Edge case testing: Deleted directories, renamed repositories, network paths, 50+ locations
+- [x] T060 Code cleanup: Remove debug logging, optimize sorting/filtering logic
+- [x] T061 Final integration test: Verify all three user stories work together without conflicts
+- [x] T062 Documentation: Update user guide with "Organizing Credentials by Context" section
+- [x] T063 [P] Update `list` command help text to document `--by-project` and `--location` flags (per spec.md Documentation Updates)
+- [x] T064 [P] Add user guide section "Organizing Credentials by Context" explaining single-vault model (per spec.md Documentation Updates)
+- [x] T065 [P] Add troubleshooting FAQ section for common usage tracking questions: "Why is my usage data empty?" (per spec.md Documentation Updates)
 
 ---
 
