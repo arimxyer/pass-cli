@@ -34,19 +34,19 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T001 [P] [FOUNDATION] Write unit tests for LoadMetadata in `internal/vault/metadata_test.go`
-- [ ] T002 [P] [FOUNDATION] Write unit tests for SaveMetadata in `internal/vault/metadata_test.go`
-- [ ] T003 [P] [FOUNDATION] Write unit tests for DeleteMetadata in `internal/vault/metadata_test.go`
-- [ ] T004 [P] [FOUNDATION] Write unit tests for MetadataPath in `internal/vault/metadata_test.go`
-- [ ] T004a [P] [FOUNDATION] Write benchmark tests for metadata operations in `internal/vault/metadata_test.go` (BenchmarkLoadMetadata, BenchmarkSaveMetadata, BenchmarkDeleteMetadata for SC-003 validation)
-- [ ] T005 [FOUNDATION] Implement VaultMetadata struct in `internal/vault/metadata.go` (TDD: tests from T001-T004 should fail)
-- [ ] T006 [FOUNDATION] Implement LoadMetadata function in `internal/vault/metadata.go` (make T001 tests pass)
-- [ ] T007 [FOUNDATION] Implement SaveMetadata function in `internal/vault/metadata.go` (make T002 tests pass, use temp+rename pattern)
-- [ ] T008 [FOUNDATION] Implement DeleteMetadata function in `internal/vault/metadata.go` (make T003 tests pass, idempotent)
-- [ ] T009 [FOUNDATION] Implement MetadataPath helper in `internal/vault/metadata.go` (make T004 tests pass)
-- [ ] T010 [FOUNDATION] Update VaultService constructor to load metadata in `internal/vault/vault.go` (lines ~50-80, add metadata loading logic)
-- [ ] T011 [FOUNDATION] Implement fallback self-discovery logic in VaultService constructor in `internal/vault/vault.go` (after metadata load attempt)
-- [ ] T011a [FOUNDATION] Verify event type constants in `internal/security/audit.go` (confirm "keychain_status" and "vault_remove" event types exist, add if missing)
+- [X] T001 [P] [FOUNDATION] Write unit tests for LoadMetadata in `internal/vault/metadata_test.go`
+- [X] T002 [P] [FOUNDATION] Write unit tests for SaveMetadata in `internal/vault/metadata_test.go`
+- [X] T003 [P] [FOUNDATION] Write unit tests for DeleteMetadata in `internal/vault/metadata_test.go`
+- [X] T004 [P] [FOUNDATION] Write unit tests for MetadataPath in `internal/vault/metadata_test.go`
+- [X] T004a [P] [FOUNDATION] Write benchmark tests for metadata operations in `internal/vault/metadata_test.go` (BenchmarkLoadMetadata, BenchmarkSaveMetadata, BenchmarkDeleteMetadata for SC-003 validation)
+- [X] T005 [FOUNDATION] Implement VaultMetadata struct in `internal/vault/metadata.go` (TDD: tests from T001-T004 should fail)
+- [X] T006 [FOUNDATION] Implement LoadMetadata function in `internal/vault/metadata.go` (make T001 tests pass)
+- [X] T007 [FOUNDATION] Implement SaveMetadata function in `internal/vault/metadata.go` (make T002 tests pass, use temp+rename pattern)
+- [X] T008 [FOUNDATION] Implement DeleteMetadata function in `internal/vault/metadata.go` (make T003 tests pass, idempotent)
+- [X] T009 [FOUNDATION] Implement MetadataPath helper in `internal/vault/metadata.go` (make T004 tests pass)
+- [X] T010 [FOUNDATION] Update VaultService constructor to load metadata in `internal/vault/vault.go` (lines ~50-80, add metadata loading logic)
+- [X] T011 [FOUNDATION] Implement fallback self-discovery logic in VaultService constructor in `internal/vault/vault.go` (after metadata load attempt)
+- [X] T011a [FOUNDATION] Verify event type constants in `internal/security/audit.go` (confirm "keychain_status" and "vault_remove" event types exist, add if missing)
 
 **Checkpoint**: Foundation ready - metadata persistence works, VaultService loads metadata on initialization. All foundational unit tests pass.
 

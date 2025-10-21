@@ -116,7 +116,7 @@ func New(vaultPath string) (*VaultService, error) {
 		return nil, fmt.Errorf("failed to create storage service: %w", err)
 	}
 
-	return &VaultService{
+	v := &VaultService{
 		vaultPath:       vaultPath,
 		cryptoService:   cryptoService,
 		storageService:  storageService,
@@ -124,7 +124,36 @@ func New(vaultPath string) (*VaultService, error) {
 		unlocked:        false,
 		auditEnabled:    false,      // T066: Default disabled per FR-025
 		rateLimiter:     security.NewValidationRateLimiter(), // T051a: Initialize rate limiter
-	}, nil
+	}
+
+	// T010: Load metadata file (if exists) to enable audit logging before vault unlock
+	meta, err := LoadMetadata(vaultPath)
+	if err != nil {
+		// Metadata exists but corrupted - log warning and try fallback (T011)
+		fmt.Fprintf(os.Stderr, "Warning: Failed to load metadata: %v\n", err)
+		meta = nil
+	}
+
+	// Initialize audit from metadata
+	if meta != nil && meta.AuditEnabled && meta.AuditLogPath != "" {
+		if err := v.EnableAudit(meta.AuditLogPath, meta.VaultID); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to enable audit from metadata: %v\n", err)
+		}
+	}
+
+	// T011: Fallback self-discovery if metadata missing/failed
+	if meta == nil {
+		auditLogPath := filepath.Join(filepath.Dir(vaultPath), "audit.log")
+		if _, err := os.Stat(auditLogPath); err == nil {
+			// audit.log exists, enable best-effort audit
+			if err := v.EnableAudit(auditLogPath, vaultPath); err != nil {
+				// Best-effort failed, continue without audit (non-fatal)
+				fmt.Fprintf(os.Stderr, "Warning: Self-discovery audit init failed: %v\n", err)
+			}
+		}
+	}
+
+	return v, nil
 }
 
 // T066: EnableAudit enables audit logging for this vault
