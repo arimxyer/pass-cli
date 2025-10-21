@@ -358,7 +358,7 @@ pass-cli verify-audit
 ❌ **TUI Display Security (Interactive Mode)**
 - Shoulder surfing: Credentials visible on screen in TUI mode
 - Screen recording: TUI displays service names and details
-- Password visibility toggle: `Ctrl+H` shows plaintext passwords
+- Password visibility toggle: `Ctrl+P` shows plaintext passwords
 - Shared terminals: Other users may see credential list
 
 ## Security Guarantees
@@ -474,7 +474,7 @@ pass-cli verify-audit
    - Consider using CLI mode for sensitive environments
 
 2. **Password Visibility Toggle**
-   - `Ctrl+H` in add/edit forms shows passwords in plaintext
+   - `Ctrl+P` in add/edit forms shows passwords in plaintext
    - **Only use in private, trusted environments**
    - Password resets to masked when form closes
    - Be cautious in:

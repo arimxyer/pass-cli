@@ -282,7 +282,7 @@ func (af *AddForm) wrapInFrame() {
 
 	// Create hints footer as a TextView with wrapping enabled
 	// Match statusbar style: [yellow] for keys, [white] for separators
-	hintsText := "[yellow]Tab[white]/[yellow]Shift+Tab[-]:Navigate  [yellow]Ctrl+S[-]:Add  [yellow]Ctrl+H[-]:Toggle password  [yellow]Esc[-]:Cancel"
+	hintsText := "[yellow]Tab[white]/[yellow]Shift+Tab[-]:Navigate  [yellow]Ctrl+S[-]:Add  [yellow]Ctrl+P[-]:Toggle password  [yellow]Esc[-]:Cancel"
 	hints := tview.NewTextView().
 		SetText(hintsText).
 		SetTextAlign(tview.AlignCenter).
@@ -316,15 +316,10 @@ func (af *AddForm) setupKeyboardShortcuts() {
 			af.onAddPressed()
 			return nil
 
-		case tcell.KeyCtrlH:
-			// Only toggle if Ctrl modifier is actually pressed
-			// Backspace sends KeyCtrlH but without ModCtrl set
-			if event.Modifiers()&tcell.ModCtrl != 0 {
-				af.togglePasswordVisibility()
-				return nil
-			}
-			// Regular backspace - pass through to allow deletion
-			return event
+		case tcell.KeyCtrlP:
+			// Ctrl+P for password visibility toggle
+			af.togglePasswordVisibility()
+			return nil
 
 		case tcell.KeyEscape:
 			// Handle Escape to close form
@@ -698,7 +693,7 @@ func (ef *EditForm) wrapInFrame() {
 
 	// Create hints footer as a TextView with wrapping enabled
 	// Match statusbar style: [yellow] for keys, [white] for separators
-	hintsText := "[yellow]Tab[white]/[yellow]Shift+Tab[-]:Navigate  [yellow]Ctrl+S[-]:Save  [yellow]Ctrl+H[-]:Toggle password  [yellow]Esc[-]:Cancel"
+	hintsText := "[yellow]Tab[white]/[yellow]Shift+Tab[-]:Navigate  [yellow]Ctrl+S[-]:Save  [yellow]Ctrl+P[-]:Toggle password  [yellow]Esc[-]:Cancel"
 	hints := tview.NewTextView().
 		SetText(hintsText).
 		SetTextAlign(tview.AlignCenter).
@@ -732,15 +727,10 @@ func (ef *EditForm) setupKeyboardShortcuts() {
 			ef.onSavePressed()
 			return nil
 
-		case tcell.KeyCtrlH:
-			// Only toggle if Ctrl modifier is actually pressed
-			// Backspace sends KeyCtrlH but without ModCtrl set
-			if event.Modifiers()&tcell.ModCtrl != 0 {
-				ef.togglePasswordVisibility()
-				return nil
-			}
-			// Regular backspace - pass through to allow deletion
-			return event
+		case tcell.KeyCtrlP:
+			// Ctrl+P for password visibility toggle
+			ef.togglePasswordVisibility()
+			return nil
 
 		case tcell.KeyEscape:
 			// Handle Escape to close form

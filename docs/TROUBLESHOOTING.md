@@ -511,7 +511,7 @@ Set-Acl "$env:USERPROFILE\.pass-cli\vault.enc" $acl
 
 ### Keyboard Shortcuts Not Working
 
-**Symptom**: Pressing `n`, `/`, `Ctrl+H` or other shortcuts does nothing
+**Symptom**: Pressing `n`, `/`, `Ctrl+P` or other shortcuts does nothing
 
 **Cause**: Terminal emulator intercepts keys or conflicts with system shortcuts
 
@@ -629,11 +629,11 @@ Set-Acl "$env:USERPROFILE\.pass-cli\vault.enc" $acl
 
 ---
 
-### Ctrl+H Password Toggle Not Working
+### Ctrl+P Password Toggle Not Working
 
-**Symptom**: Pressing `Ctrl+H` in add/edit forms doesn't toggle password visibility
+**Symptom**: Pressing `Ctrl+P` in add/edit forms doesn't toggle password visibility
 
-**Cause**: Not in form context, or terminal intercepts `Ctrl+H` as backspace
+**Cause**: Not in form context, or terminal intercepts `Ctrl+P` as backspace
 
 **Solutions**:
 
@@ -646,13 +646,13 @@ Set-Acl "$env:USERPROFILE\.pass-cli\vault.enc" $acl
    press Tab until focused on Password field
 
    # Toggle visibility
-   press Ctrl+H  # Should show/hide password
+   press Ctrl+P  # Should show/hide password
    ```
 
 2. **Terminal backspace mapping**
-   - Some terminals map `Ctrl+H` to backspace
+   - Some terminals map `Ctrl+P` to backspace
    - Try pressing `Backspace` first to test
-   - If `Ctrl+H` deletes character, terminal is intercepting
+   - If `Ctrl+P` deletes character, terminal is intercepting
 
 3. **Alternative verification method**
    ```bash

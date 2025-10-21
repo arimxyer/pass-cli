@@ -812,7 +812,7 @@ keybindings:
 
 **Hardcoded Shortcuts** (cannot be changed):
 - Navigation: Tab, Shift+Tab, ↑/↓, Enter, Esc
-- Forms: Ctrl+H, Ctrl+S, Ctrl+C
+- Forms: Ctrl+P, Ctrl+S, Ctrl+C
 - Detail view: p, c
 
 **Validation**:
@@ -903,7 +903,7 @@ Both modes access the same encrypted vault file (`~/.pass-cli/vault.enc`).
 | Shortcut | Action | Context |
 |----------|--------|---------|
 | `Ctrl+S` | Save form | Add/edit forms |
-| `Ctrl+H` | Toggle password visibility | Add/edit forms |
+| `Ctrl+P` | Toggle password visibility | Add/edit forms |
 | `Tab` | Next field | Forms |
 | `Shift+Tab` | Previous field | Forms |
 | `Esc` | Cancel / Close form | Forms |
@@ -917,7 +917,7 @@ Both modes access the same encrypted vault file (`~/.pass-cli/vault.enc`).
 | `Esc` | Close modal / Cancel search | Modals, search mode |
 | `Ctrl+C` | Quit application | Any time |
 
-**Note**: Configurable shortcuts (a, e, d, i, s, ?, /, q) can be customized via `~/.config/pass-cli/config.yml`. See [Configuration](#configuration) section for keybinding customization details. Navigation shortcuts (Tab, arrows, Enter, Esc, Ctrl+H, Ctrl+S, Ctrl+C) are hardcoded and cannot be changed.
+**Note**: Configurable shortcuts (a, e, d, i, s, ?, /, q) can be customized via `~/.config/pass-cli/config.yml`. See [Configuration](#configuration) section for keybinding customization details. Navigation shortcuts (Tab, arrows, Enter, Esc, Ctrl+P, Ctrl+S, Ctrl+C) are hardcoded and cannot be changed.
 
 ### Search & Filter
 
@@ -951,7 +951,7 @@ Esc         # Exits search mode, shows all credentials
 
 ### Password Visibility Toggle
 
-In add and edit forms, press `Ctrl+H` to toggle between masked and visible passwords.
+In add and edit forms, press `Ctrl+P` to toggle between masked and visible passwords.
 
 **Use Cases**:
 - Verify password spelling before saving
@@ -960,8 +960,8 @@ In add and edit forms, press `Ctrl+H` to toggle between masked and visible passw
 
 **Behavior**:
 - **Default state**: Password masked (asterisks: `******`)
-- **After `Ctrl+H`**: Password visible (plaintext), label shows `[VISIBLE]`
-- **After `Ctrl+H` again**: Password masked again
+- **After `Ctrl+P`**: Password visible (plaintext), label shows `[VISIBLE]`
+- **After `Ctrl+P` again**: Password masked again
 - **On form close**: Visibility resets to masked (secure default)
 - **Cursor position**: Preserved when toggling (no text loss)
 
@@ -970,16 +970,16 @@ In add and edit forms, press `Ctrl+H` to toggle between masked and visible passw
 # In add form
 n                              # Open new credential form
 Type: SecureP@ssw0rd!         # Password shows as ******
-Ctrl+H                         # Password shows: SecureP@ssw0rd!
-Ctrl+H                         # Password shows as ******
+Ctrl+P                         # Password shows: SecureP@ssw0rd!
+Ctrl+P                         # Password shows as ******
 Ctrl+S                         # Save (password saved correctly)
 
 # In edit form
 e                              # Open edit form for selected credential
 Focus password field           # Existing password loads (masked)
-Ctrl+H                         # View current password
+Ctrl+P                         # View current password
 Type new password              # Update password
-Ctrl+H                         # Mask again to verify asterisks
+Ctrl+P                         # Mask again to verify asterisks
 Ctrl+S                         # Save changes
 ```
 
@@ -1073,7 +1073,7 @@ Press `q` or `Ctrl+C` at any time to quit the TUI and return to shell.
 1. **Use `/` search for large vaults** - Faster than scrolling through 50+ credentials
 2. **Press `?` to see all shortcuts** - Built-in help always available
 3. **Toggle detail panel (`i`) on narrow terminals** - Maximize table visibility
-4. **Use `Ctrl+H` to verify passwords** - Catch typos before saving
+4. **Use `Ctrl+P` to verify passwords** - Catch typos before saving
 5. **Check usage locations before deleting** - Understand credential dependencies
 6. **Press `c` to copy passwords** - Clipboard auto-clears after 30 seconds
 
@@ -1082,7 +1082,7 @@ Press `q` or `Ctrl+C` at any time to quit the TUI and return to shell.
 **Problem**: TUI doesn't launch, shows "command not found"
 **Solution**: Ensure you're running `pass-cli` with no arguments. If you pass any argument (even invalid), it attempts CLI mode.
 
-**Problem**: Ctrl+H does nothing in forms
+**Problem**: Ctrl+P does nothing in forms
 **Solution**: Ensure you're in add or edit form, not the main view. Password toggle only works in forms.
 
 **Problem**: Search key `/` types "/" character instead of activating search

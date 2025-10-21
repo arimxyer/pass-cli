@@ -112,12 +112,12 @@ func TestAddFormPasswordVisibilityToggle(t *testing.T) {
 
 	// Test toggle to visible - this will FAIL until implementation
 	t.Run("ToggleToVisible", func(t *testing.T) {
-		// Simulate Ctrl+H key event with Ctrl modifier
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		// Simulate Ctrl+P key event with Ctrl modifier
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 		result := form.GetInputCapture()(event)
 
 		if result != nil {
-			t.Error("Expected Ctrl+H to be consumed (return nil)")
+			t.Error("Expected Ctrl+P to be consumed (return nil)")
 		}
 
 		expectedLabel := "Password [VISIBLE]"
@@ -128,8 +128,8 @@ func TestAddFormPasswordVisibilityToggle(t *testing.T) {
 
 	// Test toggle back to masked
 	t.Run("ToggleBackToMasked", func(t *testing.T) {
-		// Simulate Ctrl+H again with Ctrl modifier
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		// Simulate Ctrl+P again with Ctrl modifier
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 		form.GetInputCapture()(event)
 
 		if passwordField.GetLabel() != "Password" {
@@ -138,19 +138,19 @@ func TestAddFormPasswordVisibilityToggle(t *testing.T) {
 	})
 }
 
-// TestAddFormCtrlHShortcut verifies Ctrl+H key event is consumed
-// T005: Unit test for Ctrl+H keyboard shortcut handling
-func TestAddFormCtrlHShortcut(t *testing.T) {
+// TestAddFormCtrlPShortcut verifies Ctrl+P key event is consumed
+// T005: Unit test for Ctrl+P keyboard shortcut handling
+func TestAddFormCtrlPShortcut(t *testing.T) {
 	mockVault := newMockVaultServiceForForms()
 	appState := models.NewAppState(mockVault)
 	form := NewAddForm(appState)
 
-	t.Run("CtrlHConsumed", func(t *testing.T) {
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+	t.Run("CtrlPConsumed", func(t *testing.T) {
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 		result := form.GetInputCapture()(event)
 
 		if result != nil {
-			t.Errorf("Expected Ctrl+H to be consumed (return nil), but event was passed through")
+			t.Errorf("Expected Ctrl+P to be consumed (return nil), but event was passed through")
 		}
 	})
 
@@ -182,7 +182,7 @@ func TestAddFormCursorPreservation(t *testing.T) {
 		originalText := passwordField.GetText()
 
 		// Toggle to visible with Ctrl modifier
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 		form.GetInputCapture()(event)
 
 		if passwordField.GetText() != originalText {
@@ -224,7 +224,7 @@ func TestEditFormPasswordVisibilityToggle(t *testing.T) {
 
 	// Test toggle to visible - this will FAIL until implementation
 	t.Run("ToggleToVisible", func(t *testing.T) {
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 		form.GetInputCapture()(event)
 
 		expectedLabel := "Password [VISIBLE]"
@@ -235,7 +235,7 @@ func TestEditFormPasswordVisibilityToggle(t *testing.T) {
 
 	// Test toggle back to masked
 	t.Run("ToggleBackToMasked", func(t *testing.T) {
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 		form.GetInputCapture()(event)
 
 		if passwordField.GetLabel() != "Password" {
@@ -295,7 +295,7 @@ func TestEmptyPasswordFieldToggle(t *testing.T) {
 			}
 		}()
 
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 		form.GetInputCapture()(event)
 
 		// Label should still update
@@ -315,7 +315,7 @@ func TestVisibilityResetOnFormClose(t *testing.T) {
 	t.Run("AddFormResetOnRecreation", func(t *testing.T) {
 		// Create form, toggle to visible
 		form1 := NewAddForm(appState)
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 		form1.GetInputCapture()(event)
 
 		// Verify form1 is visible
@@ -342,7 +342,7 @@ func TestVisibilityResetOnFormClose(t *testing.T) {
 
 		// Create form, toggle to visible
 		form1 := NewEditForm(appState, credential)
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 		form1.GetInputCapture()(event)
 
 		// Verify form1 is visible
@@ -369,7 +369,7 @@ func TestVisibilityResetOnFormClose(t *testing.T) {
 
 		// Create AddForm, toggle visible
 		addForm := NewAddForm(appState)
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 		addForm.GetInputCapture()(event)
 
 		// Verify AddForm is visible
@@ -397,7 +397,7 @@ func TestVisualIndicatorChanges(t *testing.T) {
 	t.Run("AddFormIndicatorAccuracy", func(t *testing.T) {
 		form := NewAddForm(appState)
 		passwordField := form.GetFormItem(2).(*tview.InputField)
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 
 		// Initial state: "Password"
 		if passwordField.GetLabel() != "Password" {
@@ -435,7 +435,7 @@ func TestVisualIndicatorChanges(t *testing.T) {
 		}
 		form := NewEditForm(appState, credential)
 		passwordField := form.GetFormItem(2).(*tview.InputField)
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 
 		// Initial state: "Password"
 		if passwordField.GetLabel() != "Password" {
@@ -457,7 +457,7 @@ func TestVisualIndicatorChanges(t *testing.T) {
 	t.Run("IndicatorPersistenceWithText", func(t *testing.T) {
 		form := NewAddForm(appState)
 		passwordField := form.GetFormItem(2).(*tview.InputField)
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 
 		// Add text to field
 		passwordField.SetText("SecurePassword123")
@@ -489,13 +489,13 @@ func TestNoPasswordLogging(t *testing.T) {
 		// 1. Run: go build -o pass-cli.exe
 		// 2. Run: ./pass-cli.exe --verbose tui (if verbose flag exists)
 		// 3. Open add form, enter password "SensitivePassword123"
-		// 4. Toggle visibility multiple times with Ctrl+H
+		// 4. Toggle visibility multiple times with Ctrl+P
 		// 5. Verify console output contains NO password content
 		// 6. Only state changes or UI events should appear (if any logging present)
 
 		form := NewAddForm(appState)
 		passwordField := form.GetFormItem(2).(*tview.InputField)
-		event := tcell.NewEventKey(tcell.KeyCtrlH, 0, tcell.ModCtrl)
+		event := tcell.NewEventKey(tcell.KeyCtrlP, 0, tcell.ModCtrl)
 
 		// Set sensitive password
 		passwordField.SetText("SensitivePassword123")

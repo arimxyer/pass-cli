@@ -96,7 +96,7 @@ pass-cli get github
 
 - **Visual Navigation**: Browse credentials with arrow keys and Tab
 - **Interactive Forms**: Add/edit credentials with visual feedback
-- **Password Visibility Toggle**: Press `Ctrl+H` in forms to verify passwords
+- **Password Visibility Toggle**: Press `Ctrl+P` in forms to verify passwords
 - **Search & Filter**: Press `/` to search, `Esc` to clear
 - **Keyboard Shortcuts**: Press `?` to see all available shortcuts
 - **Responsive Layout**: Sidebar and detail panel adapt to terminal size
