@@ -10,11 +10,7 @@ var keychainCmd = &cobra.Command{
 
 The keychain integration stores your vault master password securely in the
 operating system's native credential storage (Windows Credential Manager,
-macOS Keychain, or Linux Secret Service).
-
-Available commands:
-  enable  - Enable keychain for an existing vault
-  status  - Check keychain integration status`,
+macOS Keychain, or Linux Secret Service).`,
 }
 
 func init() {
