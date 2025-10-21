@@ -144,3 +144,31 @@ Users who want to remove test vaults or permanently delete vaults need a clean r
 - Depends on existing vault path resolution logic (GetVaultPath() function)
 - Depends on existing keychain service name generation logic
 - Depends on existing audit log system for recording keychain lifecycle operations (per FR-015)
+
+## Known Limitations
+
+### Audit Logging for Non-Unlocking Operations
+
+**Issue**: Commands that operate without unlocking the vault (`keychain status`, `vault remove`) cannot write audit entries because audit configuration is loaded only during vault unlock.
+
+**Impact**:
+- `keychain enable` → ✅ Audit logging works (unlocks vault to validate password)
+- `keychain status` → ⚠️ No audit logging (read-only, doesn't unlock vault)
+- `vault remove` → ⚠️ No audit logging (works on locked vault by design)
+
+**Why**: Audit configuration (`AuditLogPath`, `VaultID`) is stored inside the encrypted vault data, requiring decryption to access.
+
+**Partial FR-015 Compliance**: FR-015 states "System MUST log all keychain lifecycle operations" - currently only `enable` is logged. The `status` command has low security impact (read-only query), but `vault remove` is a destructive operation that should ideally be audited.
+
+**Future Work**: See `FOLLOW_UP.md` for proposed metadata-based solution that would enable audit logging for all operations without requiring vault unlock.
+
+**Workaround** (for `vault remove`): Unlock the vault before removal to load audit configuration:
+```bash
+# Option 1: Get any credential first (loads audit config)
+pass-cli get <any-credential> --vault /path/to/vault.enc
+pass-cli vault remove /path/to/vault.enc --yes
+
+# Option 2: Use keychain to auto-unlock
+pass-cli keychain enable --vault /path/to/vault.enc
+pass-cli vault remove /path/to/vault.enc --yes
+```
