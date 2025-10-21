@@ -1,0 +1,67 @@
+name: Promote to Main
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: 'Run full test suite before merge'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    name: Promote develop to main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout develop
+        uses: actions/checkout@v5
+        with:
+          ref: develop
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Go
+        if: inputs.run_tests == 'true'
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+          cache: true
+
+      - name: Run unit tests
+        if: inputs.run_tests == 'true'
+        run: go test -v -race ./...
+
+      - name: Run integration tests
+        if: inputs.run_tests == 'true'
+        run: go test -v -tags=integration -timeout 5m ./test
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge develop to main
+        run: |
+          git fetch origin main
+          git checkout main
+          git merge origin/develop --no-ff -m "chore: promote develop to main
+
+          Merged develop branch to main for production deployment.
+
+          Generated with Claude Code
+
+          Co-Authored-By: Claude <noreply@anthropic.com>"
+          git push origin main
+
+      - name: Summary
+        run: |
+          echo "✅ Successfully promoted develop to main"
+          echo "Main branch is now ready for release tagging"
