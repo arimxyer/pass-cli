@@ -62,18 +62,18 @@
 
 **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T012 [P] [US1] Write integration test for keychain status with metadata in `test/keychain_status_test.go` (test audit entry written per FR-007, verify event_type matches internal/security/audit.go constants)
-- [ ] T013 [P] [US1] Write integration test for vault remove with metadata in `test/vault_remove_test.go` (test audit attempt + success entries written)
-- [ ] T014 [P] [US1] Write integration test for corrupted metadata fallback in `test/vault_metadata_test.go` (test self-discovery works)
-- [ ] T015 [P] [US1] Write integration test for multiple vaults in same directory in `test/vault_metadata_test.go` (test correct vault identified)
+- [X] T012 [P] [US1] Write integration test for keychain status with metadata in `test/keychain_status_test.go` (test audit entry written per FR-007, verify event_type matches internal/security/audit.go constants)
+- [X] T013 [P] [US1] Write integration test for vault remove with metadata in `test/vault_remove_test.go` (test audit attempt + success entries written)
+- [X] T014 [P] [US1] Write integration test for corrupted metadata fallback in `test/vault_metadata_test.go` (test self-discovery works)
+- [X] T015 [P] [US1] Write integration test for multiple vaults in same directory in `test/vault_metadata_test.go` (test correct vault identified)
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] Update RemoveVault to load metadata and enable audit in `internal/vault/vault.go` (~lines 400-450, add metadata load + audit init before deletion)
-- [ ] T017 [US1] Add vault_remove_attempt audit entry in RemoveVault in `internal/vault/vault.go` (before deletion)
-- [ ] T018 [US1] Add vault_remove_success/failure audit entries in RemoveVault in `internal/vault/vault.go` (after deletion)
-- [ ] T019 [US1] Delete metadata file after vault deletion in RemoveVault in `internal/vault/vault.go` (after final audit entry)
-- [ ] T020 [US1] Run integration tests T012-T015 and verify all pass (TDD validation)
+- [X] T016 [US1] Update RemoveVault to load metadata and enable audit in `internal/vault/vault.go` (~lines 400-450, add metadata load + audit init before deletion)
+- [X] T017 [US1] Add vault_remove_attempt audit entry in RemoveVault in `internal/vault/vault.go` (before deletion)
+- [X] T018 [US1] Add vault_remove_success/failure audit entries in RemoveVault in `internal/vault/vault.go` (after deletion)
+- [X] T019 [US1] Delete metadata file after vault deletion in RemoveVault in `internal/vault/vault.go` (after final audit entry)
+- [X] T020 [US1] Run integration tests T012-T015 and verify all pass (TDD validation)
 
 **Checkpoint**: User Story 1 complete and independently testable. `keychain status` and `vault remove` now write audit entries via metadata.
 

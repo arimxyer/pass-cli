@@ -4,12 +4,15 @@
 package test
 
 import (
+	"bufio"
 	"bytes"
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"pass-cli/internal/keychain"
 )
@@ -131,4 +134,104 @@ func TestIntegration_KeychainStatus(t *testing.T) {
 		//     t.Errorf("Expected output to contain backend name, got: %s", output)
 		// }
 	})
+}
+
+// T012: Integration test for keychain status with metadata
+// Tests that keychain status command writes audit entry when vault has metadata
+// Verifies FR-007 compliance and event_type matches internal/security/audit.go constants
+func TestIntegration_KeychainStatusWithMetadata(t *testing.T) {
+	// Check if keychain is available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
+
+	testPassword := "MetadataTest-Pass@123"
+	vaultDir := filepath.Join(testDir, "metadata-status-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	auditLogPath := filepath.Join(vaultDir, "audit.log")
+
+	// Ensure clean state
+	defer cleanupKeychain(t, ks)
+	defer os.RemoveAll(vaultDir)
+
+	// Create vault with audit enabled
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	// Initialize vault with audit
+	input := testPassword + "\n" + testPassword + "\n"
+	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd.Stdin = strings.NewReader(input)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Init with audit failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+	}
+
+	// Verify metadata file created
+	metaPath := filepath.Join(vaultDir, "vault.meta")
+	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
+		t.Fatal("Metadata file was not created")
+	}
+
+	// Get initial audit log line count
+	initialLines := 0
+	if _, err := os.Stat(auditLogPath); err == nil {
+		data, _ := os.ReadFile(auditLogPath)
+		initialLines = len(strings.Split(string(data), "\n")) - 1
+	}
+
+	// Run keychain status command
+	cmd = exec.Command(binaryPath, "--vault", vaultPath, "keychain", "status")
+	stdout.Reset()
+	stderr.Reset()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Keychain status failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+	}
+
+	// Verify audit entry written (FR-007)
+	time.Sleep(100 * time.Millisecond) // Allow audit flush
+	data, err := os.ReadFile(auditLogPath)
+	if err != nil {
+		t.Fatalf("Failed to read audit log: %v", err)
+	}
+
+	auditLines := strings.Split(string(data), "\n")
+	newLines := len(auditLines) - initialLines - 1
+
+	if newLines < 1 {
+		t.Fatal("No audit entry written for keychain status command")
+	}
+
+	// Verify last audit entry has correct event_type (matches internal/security/audit.go)
+	lastLine := auditLines[len(auditLines)-2] // -2 because last is empty
+	var auditEntry map[string]interface{}
+	if err := json.Unmarshal([]byte(lastLine), &auditEntry); err != nil {
+		t.Fatalf("Failed to parse audit entry: %v", err)
+	}
+
+	eventType, ok := auditEntry["event_type"].(string)
+	if !ok {
+		t.Fatal("Audit entry missing event_type field")
+	}
+
+	// Verify event type matches constant from internal/security/audit.go
+	if eventType != "keychain_status" {
+		t.Errorf("Expected event_type 'keychain_status', got %q", eventType)
+	}
+
+	outcome, ok := auditEntry["outcome"].(string)
+	if !ok || outcome == "" {
+		t.Error("Audit entry missing outcome field")
+	}
+
+	t.Logf("✓ Audit entry written: event_type=%s, outcome=%s", eventType, outcome)
 }

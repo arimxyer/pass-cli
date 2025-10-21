@@ -183,6 +183,20 @@ func (v *VaultService) EnableAudit(auditLogPath, vaultID string) error {
 		}
 	}
 
+	// T026 (US2): Save metadata file for pre-unlock audit logging
+	meta := &VaultMetadata{
+		VaultID:      vaultID,
+		AuditEnabled: true,
+		AuditLogPath: auditLogPath,
+		CreatedAt:    time.Now().UTC(),
+		Version:      1,
+	}
+
+	if err := SaveMetadata(meta, v.vaultPath); err != nil {
+		// Non-fatal: audit logger is enabled, metadata save failed
+		fmt.Fprintf(os.Stderr, "Warning: Failed to save metadata: %v\n", err)
+	}
+
 	return nil
 }
 
@@ -952,18 +966,34 @@ func (v *VaultService) GetKeychainStatus() *KeychainStatus {
 
 // RemoveVault permanently deletes the vault file and its keychain entry.
 func (v *VaultService) RemoveVault(force bool) (*RemoveVaultResult, error) {
+	// T016: Load metadata to enable audit logging before vault deletion
+	meta, err := LoadMetadata(v.vaultPath)
+	if err == nil && meta != nil && meta.AuditEnabled && meta.AuditLogPath != "" {
+		// Enable audit from metadata (if not already enabled)
+		if !v.auditEnabled {
+			if err := v.EnableAudit(meta.AuditLogPath, meta.VaultID); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to enable audit: %v\n", err)
+			}
+		}
+	}
+
+	// T017: Log vault_remove_attempt before deletion
 	v.LogAudit(security.EventVaultRemove, security.OutcomeAttempt, v.vaultPath)
 
 	result := &RemoveVaultResult{}
 
 	// Attempt to delete vault file
-	err := os.Remove(v.vaultPath)
+	err = os.Remove(v.vaultPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			result.FileNotFound = true
 		} else if os.IsPermission(err) && !force {
+			// T018: Log failure on permission error
+			v.LogAudit(security.EventVaultRemove, security.OutcomeFailure, v.vaultPath)
 			return nil, fmt.Errorf("vault file is in use or permission denied. Use --force to override")
 		} else if !force {
+			// T018: Log failure
+			v.LogAudit(security.EventVaultRemove, security.OutcomeFailure, v.vaultPath)
 			return nil, fmt.Errorf("failed to delete vault file: %w", err)
 		}
 		// If --force is set, continue even on errors
@@ -988,10 +1018,16 @@ func (v *VaultService) RemoveVault(force bool) (*RemoveVaultResult, error) {
 		result.KeychainNotFound = true
 	}
 
+	// T018: Log success/failure based on deletion results
 	if result.FileDeleted || result.KeychainDeleted {
 		v.LogAudit(security.EventVaultRemove, security.OutcomeSuccess, v.vaultPath)
 	} else {
 		v.LogAudit(security.EventVaultRemove, security.OutcomeFailure, v.vaultPath)
+	}
+
+	// T019: Delete metadata file after final audit entry
+	if err := DeleteMetadata(v.vaultPath); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: Failed to delete metadata: %v\n", err)
 	}
 
 	return result, nil
