@@ -14,7 +14,7 @@ func TestVersionCheck_UpToDate(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"tag_name": "v1.2.3", "html_url": "https://github.com/test/pass-cli/releases/tag/v1.2.3"}`))
+		_, _ = w.Write([]byte(`{"tag_name": "v1.2.3", "html_url": "https://github.com/test/pass-cli/releases/tag/v1.2.3"}`))
 	}))
 	defer server.Close()
 
@@ -59,7 +59,7 @@ func TestVersionCheck_UpdateAvailable(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"tag_name": "v1.2.4", "html_url": "https://github.com/test/pass-cli/releases/tag/v1.2.4"}`))
+		_, _ = w.Write([]byte(`{"tag_name": "v1.2.4", "html_url": "https://github.com/test/pass-cli/releases/tag/v1.2.4"}`))
 	}))
 	defer server.Close()
 
