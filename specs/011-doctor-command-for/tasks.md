@@ -423,7 +423,7 @@
 - [X] **T076** [Polish] Run full test suite: `go test ./... -v -cover`
   - internal/health: 89.2% coverage (exceeds 80% target)
   - internal/vault/firstrun: 88-100% per function
-  - All 44 tests PASSING (34 unit + 10 integration)
+  - All 34 tests PASSING (24 unit + 10 integration)
 
 - [X] **T077** [Polish] Run pre-commit checks per CLAUDE.md
   - `go fmt ./...` - all files formatted
