@@ -119,26 +119,26 @@
 
 ### Tests for User Story 3 (TDD - Write First)
 
-- [ ] T037 [P] [US3] Integration test: `list --location <path>` shows only credentials from exact path in `test/list_test.go` (Acceptance Scenario 1)
-- [ ] T038 [P] [US3] Integration test: `list --location <relative-path>` resolves to absolute path in `test/list_test.go` (Acceptance Scenario 2)
-- [ ] T039 [P] [US3] Integration test: `list --location <path> --recursive` includes subdirectories in `test/list_test.go` (Acceptance Scenario 3)
-- [ ] T040 [P] [US3] Integration test: `list --location <nonexistent>` displays "No credentials found" message in `test/list_test.go` (Acceptance Scenario 4)
-- [ ] T041 [P] [US3] Integration test: `list --location <path> --format json` outputs filtered results in `test/list_test.go` (Acceptance Scenario 5)
-- [ ] T041a [P] [INTEGRATION] Integration test: `list --by-project --location <path>` combines filter and grouping in `test/list_test.go` (validates T048 - moved from Phase 4 T028)
+- [x] T037 [P] [US3] Integration test: `list --location <path>` shows only credentials from exact path in `test/list_test.go` (Acceptance Scenario 1)
+- [x] T038 [P] [US3] Integration test: `list --location <relative-path>` resolves to absolute path in `test/list_test.go` (Acceptance Scenario 2)
+- [x] T039 [P] [US3] Integration test: `list --location <path> --recursive` includes subdirectories in `test/list_test.go` (Acceptance Scenario 3)
+- [x] T040 [P] [US3] Integration test: `list --location <nonexistent>` displays "No credentials found" message in `test/list_test.go` (Acceptance Scenario 4)
+- [x] T041 [P] [US3] Integration test: `list --location <path> --format json` outputs filtered results in `test/list_test.go` (Acceptance Scenario 5)
+- [x] T041a [P] [INTEGRATION] Integration test: `list --by-project --location <path>` combines filter and grouping in `test/list_test.go` (validates T048 - moved from Phase 4 T028)
 
 ### Implementation for User Story 3
 
-- [ ] T042 [US3] Add `--location` string flag to `list` command in `cmd/list.go`
-- [ ] T043 [US3] Add `--recursive` boolean flag to `list` command in `cmd/list.go`
-- [ ] T044 [US3] Implement `filterCredentialsByLocation()` function in `cmd/list.go`: iterate all credentials, check UsageRecords for location match
-- [ ] T045 [US3] Implement path resolution (relative → absolute) in `cmd/list.go` using `filepath.Abs()`
-- [ ] T046 [US3] Implement exact match logic (default) in `cmd/list.go`: location == UsageRecord.Location
-- [ ] T047 [US3] Implement recursive match logic in `cmd/list.go`: prefix match with `--recursive` flag
-- [ ] T048 [US3] Implement combined `--location` + `--by-project` logic in `cmd/list.go`: filter first, then group (orthogonal operations per research.md Decision 2)
-- [ ] T049 [US3] Add table/JSON/simple format outputs for location filter in `cmd/list.go` per contract
-- [ ] T050 [US3] Handle empty results case with "No credentials found for location" message in `cmd/list.go`
-- [ ] T051 [US3] Update help text for `list` command to document `--location` and `--recursive` flags in `cmd/list.go`
-- [ ] T052 [US3] Verify all T037-T041a tests pass (TDD validation - includes integration test T041a)
+- [x] T042 [US3] Add `--location` string flag to `list` command in `cmd/list.go`
+- [x] T043 [US3] Add `--recursive` boolean flag to `list` command in `cmd/list.go`
+- [x] T044 [US3] Implement `filterCredentialsByLocation()` function in `cmd/list.go`: iterate all credentials, check UsageRecords for location match
+- [x] T045 [US3] Implement path resolution (relative → absolute) in `cmd/list.go` using `filepath.Abs()`
+- [x] T046 [US3] Implement exact match logic (default) in `cmd/list.go`: location == UsageRecord.Location
+- [x] T047 [US3] Implement recursive match logic in `cmd/list.go`: prefix match with `--recursive` flag
+- [x] T048 [US3] Implement combined `--location` + `--by-project` logic in `cmd/list.go`: filter first, then group (orthogonal operations per research.md Decision 2)
+- [x] T049 [US3] Add table/JSON/simple format outputs for location filter in `cmd/list.go` per contract
+- [x] T050 [US3] Handle empty results case with "No credentials found for location" message in `cmd/list.go`
+- [x] T051 [US3] Update help text for `list` command to document `--location` and `--recursive` flags in `cmd/list.go`
+- [x] T052 [US3] Verify all T037-T041a tests pass (TDD validation - includes integration test T041a)
 
 **Checkpoint**: All user stories should now be independently functional - `usage`, `list --by-project`, `list --location`, and combined flags all work
 

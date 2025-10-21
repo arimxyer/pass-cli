@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -112,10 +113,23 @@ func runList(cmd *cobra.Command, args []string) error {
 		metadata = filterUnused(metadata, listDays)
 	}
 
-	// T048: Filter by location if requested (User Story 3)
-	// TODO: Implement location filtering in Phase 5
+	// T044-T048: Filter by location if requested (User Story 3)
+	if listLocation != "" {
+		filtered, err := filterCredentialsByLocation(metadata, listLocation, listRecursive)
+		if err != nil {
+			return fmt.Errorf("failed to filter by location: %w", err)
+		}
+		metadata = filtered
+
+		// T050: Handle empty results
+		if len(metadata) == 0 {
+			fmt.Printf("No credentials found for location: %s\n", listLocation)
+			return nil
+		}
+	}
 
 	// T030-T034: Handle --by-project mode (User Story 2)
+	// T048: Works with --location (filter first, then group)
 	if listByProject {
 		projects := groupCredentialsByProject(metadata)
 		return outputByProject(projects, listFormat)
@@ -152,6 +166,54 @@ func filterUnused(metadata []vault.CredentialMetadata, days int) []vault.Credent
 	}
 
 	return filtered
+}
+
+// T044: filterCredentialsByLocation filters credentials by access location
+// T045: Resolves relative paths to absolute
+// T046: Exact match by default
+// T047: Prefix match with recursive flag
+func filterCredentialsByLocation(metadata []vault.CredentialMetadata, location string, recursive bool) ([]vault.CredentialMetadata, error) {
+	// T045: Resolve relative path to absolute
+	absLocation, err := filepath.Abs(location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve path: %w", err)
+	}
+
+	filtered := make([]vault.CredentialMetadata, 0)
+
+	for _, meta := range metadata {
+		// Check if this credential was accessed from the specified location
+		for _, credLocation := range meta.Locations {
+			// Convert credential location to absolute path for comparison
+			absCredLocation, err := filepath.Abs(credLocation)
+			if err != nil {
+				// If we can't resolve the credential location, skip it
+				continue
+			}
+
+			matched := false
+
+			if recursive {
+				// T047: Recursive mode - check if credential location is under the specified location
+				// Use filepath.HasPrefix logic (check if credLocation starts with location)
+				if absCredLocation == absLocation || strings.HasPrefix(absCredLocation, absLocation+string(filepath.Separator)) {
+					matched = true
+				}
+			} else {
+				// T046: Exact match mode - credential location must exactly match
+				if absCredLocation == absLocation {
+					matched = true
+				}
+			}
+
+			if matched {
+				filtered = append(filtered, meta)
+				break // Found a match, no need to check other locations for this credential
+			}
+		}
+	}
+
+	return filtered, nil
 }
 
 func outputSimple(metadata []vault.CredentialMetadata) error {

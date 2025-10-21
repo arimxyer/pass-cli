@@ -248,8 +248,6 @@ func TestListByProject(t *testing.T) {
 	// MOVED from Phase 4 (was T028) to Phase 5 - validates T048 implementation
 	// This is an integration test requiring both --by-project (Phase 4) and --location (Phase 5)
 	t.Run("T041a_ByProject_With_Location_Filter", func(t *testing.T) {
-		// Skip until Phase 5 implements --location filtering (T042-T048)
-		t.Skip("TODO: Implement --location filtering in Phase 5 (T042-T048), then enable this integration test")
 
 		// This test verifies that --location filters first, then groups
 		// We'll filter by my-web-app directory location
@@ -274,6 +272,202 @@ func TestListByProject(t *testing.T) {
 
 		if strings.Contains(stdout, "Ungrouped") || strings.Contains(stdout, "local-db") {
 			t.Error("Should not show Ungrouped section (different location)")
+		}
+	})
+}
+
+// T037-T041a: Integration tests for list --location command (User Story 3)
+
+func TestListByLocation(t *testing.T) {
+	testPassword := "ListLocation-Test-Pass@123"
+	locationVaultPath := filepath.Join(testDir, "location-vault", "vault.enc")
+
+	// Setup: Initialize vault and create credentials with usage from different locations
+	t.Run("Setup", func(t *testing.T) {
+		// Initialize vault
+		input := testPassword + "\n" + testPassword + "\n" + "n\n"
+		_, _, err := runCommandWithInputAndVault(t, locationVaultPath, input, "init")
+		if err != nil {
+			t.Fatalf("Failed to initialize vault: %v", err)
+		}
+
+		// Add credentials
+		input = testPassword + "\n" + "user1" + "\n" + "pass123" + "\n"
+		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "add", "web-cred")
+		if err != nil {
+			t.Fatalf("Failed to add web-cred: %v", err)
+		}
+
+		input = testPassword + "\n" + "user2" + "\n" + "pass456" + "\n"
+		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "add", "api-cred")
+		if err != nil {
+			t.Fatalf("Failed to add api-cred: %v", err)
+		}
+
+		input = testPassword + "\n" + "user3" + "\n" + "pass789" + "\n"
+		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "add", "db-cred")
+		if err != nil {
+			t.Fatalf("Failed to add db-cred: %v", err)
+		}
+
+		// Create directory structure for testing
+		webDir := filepath.Join(testDir, "web-project")
+		apiDir := filepath.Join(testDir, "api-project")
+		apiSubDir := filepath.Join(apiDir, "src", "handlers")
+
+		if err := os.MkdirAll(webDir, 0755); err != nil {
+			t.Fatalf("Failed to create web dir: %v", err)
+		}
+		if err := os.MkdirAll(apiSubDir, 0755); err != nil {
+			t.Fatalf("Failed to create api subdir: %v", err)
+		}
+
+		// Access web-cred from web-project directory
+		originalDir, _ := os.Getwd()
+		defer os.Chdir(originalDir)
+
+		os.Chdir(webDir)
+		input = testPassword + "\n"
+		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "get", "web-cred", "--no-clipboard")
+		if err != nil {
+			t.Fatalf("Failed to access web-cred from web-project: %v", err)
+		}
+
+		// Access api-cred from api-project root
+		os.Chdir(apiDir)
+		input = testPassword + "\n"
+		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "get", "api-cred", "--no-clipboard")
+		if err != nil {
+			t.Fatalf("Failed to access api-cred from api-project: %v", err)
+		}
+
+		// Access db-cred from api-project subdirectory
+		os.Chdir(apiSubDir)
+		input = testPassword + "\n"
+		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "get", "db-cred", "--no-clipboard")
+		if err != nil {
+			t.Fatalf("Failed to access db-cred from api-project/src/handlers: %v", err)
+		}
+
+		os.Chdir(originalDir)
+	})
+
+	// T037: Integration test - list --location shows only credentials from exact path (Acceptance Scenario 1)
+	t.Run("T037_Location_Exact_Path", func(t *testing.T) {
+		webDir := filepath.Join(testDir, "web-project")
+
+		input := testPassword + "\n"
+		stdout, stderr, err := runCommandWithInputAndVault(t, locationVaultPath, input, "list", "--location", webDir)
+
+		if err != nil {
+			t.Fatalf("List --location failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+		}
+
+		// Should show web-cred (accessed from this exact location)
+		if !strings.Contains(stdout, "web-cred") {
+			t.Error("Expected web-cred in output (accessed from this location)")
+		}
+
+		// Should NOT show api-cred or db-cred (accessed from different locations)
+		if strings.Contains(stdout, "api-cred") {
+			t.Error("Should not show api-cred (accessed from different location)")
+		}
+		if strings.Contains(stdout, "db-cred") {
+			t.Error("Should not show db-cred (accessed from different location)")
+		}
+	})
+
+	// T038: Integration test - list --location resolves relative paths (Acceptance Scenario 2)
+	t.Run("T038_Location_Relative_Path", func(t *testing.T) {
+		// Change to testDir and use relative path
+		originalDir, _ := os.Getwd()
+		defer os.Chdir(originalDir)
+
+		os.Chdir(testDir)
+
+		input := testPassword + "\n"
+		stdout, stderr, err := runCommandWithInputAndVault(t, locationVaultPath, input, "list", "--location", "./web-project")
+
+		if err != nil {
+			t.Fatalf("List --location with relative path failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+		}
+
+		// Should show web-cred (relative path resolved to absolute)
+		if !strings.Contains(stdout, "web-cred") {
+			t.Error("Expected web-cred in output (relative path should be resolved)")
+		}
+	})
+
+	// T039: Integration test - list --location --recursive includes subdirectories (Acceptance Scenario 3)
+	t.Run("T039_Location_Recursive", func(t *testing.T) {
+		apiDir := filepath.Join(testDir, "api-project")
+
+		input := testPassword + "\n"
+		stdout, stderr, err := runCommandWithInputAndVault(t, locationVaultPath, input, "list", "--location", apiDir, "--recursive")
+
+		if err != nil {
+			t.Fatalf("List --location --recursive failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+		}
+
+		// Should show both api-cred (from root) and db-cred (from subdirectory)
+		if !strings.Contains(stdout, "api-cred") {
+			t.Error("Expected api-cred in output (accessed from this location)")
+		}
+		if !strings.Contains(stdout, "db-cred") {
+			t.Error("Expected db-cred in output (accessed from subdirectory)")
+		}
+
+		// Should NOT show web-cred (accessed from completely different location)
+		if strings.Contains(stdout, "web-cred") {
+			t.Error("Should not show web-cred (accessed from different location tree)")
+		}
+	})
+
+	// T040: Integration test - list --location nonexistent displays message (Acceptance Scenario 4)
+	t.Run("T040_Location_Nonexistent", func(t *testing.T) {
+		nonexistentPath := filepath.Join(testDir, "does-not-exist")
+
+		input := testPassword + "\n"
+		stdout, stderr, err := runCommandWithInputAndVault(t, locationVaultPath, input, "list", "--location", nonexistentPath)
+
+		if err != nil {
+			t.Fatalf("List --location with nonexistent path failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+		}
+
+		// Should show "No credentials found" message
+		if !strings.Contains(stdout, "No credentials found") {
+			t.Errorf("Expected 'No credentials found' message, got: %s", stdout)
+		}
+	})
+
+	// T041: Integration test - list --location --format json (Acceptance Scenario 5)
+	t.Run("T041_Location_JSON_Format", func(t *testing.T) {
+		webDir := filepath.Join(testDir, "web-project")
+
+		input := testPassword + "\n"
+		stdout, stderr, err := runCommandWithInputAndVault(t, locationVaultPath, input, "list", "--location", webDir, "--format", "json")
+
+		if err != nil {
+			t.Fatalf("List --location --format json failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+		}
+
+		// Parse JSON
+		var result []interface{}
+		if err := json.Unmarshal([]byte(stdout), &result); err != nil {
+			t.Fatalf("Failed to parse JSON output: %v\nOutput: %s", err, stdout)
+		}
+
+		// Should have exactly 1 credential (web-cred)
+		if len(result) != 1 {
+			t.Errorf("Expected 1 credential in filtered JSON output, got %d", len(result))
+		}
+
+		// Verify it's web-cred
+		if len(result) > 0 {
+			cred := result[0].(map[string]interface{})
+			if cred["Service"] != "web-cred" {
+				t.Errorf("Expected Service='web-cred', got: %v", cred["Service"])
+			}
 		}
 	})
 }
