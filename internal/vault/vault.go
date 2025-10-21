@@ -393,6 +393,50 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 		}
 	}
 
+	// T027-T029: Metadata synchronization (User Story 2)
+	// Load existing metadata (if any)
+	meta, err := LoadMetadata(v.vaultPath)
+	if err != nil {
+		// Metadata corrupted - will be recreated if audit enabled
+		fmt.Fprintf(os.Stderr, "Warning: Corrupted metadata, will recreate: %v\n", err)
+		meta = nil
+	}
+
+	// T028: Check for metadata/vault config mismatch
+	if meta != nil {
+		mismatch := meta.AuditEnabled != vaultData.AuditEnabled ||
+			meta.AuditLogPath != vaultData.AuditLogPath ||
+			meta.VaultID != vaultData.VaultID
+
+		// T029: Synchronize metadata when mismatch detected (vault settings take precedence per FR-012)
+		if mismatch {
+			updatedMeta := &VaultMetadata{
+				VaultID:      vaultData.VaultID,
+				AuditEnabled: vaultData.AuditEnabled,
+				AuditLogPath: vaultData.AuditLogPath,
+				CreatedAt:    meta.CreatedAt, // Preserve original timestamp
+				Version:      1,
+			}
+
+			if err := SaveMetadata(updatedMeta, v.vaultPath); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to sync metadata: %v\n", err)
+			}
+		}
+	} else if vaultData.AuditEnabled && vaultData.AuditLogPath != "" {
+		// T027: Create metadata if missing and audit enabled in vault
+		newMeta := &VaultMetadata{
+			VaultID:      vaultData.VaultID,
+			AuditEnabled: true,
+			AuditLogPath: vaultData.AuditLogPath,
+			CreatedAt:    time.Now().UTC(),
+			Version:      1,
+		}
+
+		if err := SaveMetadata(newMeta, v.vaultPath); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to create metadata: %v\n", err)
+		}
+	}
+
 	// T036f: Remove backup file after successful unlock
 	// This confirms the vault is readable and migration (if any) was successful
 	backupPath := v.vaultPath + storage.BackupSuffix

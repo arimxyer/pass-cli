@@ -156,3 +156,299 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 
 	t.Logf("✓ Metadata correctly identifies vault1 among multiple vaults")
 }
+
+// T021: Integration test for automatic metadata creation on vault unlock with audit
+// Tests that metadata is created when unlocking a vault that has audit enabled but no metadata file
+func TestIntegration_AutoMetadataCreationOnUnlock(t *testing.T) {
+	testPassword := "UnlockTest-Pass@123"
+	vaultDir := filepath.Join(testDir, "unlock-metadata-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+
+	defer os.RemoveAll(vaultDir)
+
+	// Create vault with audit enabled
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	input := testPassword + "\n" + testPassword + "\n"
+	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd.Stdin = strings.NewReader(input)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+	}
+
+	// Verify metadata created by init
+	metaPath := filepath.Join(vaultDir, "vault.meta")
+	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
+		t.Fatal("Metadata should be created by init --enable-audit")
+	}
+
+	// Delete metadata to simulate old vault
+	if err := os.Remove(metaPath); err != nil {
+		t.Fatalf("Failed to delete metadata: %v", err)
+	}
+
+	// Unlock vault (should recreate metadata since audit is enabled in vault)
+	cmd = exec.Command(binaryPath, "--vault", vaultPath, "list")
+	cmd.Stdin = strings.NewReader(testPassword + "\n")
+	stdout.Reset()
+	stderr.Reset()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("List command failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+	}
+
+	// Verify metadata was recreated
+	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
+		t.Error("Metadata should be recreated on unlock when audit enabled in vault")
+	}
+
+	t.Logf("✓ Metadata automatically created on unlock")
+}
+
+// T022: Integration test for no metadata creation when audit disabled
+// Tests that metadata is NOT created for vaults without audit logging
+func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
+	testPassword := "NoAudit-Pass@123"
+	vaultDir := filepath.Join(testDir, "no-audit-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+
+	defer os.RemoveAll(vaultDir)
+
+	// Create vault WITHOUT audit
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	input := testPassword + "\n" + testPassword + "\n"
+	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	cmd.Stdin = strings.NewReader(input)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+	}
+
+	// Verify no metadata created
+	metaPath := filepath.Join(vaultDir, "vault.meta")
+	if _, err := os.Stat(metaPath); !os.IsNotExist(err) {
+		t.Error("Metadata should NOT be created when audit disabled")
+	}
+
+	// Unlock vault (should still not create metadata)
+	cmd = exec.Command(binaryPath, "--vault", vaultPath, "list")
+	cmd.Stdin = strings.NewReader(testPassword + "\n")
+	stdout.Reset()
+	stderr.Reset()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("List command failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+	}
+
+	// Verify still no metadata
+	if _, err := os.Stat(metaPath); !os.IsNotExist(err) {
+		t.Error("Metadata should still not exist after unlock when audit disabled")
+	}
+
+	t.Logf("✓ No metadata created for audit-disabled vault")
+}
+
+// T023: Integration test for metadata creation via init --enable-audit
+// Tests that init command creates metadata when --enable-audit flag is used
+func TestIntegration_MetadataCreatedByInit(t *testing.T) {
+	testPassword := "InitAudit-Pass@123"
+	vaultDir := filepath.Join(testDir, "init-audit-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+
+	defer os.RemoveAll(vaultDir)
+
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	// Init with --enable-audit
+	input := testPassword + "\n" + testPassword + "\n"
+	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd.Stdin = strings.NewReader(input)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Init with audit failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+	}
+
+	// Verify metadata created
+	metaPath := filepath.Join(vaultDir, "vault.meta")
+	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
+		t.Fatal("Metadata file should be created by init --enable-audit")
+	}
+
+	// Verify metadata content
+	data, err := os.ReadFile(metaPath)
+	if err != nil {
+		t.Fatalf("Failed to read metadata: %v", err)
+	}
+
+	if !strings.Contains(string(data), "vault.enc") {
+		t.Error("Metadata should contain vault path")
+	}
+
+	if !strings.Contains(string(data), "audit_enabled") {
+		t.Error("Metadata should contain audit_enabled field")
+	}
+
+	t.Logf("✓ Metadata created by init --enable-audit")
+}
+
+// T024: Integration test for metadata update when audit settings change
+// Tests that metadata is synchronized when vault audit config changes
+func TestIntegration_MetadataUpdateOnAuditChange(t *testing.T) {
+	testPassword := "ChangeAudit-Pass@123"
+	vaultDir := filepath.Join(testDir, "change-audit-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+
+	defer os.RemoveAll(vaultDir)
+
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	// Create vault with audit
+	input := testPassword + "\n" + testPassword + "\n"
+	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd.Stdin = strings.NewReader(input)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Init failed: %v", err)
+	}
+
+	// Read initial metadata
+	metaPath := filepath.Join(vaultDir, "vault.meta")
+	initialData, err := os.ReadFile(metaPath)
+	if err != nil {
+		t.Fatalf("Failed to read initial metadata: %v", err)
+	}
+
+	if !strings.Contains(string(initialData), `"audit_enabled": true`) {
+		t.Error("Initial metadata should have audit enabled")
+	}
+
+	// Manually corrupt metadata to simulate mismatch (set audit_enabled to false)
+	corruptedMeta := strings.Replace(string(initialData), `"audit_enabled": true`, `"audit_enabled": false`, 1)
+	if err := os.WriteFile(metaPath, []byte(corruptedMeta), 0644); err != nil {
+		t.Fatalf("Failed to write corrupted metadata: %v", err)
+	}
+
+	// Unlock vault (should detect mismatch and update metadata)
+	cmd = exec.Command(binaryPath, "--vault", vaultPath, "list")
+	cmd.Stdin = strings.NewReader(testPassword + "\n")
+	stdout.Reset()
+	stderr.Reset()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("List command failed: %v", err)
+	}
+
+	// Read updated metadata
+	updatedData, err := os.ReadFile(metaPath)
+	if err != nil {
+		t.Fatalf("Failed to read updated metadata: %v", err)
+	}
+
+	// Verify metadata was corrected (vault settings take precedence)
+	if !strings.Contains(string(updatedData), `"audit_enabled": true`) {
+		t.Error("Metadata should be updated to match vault audit settings (audit_enabled: true)")
+	}
+
+	t.Logf("✓ Metadata updated when mismatch detected")
+}
+
+// T025: Integration test for backward compatibility with old vaults
+// Tests that vaults created before metadata feature still work without breaking changes
+func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
+	testPassword := "OldVault-Pass@123"
+	vaultDir := filepath.Join(testDir, "old-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+
+	defer os.RemoveAll(vaultDir)
+
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	// Create vault without metadata (simulate old vault)
+	input := testPassword + "\n" + testPassword + "\n"
+	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	cmd.Stdin = strings.NewReader(input)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Init failed: %v", err)
+	}
+
+	// Delete metadata if created (to truly simulate old vault)
+	metaPath := filepath.Join(vaultDir, "vault.meta")
+	os.Remove(metaPath)
+
+	// Try to use vault (should work without metadata)
+	cmd = exec.Command(binaryPath, "--vault", vaultPath, "list")
+	cmd.Stdin = strings.NewReader(testPassword + "\n")
+	stdout.Reset()
+	stderr.Reset()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Old vault should work without metadata: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+	}
+
+	// Add credential to verify full functionality
+	cmd = exec.Command(binaryPath, "--vault", vaultPath, "add", "test-service")
+	cmd.Stdin = strings.NewReader(testPassword + "\ntestuser\ntestpass\ntestpass\n")
+	stdout.Reset()
+	stderr.Reset()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Add command should work without metadata: %v", err)
+	}
+
+	// List credentials
+	cmd = exec.Command(binaryPath, "--vault", vaultPath, "list")
+	cmd.Stdin = strings.NewReader(testPassword + "\n")
+	stdout.Reset()
+	stderr.Reset()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("List command failed: %v", err)
+	}
+
+	output := stdout.String()
+	if !strings.Contains(output, "test-service") {
+		t.Error("Should be able to list credentials in old vault")
+	}
+
+	t.Logf("✓ Old vaults work without metadata (backward compatible)")
+}

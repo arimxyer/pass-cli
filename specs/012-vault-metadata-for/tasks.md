@@ -87,20 +87,20 @@
 
 ### Tests for User Story 2 (TDD)
 
-- [ ] T021 [P] [US2] Write test for automatic metadata creation on vault unlock with audit in `test/vault_metadata_test.go`
-- [ ] T022 [P] [US2] Write test for no metadata creation when audit disabled in `test/vault_metadata_test.go`
-- [ ] T023 [P] [US2] Write test for metadata creation via init --enable-audit in `test/integration_test.go`
-- [ ] T024 [P] [US2] Write test for metadata update when audit settings change in `test/vault_metadata_test.go`
-- [ ] T025 [P] [US2] Write test for backward compatibility with old vaults in `test/vault_metadata_test.go` (no metadata, no breaking changes)
+- [X] T021 [P] [US2] Write test for automatic metadata creation on vault unlock with audit in `test/vault_metadata_test.go`
+- [X] T022 [P] [US2] Write test for no metadata creation when audit disabled in `test/vault_metadata_test.go`
+- [X] T023 [P] [US2] Write test for metadata creation via init --enable-audit in `test/integration_test.go`
+- [X] T024 [P] [US2] Write test for metadata update when audit settings change in `test/vault_metadata_test.go`
+- [X] T025 [P] [US2] Write test for backward compatibility with old vaults in `test/vault_metadata_test.go` (no metadata, no breaking changes)
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] Update EnableAudit to save metadata file in `internal/vault/vault.go` (~lines 250-280, add SaveMetadata call after audit logger init)
-- [ ] T027 [US2] Update Unlock to create metadata if missing and audit enabled in `internal/vault/vault.go` (~lines 150-200, add metadata creation logic)
-- [ ] T028 [US2] Update Unlock to detect metadata/vault config mismatch in `internal/vault/vault.go` (FR-012: vault settings take precedence)
-- [ ] T029 [US2] Update Unlock to synchronize metadata when mismatch detected in `internal/vault/vault.go` (update metadata to match vault)
-- [ ] T030 [US2] Update init command to create metadata when --enable-audit used in `cmd/init.go` (~lines 100-150, add metadata creation after vault init)
-- [ ] T031 [US2] Run integration tests T021-T025 and verify all pass (TDD validation)
+- [X] T026 [US2] Update EnableAudit to save metadata file in `internal/vault/vault.go` (~lines 250-280, add SaveMetadata call after audit logger init)
+- [X] T027 [US2] Update Unlock to create metadata if missing and audit enabled in `internal/vault/vault.go` (~lines 150-200, add metadata creation logic)
+- [X] T028 [US2] Update Unlock to detect metadata/vault config mismatch in `internal/vault/vault.go` (FR-012: vault settings take precedence)
+- [X] T029 [US2] Update Unlock to synchronize metadata when mismatch detected in `internal/vault/vault.go` (update metadata to match vault)
+- [X] T030 [US2] Update init command to create metadata when --enable-audit used in `cmd/init.go` (~lines 100-150, add metadata creation after vault init)
+- [X] T031 [US2] Run integration tests T021-T025 and verify all pass (TDD validation)
 
 **Checkpoint**: User Story 2 complete. Metadata files created/updated automatically. Existing vaults work without manual migration.
 
