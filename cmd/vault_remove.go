@@ -40,7 +40,7 @@ IMPORTANT: This operation is irreversible. All stored credentials will be lost.`
 }
 
 func init() {
-	rootCmd.AddCommand(vaultRemoveCmd)
+	vaultCmd.AddCommand(vaultRemoveCmd)
 	// T031: Add --yes and --force flags as aliases for confirmation bypass
 	vaultRemoveCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "skip confirmation prompt (for automation)")
 	vaultRemoveCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "force removal even if vault appears in use")
