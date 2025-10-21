@@ -38,6 +38,7 @@
 - [ ] T002 [P] [FOUNDATION] Write unit tests for SaveMetadata in `internal/vault/metadata_test.go`
 - [ ] T003 [P] [FOUNDATION] Write unit tests for DeleteMetadata in `internal/vault/metadata_test.go`
 - [ ] T004 [P] [FOUNDATION] Write unit tests for MetadataPath in `internal/vault/metadata_test.go`
+- [ ] T004a [P] [FOUNDATION] Write benchmark tests for metadata operations in `internal/vault/metadata_test.go` (BenchmarkLoadMetadata, BenchmarkSaveMetadata, BenchmarkDeleteMetadata for SC-003 validation)
 - [ ] T005 [FOUNDATION] Implement VaultMetadata struct in `internal/vault/metadata.go` (TDD: tests from T001-T004 should fail)
 - [ ] T006 [FOUNDATION] Implement LoadMetadata function in `internal/vault/metadata.go` (make T001 tests pass)
 - [ ] T007 [FOUNDATION] Implement SaveMetadata function in `internal/vault/metadata.go` (make T002 tests pass, use temp+rename pattern)
@@ -45,6 +46,7 @@
 - [ ] T009 [FOUNDATION] Implement MetadataPath helper in `internal/vault/metadata.go` (make T004 tests pass)
 - [ ] T010 [FOUNDATION] Update VaultService constructor to load metadata in `internal/vault/vault.go` (lines ~50-80, add metadata loading logic)
 - [ ] T011 [FOUNDATION] Implement fallback self-discovery logic in VaultService constructor in `internal/vault/vault.go` (after metadata load attempt)
+- [ ] T011a [FOUNDATION] Verify event type constants in `internal/security/audit.go` (confirm "keychain_status" and "vault_remove" event types exist, add if missing)
 
 **Checkpoint**: Foundation ready - metadata persistence works, VaultService loads metadata on initialization. All foundational unit tests pass.
 
@@ -60,7 +62,7 @@
 
 **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T012 [P] [US1] Write integration test for keychain status with metadata in `test/keychain_status_test.go` (test audit entry written)
+- [ ] T012 [P] [US1] Write integration test for keychain status with metadata in `test/keychain_status_test.go` (test audit entry written per FR-007, verify event_type matches internal/security/audit.go constants)
 - [ ] T013 [P] [US1] Write integration test for vault remove with metadata in `test/vault_remove_test.go` (test audit attempt + success entries written)
 - [ ] T014 [P] [US1] Write integration test for corrupted metadata fallback in `test/vault_metadata_test.go` (test self-discovery works)
 - [ ] T015 [P] [US1] Write integration test for multiple vaults in same directory in `test/vault_metadata_test.go` (test correct vault identified)
@@ -139,7 +141,7 @@
 - [ ] T044 [P] Run `golangci-lint run` and verify zero issues
 - [ ] T045 [P] Run `gosec ./...` and verify zero new security issues
 - [ ] T046 [P] Run quickstart.md validation scenarios (create vault, enable audit, run status/remove, verify audit entries)
-- [ ] T047 [P] Verify SC-003: Metadata operations complete in <50ms (benchmark test)
+- [ ] T047 [P] Verify SC-003: Metadata operations complete in <50ms using `go test -bench BenchmarkMetadata.*` in `internal/vault/metadata_test.go` (run benchmarks from T004a)
 - [ ] T048 [P] Verify SC-001: 100% of keychain status operations write audit entries (20+ test runs per platform)
 - [ ] T049 [P] Verify SC-002: 100% of vault remove operations write audit entries (20+ test runs)
 - [ ] T050 [P] Verify SC-004: Backward compatibility with existing vaults (test with vault created in v1.0)
@@ -251,7 +253,7 @@ Task: "Write integration test for multiple vaults in same directory in test/vaul
 
 With 3 developers:
 
-1. **All together**: Complete Foundational (T001-T011) - CRITICAL blocker
+1. **All together**: Complete Foundational (T001-T011a) - CRITICAL blocker
 2. **Once Foundational is done**:
    - Developer A: User Story 1 (T012-T020) - P1 MVP
    - Developer B: User Story 2 (T021-T031) - P2 Compatibility
@@ -279,14 +281,14 @@ With 3 developers:
 
 ## Task Completion Summary
 
-**Total Tasks**: 53
-- Foundational: 11 tasks (T001-T011)
+**Total Tasks**: 55
+- Foundational: 13 tasks (T001-T011a)
 - User Story 1 (P1 MVP): 9 tasks (T012-T020)
 - User Story 2 (P2): 11 tasks (T021-T031)
 - User Story 3 (P3): 10 tasks (T032-T041)
 - Polish: 12 tasks (T042-T053)
 
-**Parallel Opportunities**: 28 tasks marked [P] (53% parallelizable)
+**Parallel Opportunities**: 30 tasks marked [P] (55% parallelizable)
 
 **Independent Test Criteria**:
 - US1: Run `keychain status` and `vault remove`, verify audit.log entries
