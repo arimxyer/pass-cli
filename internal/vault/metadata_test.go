@@ -403,6 +403,12 @@ func TestMetadataPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Skip Windows path test on non-Windows platforms
+			// (filepath.Dir doesn't parse Windows paths correctly on Unix)
+			if tt.name == "Windows path" && filepath.Separator != '\\' {
+				t.Skip("Windows path test only runs on Windows")
+			}
+
 			result := MetadataPath(tt.vaultPath)
 			// Normalize paths for comparison
 			expectedNorm := filepath.FromSlash(tt.expected)
