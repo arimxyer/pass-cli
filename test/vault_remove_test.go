@@ -257,8 +257,8 @@ func TestIntegration_VaultRemoveWithMetadata(t *testing.T) {
 	}
 	initialLines := len(strings.Split(string(initialAuditData), "\n"))
 
-	// Run vault remove command with --yes flag
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "vault", "remove", "--yes")
+	// Run vault remove command with --yes flag (path is positional argument)
+	cmd = exec.Command(binaryPath, "vault", "remove", vaultPath, "--yes")
 	stdout.Reset()
 	stderr.Reset()
 	cmd.Stdout = &stdout
@@ -313,8 +313,8 @@ func TestIntegration_VaultRemoveWithMetadata(t *testing.T) {
 
 		outcome, _ := auditEntry["outcome"].(string)
 
-		// Check for vault_remove_attempt or vault_remove with "initiated" outcome
-		if eventType == "vault_remove_attempt" || (eventType == "vault_remove" && outcome == "initiated") {
+		// Check for vault_remove_attempt or vault_remove with "attempt" outcome
+		if eventType == "vault_remove_attempt" || (eventType == "vault_remove" && outcome == "attempt") {
 			foundAttempt = true
 			t.Logf("✓ Found attempt entry: event_type=%s, outcome=%s", eventType, outcome)
 		}

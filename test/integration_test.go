@@ -190,8 +190,9 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 
 	t.Run("5_Update_Credential", func(t *testing.T) {
 		// Use flags to avoid interactive mode (readPassword() requires terminal)
+		// Use --force to skip usage confirmation since credential was accessed in previous test
 		input := testPassword + "\n"
-		stdout, stderr, err := runCommandWithInput(t, input, "update", "github.com", "--username", "newuser", "--password", "new-github-pass-789")
+		stdout, stderr, err := runCommandWithInput(t, input, "update", "github.com", "--username", "newuser", "--password", "new-github-pass-789", "--force")
 
 		if err != nil {
 			t.Fatalf("Update failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
