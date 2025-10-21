@@ -125,12 +125,12 @@ description: "Task list for keychain lifecycle management feature implementation
 
 ### Tests for User Story 3 (TDD - Write FIRST, ensure they FAIL)
 
-- [ ] T024 [P] [US3] Unit test for remove command success - both deleted in `test/unit/keychain_lifecycle_test.go` - tests file + keychain deletion (contracts/commands.md lines 394-401)
-- [ ] T025 [P] [US3] Unit test for remove command - file missing, keychain exists in `test/unit/keychain_lifecycle_test.go` - tests FR-012 orphan cleanup (contracts/commands.md lines 394-401)
-- [ ] T026 [P] [US3] Unit test for remove command - user cancels confirmation in `test/unit/keychain_lifecycle_test.go` - tests no deletion on cancel (contracts/commands.md lines 394-401)
-- [ ] T027 [P] [US3] Unit test for remove command with --yes flag in `test/unit/keychain_lifecycle_test.go` - tests skip prompt (contracts/commands.md lines 394-401)
-- [ ] T028 [P] [US3] Unit test for remove command - audit log BEFORE deletion in `test/unit/keychain_lifecycle_test.go` - tests FR-015 logging order (contracts/commands.md line 400)
-- [ ] T029 [P] [US3] Integration test for remove command in `test/integration/vault_remove_test.go` - creates vault with keychain, removes, verifies 95% success rate across multiple runs (SC-003, contracts/commands.md lines 414-420)
+- [X] T024 [P] [US3] Unit test for remove command success - both deleted in `test/unit/keychain_lifecycle_test.go` - tests file + keychain deletion (contracts/commands.md lines 394-401)
+- [X] T025 [P] [US3] Unit test for remove command - file missing, keychain exists in `test/unit/keychain_lifecycle_test.go` - tests FR-012 orphan cleanup (contracts/commands.md lines 394-401)
+- [X] T026 [P] [US3] Unit test for remove command - user cancels confirmation in `test/unit/keychain_lifecycle_test.go` - tests no deletion on cancel (contracts/commands.md lines 394-401)
+- [X] T027 [P] [US3] Unit test for remove command with --yes flag in `test/unit/keychain_lifecycle_test.go` - tests skip prompt (contracts/commands.md lines 394-401)
+- [X] T028 [P] [US3] Unit test for remove command - audit log BEFORE deletion in `test/unit/keychain_lifecycle_test.go` - tests FR-015 logging order (contracts/commands.md line 400)
+- [X] T029 [P] [US3] Integration test for remove command in `test/vault_remove_test.go` - creates vault with keychain, removes, verifies 95% success rate across multiple runs (SC-003, contracts/commands.md lines 414-420)
 
 ### Implementation for User Story 3
 

@@ -1,6 +1,7 @@
 package unit_test
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -353,4 +354,196 @@ func TestKeychainStatus_AlwaysExitZero(t *testing.T) {
 	// 1. Run status command logic in various scenarios (enabled, not enabled, unavailable)
 	// 2. Verify all scenarios return nil error (exit code 0)
 	// 3. Status command is informational only, never returns error
+}
+
+// T024: Unit test for remove command success - both deleted
+// Tests: file + keychain deletion
+func TestVaultRemove_BothDeleted(t *testing.T) {
+	// Skip if keychain not available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
+
+	// Setup: Create temp vault WITH keychain
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	testPassword := []byte("TestPassword@123")
+
+	vs, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs.Initialize(testPassword, true, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	// Verify both vault file and keychain entry exist
+	if _, err := os.Stat(vaultPath); os.IsNotExist(err) {
+		t.Fatal("Vault file should exist")
+	}
+	if _, err := ks.Retrieve(); err != nil {
+		t.Fatal("Keychain entry should exist")
+	}
+
+	// Test will FAIL until cmd/vault_remove.go is implemented
+	t.Skip("TODO: Implement vault remove command (T030)")
+
+	// TODO T030: After implementation, test should:
+	// 1. Run remove command logic with confirmation
+	// 2. Verify vault file deleted (os.Stat returns IsNotExist)
+	// 3. Verify keychain entry deleted (ks.Retrieve() returns error)
+	// 4. Verify exit code 0 (success)
+}
+
+// T025: Unit test for remove command - file missing, keychain exists
+// Tests: FR-012 orphan cleanup
+func TestVaultRemove_FileMissingKeychainExists(t *testing.T) {
+	// Skip if keychain not available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
+
+	// Setup: Create temp vault WITH keychain, then manually delete file
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	testPassword := []byte("TestPassword@123")
+
+	vs, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs.Initialize(testPassword, true, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	// Manually delete vault file (simulate orphaned keychain entry)
+	if err := os.Remove(vaultPath); err != nil {
+		t.Fatalf("Failed to delete vault file: %v", err)
+	}
+
+	// Verify keychain entry still exists
+	if _, err := ks.Retrieve(); err != nil {
+		t.Fatal("Keychain entry should still exist")
+	}
+
+	// Cleanup keychain after test
+	defer ks.Delete()
+
+	// Test will FAIL until cmd/vault_remove.go is implemented
+	t.Skip("TODO: Implement vault remove command (T030)")
+
+	// TODO T030: After implementation, test should:
+	// 1. Run remove command logic
+	// 2. Verify keychain entry deleted (FR-012: orphan cleanup)
+	// 3. Verify no error (file missing is OK per FR-012)
+	// 4. Verify warning message about missing file
+}
+
+// T026: Unit test for remove command - user cancels confirmation
+// Tests: no deletion on cancel
+func TestVaultRemove_UserCancels(t *testing.T) {
+	// Skip if keychain not available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
+
+	// Setup: Create temp vault WITH keychain
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	testPassword := []byte("TestPassword@123")
+
+	vs, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs.Initialize(testPassword, true, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	// Cleanup keychain after test
+	defer ks.Delete()
+
+	// Test will FAIL until cmd/vault_remove.go is implemented
+	t.Skip("TODO: Implement vault remove command (T030)")
+
+	// TODO T030: After implementation, test should:
+	// 1. Run remove command logic with user input "n" or "no"
+	// 2. Verify vault file still exists
+	// 3. Verify keychain entry still exists
+	// 4. Verify exit code 1 (user cancelled)
+}
+
+// T027: Unit test for remove command with --yes flag
+// Tests: skip prompt
+func TestVaultRemove_WithYesFlag(t *testing.T) {
+	// Skip if keychain not available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
+
+	// Setup: Create temp vault WITH keychain
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	testPassword := []byte("TestPassword@123")
+
+	vs, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs.Initialize(testPassword, true, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	// Test will FAIL until cmd/vault_remove.go is implemented
+	t.Skip("TODO: Implement vault remove command (T030)")
+
+	// TODO T030: After implementation, test should:
+	// 1. Run remove command logic with --yes flag (no prompt)
+	// 2. Verify vault file deleted
+	// 3. Verify keychain entry deleted
+	// 4. Verify no confirmation prompt shown
+}
+
+// T028: Unit test for remove command - audit log BEFORE deletion
+// Tests: FR-015 logging order
+func TestVaultRemove_AuditLogBeforeDeletion(t *testing.T) {
+	// Skip if keychain not available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("Keychain not available on this platform")
+	}
+
+	// Setup: Create temp vault WITH keychain AND audit enabled
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	auditLogPath := filepath.Join(tempDir, "audit.log")
+	testPassword := []byte("TestPassword@123")
+
+	vs, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs.Initialize(testPassword, true, auditLogPath, vaultPath); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	// Cleanup keychain after test
+	defer ks.Delete()
+
+	// Test will FAIL until cmd/vault_remove.go is implemented
+	t.Skip("TODO: Implement vault remove command (T030)")
+
+	// TODO T030: After implementation, test should:
+	// 1. Run remove command logic
+	// 2. Verify audit log contains vault_remove event (logged BEFORE file deletion)
+	// 3. This prevents losing audit trail if deleting audit log itself
 }
