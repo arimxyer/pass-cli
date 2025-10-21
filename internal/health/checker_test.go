@@ -74,7 +74,8 @@ audit_enabled: false
 
 	// Verify all checks passed or have acceptable warnings (keychain only)
 	for _, check := range report.Checks {
-		if check.Status != CheckPass && !(check.Name == "keychain" && check.Status == CheckWarning) {
+		// Apply De Morgan's law: !(A && B) == (!A || !B)
+		if check.Status != CheckPass && (check.Name != "keychain" || check.Status != CheckWarning) {
 			t.Errorf("Check %s did not pass: status=%s, message=%s",
 				check.Name, check.Status, check.Message)
 		}
