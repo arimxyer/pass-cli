@@ -216,21 +216,21 @@ func detectUnknownFields(v *viper.Viper) []ValidationWarning {
 
 	// Define known fields (all valid config keys)
 	knownFields := map[string]bool{
-		"terminal":                    true,
-		"terminal.warning_enabled":    true,
-		"terminal.min_width":          true,
-		"terminal.min_height":         true,
-		"keybindings":                 true,
-		"keybindings.quit":            true,
-		"keybindings.add_credential":  true,
-		"keybindings.edit_credential": true,
+		"terminal":                      true,
+		"terminal.warning_enabled":      true,
+		"terminal.min_width":            true,
+		"terminal.min_height":           true,
+		"keybindings":                   true,
+		"keybindings.quit":              true,
+		"keybindings.add_credential":    true,
+		"keybindings.edit_credential":   true,
 		"keybindings.delete_credential": true,
-		"keybindings.toggle_detail":   true,
-		"keybindings.toggle_sidebar":  true,
-		"keybindings.help":            true,
-		"keybindings.search":          true,
-		"keybindings.confirm":         true,
-		"keybindings.cancel":          true,
+		"keybindings.toggle_detail":     true,
+		"keybindings.toggle_sidebar":    true,
+		"keybindings.help":              true,
+		"keybindings.search":            true,
+		"keybindings.confirm":           true,
+		"keybindings.cancel":            true,
 	}
 
 	// Check for unknown fields

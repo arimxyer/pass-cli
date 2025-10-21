@@ -70,11 +70,11 @@ func runChangePassword(cmd *cobra.Command, args []string) error {
 
 	// T047 [US3]: Display real-time strength indicator
 	policy := &security.PasswordPolicy{
-		MinLength:         12,
-		RequireUppercase:  true,
-		RequireLowercase:  true,
-		RequireDigit:      true,
-		RequireSymbol:     true,
+		MinLength:        12,
+		RequireUppercase: true,
+		RequireLowercase: true,
+		RequireDigit:     true,
+		RequireSymbol:    true,
 	}
 	strength := policy.Strength(newPassword)
 	switch strength {

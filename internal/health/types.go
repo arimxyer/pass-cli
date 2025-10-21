@@ -4,11 +4,11 @@ import "time"
 
 // VersionCheckDetails contains version check results
 type VersionCheckDetails struct {
-	Current    string `json:"current"`      // Current binary version (e.g., "v1.2.3")
-	Latest     string `json:"latest"`       // Latest GitHub release (e.g., "v1.2.4")
-	UpdateURL  string `json:"update_url"`   // GitHub release URL
-	UpToDate   bool   `json:"up_to_date"`   // Whether current version is latest
-	CheckError string `json:"check_error"`  // Network error message if offline
+	Current    string `json:"current"`     // Current binary version (e.g., "v1.2.3")
+	Latest     string `json:"latest"`      // Latest GitHub release (e.g., "v1.2.4")
+	UpdateURL  string `json:"update_url"`  // GitHub release URL
+	UpToDate   bool   `json:"up_to_date"`  // Whether current version is latest
+	CheckError string `json:"check_error"` // Network error message if offline
 }
 
 // VaultCheckDetails contains vault file check results
@@ -40,11 +40,11 @@ type ConfigError struct {
 
 // KeychainCheckDetails contains keychain status check results
 type KeychainCheckDetails struct {
-	Available       bool             `json:"available"`         // Keychain accessible
-	Backend         string           `json:"backend"`           // e.g., "Windows Credential Manager"
-	CurrentVault    *KeychainEntry   `json:"current_vault"`     // Entry for default vault
-	OrphanedEntries []KeychainEntry  `json:"orphaned_entries"`  // Entries for deleted vaults
-	AccessError     string           `json:"access_error"`      // Permission denial message
+	Available       bool            `json:"available"`        // Keychain accessible
+	Backend         string          `json:"backend"`          // e.g., "Windows Credential Manager"
+	CurrentVault    *KeychainEntry  `json:"current_vault"`    // Entry for default vault
+	OrphanedEntries []KeychainEntry `json:"orphaned_entries"` // Entries for deleted vaults
+	AccessError     string          `json:"access_error"`     // Permission denial message
 }
 
 // KeychainEntry represents a single keychain entry

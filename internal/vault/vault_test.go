@@ -1264,214 +1264,214 @@ func TestPasswordPolicy_ErrorMessagesDescriptive(t *testing.T) {
 				return
 			}
 
-							if !strings.Contains(strings.ToLower(err.Error()), strings.ToLower(tt.expectedInError)) {
-								t.Errorf("Error message should mention %s, got: %v", tt.expectedInError, err)
-							}
-						})
-					}
-				}
-			
-				// T056 [US4]: Test graceful degradation - vault operations continue if audit logging fails
-				// FR-026: System MUST continue operation even if audit logging fails
-				func TestVaultOperationsWithFailedAuditLogging(t *testing.T) {
-					vault, _, cleanup := setupTestVault(t)
-					defer cleanup()
-			
-					password := "TestPassword123!"
-			
-					// Initialize vault (audit logging not configured - should succeed anyway)
-					if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
-						t.Fatalf("Initialize() should succeed even without audit logging: %v", err)
-					}
-			
-					if err := vault.Unlock([]byte(password)); err != nil {
-						t.Fatalf("Unlock() should succeed even without audit logging: %v", err)
-					}
-			
-					// Test credential operations (should all succeed)
-					if err := vault.AddCredential("test", "user", []byte("pass"), "", "", ""); err != nil {
-						t.Fatalf("AddCredential() should succeed even without audit logging: %v", err)
-					}
-			
-					if _, err := vault.GetCredential("test", false); err != nil {
-						t.Fatalf("GetCredential() should succeed even without audit logging: %v", err)
-					}
-			
-					newPassword := []byte("new-pass")
-					if err := vault.UpdateCredential("test", UpdateOpts{Password: &newPassword}); err != nil {
-						t.Fatalf("UpdateCredential() should succeed even without audit logging: %v", err)
-					}
-			
-					if err := vault.DeleteCredential("test"); err != nil {
-						t.Fatalf("DeleteCredential() should succeed even without audit logging: %v", err)
-					}
-			
-					// Test password change (should succeed)
-					if err := vault.ChangePassword([]byte("NewVaultPass123!")); err != nil {
-						t.Fatalf("ChangePassword() should succeed even without audit logging: %v", err)
-					}
-			
-					vault.Lock() // Lock should succeed even without audit logging
-				}
-			
-				func TestVaultOperationsWithInvalidAuditPath(t *testing.T) {
-					vault, _, cleanup := setupTestVault(t)
-					defer cleanup()
-			
-					password := "TestPassword123!"
-			
-					// TODO: Once audit logging is implemented, configure with invalid path
-					// For now, test that operations work without audit configuration
-			
-					if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
-						t.Fatalf("Initialize() failed: %v", err)
-					}
-			
-					if err := vault.Unlock([]byte(password)); err != nil {
-						t.Fatalf("Unlock() failed: %v", err)
-					}
-			
-					// Vault operations should succeed regardless of audit configuration
-					if err := vault.AddCredential("test", "user", []byte("pass"), "", "", ""); err != nil {
-						t.Fatalf("AddCredential() should succeed: %v", err)
-					}
-				}
-			
-				func TestEnableKeychain(t *testing.T) {
-						vault, _, cleanup := setupTestVault(t)
-						defer cleanup()
-				
-						_ = vault.keychainService.Delete()			
-					password := "TestPassword123!"
-			
-					if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
-						t.Fatalf("Initialize() failed: %v", err)
-					}
-			
-					if err := vault.EnableKeychain([]byte(password), false); err != nil {
-						t.Fatalf("EnableKeychain() failed: %v", err)
-					}
-			
-					// Verify that the password is in the keychain
-					_, err := vault.keychainService.Retrieve()
-					if err != nil {
-						t.Fatalf("Failed to retrieve password from keychain: %v", err)
-					}
-			
-							// cleanup
-							_ = vault.keychainService.Delete()
-						}
-					
-						func TestEnableKeychainAlreadyEnabled(t *testing.T) {
-								vault, _, cleanup := setupTestVault(t)
-								defer cleanup()
-						
-								_ = vault.keychainService.Delete()					
-							password := "TestPassword123!"
-					
-							if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
-								t.Fatalf("Initialize() failed: %v", err)
-							}
-					
-							if err := vault.EnableKeychain([]byte(password), false); err != nil {
-								t.Fatalf("EnableKeychain() failed: %v", err)
-							}
-					
-							// Try to enable it again
-							err := vault.EnableKeychain([]byte(password), false)
-							if err != ErrKeychainAlreadyEnabled {
-								t.Errorf("Expected ErrKeychainAlreadyEnabled, got %v", err)
-							}
-					
-							// cleanup
-							_ = vault.keychainService.Delete()
-						}
-					
-						func TestEnableKeychainWithInvalidPassword(t *testing.T) {
-								vault, _, cleanup := setupTestVault(t)
-								defer cleanup()
-						
-								_ = vault.keychainService.Delete()					
-							password := "TestPassword123!"
-					
-							if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
-								t.Fatalf("Initialize() failed: %v", err)
-							}
-					
-							// Try to enable with the wrong password
-							err := vault.EnableKeychain([]byte("wrong-password"), false)
-							if err == nil {
-								t.Error("Expected error when enabling keychain with invalid password")
-							}
-						}
-					
-						func TestGetKeychainStatus(t *testing.T) {
-								vault, _, cleanup := setupTestVault(t)
-								defer cleanup()
-						
-								_ = vault.keychainService.Delete()					
-							password := "TestPassword123!"
-					
-							if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
-								t.Fatalf("Initialize() failed: %v", err)
-							}
-					
-							status := vault.GetKeychainStatus()
-					
-							if status.PasswordStored {
-								t.Error("Password should not be stored in keychain yet")
-							}
-					
-							if err := vault.EnableKeychain([]byte(password), false); err != nil {
-								t.Fatalf("EnableKeychain() failed: %v", err)
-							}
-					
-							status = vault.GetKeychainStatus()
-					
-							if !status.PasswordStored {
-								t.Error("Password should be stored in keychain")
-							}
-					
-							// cleanup
-							_ = vault.keychainService.Delete()
-						}
-					
-						func TestRemoveVault(t *testing.T) {
-								vault, vaultPath, cleanup := setupTestVault(t)
-								defer cleanup()
-						
-								_ = vault.keychainService.Delete()					
-							password := "TestPassword123!"
-					
-							if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
-								t.Fatalf("Initialize() failed: %v", err)
-							}
-					
-							if err := vault.EnableKeychain([]byte(password), false); err != nil {
-								t.Fatalf("EnableKeychain() failed: %v", err)
-							}
-					
-							result, err := vault.RemoveVault(false)
-							if err != nil {
-								t.Fatalf("RemoveVault() failed: %v", err)
-							}
-					
-							if !result.FileDeleted {
-								t.Error("Vault file should have been deleted")
-							}
-					
-							if !result.KeychainDeleted {
-								t.Error("Keychain entry should have been deleted")
-							}
-					
-							// Verify that the file is gone
-							if _, err := os.Stat(vaultPath); !os.IsNotExist(err) {
-								t.Error("Vault file still exists")
-							}
-					
-							// Verify that the password is not in the keychain
-							_, err = vault.keychainService.Retrieve()
-							if err == nil {
-								t.Error("Password still exists in keychain")
-							}
-						}
+			if !strings.Contains(strings.ToLower(err.Error()), strings.ToLower(tt.expectedInError)) {
+				t.Errorf("Error message should mention %s, got: %v", tt.expectedInError, err)
+			}
+		})
+	}
+}
+
+// T056 [US4]: Test graceful degradation - vault operations continue if audit logging fails
+// FR-026: System MUST continue operation even if audit logging fails
+func TestVaultOperationsWithFailedAuditLogging(t *testing.T) {
+	vault, _, cleanup := setupTestVault(t)
+	defer cleanup()
+
+	password := "TestPassword123!"
+
+	// Initialize vault (audit logging not configured - should succeed anyway)
+	if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
+		t.Fatalf("Initialize() should succeed even without audit logging: %v", err)
+	}
+
+	if err := vault.Unlock([]byte(password)); err != nil {
+		t.Fatalf("Unlock() should succeed even without audit logging: %v", err)
+	}
+
+	// Test credential operations (should all succeed)
+	if err := vault.AddCredential("test", "user", []byte("pass"), "", "", ""); err != nil {
+		t.Fatalf("AddCredential() should succeed even without audit logging: %v", err)
+	}
+
+	if _, err := vault.GetCredential("test", false); err != nil {
+		t.Fatalf("GetCredential() should succeed even without audit logging: %v", err)
+	}
+
+	newPassword := []byte("new-pass")
+	if err := vault.UpdateCredential("test", UpdateOpts{Password: &newPassword}); err != nil {
+		t.Fatalf("UpdateCredential() should succeed even without audit logging: %v", err)
+	}
+
+	if err := vault.DeleteCredential("test"); err != nil {
+		t.Fatalf("DeleteCredential() should succeed even without audit logging: %v", err)
+	}
+
+	// Test password change (should succeed)
+	if err := vault.ChangePassword([]byte("NewVaultPass123!")); err != nil {
+		t.Fatalf("ChangePassword() should succeed even without audit logging: %v", err)
+	}
+
+	vault.Lock() // Lock should succeed even without audit logging
+}
+
+func TestVaultOperationsWithInvalidAuditPath(t *testing.T) {
+	vault, _, cleanup := setupTestVault(t)
+	defer cleanup()
+
+	password := "TestPassword123!"
+
+	// TODO: Once audit logging is implemented, configure with invalid path
+	// For now, test that operations work without audit configuration
+
+	if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+
+	if err := vault.Unlock([]byte(password)); err != nil {
+		t.Fatalf("Unlock() failed: %v", err)
+	}
+
+	// Vault operations should succeed regardless of audit configuration
+	if err := vault.AddCredential("test", "user", []byte("pass"), "", "", ""); err != nil {
+		t.Fatalf("AddCredential() should succeed: %v", err)
+	}
+}
+
+func TestEnableKeychain(t *testing.T) {
+	vault, _, cleanup := setupTestVault(t)
+	defer cleanup()
+
+	_ = vault.keychainService.Delete()
+	password := "TestPassword123!"
+
+	if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+
+	if err := vault.EnableKeychain([]byte(password), false); err != nil {
+		t.Fatalf("EnableKeychain() failed: %v", err)
+	}
+
+	// Verify that the password is in the keychain
+	_, err := vault.keychainService.Retrieve()
+	if err != nil {
+		t.Fatalf("Failed to retrieve password from keychain: %v", err)
+	}
+
+	// cleanup
+	_ = vault.keychainService.Delete()
+}
+
+func TestEnableKeychainAlreadyEnabled(t *testing.T) {
+	vault, _, cleanup := setupTestVault(t)
+	defer cleanup()
+
+	_ = vault.keychainService.Delete()
+	password := "TestPassword123!"
+
+	if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+
+	if err := vault.EnableKeychain([]byte(password), false); err != nil {
+		t.Fatalf("EnableKeychain() failed: %v", err)
+	}
+
+	// Try to enable it again
+	err := vault.EnableKeychain([]byte(password), false)
+	if err != ErrKeychainAlreadyEnabled {
+		t.Errorf("Expected ErrKeychainAlreadyEnabled, got %v", err)
+	}
+
+	// cleanup
+	_ = vault.keychainService.Delete()
+}
+
+func TestEnableKeychainWithInvalidPassword(t *testing.T) {
+	vault, _, cleanup := setupTestVault(t)
+	defer cleanup()
+
+	_ = vault.keychainService.Delete()
+	password := "TestPassword123!"
+
+	if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+
+	// Try to enable with the wrong password
+	err := vault.EnableKeychain([]byte("wrong-password"), false)
+	if err == nil {
+		t.Error("Expected error when enabling keychain with invalid password")
+	}
+}
+
+func TestGetKeychainStatus(t *testing.T) {
+	vault, _, cleanup := setupTestVault(t)
+	defer cleanup()
+
+	_ = vault.keychainService.Delete()
+	password := "TestPassword123!"
+
+	if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+
+	status := vault.GetKeychainStatus()
+
+	if status.PasswordStored {
+		t.Error("Password should not be stored in keychain yet")
+	}
+
+	if err := vault.EnableKeychain([]byte(password), false); err != nil {
+		t.Fatalf("EnableKeychain() failed: %v", err)
+	}
+
+	status = vault.GetKeychainStatus()
+
+	if !status.PasswordStored {
+		t.Error("Password should be stored in keychain")
+	}
+
+	// cleanup
+	_ = vault.keychainService.Delete()
+}
+
+func TestRemoveVault(t *testing.T) {
+	vault, vaultPath, cleanup := setupTestVault(t)
+	defer cleanup()
+
+	_ = vault.keychainService.Delete()
+	password := "TestPassword123!"
+
+	if err := vault.Initialize([]byte(password), false, "", ""); err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+
+	if err := vault.EnableKeychain([]byte(password), false); err != nil {
+		t.Fatalf("EnableKeychain() failed: %v", err)
+	}
+
+	result, err := vault.RemoveVault(false)
+	if err != nil {
+		t.Fatalf("RemoveVault() failed: %v", err)
+	}
+
+	if !result.FileDeleted {
+		t.Error("Vault file should have been deleted")
+	}
+
+	if !result.KeychainDeleted {
+		t.Error("Keychain entry should have been deleted")
+	}
+
+	// Verify that the file is gone
+	if _, err := os.Stat(vaultPath); !os.IsNotExist(err) {
+		t.Error("Vault file still exists")
+	}
+
+	// Verify that the password is not in the keychain
+	_, err = vault.keychainService.Retrieve()
+	if err == nil {
+		t.Error("Password still exists in keychain")
+	}
+}

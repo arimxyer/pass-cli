@@ -103,7 +103,7 @@ func runAdd(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to read password: %w", err)
 		}
-		fmt.Println() // newline after password input
+		fmt.Println()                  // newline after password input
 		addPassword = string(password) // TODO: Remove string conversion in Phase 3 (T020d)
 	}
 

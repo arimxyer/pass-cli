@@ -495,11 +495,11 @@ func TestModalPreservation_DuringWarning(t *testing.T) {
 // around the minimum size threshold.
 func TestHandleResize_BoundaryEdgeCases(t *testing.T) {
 	tests := []struct {
-		name          string
-		width         int
-		height        int
-		shouldWarn    bool
-		description   string
+		name        string
+		width       int
+		height      int
+		shouldWarn  bool
+		description string
 	}{
 		{
 			name:        "59×30 - width just below minimum",

@@ -296,11 +296,11 @@ func TestPasswordPolicy_Validate_AllRequirements(t *testing.T) {
 func TestPasswordPolicy_Validate_CustomPolicy(t *testing.T) {
 	// Test with custom policy (less restrictive)
 	customPolicy := PasswordPolicy{
-		MinLength:         8,
-		RequireUppercase:  false,
-		RequireLowercase:  true,
-		RequireDigit:      true,
-		RequireSymbol:     false,
+		MinLength:        8,
+		RequireUppercase: false,
+		RequireLowercase: true,
+		RequireDigit:     true,
+		RequireSymbol:    false,
 	}
 
 	tests := []struct {
@@ -356,11 +356,11 @@ func TestPasswordPolicy_Strength_Weak(t *testing.T) {
 	policy := DefaultPasswordPolicy
 
 	weakPasswords := [][]byte{
-		[]byte("Password123!"),     // Minimum requirements only (12 chars)
-		[]byte("Abcdefgh123!"),     // Exactly 12 chars
-		[]byte("Short1!Aa"),        // Less than 12 chars (should be rejected by Validate)
-		[]byte("Password1!"),       // 10 chars
-		[]byte("HelloWorld1!"),     // 12 chars, simple pattern
+		[]byte("Password123!"), // Minimum requirements only (12 chars)
+		[]byte("Abcdefgh123!"), // Exactly 12 chars
+		[]byte("Short1!Aa"),    // Less than 12 chars (should be rejected by Validate)
+		[]byte("Password1!"),   // 10 chars
+		[]byte("HelloWorld1!"), // 12 chars, simple pattern
 	}
 
 	for _, password := range weakPasswords {
@@ -377,11 +377,11 @@ func TestPasswordPolicy_Strength_Medium(t *testing.T) {
 	policy := DefaultPasswordPolicy
 
 	mediumPasswords := [][]byte{
-		[]byte("MySecurePass123!"),        // 16 chars with variety
-		[]byte("GoodPassword2023!"),       // 16 chars
-		[]byte("Testing@Password1"),       // 17 chars
-		[]byte("HelloWorld123!@#"),        // Multiple symbols
-		[]byte("P@ssw0rd!Testing"),        // 16 chars with substitutions
+		[]byte("MySecurePass123!"),  // 16 chars with variety
+		[]byte("GoodPassword2023!"), // 16 chars
+		[]byte("Testing@Password1"), // 17 chars
+		[]byte("HelloWorld123!@#"),  // Multiple symbols
+		[]byte("P@ssw0rd!Testing"),  // 16 chars with substitutions
 	}
 
 	for _, password := range mediumPasswords {
@@ -398,11 +398,11 @@ func TestPasswordPolicy_Strength_Strong(t *testing.T) {
 	policy := DefaultPasswordPolicy
 
 	strongPasswords := [][]byte{
-		[]byte("ThisIsAVerySecureP@ssw0rd2024!"),           // 30+ chars
-		[]byte("Correct-Horse-Battery-Staple-2024!"),       // Long passphrase
-		[]byte("MyUltraSecurePassword123!@#$%"),            // 28 chars with variety
-		[]byte("ComplexP@ssw0rd!WithManyCharacters"),       // Long with variety
-		[]byte("Security2024!@#$%^&*()HighEntropy"),        // Many special chars
+		[]byte("ThisIsAVerySecureP@ssw0rd2024!"),     // 30+ chars
+		[]byte("Correct-Horse-Battery-Staple-2024!"), // Long passphrase
+		[]byte("MyUltraSecurePassword123!@#$%"),      // 28 chars with variety
+		[]byte("ComplexP@ssw0rd!WithManyCharacters"), // Long with variety
+		[]byte("Security2024!@#$%^&*()HighEntropy"),  // Many special chars
 	}
 
 	for _, password := range strongPasswords {
@@ -680,12 +680,12 @@ func TestPasswordPolicy_Strength_Unicode(t *testing.T) {
 	policy := DefaultPasswordPolicy
 
 	unicodePasswords := [][]byte{
-		[]byte("Pàsswörd123!"),                              // Accented letters
-		[]byte("MyÜberSecurePassword2024!"),                 // German umlauts
-		[]byte("ContraseñaSegura123!"),                      // Spanish ñ
-		[]byte("密码SecurePassword123!"),                      // Chinese characters
-		[]byte("パスワードPassword123!"),                        // Japanese
-		[]byte("비밀번호SecurePass123!"),                        // Korean
+		[]byte("Pàsswörd123!"),              // Accented letters
+		[]byte("MyÜberSecurePassword2024!"), // German umlauts
+		[]byte("ContraseñaSegura123!"),      // Spanish ñ
+		[]byte("密码SecurePassword123!"),      // Chinese characters
+		[]byte("パスワードPassword123!"),         // Japanese
+		[]byte("비밀번호SecurePass123!"),        // Korean
 	}
 
 	for _, password := range unicodePasswords {

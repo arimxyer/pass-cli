@@ -24,25 +24,25 @@ const (
 
 // HealthChecker defines interface for individual health checks
 type HealthChecker interface {
-	Name() string                             // Check name (e.g., "version", "vault")
-	Run(ctx context.Context) CheckResult      // Execute check and return result
+	Name() string                        // Check name (e.g., "version", "vault")
+	Run(ctx context.Context) CheckResult // Execute check and return result
 }
 
 // CheckResult represents a single health check outcome
 type CheckResult struct {
-	Name           string      `json:"name"`            // e.g., "version", "vault", "config"
-	Status         CheckStatus `json:"status"`          // pass, warning, error
-	Message        string      `json:"message"`         // Human-readable result
-	Recommendation string      `json:"recommendation"`  // Actionable fix (empty if passed)
-	Details        interface{} `json:"details"`         // Check-specific structured data
+	Name           string      `json:"name"`           // e.g., "version", "vault", "config"
+	Status         CheckStatus `json:"status"`         // pass, warning, error
+	Message        string      `json:"message"`        // Human-readable result
+	Recommendation string      `json:"recommendation"` // Actionable fix (empty if passed)
+	Details        interface{} `json:"details"`        // Check-specific structured data
 }
 
 // HealthSummary provides high-level statistics
 type HealthSummary struct {
-	Passed   int `json:"passed"`     // Number of checks that passed
-	Warnings int `json:"warnings"`   // Number of warnings
-	Errors   int `json:"errors"`     // Number of errors
-	ExitCode int `json:"exit_code"`  // 0=healthy, 1=warnings, 2=errors, 3=security
+	Passed   int `json:"passed"`    // Number of checks that passed
+	Warnings int `json:"warnings"`  // Number of warnings
+	Errors   int `json:"errors"`    // Number of errors
+	ExitCode int `json:"exit_code"` // 0=healthy, 1=warnings, 2=errors, 3=security
 }
 
 // HealthReport aggregates all health check results

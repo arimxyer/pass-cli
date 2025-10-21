@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	useKeychain  bool
-	enableAudit  bool   // T073: Flag to enable audit logging (FR-025)
+	useKeychain bool
+	enableAudit bool // T073: Flag to enable audit logging (FR-025)
 )
 
 var initCmd = &cobra.Command{
@@ -67,11 +67,11 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	// T047 [US3]: Display real-time strength indicator
 	policy := &security.PasswordPolicy{
-		MinLength:         12,
-		RequireUppercase:  true,
-		RequireLowercase:  true,
-		RequireDigit:      true,
-		RequireSymbol:     true,
+		MinLength:        12,
+		RequireUppercase: true,
+		RequireLowercase: true,
+		RequireDigit:     true,
+		RequireSymbol:    true,
 	}
 	strength := policy.Strength(password)
 	switch strength {

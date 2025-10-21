@@ -35,9 +35,9 @@ type PageManager struct {
 	app        *tview.Application
 	modalStack []string // Track modal names for proper close operations
 
-	sizeWarningActive bool   // Track whether terminal size warning is currently displayed
+	sizeWarningActive  bool             // Track whether terminal size warning is currently displayed
 	pendingSizeWarning *tview.Primitive // Pending warning modal to be added on next safe opportunity
-	pendingHideWarning bool   // Flag to hide warning on next safe opportunity
+	pendingHideWarning bool             // Flag to hide warning on next safe opportunity
 }
 
 // NewPageManager creates a new page manager for handling modals and page switching.

@@ -117,24 +117,24 @@ func (af *AddForm) buildFormFields() {
 
 	// New autocomplete input field for Category
 	categoryField := tview.NewInputField().
-      SetLabel("Category").
-      SetFieldWidth(0)
+		SetLabel("Category").
+		SetFieldWidth(0)
 
-  categoryField.SetAutocompleteFunc(func(currentText string) []string {
-      if currentText == "" {
-          return categories
-      }
-      var matches []string
-      lowerText := strings.ToLower(currentText)
-      for _, cat := range categories {
-          if strings.HasPrefix(strings.ToLower(cat), lowerText) {
-              matches = append(matches, cat)
-          }
-      }
-      return matches
-  })
+	categoryField.SetAutocompleteFunc(func(currentText string) []string {
+		if currentText == "" {
+			return categories
+		}
+		var matches []string
+		lowerText := strings.ToLower(currentText)
+		for _, cat := range categories {
+			if strings.HasPrefix(strings.ToLower(cat), lowerText) {
+				matches = append(matches, cat)
+			}
+		}
+		return matches
+	})
 
-  af.form.AddFormItem(categoryField)
+	af.form.AddFormItem(categoryField)
 	af.form.AddInputField("URL", "", 0, nil, nil)
 	af.form.AddTextArea("Notes", "", 0, 5, 0, nil)
 
@@ -294,8 +294,8 @@ func (af *AddForm) wrapInFrame() {
 	// Create Flex layout: form on top, hints at bottom
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(af.form, 0, 1, true).  // Form takes all available space
-		AddItem(hints, 2, 0, false)     // Hints fixed at 2 rows (enough for wrapped text)
+		AddItem(af.form, 0, 1, true). // Form takes all available space
+		AddItem(hints, 2, 0, false)   // Hints fixed at 2 rows (enough for wrapped text)
 
 	// Apply border and title to the flex container
 	flex.SetBorder(true).
@@ -305,7 +305,6 @@ func (af *AddForm) wrapInFrame() {
 
 	af.Flex = flex
 }
-
 
 // setupKeyboardShortcuts configures form-level keyboard shortcuts.
 // Adds Ctrl+S for quick-save and ensures Tab/Shift+Tab stay within form.
@@ -711,8 +710,8 @@ func (ef *EditForm) wrapInFrame() {
 	// Create Flex layout: form on top, hints at bottom
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(ef.form, 0, 1, true).  // Form takes all available space
-		AddItem(hints, 2, 0, false)     // Hints fixed at 2 rows (enough for wrapped text)
+		AddItem(ef.form, 0, 1, true). // Form takes all available space
+		AddItem(hints, 2, 0, false)   // Hints fixed at 2 rows (enough for wrapped text)
 
 	// Apply border and title to the flex container
 	flex.SetBorder(true).

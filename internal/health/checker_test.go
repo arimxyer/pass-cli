@@ -153,7 +153,7 @@ func TestRunChecks_WithErrors(t *testing.T) {
 	opts := CheckOptions{
 		CurrentVersion: "v1.2.3",
 		GitHubRepo:     "test/pass-cli",
-		VaultPath:      tmpDir + "/nonexistent-vault.enc",  // Doesn't exist
+		VaultPath:      tmpDir + "/nonexistent-vault.enc", // Doesn't exist
 		VaultDir:       tmpDir,
 		ConfigPath:     tmpDir + "/config.yaml",
 	}

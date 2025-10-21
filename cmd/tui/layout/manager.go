@@ -314,18 +314,18 @@ func (lm *LayoutManager) shouldShowSidebar() bool {
 // When search is inactive, returns just the table.
 func (lm *LayoutManager) getTableArea() tview.Primitive {
 	searchState := lm.appState.GetSearchState()
-	
+
 	// If search is not active, return table directly
 	if searchState == nil || !searchState.Active {
 		return lm.table
 	}
-	
+
 	// Search is active - create vertical Flex with InputField + Table
 	tableArea := tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(searchState.InputField, 1, 0, true). // Search input (1 row, focusable)
-		AddItem(lm.table, 0, 1, false)                // Table (flex height, not directly focusable)
-	
+		AddItem(lm.table, 0, 1, false)               // Table (flex height, not directly focusable)
+
 	return tableArea
 }
 
