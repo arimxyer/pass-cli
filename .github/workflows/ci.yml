@@ -6,6 +6,11 @@ on:
     paths-ignore:
       - '**.md'
       - 'docs/**'
+      - 'specs/**'
+      - '.specify/**'
+      - 'CLAUDE.md'
+      - 'CONTRIBUTING.md'
+      - 'DEVELOPMENT.md'
       - 'LICENSE'
       - '.gitignore'
   pull_request:
@@ -13,6 +18,11 @@ on:
     paths-ignore:
       - '**.md'
       - 'docs/**'
+      - 'specs/**'
+      - '.specify/**'
+      - 'CLAUDE.md'
+      - 'CONTRIBUTING.md'
+      - 'DEVELOPMENT.md'
       - 'LICENSE'
       - '.gitignore'
 

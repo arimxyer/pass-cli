@@ -61,12 +61,18 @@ archives:
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
 
-    # Files to include in archive
+    # Files to include in archive (user-facing docs only)
     files:
       - LICENSE*
       - README*
       - CHANGELOG*
-      - docs/*
+      - docs/INSTALLATION.md
+      - docs/USAGE.md
+      - docs/SECURITY.md
+      - docs/TROUBLESHOOTING.md
+      - docs/KNOWN_LIMITATIONS.md
+      - docs/MIGRATION.md
+      - docs/README.md
 
 checksum:
   name_template: "checksums.txt"
