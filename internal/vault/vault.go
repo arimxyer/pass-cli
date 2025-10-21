@@ -116,7 +116,7 @@ func New(vaultPath string) (*VaultService, error) {
 		return nil, fmt.Errorf("failed to create storage service: %w", err)
 	}
 
-	return &VaultService{
+	v := &VaultService{
 		vaultPath:       vaultPath,
 		cryptoService:   cryptoService,
 		storageService:  storageService,
@@ -124,7 +124,36 @@ func New(vaultPath string) (*VaultService, error) {
 		unlocked:        false,
 		auditEnabled:    false,      // T066: Default disabled per FR-025
 		rateLimiter:     security.NewValidationRateLimiter(), // T051a: Initialize rate limiter
-	}, nil
+	}
+
+	// T010: Load metadata file (if exists) to enable audit logging before vault unlock
+	meta, err := LoadMetadata(vaultPath)
+	if err != nil {
+		// Metadata exists but corrupted - log warning and try fallback (T011)
+		fmt.Fprintf(os.Stderr, "Warning: Failed to load metadata: %v\n", err)
+		meta = nil
+	}
+
+	// Initialize audit from metadata
+	if meta != nil && meta.AuditEnabled && meta.AuditLogPath != "" {
+		if err := v.EnableAudit(meta.AuditLogPath, meta.VaultID); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to enable audit from metadata: %v\n", err)
+		}
+	}
+
+	// T011: Fallback self-discovery if metadata missing/failed
+	if meta == nil {
+		auditLogPath := filepath.Join(filepath.Dir(vaultPath), "audit.log")
+		if _, err := os.Stat(auditLogPath); err == nil {
+			// audit.log exists, enable best-effort audit
+			if err := v.EnableAudit(auditLogPath, vaultPath); err != nil {
+				// Best-effort failed, continue without audit (non-fatal)
+				fmt.Fprintf(os.Stderr, "Warning: Self-discovery audit init failed: %v\n", err)
+			}
+		}
+	}
+
+	return v, nil
 }
 
 // T066: EnableAudit enables audit logging for this vault
@@ -152,6 +181,20 @@ func (v *VaultService) EnableAudit(auditLogPath, vaultID string) error {
 		if err := v.save(); err != nil {
 			return fmt.Errorf("failed to persist audit configuration: %w", err)
 		}
+	}
+
+	// T026 (US2): Save metadata file for pre-unlock audit logging
+	meta := &VaultMetadata{
+		VaultID:      vaultID,
+		AuditEnabled: true,
+		AuditLogPath: auditLogPath,
+		CreatedAt:    time.Now().UTC(),
+		Version:      1,
+	}
+
+	if err := SaveMetadata(meta, v.vaultPath); err != nil {
+		// Non-fatal: audit logger is enabled, metadata save failed
+		fmt.Fprintf(os.Stderr, "Warning: Failed to save metadata: %v\n", err)
 	}
 
 	return nil
@@ -347,6 +390,50 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 		if err := v.EnableAudit(vaultData.AuditLogPath, vaultData.VaultID); err != nil {
 			// Log warning but don't fail unlock - audit logging is optional
 			fmt.Fprintf(os.Stderr, "Warning: failed to restore audit logging: %v\n", err)
+		}
+	}
+
+	// T027-T029: Metadata synchronization (User Story 2)
+	// Load existing metadata (if any)
+	meta, err := LoadMetadata(v.vaultPath)
+	if err != nil {
+		// Metadata corrupted - will be recreated if audit enabled
+		fmt.Fprintf(os.Stderr, "Warning: Corrupted metadata, will recreate: %v\n", err)
+		meta = nil
+	}
+
+	// T028: Check for metadata/vault config mismatch
+	if meta != nil {
+		mismatch := meta.AuditEnabled != vaultData.AuditEnabled ||
+			meta.AuditLogPath != vaultData.AuditLogPath ||
+			meta.VaultID != vaultData.VaultID
+
+		// T029: Synchronize metadata when mismatch detected (vault settings take precedence per FR-012)
+		if mismatch {
+			updatedMeta := &VaultMetadata{
+				VaultID:      vaultData.VaultID,
+				AuditEnabled: vaultData.AuditEnabled,
+				AuditLogPath: vaultData.AuditLogPath,
+				CreatedAt:    meta.CreatedAt, // Preserve original timestamp
+				Version:      1,
+			}
+
+			if err := SaveMetadata(updatedMeta, v.vaultPath); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to sync metadata: %v\n", err)
+			}
+		}
+	} else if vaultData.AuditEnabled && vaultData.AuditLogPath != "" {
+		// T027: Create metadata if missing and audit enabled in vault
+		newMeta := &VaultMetadata{
+			VaultID:      vaultData.VaultID,
+			AuditEnabled: true,
+			AuditLogPath: vaultData.AuditLogPath,
+			CreatedAt:    time.Now().UTC(),
+			Version:      1,
+		}
+
+		if err := SaveMetadata(newMeta, v.vaultPath); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to create metadata: %v\n", err)
 		}
 	}
 
@@ -923,18 +1010,34 @@ func (v *VaultService) GetKeychainStatus() *KeychainStatus {
 
 // RemoveVault permanently deletes the vault file and its keychain entry.
 func (v *VaultService) RemoveVault(force bool) (*RemoveVaultResult, error) {
+	// T016: Load metadata to enable audit logging before vault deletion
+	meta, err := LoadMetadata(v.vaultPath)
+	if err == nil && meta != nil && meta.AuditEnabled && meta.AuditLogPath != "" {
+		// Enable audit from metadata (if not already enabled)
+		if !v.auditEnabled {
+			if err := v.EnableAudit(meta.AuditLogPath, meta.VaultID); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to enable audit: %v\n", err)
+			}
+		}
+	}
+
+	// T017: Log vault_remove_attempt before deletion
 	v.LogAudit(security.EventVaultRemove, security.OutcomeAttempt, v.vaultPath)
 
 	result := &RemoveVaultResult{}
 
 	// Attempt to delete vault file
-	err := os.Remove(v.vaultPath)
+	err = os.Remove(v.vaultPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			result.FileNotFound = true
 		} else if os.IsPermission(err) && !force {
+			// T018: Log failure on permission error
+			v.LogAudit(security.EventVaultRemove, security.OutcomeFailure, v.vaultPath)
 			return nil, fmt.Errorf("vault file is in use or permission denied. Use --force to override")
 		} else if !force {
+			// T018: Log failure
+			v.LogAudit(security.EventVaultRemove, security.OutcomeFailure, v.vaultPath)
 			return nil, fmt.Errorf("failed to delete vault file: %w", err)
 		}
 		// If --force is set, continue even on errors
@@ -959,10 +1062,16 @@ func (v *VaultService) RemoveVault(force bool) (*RemoveVaultResult, error) {
 		result.KeychainNotFound = true
 	}
 
+	// T018: Log success/failure based on deletion results
 	if result.FileDeleted || result.KeychainDeleted {
 		v.LogAudit(security.EventVaultRemove, security.OutcomeSuccess, v.vaultPath)
 	} else {
 		v.LogAudit(security.EventVaultRemove, security.OutcomeFailure, v.vaultPath)
+	}
+
+	// T019: Delete metadata file after final audit entry
+	if err := DeleteMetadata(v.vaultPath); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: Failed to delete metadata: %v\n", err)
 	}
 
 	return result, nil
