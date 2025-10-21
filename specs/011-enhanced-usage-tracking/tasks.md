@@ -10,6 +10,9 @@
 ## Format: `[ID] [P?] [Story] Description`
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+  - US1 = User Story 1 (Detailed Credential Usage View)
+  - US2 = User Story 2 (Group Credentials by Project)
+  - US3 = User Story 3 (Filter Credentials by Location)
 - Include exact file paths in descriptions
 
 ## Path Conventions
@@ -155,6 +158,9 @@
 - [ ] T060 Code cleanup: Remove debug logging, optimize sorting/filtering logic
 - [ ] T061 Final integration test: Verify all three user stories work together without conflicts
 - [ ] T062 Documentation: Update user guide with "Organizing Credentials by Context" section
+- [ ] T063 [P] Update `list` command help text to document `--by-project` and `--location` flags (per spec.md Documentation Updates)
+- [ ] T064 [P] Add user guide section "Organizing Credentials by Context" explaining single-vault model (per spec.md Documentation Updates)
+- [ ] T065 [P] Add troubleshooting FAQ section for common usage tracking questions: "Why is my usage data empty?" (per spec.md Documentation Updates)
 
 ---
 
@@ -190,7 +196,7 @@
   - Developer A: User Story 1 (cmd/usage.go)
   - Developer B: User Story 2 (cmd/list.go --by-project)
   - Developer C: User Story 3 (cmd/list.go --location)
-- All Polish tasks T053-T059 marked [P] can run in parallel
+- All Polish tasks T053-T059, T063-T065 marked [P] can run in parallel
 
 ---
 
@@ -292,7 +298,7 @@ Tasks T037-T052 (list --location in cmd/list.go)
 2. Add User Story 1 (T005-T023) → `usage` command working
 3. Add User Story 2 (T024-T036) → `list --by-project` working
 4. Add User Story 3 (T037-T052) → `list --location` working
-5. Complete Polish (T053-T062) → Performance validated, edge cases tested, docs updated
+5. Complete Polish (T053-T065) → Performance validated, edge cases tested, docs updated
 
 **Deliverable**: Complete Enhanced Usage Tracking CLI with all three user stories
 
@@ -306,7 +312,7 @@ With three developers:
    - Developer B: User Story 2 (cmd/list.go --by-project) - T024-T036
    - Developer C: User Story 3 (cmd/list.go --location) - T037-T052
 3. Stories complete and integrate independently
-4. Team completes Polish together (T053-T062)
+4. Team completes Polish together (T053-T065)
 
 **Timeline**: ~3 days with parallel execution vs. ~7 days sequential
 
@@ -328,19 +334,19 @@ With three developers:
 
 ## Task Summary
 
-**Total Tasks**: 62
+**Total Tasks**: 65
 - **Foundational**: 4 tasks (T001-T004) - Helper functions
 - **User Story 1 (P1 MVP)**: 19 tasks (T005-T023) - 10 tests + 9 implementation
 - **User Story 2 (P2)**: 13 tasks (T024-T036) - 5 tests + 8 implementation
 - **User Story 3 (P3)**: 16 tasks (T037-T052) - 5 tests + 11 implementation
-- **Polish**: 10 tasks (T053-T062) - Performance, security, docs
+- **Polish**: 13 tasks (T053-T065) - Performance, security, docs
 
-**Parallel Opportunities**: 38 tasks marked [P] can run in parallel
+**Parallel Opportunities**: 41 tasks marked [P] can run in parallel
 - Foundational: 3 parallel tasks (T001-T003)
 - User Story 1 tests: 10 parallel tasks (T005-T014)
 - User Story 2 tests: 5 parallel tasks (T024-T028)
 - User Story 3 tests: 5 parallel tasks (T037-T041)
-- Polish: 9 parallel tasks (T053-T059)
+- Polish: 12 parallel tasks (T053-T059, T063-T065)
 - User stories can run in parallel: US1 (cmd/usage.go), US2+US3 (cmd/list.go with coordination)
 
 **Independent Test Criteria**:

@@ -121,10 +121,10 @@ As a developer working in a specific project directory, I want to filter credent
 
 ### Measurable Outcomes
 
-- **SC-001**: Users can view detailed credential usage history in under 3 seconds for credentials with up to 50 usage locations
+- **SC-001**: Users can view detailed credential usage history in under 3 seconds for credentials with up to 50 usage locations (measured on typical developer hardware: 4-core CPU, 8GB RAM, SSD)
 - **SC-002**: 100% of usage data displayed in TUI detail view is accessible via `pass-cli usage` command
-- **SC-003**: Users can successfully filter credentials by project context using `list --by-project` with results displayed in under 2 seconds for vaults with up to 100 credentials
-- **SC-004**: Users can successfully filter credentials by location path using `list --location` with results displayed in under 2 seconds
+- **SC-003**: Users can successfully filter credentials by project context using `list --by-project` with results displayed in under 2 seconds for vaults with up to 100 credentials (measured on typical developer hardware: 4-core CPU, 8GB RAM, SSD)
+- **SC-004**: Users can successfully filter credentials by location path using `list --location` with results displayed in under 2 seconds (measured on typical developer hardware: 4-core CPU, 8GB RAM, SSD)
 - **SC-005**: All new commands support script-friendly JSON output that can be parsed by standard JSON tools (jq, Python json module, etc.)
 - **SC-006**: Users can discover project-specific credentials without prior knowledge of credential names (via `list --by-project` or `list --location`)
 
