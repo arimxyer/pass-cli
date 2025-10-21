@@ -22,10 +22,10 @@
 
 **Purpose**: Project initialization and directory structure for health checks
 
-- [ ] **T001** [P] [Setup] Create `internal/health/` directory for health check library
-- [ ] **T002** [P] [Setup] Create `test/` files: `doctor_test.go`, `firstrun_test.go` for integration tests
-- [ ] **T003** [P] [Setup] Create `specs/011-doctor-command-for/contracts/` directory (already exists, verify)
-- [ ] **T003a** [P] [Setup] Verify build process injects version via ldflags in `Makefile` or `.goreleaser.yml`
+- [X] **T001** [P] [Setup] Create `internal/health/` directory for health check library
+- [X] **T002** [P] [Setup] Create `test/` files: `doctor_test.go`, `firstrun_test.go` for integration tests
+- [X] **T003** [P] [Setup] Create `specs/011-doctor-command-for/contracts/` directory (already exists, verify)
+- [X] **T003a** [P] [Setup] Verify build process injects version via ldflags in `Makefile` or `.goreleaser.yml`
   - Confirm `-ldflags "-X main.version=$(VERSION)"` or equivalent exists
   - If missing, add version injection to build commands
   - Document version variable location (e.g., `cmd/version.go` or `main.go`)
