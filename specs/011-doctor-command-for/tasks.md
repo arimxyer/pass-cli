@@ -71,67 +71,67 @@
 
 **⚠️ CRITICAL**: Write these tests FIRST, verify they FAIL, then implement
 
-- [ ] **T007** [P] [US1] Unit test: `TestVersionCheck_UpToDate` in `internal/health/version_test.go`
+- [X] **T007** [P] [US1] Unit test: `TestVersionCheck_UpToDate` in `internal/health/version_test.go`
   - Current == Latest → Pass status
 
-- [ ] **T008** [P] [US1] Unit test: `TestVersionCheck_UpdateAvailable` in `internal/health/version_test.go`
+- [X] **T008** [P] [US1] Unit test: `TestVersionCheck_UpdateAvailable` in `internal/health/version_test.go`
   - Current < Latest → Warning status with update URL
 
-- [ ] **T009** [P] [US1] Unit test: `TestVersionCheck_NetworkTimeout` in `internal/health/version_test.go`
+- [X] **T009** [P] [US1] Unit test: `TestVersionCheck_NetworkTimeout` in `internal/health/version_test.go`
   - Offline/timeout → Pass status with check_error field populated
 
-- [ ] **T010** [P] [US1] Unit test: `TestVaultCheck_Exists` in `internal/health/vault_test.go`
+- [X] **T010** [P] [US1] Unit test: `TestVaultCheck_Exists` in `internal/health/vault_test.go`
   - Vault present, readable, 0600 permissions → Pass status
 
-- [ ] **T011** [P] [US1] Unit test: `TestVaultCheck_Missing` in `internal/health/vault_test.go`
+- [X] **T011** [P] [US1] Unit test: `TestVaultCheck_Missing` in `internal/health/vault_test.go`
   - No vault file → Error status with specific message
 
-- [ ] **T012** [P] [US1] Unit test: `TestVaultCheck_PermissionsWarning` in `internal/health/vault_test.go`
+- [X] **T012** [P] [US1] Unit test: `TestVaultCheck_PermissionsWarning` in `internal/health/vault_test.go`
   - Vault with 0644 permissions → Warning status
 
-- [ ] **T013** [P] [US1] Unit test: `TestConfigCheck_Valid` in `internal/health/config_test.go`
+- [X] **T013** [P] [US1] Unit test: `TestConfigCheck_Valid` in `internal/health/config_test.go`
   - Valid YAML, all values in range → Pass status
 
-- [ ] **T014** [P] [US1] Unit test: `TestConfigCheck_InvalidValue` in `internal/health/config_test.go`
+- [X] **T014** [P] [US1] Unit test: `TestConfigCheck_InvalidValue` in `internal/health/config_test.go`
   - clipboard_timeout=500 → Warning status with recommendation
 
-- [ ] **T015** [P] [US1] Unit test: `TestConfigCheck_UnknownKeys` in `internal/health/config_test.go`
+- [X] **T015** [P] [US1] Unit test: `TestConfigCheck_UnknownKeys` in `internal/health/config_test.go`
   - Typo in config key → Warning status
 
-- [ ] **T016** [P] [US1] Unit test: `TestKeychainCheck_Healthy` in `internal/health/keychain_test.go`
+- [X] **T016** [P] [US1] Unit test: `TestKeychainCheck_Healthy` in `internal/health/keychain_test.go`
   - Password stored, no orphaned entries → Pass status
 
-- [ ] **T017** [P] [US1] Unit test: `TestKeychainCheck_OrphanedEntries` in `internal/health/keychain_test.go`
+- [X] **T017** [P] [US1] Unit test: `TestKeychainCheck_OrphanedEntries` in `internal/health/keychain_test.go`
   - Keychain entry for deleted vault → Error status with orphan list
 
-- [ ] **T018** [P] [US1] Unit test: `TestBackupCheck_NoBackups` in `internal/health/backup_test.go`
+- [X] **T018** [P] [US1] Unit test: `TestBackupCheck_NoBackups` in `internal/health/backup_test.go`
   - No *.backup files → Pass status
 
-- [ ] **T019** [P] [US1] Unit test: `TestBackupCheck_OldBackup` in `internal/health/backup_test.go`
+- [X] **T019** [P] [US1] Unit test: `TestBackupCheck_OldBackup` in `internal/health/backup_test.go`
   - Backup >24h old → Warning status with age details
 
-- [ ] **T020** [P] [US1] Unit test: `TestRunChecks_AllPass` in `internal/health/checker_test.go`
+- [X] **T020** [P] [US1] Unit test: `TestRunChecks_AllPass` in `internal/health/checker_test.go`
   - All checks pass → ExitCode=0, summary correct
 
-- [ ] **T021** [P] [US1] Unit test: `TestRunChecks_WithWarnings` in `internal/health/checker_test.go`
+- [X] **T021** [P] [US1] Unit test: `TestRunChecks_WithWarnings` in `internal/health/checker_test.go`
   - Some warnings → ExitCode=1, summary correct
 
-- [ ] **T022** [P] [US1] Unit test: `TestRunChecks_WithErrors` in `internal/health/checker_test.go`
+- [X] **T022** [P] [US1] Unit test: `TestRunChecks_WithErrors` in `internal/health/checker_test.go`
   - Some errors → ExitCode=2, summary correct
 
-- [ ] **T023** [P] [US1] Integration test: `TestDoctorCommand_Healthy` in `test/doctor_test.go`
+- [X] **T023** [P] [US1] Integration test: `TestDoctorCommand_Healthy` in `test/doctor_test.go`
   - Run `pass-cli doctor` with healthy vault → Exit 0, human-readable output
 
-- [ ] **T024** [P] [US1] Integration test: `TestDoctorCommand_JSON` in `test/doctor_test.go`
+- [X] **T024** [P] [US1] Integration test: `TestDoctorCommand_JSON` in `test/doctor_test.go`
   - Run `pass-cli doctor --json` → Valid JSON schema per contract
 
-- [ ] **T025** [P] [US1] Integration test: `TestDoctorCommand_Quiet` in `test/doctor_test.go`
+- [X] **T025** [P] [US1] Integration test: `TestDoctorCommand_Quiet` in `test/doctor_test.go`
   - Run `pass-cli doctor --quiet` → No stdout/stderr, exit code only
 
-- [ ] **T026** [P] [US1] Integration test: `TestDoctorCommand_Offline` in `test/doctor_test.go`
+- [X] **T026** [P] [US1] Integration test: `TestDoctorCommand_Offline` in `test/doctor_test.go`
   - Network unavailable → Version check skipped gracefully
 
-- [ ] **T027** [P] [US1] Integration test: `TestDoctorCommand_NoVault` in `test/doctor_test.go`
+- [X] **T027** [P] [US1] Integration test: `TestDoctorCommand_NoVault` in `test/doctor_test.go`
   - Vault missing → Exit 2, reports vault error
 
 ### Implementation for User Story 1

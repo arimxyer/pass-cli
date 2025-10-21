@@ -6,6 +6,7 @@ import "context"
 type VersionChecker struct {
 	currentVersion string
 	githubRepo     string
+	apiBaseURL     string // For testing - defaults to GitHub API
 }
 
 // NewVersionChecker creates a new version checker
@@ -13,6 +14,7 @@ func NewVersionChecker(currentVersion string, githubRepo string) HealthChecker {
 	return &VersionChecker{
 		currentVersion: currentVersion,
 		githubRepo:     githubRepo,
+		apiBaseURL:     "https://api.github.com", // Default to real GitHub API
 	}
 }
 
