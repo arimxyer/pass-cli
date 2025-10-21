@@ -52,5 +52,8 @@ Thumbs.db
 .github/prompts/
 .spec-workflow/
 
+# Development notes (keep local only)
+n-n-o-*.md
+
 # Test debugging
 test-debug/
