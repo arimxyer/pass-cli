@@ -92,7 +92,7 @@ func SaveMetadata(meta *VaultMetadata, vaultPath string) error {
 
 	// Atomic rename
 	if err := os.Rename(tmpPath, metaPath); err != nil {
-		os.Remove(tmpPath) // Cleanup on failure
+		_ = os.Remove(tmpPath) // Cleanup on failure (best-effort)
 		return fmt.Errorf("failed to save metadata: %w", err)
 	}
 
