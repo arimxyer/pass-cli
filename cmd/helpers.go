@@ -189,8 +189,8 @@ func formatUsageTable(records []vault.UsageRecord) string {
 	w := tabwriter.NewWriter(&builder, 0, 0, 2, ' ', 0)
 
 	// Header
-	fmt.Fprintln(w, "Location\tRepository\tLast Used\tCount\tFields")
-	fmt.Fprintln(w, "────────────────────────────────────────────────────────────────────────────────────")
+	_, _ = fmt.Fprintln(w, "Location\tRepository\tLast Used\tCount\tFields")
+	_, _ = fmt.Fprintln(w, "────────────────────────────────────────────────────────────────────────────────────")
 
 	// Rows
 	for _, record := range records {
@@ -203,9 +203,9 @@ func formatUsageTable(records []vault.UsageRecord) string {
 		count := fmt.Sprintf("%d", record.Count)
 		fields := formatFieldCounts(record.FieldAccess)
 
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", location, repository, lastUsed, count, fields)
+		_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", location, repository, lastUsed, count, fields)
 	}
 
-	w.Flush()
+	_ = w.Flush()
 	return builder.String()
 }
