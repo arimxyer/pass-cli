@@ -187,7 +187,7 @@
 
 **CLI Command Implementation**:
 
-- [ ] **T033** [US1] Implement doctor command in `cmd/doctor.go`
+- [X] **T033** [US1] Implement doctor command in `cmd/doctor.go`
   - Define `doctorCmd` Cobra command with Use: "doctor"
   - Add flags: `--json`, `--quiet`, `--verbose` (bool flags)
   - RunE implementation:
@@ -197,24 +197,24 @@
     - Format output based on flags (depends on T034, T035, T036)
     - Exit with report.Summary.ExitCode
 
-- [ ] **T034** [P] [US1] Implement human-readable formatter in `cmd/doctor.go`
+- [X] **T034** [P] [US1] Implement human-readable formatter in `cmd/doctor.go`
   - Function `outputHumanReadable(report HealthReport)`
   - Format with colors: ✅ green (pass), ⚠️ yellow (warning), ❌ red (error)
   - Show check name, status, message, recommendation
   - Display summary: X checks passed, Y warnings, Z errors
   - Use `github.com/fatih/color` for colored output
 
-- [ ] **T035** [P] [US1] Implement JSON formatter in `cmd/doctor.go`
-  - Function `outputJSON(report HealthReport)`
+- [X] **T035** [P] [US1] Implement JSON formatter in `cmd/doctor.go`
+  - Function `outputHealthReportJSON(report HealthReport)`
   - Marshal HealthReport to JSON
   - Output to stdout with proper indentation
 
-- [ ] **T036** [P] [US1] Implement quiet mode handler in `cmd/doctor.go`
-  - Function `handleQuietMode(exitCode int)`
+- [X] **T036** [P] [US1] Implement quiet mode handler in `cmd/doctor.go`
+  - Quiet mode handled in runDoctor() with os.Exit()
   - No output to stdout/stderr
-  - Call `os.Exit(exitCode)` directly
+  - Exit with report.Summary.ExitCode directly
 
-- [ ] **T037** [US1] Register doctor command in `cmd/root.go`
+- [X] **T037** [US1] Register doctor command in `cmd/root.go`
   - Add `rootCmd.AddCommand(doctorCmd)` in init()
 
 **Verification**:
