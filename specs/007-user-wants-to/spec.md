@@ -2,7 +2,8 @@
 
 **Feature Branch**: `007-user-wants-to`
 **Created**: 2025-10-14
-**Status**: Draft
+**Status**: Implementation Complete
+**Completion**: 2025-10-20 (55/59 tasks completed, config.yml system with keybindings implemented)
 **Input**: User description: "User wants to add a configuration file (config.yml) that allows customization of terminal size warning thresholds and keyboard shortcuts. Config should live at ~/.config/pass-cli/config.yml (or Windows equivalent). File is optional - app ships with hardcoded defaults. When config exists, keybindings are loaded and all UI elements (status bar, help modal, form hints) automatically reflect the custom keys. Include config management commands: init, edit, reset, validate. Must validate for keybinding conflicts on load."
 
 ## Clarifications

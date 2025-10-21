@@ -1,4 +1,4 @@
-﻿### 1. Communication Standards
+### 1. Communication Standards
 
 **Be concise and direct**:
 - Avoid preamble like "Great!", "Sure!", "Let me help"
@@ -147,3 +147,137 @@ If you think the spec is wrong, unclear, or could be improved:
 **Critical Rule**: If a spec exists, follow it exactly. No questions asked, only execution.
 
 **When in doubt**: Read the spec docs, check existing patterns, and ask the user a question if the information isn't 100% clear according to the existing documentation.
+
+---
+
+# pass-cli Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2025-10-20
+
+## Active Technologies
+
+- Go 1.21+ (existing codebase) (011-keychain-lifecycle-management)
+
+## Project Structure
+
+```
+pass-cli/
+├── cmd/                      # CLI commands (Cobra-based)
+│   ├── tui/                  # TUI components (charmbracelet/bubbletea)
+│   ├── root.go               # Root command and global flags
+│   ├── init.go               # Vault initialization
+│   ├── add.go                # Add credential
+│   ├── get.go                # Retrieve credential
+│   ├── update.go             # Update credential
+│   ├── delete.go             # Delete credential
+│   ├── list.go               # List credentials
+│   ├── generate.go           # Generate password
+│   ├── change_password.go    # Change vault master password
+│   ├── verify_audit.go       # Verify audit log integrity
+│   ├── config.go             # Configuration management
+│   ├── version.go            # Version information
+│   └── helpers.go            # Shared command helpers
+├── internal/                 # Internal library packages
+│   ├── vault/                # Vault operations and credential management
+│   ├── crypto/               # Encryption/decryption (AES-GCM, password clearing)
+│   ├── keychain/             # OS keychain integration (Windows/macOS/Linux)
+│   ├── security/             # Audit logging with HMAC signatures
+│   ├── storage/              # File operations
+│   └── config/               # Configuration handling
+├── test/                     # Integration and unit tests
+│   ├── tui/                  # TUI integration tests
+│   ├── unit/                 # Unit tests
+│   ├── integration_test.go   # CLI integration tests
+│   ├── keychain_integration_test.go
+│   └── tui_integration_test.go
+├── specs/                    # Feature specifications (Speckit framework)
+├── docs/                     # Documentation
+├── .specify/                 # Speckit framework configuration
+├── main.go                   # Application entry point
+└── go.mod                    # Go module dependencies
+```
+
+**Architecture**: Library-first design (Constitution Principle II). CLI commands (`cmd/`) are thin wrappers that delegate to `internal/` packages. Single-vault model with multi-location usage tracking per credential.
+
+## Commands
+
+### Building
+```bash
+go build -o pass-cli .              # Build binary
+go install .                        # Install to GOPATH
+```
+
+### Testing
+```bash
+go test ./...                       # Run all tests
+go test -race ./...                 # Run with race detection
+go test -v -tags=integration -timeout 5m ./test  # Integration tests
+go test -coverprofile=coverage.out ./...         # Coverage report
+go tool cover -html=coverage.out -o coverage.html
+```
+
+### Code Quality
+```bash
+go fmt ./...                        # Format code
+go vet ./...                        # Static analysis
+golangci-lint run                   # Linting (comprehensive)
+gosec ./...                         # Security scanning
+govulncheck ./...                   # Vulnerability checking
+```
+
+### Pre-Commit Checks
+```bash
+go fmt ./...
+go vet ./...
+golangci-lint run
+go test -race ./...
+gosec ./...
+```
+
+## Code Style
+
+**General Principles**:
+- Follow Go best practices and idioms (Effective Go, Go Code Review Comments)
+- Library-first architecture: business logic in `internal/`, CLI in `cmd/`
+- Security-first: No credentials logged, memory cleared with `crypto.ClearBytes()`, audit logging for all operations
+- Test-driven development (TDD): Write tests before implementation
+
+**Naming Conventions**:
+- Packages: lowercase, no underscores (e.g., `keychain`, `vault`, `crypto`)
+- Exported types: PascalCase (e.g., `VaultService`, `UsageRecord`)
+- Unexported functions: camelCase (e.g., `readPassword`, `logAudit`)
+- Error variables: Prefix with `Err` (e.g., `ErrVaultLocked`, `ErrCredentialNotFound`)
+
+**Password Handling**:
+- Use `[]byte` type (never `string`)
+- Apply `defer crypto.ClearBytes(password)` immediately after allocation
+- Example pattern:
+  ```go
+  password, err := readPassword()
+  if err != nil { return err }
+  defer crypto.ClearBytes(password)  // CRITICAL: clear on all paths
+  ```
+
+**Error Handling**:
+- Wrap errors with context: `fmt.Errorf("failed to unlock vault: %w", err)`
+- Platform-specific error messages for keychain operations (Windows/macOS/Linux)
+- Graceful degradation (e.g., keychain unavailable should not crash)
+
+**Testing**:
+- Unit tests: `internal/` packages
+- Integration tests: `test/` directory with real vault files and keychain operations
+- Security tests: Verify audit logging, password clearing, no credential leakage
+- Test tags: `-tags=integration` for integration tests
+
+**Commit Messages**:
+- Format: `<type>: <description>` (e.g., `feat:`, `fix:`, `docs:`, `refactor:`)
+- Include body for non-trivial changes
+- Reference spec phases when implementing specs
+- Footer: `Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>`
+
+## Recent Changes
+
+- 011-keychain-lifecycle-management: Added Go 1.21+ (existing codebase)
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->

@@ -2,7 +2,8 @@
 
 **Feature Branch**: `002-hey-i-d`
 **Created**: 2025-10-09
-**Status**: Draft
+**Status**: Implementation Complete
+**Completion**: 2025-10-20 (62/69 tasks completed, core features implemented)
 **Input**: User description: "Hey, I'd like to implement a few more features to the app:
 
 1) First, I'd like to also implment a sidebar toggle, similar to how we've implemented the details toggle for the details panel

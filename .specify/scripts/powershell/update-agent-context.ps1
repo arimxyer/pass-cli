@@ -259,6 +259,69 @@ function New-AgentFile {
     return $true
 }
 
+function Test-HasSpeckitSections {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$FilePath
+    )
+    if (-not (Test-Path $FilePath)) { return $false }
+    $content = Get-Content -LiteralPath $FilePath -Raw -Encoding utf8
+    $hasActiveTech = $content -match '##\s+Active Technologies'
+    $hasRecentChanges = $content -match '##\s+Recent Changes'
+    $hasManualMarkers = $content -match '<!--\s*MANUAL ADDITIONS START\s*-->'
+    return ($hasActiveTech -and $hasRecentChanges -and $hasManualMarkers)
+}
+
+function Add-SpeckitSectionsToFile {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$TargetFile,
+        [Parameter(Mandatory=$true)]
+        [datetime]$Date
+    )
+
+    Write-WarningMsg "CLAUDE.md missing speckit sections - appending them to preserve custom content"
+
+    $techStack = Format-TechnologyStack -Lang $NEW_LANG -Framework $NEW_FRAMEWORK
+    $techEntries = @()
+    if ($techStack) { $techEntries += "- $techStack ($CURRENT_BRANCH)" }
+    if ($NEW_DB -and $NEW_DB -notin @('N/A','NEEDS CLARIFICATION')) {
+        $techEntries += "- $NEW_DB ($CURRENT_BRANCH)"
+    }
+
+    $changeEntry = ''
+    if ($techStack) { $changeEntry = "- ${CURRENT_BRANCH}: Added ${techStack}" }
+    elseif ($NEW_DB -and $NEW_DB -notin @('N/A','NEEDS CLARIFICATION')) {
+        $changeEntry = "- ${CURRENT_BRANCH}: Added ${NEW_DB}"
+    }
+
+    $speckitSections = @()
+    $speckitSections += ''
+    $speckitSections += '---'
+    $speckitSections += ''
+    $speckitSections += '## Active Technologies'
+    $speckitSections += ''
+    if ($techEntries.Count -gt 0) {
+        $techEntries | ForEach-Object { $speckitSections += $_ }
+    }
+    $speckitSections += ''
+    $speckitSections += '## Recent Changes'
+    $speckitSections += ''
+    if ($changeEntry) { $speckitSections += $changeEntry }
+    $speckitSections += ''
+    $speckitSections += '<!-- MANUAL ADDITIONS START -->'
+    $speckitSections += '<!-- MANUAL ADDITIONS END -->'
+    $speckitSections += ''
+    $speckitSections += "**Last updated**: $($Date.ToString('yyyy-MM-dd'))"
+
+    $existingContent = Get-Content -LiteralPath $TargetFile -Encoding utf8
+    $newContent = $existingContent + $speckitSections
+    Set-Content -LiteralPath $TargetFile -Value ($newContent -join [Environment]::NewLine) -Encoding utf8
+
+    Write-Success "Added speckit sections to existing file"
+    return $true
+}
+
 function Update-ExistingAgentFile {
     param(
         [Parameter(Mandatory=$true)]
@@ -267,6 +330,13 @@ function Update-ExistingAgentFile {
         [datetime]$Date
     )
     if (-not (Test-Path $TargetFile)) { return (New-AgentFile -TargetFile $TargetFile -ProjectName (Split-Path $REPO_ROOT -Leaf) -Date $Date) }
+
+    # Check if file has speckit sections - if not, add them
+    if (-not (Test-HasSpeckitSections -FilePath $TargetFile)) {
+        if (-not (Add-SpeckitSectionsToFile -TargetFile $TargetFile -Date $Date)) {
+            return $false
+        }
+    }
 
     $techStack = Format-TechnologyStack -Lang $NEW_LANG -Framework $NEW_FRAMEWORK
     $newTechEntries = @()

@@ -1,0 +1,207 @@
+//go:build integration
+// +build integration
+
+package test
+
+import (
+	"bytes"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"pass-cli/internal/keychain"
+)
+
+// T029: Integration test for remove command
+// Tests: creates vault with keychain, removes, verifies 95% success rate across multiple runs
+func TestIntegration_VaultRemove(t *testing.T) {
+	// Check if keychain is available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping vault remove integration test")
+	}
+
+	testPassword := "RemoveTest-Pass@123"
+	vaultPath := filepath.Join(testDir, "remove-test-vault", "vault.enc")
+
+	// Ensure clean state
+	defer cleanupKeychain(t, ks)
+	defer os.RemoveAll(filepath.Dir(vaultPath))
+
+	// Step 1: Initialize vault WITH keychain
+	t.Run("1_Init_With_Keychain", func(t *testing.T) {
+		input := testPassword + "\n" + testPassword + "\n"
+		cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--use-keychain")
+		cmd.Stdin = strings.NewReader(input)
+
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+		if err != nil {
+			t.Fatalf("Init with keychain failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+		}
+
+		// Verify vault file was created
+		if _, err := os.Stat(vaultPath); os.IsNotExist(err) {
+			t.Error("Vault file was not created")
+		}
+
+		// Verify password is in keychain
+		_, err = ks.Retrieve()
+		if err != nil {
+			t.Fatalf("Password was not stored in keychain: %v", err)
+		}
+	})
+
+	// Step 2: Remove vault with confirmation
+	t.Run("2_Remove_With_Confirmation", func(t *testing.T) {
+		// This test will FAIL until cmd/vault_remove.go is implemented (T030)
+		t.Skip("TODO: Implement vault remove command (T030)")
+
+		// TODO T030: After implementation, test should:
+		// input := "yes\n" // Confirm removal
+		// cmd := exec.Command(binaryPath, "vault", "remove", vaultPath)
+		// cmd.Stdin = strings.NewReader(input)
+		//
+		// var stdout, stderr bytes.Buffer
+		// cmd.Stdout = &stdout
+		// cmd.Stderr = &stderr
+		//
+		// err := cmd.Run()
+		// if err != nil {
+		//     t.Fatalf("Vault remove failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+		// }
+		//
+		// // Verify vault file was deleted
+		// if _, err := os.Stat(vaultPath); !os.IsNotExist(err) {
+		//     t.Error("Vault file should have been deleted")
+		// }
+		//
+		// // Verify keychain entry was deleted
+		// _, err = ks.Retrieve()
+		// if err == nil {
+		//     t.Error("Keychain entry should have been deleted")
+		// }
+	})
+
+	// Step 3: Test removal with --yes flag (no prompt)
+	t.Run("3_Remove_With_Yes_Flag", func(t *testing.T) {
+		t.Skip("TODO: Implement after T030 and T031 (depends on --yes flag)")
+
+		// TODO T031: After --yes flag implementation:
+		// // Recreate vault for this test
+		// input := testPassword + "\n" + testPassword + "\n"
+		// cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--use-keychain")
+		// cmd.Stdin = strings.NewReader(input)
+		// cmd.Run()
+		//
+		// // Remove with --yes flag (no prompt)
+		// cmd = exec.Command(binaryPath, "vault", "remove", vaultPath, "--yes")
+		//
+		// var stdout, stderr bytes.Buffer
+		// cmd.Stdout = &stdout
+		// cmd.Stderr = &stderr
+		//
+		// err := cmd.Run()
+		// if err != nil {
+		//     t.Fatalf("Vault remove --yes failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+		// }
+		//
+		// // Verify both deleted
+		// if _, err := os.Stat(vaultPath); !os.IsNotExist(err) {
+		//     t.Error("Vault file should have been deleted")
+		// }
+		// _, err = ks.Retrieve()
+		// if err == nil {
+		//     t.Error("Keychain entry should have been deleted")
+		// }
+	})
+
+	// Step 4: Test removal when vault file missing but keychain exists (FR-012)
+	t.Run("4_Remove_Orphaned_Keychain", func(t *testing.T) {
+		t.Skip("TODO: Implement after T030 (depends on remove command)")
+
+		// TODO T030: After implementation:
+		// // Recreate vault
+		// input := testPassword + "\n" + testPassword + "\n"
+		// cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--use-keychain")
+		// cmd.Stdin = strings.NewReader(input)
+		// cmd.Run()
+		//
+		// // Manually delete vault file (simulate orphaned keychain)
+		// os.Remove(vaultPath)
+		//
+		// // Remove should still clean up keychain
+		// cmd = exec.Command(binaryPath, "vault", "remove", vaultPath, "--yes")
+		//
+		// var stdout, stderr bytes.Buffer
+		// cmd.Stdout = &stdout
+		// cmd.Stderr = &stderr
+		//
+		// err := cmd.Run()
+		// if err != nil {
+		//     t.Fatalf("Remove orphaned keychain failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+		// }
+		//
+		// // Verify keychain entry was cleaned up
+		// _, err = ks.Retrieve()
+		// if err == nil {
+		//     t.Error("Orphaned keychain entry should have been deleted (FR-012)")
+		// }
+		//
+		// // Verify warning message about missing file
+		// output := stdout.String() + stderr.String()
+		// if !strings.Contains(output, "not found") && !strings.Contains(output, "missing") {
+		//     t.Error("Expected warning about missing vault file")
+		// }
+	})
+
+	// Step 5: Test 95% success rate (SC-003)
+	t.Run("5_Success_Rate_Test", func(t *testing.T) {
+		t.Skip("TODO: Implement after T030")
+
+		// TODO T030: After implementation, run remove 20 times and verify >=95% success
+		// successCount := 0
+		// totalRuns := 20
+		//
+		// for i := 0; i < totalRuns; i++ {
+		//     // Create vault
+		//     input := testPassword + "\n" + testPassword + "\n"
+		//     cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--use-keychain")
+		//     cmd.Stdin = strings.NewReader(input)
+		//     cmd.Run()
+		//
+		//     // Remove vault
+		//     cmd = exec.Command(binaryPath, "vault", "remove", vaultPath, "--yes")
+		//     err := cmd.Run()
+		//
+		//     // Check both file and keychain deleted
+		//     fileDeleted := false
+		//     if _, err := os.Stat(vaultPath); os.IsNotExist(err) {
+		//         fileDeleted = true
+		//     }
+		//
+		//     keychainDeleted := false
+		//     if _, err := ks.Retrieve(); err != nil {
+		//         keychainDeleted = true
+		//     }
+		//
+		//     if err == nil && fileDeleted && keychainDeleted {
+		//         successCount++
+		//     }
+		//
+		//     // Cleanup for next run
+		//     os.Remove(vaultPath)
+		//     ks.Delete()
+		// }
+		//
+		// successRate := float64(successCount) / float64(totalRuns) * 100
+		// if successRate < 95.0 {
+		//     t.Errorf("Success rate %.1f%% is below 95%% requirement (SC-003)", successRate)
+		// }
+	})
+}
