@@ -37,10 +37,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T001 [P] Create helper function `formatRelativeTime(timestamp time.Time) string` for human-readable timestamps in `cmd/helpers.go`
-- [ ] T002 [P] Create helper function `pathExists(path string) bool` for filesystem existence checks in `cmd/helpers.go`
-- [ ] T003 [P] Create helper function `formatFieldCounts(fieldCounts map[string]int) string` for "password:5, username:2" display in `cmd/helpers.go`
-- [ ] T004 Create table writer utility `formatUsageTable(records []vault.UsageRecord) string` in `cmd/helpers.go` (depends on T001, T003)
+- [x] T001 [P] Create helper function `formatRelativeTime(timestamp time.Time) string` for human-readable timestamps in `cmd/helpers.go`
+- [x] T002 [P] Create helper function `pathExists(path string) bool` for filesystem existence checks in `cmd/helpers.go`
+- [x] T003 [P] Create helper function `formatFieldCounts(fieldCounts map[string]int) string` for "password:5, username:2" display in `cmd/helpers.go`
+- [x] T004 Create table writer utility `formatUsageTable(records []vault.UsageRecord) string` in `cmd/helpers.go` (depends on T001, T003)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
