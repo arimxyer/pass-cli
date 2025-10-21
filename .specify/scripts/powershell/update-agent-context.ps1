@@ -280,7 +280,7 @@ function Add-SpeckitSectionsToFile {
         [datetime]$Date
     )
 
-    Write-WarningMsg "CLAUDE.md missing speckit sections - adding header and appending sections to preserve custom content"
+    Write-WarningMsg "CLAUDE.md missing speckit sections - appending them to preserve custom content"
 
     $techStack = Format-TechnologyStack -Lang $NEW_LANG -Framework $NEW_FRAMEWORK
     $techEntries = @()
@@ -295,151 +295,30 @@ function Add-SpeckitSectionsToFile {
         $changeEntry = "- ${CURRENT_BRANCH}: Added ${NEW_DB}"
     }
 
-    $existingContent = Get-Content -LiteralPath $TargetFile -Encoding utf8
-    $projectName = Split-Path $REPO_ROOT -Leaf
-
-    # Check if file already has a title header
-    $hasHeader = $existingContent[0] -match '^#\s+'
-
-    $output = New-Object System.Collections.Generic.List[string]
-
-    # Add header at top if missing
-    if (-not $hasHeader) {
-        $output.Add("# $projectName Development Guidelines")
-        $output.Add('')
-        $output.Add("Auto-generated from all feature plans. Last updated: $($Date.ToString('yyyy-MM-dd'))")
-        $output.Add('')
-    }
-
-    # Add existing content
-    $existingContent | ForEach-Object { $output.Add($_) }
-
-    # Append speckit sections at bottom
-    $output.Add('')
-    $output.Add('---')
-    $output.Add('')
-    $output.Add('## Active Technologies')
-    $output.Add('')
+    $speckitSections = @()
+    $speckitSections += ''
+    $speckitSections += '---'
+    $speckitSections += ''
+    $speckitSections += '## Active Technologies'
+    $speckitSections += ''
     if ($techEntries.Count -gt 0) {
-        $techEntries | ForEach-Object { $output.Add($_) }
+        $techEntries | ForEach-Object { $speckitSections += $_ }
     }
-    $output.Add('')
-    $output.Add('## Recent Changes')
-    $output.Add('')
-    if ($changeEntry) { $output.Add($changeEntry) }
-    $output.Add('')
-    $output.Add('<!-- MANUAL ADDITIONS START -->')
-    $output.Add('<!-- MANUAL ADDITIONS END -->')
+    $speckitSections += ''
+    $speckitSections += '## Recent Changes'
+    $speckitSections += ''
+    if ($changeEntry) { $speckitSections += $changeEntry }
+    $speckitSections += ''
+    $speckitSections += '<!-- MANUAL ADDITIONS START -->'
+    $speckitSections += '<!-- MANUAL ADDITIONS END -->'
+    $speckitSections += ''
+    $speckitSections += "**Last updated**: $($Date.ToString('yyyy-MM-dd'))"
 
-    Set-Content -LiteralPath $TargetFile -Value ($output -join [Environment]::NewLine) -Encoding utf8
+    $existingContent = Get-Content -LiteralPath $TargetFile -Encoding utf8
+    $newContent = $existingContent + $speckitSections
+    Set-Content -LiteralPath $TargetFile -Value ($newContent -join [Environment]::NewLine) -Encoding utf8
 
-    Write-Success "Added header and speckit sections to existing file"
-    return $true
-}
-
-function Ensure-CompleteTemplateSections {
-    <#
-    .SYNOPSIS
-    Ensures existing agent files have all template sections (Project Structure, Commands, Code Style)
-
-    .DESCRIPTION
-    Checks if an agent file has the three optional template sections and backfills them if missing.
-    Preserves existing content and inserts missing sections in the correct order.
-    Called after Add-SpeckitSectionsToFile to ensure files created before template expansion have all sections.
-
-    .PARAMETER TargetFile
-    Path to the agent file to check and update
-
-    .RETURNS
-    $true if sections were added or already present, $false on error
-    #>
-    param(
-        [Parameter(Mandatory=$true)]
-        [string]$TargetFile
-    )
-
-    if (-not (Test-Path $TargetFile)) { return $false }
-
-    $content = Get-Content -LiteralPath $TargetFile -Raw -Encoding utf8
-
-    # Check which sections are missing
-    $hasProjectStructure = $content -match '##\s+Project Structure'
-    $hasCommands = $content -match '##\s+Commands'
-    $hasCodeStyle = $content -match '##\s+Code Style'
-
-    # If all sections present, nothing to do
-    if ($hasProjectStructure -and $hasCommands -and $hasCodeStyle) {
-        return $true
-    }
-
-    Write-WarningMsg "Agent file missing template sections - backfilling..."
-
-    $lines = Get-Content -LiteralPath $TargetFile -Encoding utf8
-    $output = New-Object System.Collections.Generic.List[string]
-    $insertedSections = $false
-
-    for ($i = 0; $i -lt $lines.Count; $i++) {
-        $line = $lines[$i]
-
-        # Insert missing sections BEFORE "## Active Technologies"
-        if ($line -match '^##\s+Active Technologies' -and -not $insertedSections) {
-            # Add missing Project Structure section
-            if (-not $hasProjectStructure) {
-                $output.Add('## Project Structure')
-                $output.Add('')
-                $output.Add('[TODO: Add project directory structure and architecture notes]')
-                $output.Add('')
-            }
-
-            # Add missing Commands section
-            if (-not $hasCommands) {
-                $output.Add('## Commands')
-                $output.Add('')
-                $output.Add('[TODO: Add language/framework-specific commands]')
-                $output.Add('')
-            }
-
-            # Add missing Code Style section
-            if (-not $hasCodeStyle) {
-                $output.Add('## Code Style')
-                $output.Add('')
-                $output.Add('[TODO: Add coding conventions and style guidelines]')
-                $output.Add('')
-            }
-
-            # Add separator before Active Technologies only if not already present
-            # Check if last non-empty line is already a separator
-            $needsSeparator = $true
-            for ($j = $output.Count - 1; $j -ge 0; $j--) {
-                if (-not [string]::IsNullOrWhiteSpace($output[$j])) {
-                    if ($output[$j] -eq '---') {
-                        $needsSeparator = $false
-                    }
-                    break
-                }
-            }
-            if ($needsSeparator) {
-                $output.Add('---')
-                $output.Add('')
-            }
-
-            $insertedSections = $true
-        }
-
-        $output.Add($line)
-    }
-
-    Set-Content -LiteralPath $TargetFile -Value ($output -join [Environment]::NewLine) -Encoding utf8
-
-    $addedSections = @()
-    if (-not $hasProjectStructure) { $addedSections += "Project Structure" }
-    if (-not $hasCommands) { $addedSections += "Commands" }
-    if (-not $hasCodeStyle) { $addedSections += "Code Style" }
-
-    if ($addedSections.Count -gt 0) {
-        Write-Success "Backfilled missing sections: $($addedSections -join ', ')"
-    }
-
+    Write-Success "Added speckit sections to existing file"
     return $true
 }
 
@@ -457,11 +336,6 @@ function Update-ExistingAgentFile {
         if (-not (Add-SpeckitSectionsToFile -TargetFile $TargetFile -Date $Date)) {
             return $false
         }
-    }
-
-    # Ensure file has all template sections (Project Structure, Commands, Code Style)
-    if (-not (Ensure-CompleteTemplateSections -TargetFile $TargetFile)) {
-        Write-WarningMsg "Failed to backfill template sections, continuing anyway..."
     }
 
     $techStack = Format-TechnologyStack -Lang $NEW_LANG -Framework $NEW_FRAMEWORK
@@ -512,8 +386,7 @@ function Update-ExistingAgentFile {
             if ($existingChanges -lt 2) { $output.Add($line); $existingChanges++ }
             continue
         }
-        # Update "Last updated:" date in header (line 3 of template)
-        if ($line -match '^Auto-generated from all feature plans\. Last updated: \d{4}-\d{2}-\d{2}$') {
+        if ($line -match '\*\*Last updated\*\*: .*\d{4}-\d{2}-\d{2}') {
             $output.Add(($line -replace '\d{4}-\d{2}-\d{2}',$Date.ToString('yyyy-MM-dd')))
             continue
         }
