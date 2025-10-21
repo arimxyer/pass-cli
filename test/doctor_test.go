@@ -38,17 +38,27 @@ audit_enabled: true
 	output, err := cmd.CombinedOutput()
 
 	// Assertions
+	outputStr := string(output)
+
+	// Allow exit code 0 (all healthy) or 1 (warnings, like keychain unavailable in CI)
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
-			if exitErr.ExitCode() != 0 {
-				t.Errorf("Expected exit code 0, got %d. Output:\n%s", exitErr.ExitCode(), output)
+			exitCode := exitErr.ExitCode()
+			// Exit code 1 is acceptable if there are warnings (e.g., keychain unavailable in CI)
+			// Exit code 2 indicates errors, which should fail the test
+			if exitCode > 1 {
+				t.Errorf("Expected exit code 0 or 1 (warnings), got %d. Output:\n%s", exitCode, outputStr)
+			}
+			// If exit code is 1, verify it's due to warnings, not errors
+			if exitCode == 1 && !strings.Contains(outputStr, "warnings") {
+				t.Errorf("Exit code 1 without warnings detected. Output:\n%s", outputStr)
 			}
 		} else {
 			t.Fatalf("Failed to run doctor command: %v", err)
 		}
 	}
 
-	outputStr := string(output)
+	// Verify we have success indicators (even if warnings are present)
 	if !strings.Contains(outputStr, "✅") && !strings.Contains(outputStr, "pass") {
 		t.Errorf("Expected pass indicators in output, got:\n%s", outputStr)
 	}
