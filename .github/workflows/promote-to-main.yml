@@ -48,17 +48,29 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge develop to main
+      - name: Merge develop to main (selective)
         run: |
           git fetch origin main
           git checkout main
-          git merge origin/develop --no-ff -m "chore: promote develop to main
+
+          # Merge develop but don't commit yet
+          git merge origin/develop --no-ff --no-commit || true
+
+          # Remove development-only files from the merge
+          git reset HEAD specs/ .specify/ CLAUDE.md CONTRIBUTING.md DEVELOPMENT.md || true
+          git checkout -- specs/ .specify/ CLAUDE.md CONTRIBUTING.md DEVELOPMENT.md || true
+
+          # Complete the merge commit
+          git commit -m "chore: promote develop to main
 
           Merged develop branch to main for production deployment.
+          Development files (specs/, .specify/, CLAUDE.md, CONTRIBUTING.md, DEVELOPMENT.md)
+          excluded from merge to keep main clean.
 
           Generated with Claude Code
 
           Co-Authored-By: Claude <noreply@anthropic.com>"
+
           git push origin main
 
       - name: Summary
