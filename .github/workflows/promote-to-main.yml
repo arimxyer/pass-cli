@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   promote:
@@ -48,10 +49,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge develop to main (selective)
+      - name: Create promotion branch with selective merge
+        id: create-branch
         run: |
+          # Create unique branch name
+          BRANCH_NAME="promote-$(date +%Y%m%d-%H%M%S)"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+          # Fetch main and create promotion branch
           git fetch origin main
-          git checkout main
+          git checkout -b $BRANCH_NAME origin/main
 
           # Merge develop but don't commit yet
           git merge origin/develop --no-ff --no-commit || true
@@ -69,11 +76,41 @@ jobs:
 
           Generated with Claude Code
 
-          Co-Authored-By: Claude <noreply@anthropic.com>"
+          Co-Authored-By: Claude <noreply@anthropic.com>" || echo "No changes to commit"
 
-          git push origin main
+          # Push promotion branch
+          git push origin $BRANCH_NAME
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --base main \
+            --head ${{ steps.create-branch.outputs.branch_name }} \
+            --title "chore: promote develop to main" \
+            --body "$(cat <<'EOF'
+          ## Promotion from develop to main
+
+          This PR merges the latest changes from develop to main for production deployment.
+
+          **Development files excluded:**
+          - specs/
+          - .specify/
+          - CLAUDE.md
+          - CONTRIBUTING.md
+          - DEVELOPMENT.md
+
+          **Review checklist:**
+          - [ ] All CI checks passing on develop
+          - [ ] No unexpected file changes
+          - [ ] Ready for production deployment
+
+          Generated with Claude Code
+          EOF
+          )"
 
       - name: Summary
         run: |
-          echo "✅ Successfully promoted develop to main"
-          echo "Main branch is now ready for release tagging"
+          echo "✅ Pull request created for promotion to main"
+          echo "🔗 Review and merge at: https://github.com/${{ github.repository }}/pulls"
