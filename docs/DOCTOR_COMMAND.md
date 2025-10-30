@@ -388,7 +388,7 @@ This is expected. Run `pass-cli init` to create your vault, then `doctor` will s
 
 ## See Also
 
-- [Getting Started Guide](getting-started.md) - First-time setup and initialization
+- [Getting Started Guide](GETTING_STARTED.md) - First-time setup and initialization
 - [Troubleshooting](TROUBLESHOOTING.md) - Common issues and solutions
 - [Security Guide](SECURITY.md) - Security best practices
 - [Usage Guide](USAGE.md) - Complete command reference

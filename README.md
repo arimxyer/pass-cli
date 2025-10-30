@@ -57,7 +57,7 @@ pass-cli list
 export API_KEY=$(pass-cli get myservice --quiet --field password)
 ```
 
-For detailed usage and examples, see [docs/getting-started.md](docs/getting-started.md).
+For detailed usage and examples, see [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 
 ## Interactive TUI Mode
 

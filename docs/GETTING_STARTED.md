@@ -322,7 +322,7 @@ Health Check Results
 Overall Status: HEALTHY
 ```
 
-See [doctor-command.md](doctor-command.md) for detailed health check documentation.
+See [DOCTOR_COMMAND.md](DOCTOR_COMMAND.md) for detailed health check documentation.
 
 ### Common First-Time Issues
 

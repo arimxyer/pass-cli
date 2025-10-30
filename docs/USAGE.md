@@ -1436,7 +1436,7 @@ Health Check Results
 Overall Status: HEALTHY
 ```
 
-See [doctor-command.md](doctor-command.md) for detailed documentation and troubleshooting.
+See [DOCTOR_COMMAND.md](DOCTOR_COMMAND.md) for detailed documentation and troubleshooting.
 
 #### Why does doctor report orphaned keychain entries?
 
@@ -1544,7 +1544,7 @@ tty  # Should show /dev/pts/X or similar, not "not a tty"
 pass-cli init
 ```
 
-See [getting-started.md](getting-started.md) for complete first-run documentation.
+See [GETTING_STARTED.md](GETTING_STARTED.md) for complete first-run documentation.
 
 ## Getting Help
 
