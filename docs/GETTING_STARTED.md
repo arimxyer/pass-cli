@@ -405,22 +405,19 @@ cp ~/.pass-cli/vault.enc.backup.1 ~/.pass-cli/vault.enc
 
 ## Configuration
 
-Customize pass-cli behavior with `~/.pass-cli/config.json`:
+Customize pass-cli behavior with `~/.pass-cli/config.yaml`:
 
-```json
-{
-  "vault_path": "/home/user/.pass-cli/vault.enc",
-  "keychain_enabled": true,
-  "audit_enabled": true,
-  "backup_count": 3,
-  "password_policy": {
-    "min_length": 12,
-    "require_uppercase": true,
-    "require_lowercase": true,
-    "require_number": true,
-    "require_special": true
-  }
-}
+```yaml
+vault_path: /home/user/.pass-cli/vault.enc
+keychain_enabled: true
+audit_enabled: true
+backup_count: 3
+password_policy:
+  min_length: 12
+  require_uppercase: true
+  require_lowercase: true
+  require_number: true
+  require_special: true
 ```
 
 See [USAGE.md](USAGE.md) for complete configuration documentation.

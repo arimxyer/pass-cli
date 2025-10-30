@@ -164,13 +164,13 @@ esac
 **Symptom**:
 ```
 ✗ Vault: Vault file has insecure permissions (644)
-  Recommendation: Run 'chmod 600 /home/user/.pass/vault.enc'
+  Recommendation: Run 'chmod 600 /home/user/.pass-cli/vault.enc'
 ```
 
 **Solution**: Fix file permissions to restrict vault access:
 
 ```bash
-chmod 600 ~/.pass/vault.enc
+chmod 600 ~/.pass-cli/vault.enc
 ```
 
 On Windows, ensure only your user account has read/write access.
@@ -184,8 +184,8 @@ On Windows, ensure only your user account has read/write access.
 ```
 
 **Solution**:
-1. Check for backup files: `ls ~/.pass/vault.enc.backup*`
-2. Restore from backup: `cp ~/.pass/vault.enc.backup.1 ~/.pass/vault.enc`
+1. Check for backup files: `ls ~/.pass-cli/vault.enc.backup*`
+2. Restore from backup: `cp ~/.pass-cli/vault.enc.backup.1 ~/.pass-cli/vault.enc`
 3. If no backups exist, you may need to reinitialize: `pass-cli init`
 
 ### Config Check
@@ -194,11 +194,11 @@ On Windows, ensure only your user account has read/write access.
 
 **Symptom**:
 ```
-✗ Config: Invalid JSON syntax at line 5
+✗ Config: Invalid YAML syntax at line 5
   Recommendation: Fix configuration syntax or delete to use defaults
 ```
 
-**Solution**: Edit `~/.pass/config.json` to fix syntax errors, or delete the file to regenerate defaults.
+**Solution**: Edit `~/.pass-cli/config.yaml` to fix syntax errors, or delete the file to regenerate defaults.
 
 #### Missing Configuration (Pass)
 
@@ -261,7 +261,7 @@ On Windows, ensure only your user account has read/write access.
 **Solution**: Remove the corrupted backup file:
 
 ```bash
-rm ~/.pass/vault.enc.backup.2
+rm ~/.pass-cli/vault.enc.backup.2
 ```
 
 ## Script Integration Examples
@@ -321,7 +321,7 @@ backup_status=$(echo "$result" | jq -r '.checks[] | select(.name=="backup") | .s
 
 if [ "$backup_status" = "warning" ]; then
   echo "Backup warning detected - triggering manual backup"
-  cp ~/.pass/vault.enc ~/.pass/vault.enc.backup.manual
+  cp ~/.pass-cli/vault.enc ~/.pass-cli/vault.enc.backup.manual
 fi
 ```
 
