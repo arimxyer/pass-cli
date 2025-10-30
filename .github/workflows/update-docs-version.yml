@@ -4,6 +4,17 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to update to (e.g., v0.9.0)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Dry run (show changes without committing)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -16,23 +27,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.ref_name }}
           fetch-depth: 0
 
       - name: Get current date
         id: date
         run: echo "date=$(date +'%B %Y')" >> $GITHUB_OUTPUT
 
-      - name: Extract version without 'v' prefix
+      - name: Determine version
         id: version
-        run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME}"
+          fi
+          echo "full=$VERSION" >> $GITHUB_OUTPUT
+          echo "no_v=${VERSION#v}" >> $GITHUB_OUTPUT
 
       - name: Update documentation version numbers
         uses: richardrigutins/replace-in-files@v2
         with:
           files: 'docs/*.md'
           search-text: '\*\*Documentation Version\*\*: v[0-9]+\.[0-9]+\.[0-9]+'
-          replacement-text: '**Documentation Version**: ${{ github.ref_name }}'
+          replacement-text: '**Documentation Version**: ${{ steps.version.outputs.full }}'
           encoding: 'utf8'
 
       - name: Update documentation dates
@@ -48,7 +66,7 @@ jobs:
         with:
           files: 'homebrew/pass-cli.rb'
           search-text: 'version "[0-9]+\.[0-9]+\.[0-9]+"'
-          replacement-text: 'version "${{ steps.version.outputs.version }}"'
+          replacement-text: 'version "${{ steps.version.outputs.no_v }}"'
           encoding: 'utf8'
 
       - name: Update Scoop manifest version
@@ -56,7 +74,7 @@ jobs:
         with:
           files: 'scoop/pass-cli.json'
           search-text: '"version": "[0-9]+\.[0-9]+\.[0-9]+"'
-          replacement-text: '"version": "${{ steps.version.outputs.version }}"'
+          replacement-text: '"version": "${{ steps.version.outputs.no_v }}"'
           encoding: 'utf8'
 
       - name: Check if there are changes
@@ -68,21 +86,42 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Show changes (dry run)
+        if: steps.changes.outputs.has_changes == 'true' && inputs.dry_run == true
+        run: |
+          echo "📋 Changes that would be made:"
+          git diff
+
       - name: Commit and push changes
-        if: steps.changes.outputs.has_changes == 'true'
+        if: steps.changes.outputs.has_changes == 'true' && inputs.dry_run != true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/*.md homebrew/pass-cli.rb scoop/pass-cli.json
-          git commit -m "docs: update version to ${{ github.ref_name }} and date to ${{ steps.date.outputs.date }}"
-          git push origin HEAD:main
+          git commit -m "docs: update version to ${{ steps.version.outputs.full }} and date to ${{ steps.date.outputs.date }}"
+
+          # Push to current branch
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            # Tag push - push to main
+            git push origin HEAD:main
+          else
+            # Manual trigger - push to current branch
+            git push origin HEAD:"${BRANCH_NAME}"
+          fi
 
       - name: Summary
         run: |
-          echo "✅ Documentation updated to version ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Documentation updated to version ${{ steps.version.outputs.full }}" >> $GITHUB_STEP_SUMMARY
           echo "📅 Date updated to ${{ steps.date.outputs.date }}" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ steps.changes.outputs.has_changes }}" == "true" ]]; then
-            echo "📝 Changes committed and pushed to main branch" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "🔍 DRY RUN - No changes committed" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ steps.changes.outputs.has_changes }}" == "true" ]]; then
+            if [[ "${{ github.event_name }}" == "push" ]]; then
+              echo "📝 Changes committed and pushed to main branch" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "📝 Changes committed and pushed to ${GITHUB_REF#refs/heads/}" >> $GITHUB_STEP_SUMMARY
+            fi
           else
             echo "ℹ️ No changes needed - docs already up to date" >> $GITHUB_STEP_SUMMARY
           fi
