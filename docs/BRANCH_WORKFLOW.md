@@ -5,19 +5,20 @@ This document describes the branching strategy and workflow for pass-cli develop
 ## Branch Structure
 
 ### `main` Branch
-- **Purpose**: Production-ready code only
-- **Protection**: Heavily protected (see below)
-- **Updates**: Only via "Promote to Main" workflow or PR
+- **Purpose**: Production-ready code
+- **Protection**: Requires PR and passing CI checks
+- **Updates**: Via pull requests from develop
 - **Default**: Yes (users cloning repo get this)
-- **Tags**: All release tags are on main
-- **CI**: Runs only on PRs to main
+- **Tags**: All release tags are created on main
 
 ### `develop` Branch
 - **Purpose**: Active development work
-- **Protection**: Light protection (no deletion, no force push)
+- **Protection**: Block force pushes and deletions
 - **Updates**: Direct pushes allowed for daily work
 - **CI**: Runs on every push to develop
-- **Specs/Planning**: All specs, notes, and planning docs live here
+- **Content**: All files including specs, planning docs, and development notes
+
+**Note**: Both branches now contain the same files. Development files (specs/, .specify/, etc.) exist on both branches to simplify the workflow. Release artifacts remain clean via GoReleaser configuration.
 
 ## Daily Workflow
 
@@ -38,42 +39,48 @@ git pull origin develop
 ### Making Changes
 
 ```bash
-# Make changes on develop branch
+# Work on develop branch
 git add .
 git commit -m "feat: add new feature"
 git push origin develop
 
-# CI runs automatically on develop
+# CI runs automatically
 ```
 
 ### Promoting to Production
 
-When ready to release:
+When develop is stable and ready for release:
 
-1. **Verify develop is clean**
+1. **Verify develop is clean and CI passing**
    ```bash
    git checkout develop
    git status
    # Should show "nothing to commit, working tree clean"
+   # Check GitHub Actions to confirm CI is green
    ```
 
-2. **Trigger promotion workflow**
-   - Go to GitHub Actions: https://github.com/ari1110/pass-cli/actions
-   - Select **"Promote to Main"** workflow (left sidebar)
-   - Click **"Run workflow"** button (right side)
-   - Choose options:
-     - Branch: `develop` (default)
-     - Run tests: `true` (recommended)
-   - Click green **"Run workflow"** button
+2. **Create PR from develop to main**
+   - Go to GitHub: https://github.com/ari1110/pass-cli/compare/main...develop
+   - Click "Create pull request"
+   - Title: "chore: promote develop to main"
+   - Description: List key changes being promoted
+   - CI will run on the PR
 
-3. **Wait for merge**
-   - Workflow runs tests (if enabled)
-   - Merges develop → main automatically
-   - Check workflow succeeds
+3. **Review and merge**
+   - Wait for CI checks to pass
+   - Review changes in PR
+   - Click "Squash and merge" or "Merge pull request"
 
-4. **Create release**
+4. **Sync develop with main**
    ```bash
-   # Switch to main and pull the merge
+   git checkout develop
+   git pull origin develop
+   git merge main
+   git push origin develop
+   ```
+
+5. **Create release**
+   ```bash
    git checkout main
    git pull origin main
 
@@ -84,15 +91,9 @@ When ready to release:
    # Release workflow runs automatically
    ```
 
-5. **Return to develop**
-   ```bash
-   git checkout develop
-   # Continue working
-   ```
-
 ## Branch Protection
 
-### Main Branch Protection (Ruleset)
+### Main Branch Protection
 
 **Enabled protections:**
 - ✅ Require pull request before merging
@@ -104,13 +105,13 @@ When ready to release:
   - `Integration Tests (windows-latest)`
   - `Security Scan`
   - `Build`
-- ✅ Require branches to be up to date before merging
 - ✅ Block force pushes
 - ✅ Restrict deletions
+- ✅ Repository admins can bypass (for emergency fixes)
 
-**Result**: Cannot push directly to main. Must use workflow or PR.
+**Result**: Cannot push directly to main. Must use pull requests.
 
-### Develop Branch Protection (Ruleset)
+### Develop Branch Protection
 
 **Enabled protections:**
 - ✅ Block force pushes
@@ -125,17 +126,11 @@ When ready to release:
 develop push → CI runs (lint, unit tests, integration tests, security scan, build)
 ```
 
+**Smart filtering**: CI skips test jobs when only non-code files change (.github/, docs/, specs/, etc.)
+
 ### On PR to `main` or `develop`
 ```
-PR created → CI runs on PR branch
-```
-
-### On Promotion
-```
-"Promote to Main" workflow triggered →
-  Optional: Run tests on develop →
-  Merge develop → main (--no-ff) →
-  Push to main
+PR created → CI runs on PR branch → Must pass before merge allowed
 ```
 
 ### On Release Tag
@@ -155,10 +150,11 @@ For critical production bugs:
 **Option 1: Via develop (Recommended)**
 ```bash
 git checkout develop
+git pull origin develop
 # Fix the bug
 git commit -m "fix: critical bug"
 git push origin develop
-# Use "Promote to Main" workflow immediately
+# Create PR to main immediately
 ```
 
 **Option 2: Direct PR to main (If develop has unreleased work)**
@@ -168,7 +164,10 @@ git checkout -b hotfix/critical-bug main
 git commit -m "fix: critical bug"
 git push origin hotfix/critical-bug
 # Create PR: hotfix/critical-bug → main
-# CI must pass before merge allowed
+# After merge, sync to develop:
+git checkout develop
+git merge main
+git push origin develop
 ```
 
 ## Common Commands
@@ -193,25 +192,33 @@ git diff main..develop
 git branch -a
 ```
 
+### Sync develop with main (after promoting)
+```bash
+git checkout develop
+git merge main
+git push origin develop
+```
+
 ## Tips
 
 1. **Always work on develop** - Don't work directly on main
 2. **Commit frequently** - Small, focused commits are better
 3. **Test locally** - Run `go test ./...` before pushing
-4. **Use promote workflow** - Don't manually merge develop to main
-5. **Keep main clean** - Only release-ready code on main
+4. **Create PRs for promotion** - Manual PR from develop → main
+5. **Sync after promotion** - Merge main → develop after successful promotion
+6. **Keep commits clean** - Use descriptive commit messages
 
 ## Troubleshooting
 
 ### "Cannot push to main" error
-This is expected! Use the "Promote to Main" workflow instead.
+This is expected! Create a pull request from develop → main instead.
 
 ### Develop and main diverged
+This can happen if you forget to sync develop after promotion:
 ```bash
-# Should never happen with this workflow, but if it does:
 git checkout develop
 git pull origin develop
-git pull origin main
+git merge main
 # Resolve conflicts if any
 git push origin develop
 ```
@@ -223,7 +230,17 @@ git checkout develop
 # Fix the failing tests/linting
 git commit -m "fix: resolve CI failures"
 git push origin develop
-# Wait for CI to pass
+# Wait for CI to pass on GitHub Actions
+```
+
+### PR has merge conflicts
+```bash
+# Update develop with main's changes
+git checkout develop
+git merge main
+# Resolve conflicts
+git push origin develop
+# PR should now be conflict-free
 ```
 
 ## References
@@ -232,4 +249,3 @@ git push origin develop
 - Branch Settings: https://github.com/ari1110/pass-cli/settings/rules
 - Release Workflow: `.github/workflows/release.yml`
 - CI Workflow: `.github/workflows/ci.yml`
-- Promote Workflow: `.github/workflows/promote-to-main.yml`
