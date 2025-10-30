@@ -13,6 +13,9 @@ Complete reference for all Pass-CLI commands, flags, and features.
   - [update](#update---update-credential)
   - [delete](#delete---delete-credential)
   - [generate](#generate---generate-password)
+  - [keychain](#keychain---manage-keychain-integration)
+  - [vault](#vault---manage-vault-files)
+  - [usage](#usage---view-credential-usage-history)
   - [version](#version---show-version)
 - [Output Modes](#output-modes)
 - [Script Integration](#script-integration)
@@ -570,6 +573,301 @@ pass-cli version X.Y.Z
   built:  2025-01-20T10:30:00Z
   go:     go1.25.1
 ```
+
+### keychain - Manage Keychain Integration
+
+Manage system keychain integration for storing vault master passwords.
+
+#### Synopsis
+
+```bash
+pass-cli keychain <subcommand>
+```
+
+#### Subcommands
+
+##### keychain enable
+
+Enable keychain integration for an existing vault by storing the master password in the system keychain.
+
+**Synopsis:**
+```bash
+pass-cli keychain enable [flags]
+```
+
+**Description:**
+Stores your vault master password in the OS keychain (Windows Credential Manager, macOS Keychain, or Linux Secret Service). Future commands will not prompt for password when keychain is available. This is useful for vaults created without the `--use-keychain` flag.
+
+**Flags:**
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `--force` | bool | Overwrite existing keychain entry if already enabled |
+
+**Examples:**
+```bash
+# Enable keychain for default vault
+pass-cli keychain enable
+
+# Enable keychain for specific vault
+pass-cli keychain enable --vault /path/to/vault.enc
+
+# Force overwrite existing keychain entry
+pass-cli keychain enable --force
+```
+
+**Output:**
+```
+Master password: ********
+
+✅ Keychain integration enabled for vault at /home/user/.pass-cli/vault.enc
+
+Future commands will not prompt for password when keychain is available.
+```
+
+##### keychain status
+
+Display keychain integration status for the current vault.
+
+**Synopsis:**
+```bash
+pass-cli keychain status [flags]
+```
+
+**Description:**
+Shows keychain availability, password storage status, and backend name. This is a read-only operation that doesn't require unlocking the vault.
+
+**Examples:**
+```bash
+# Check keychain status for default vault
+pass-cli keychain status
+
+# Check keychain status for specific vault
+pass-cli keychain status --vault /path/to/vault.enc
+```
+
+**Output Examples:**
+
+**When keychain is enabled:**
+```
+Keychain Status for /home/user/.pass-cli/vault.enc:
+
+✓ System Keychain:        Available (keychain)
+✓ Password Stored:        Yes
+✓ Backend:                keychain
+
+Your vault password is securely stored in the system keychain.
+Future commands will not prompt for password.
+```
+
+**When keychain is available but not enabled:**
+```
+Keychain Status for /home/user/.pass-cli/vault.enc:
+
+✓ System Keychain:        Available (wincred)
+✗ Password Stored:        No
+
+The system keychain is available but no password is stored for this vault.
+Run 'pass-cli keychain enable' to store your password and skip future prompts.
+```
+
+**When keychain is not available:**
+```
+Keychain Status for /home/user/.pass-cli/vault.enc:
+
+✗ System Keychain:        Not available on this platform
+✗ Password Stored:        N/A
+
+System keychain is not accessible. You will be prompted for password on each command.
+```
+
+#### Platform Support
+
+| Platform | Backend | Service Name |
+|----------|---------|--------------|
+| Windows | wincred | Windows Credential Manager |
+| macOS | keychain | Keychain Access |
+| Linux | gnome-keyring/kwallet | Secret Service API |
+
+### vault - Manage Vault Files
+
+Manage pass-cli vault files and their lifecycle.
+
+#### Synopsis
+
+```bash
+pass-cli vault <subcommand>
+```
+
+#### Subcommands
+
+##### vault remove
+
+Permanently delete a vault file and its associated keychain entry.
+
+**Synopsis:**
+```bash
+pass-cli vault remove <path> [flags]
+```
+
+**Description:**
+Permanently deletes:
+1. The vault file from disk
+2. The master password from the system keychain
+3. Any orphaned keychain entries
+
+**⚠️ WARNING:** This operation is irreversible. All stored credentials will be lost. Ensure you have backups before proceeding.
+
+**Arguments:**
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<path>` | Yes | Path to vault file to remove |
+
+**Flags:**
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `-y`, `--yes` | bool | Skip confirmation prompt (for automation) |
+| `-f`, `--force` | bool | Force removal even if vault appears in use |
+
+**Examples:**
+```bash
+# Remove vault with confirmation prompt
+pass-cli vault remove /path/to/vault.enc
+
+# Remove vault without confirmation (for automation)
+pass-cli vault remove /path/to/vault.enc --yes
+
+# Force removal even if file appears in use
+pass-cli vault remove /path/to/vault.enc --force
+```
+
+**Output:**
+```
+⚠️  WARNING: This will permanently delete the vault and all stored credentials.
+Are you sure you want to remove /home/user/.pass-cli/vault.enc? (y/n): y
+
+✅ Vault removed successfully:
+   • Vault file deleted
+   • Keychain entry removed
+   • Orphaned entries cleaned up
+```
+
+**Use Cases:**
+- Decommissioning a vault that's no longer needed
+- Cleaning up test vaults
+- Removing vaults with forgotten passwords (data loss)
+- Automated testing and CI/CD cleanup
+
+### usage - View Credential Usage History
+
+Display detailed usage history for a specific credential across all locations.
+
+#### Synopsis
+
+```bash
+pass-cli usage <service> [flags]
+```
+
+**Description:**
+Shows where and when a credential was accessed, including:
+- Location paths (working directories)
+- Git repository context
+- Last access timestamps
+- Access counts per location
+- Field-level usage breakdown (which fields were accessed)
+
+This helps you understand which projects use specific credentials, audit access patterns, and identify unused credentials.
+
+#### Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<service>` | Yes | Name of the credential to view usage for |
+
+#### Flags
+
+| Flag | Type | Description | Default |
+|------|------|-------------|---------|
+| `--format` | string | Output format: table, json, simple | table |
+| `--limit` | int | Maximum number of locations to display (0 = unlimited) | 20 |
+
+#### Examples
+
+```bash
+# View usage history (default: table format, 20 most recent locations)
+pass-cli usage github
+
+# View all locations (no limit)
+pass-cli usage aws --limit 0
+
+# View only 5 most recent locations
+pass-cli usage postgres --limit 5
+
+# JSON output for scripting
+pass-cli usage heroku --format json
+
+# Simple format (location paths only)
+pass-cli usage redis --format simple
+```
+
+#### Output Examples
+
+**Table Format (default):**
+```
+Credential: github
+Total Access Count: 47
+Locations: 3
+
+Location                              Repository      Last Used        Count   Fields
+─────────────────────────────────────────────────────────────────────────────────────
+/home/user/projects/web-app           my-web-app      2 hours ago      25      password:20, username:5
+/home/user/projects/api               my-api          5 days ago       15      password:15
+/home/user/scripts                    -               2 weeks ago      7       password:7
+```
+
+**JSON Format:**
+```json
+{
+  "credential": "github",
+  "total_count": 47,
+  "locations": [
+    {
+      "path": "/home/user/projects/web-app",
+      "repository": "my-web-app",
+      "last_accessed": "2025-10-30T14:25:00Z",
+      "count": 25,
+      "fields": {
+        "password": 20,
+        "username": 5
+      },
+      "path_exists": true
+    }
+  ]
+}
+```
+
+**Simple Format:**
+```
+/home/user/projects/web-app
+/home/user/projects/api
+/home/user/scripts
+```
+
+#### Use Cases
+
+- **Audit before rotation:** Check which projects use a credential before changing it
+- **Discover project dependencies:** Find all projects that depend on specific credentials
+- **Track access patterns:** Monitor when and where credentials are being used
+- **Find unused credentials:** Identify credentials that haven't been accessed recently
+- **Multi-project organization:** Understand how credentials are organized across projects
+
+#### Related Commands
+
+- `pass-cli list --location <path>` - Filter credentials by location
+- `pass-cli list --by-project` - Group credentials by repository
+- `pass-cli list --unused --days 30` - Find credentials not used in 30 days
 
 ---
 
