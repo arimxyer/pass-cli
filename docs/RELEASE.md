@@ -52,11 +52,35 @@ go test -v -tags=integration -timeout 5m ./test
 go fmt ./...
 go vet ./...
 golangci-lint run
-
-# Update version in CHANGELOG.md if you maintain one
 ```
 
-### 2. Create Release Tag
+### 2. Update Version Numbers
+
+Use the automated version update script to update all documentation and package manifests:
+
+```bash
+# Update version across all docs (Bash - use Git Bash on Windows)
+./scripts/update-version.sh v0.1.0
+
+# Review changes
+git diff
+
+# Update CHANGELOG.md with release notes (manual step)
+# Add your release notes to CHANGELOG.md
+
+# Commit version bump
+git add -A
+git commit -m "chore: bump version to v0.1.0"
+```
+
+**What the script updates:**
+- Documentation version footers (USAGE.md, SECURITY.md, etc.)
+- "Last Updated" dates across all documentation
+- Package manifest versions (homebrew/pass-cli.rb, scoop/pass-cli.json)
+
+**Note:** Package manifest URLs and checksums are automatically updated by GoReleaser during the release process.
+
+### 3. Create Release Tag
 
 ```bash
 # Create and push a version tag
