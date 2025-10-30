@@ -142,16 +142,15 @@ For complete security details, best practices, and migration guides, see [docs/S
 ## Documentation
 
 **Essential Guides**:
-- [Getting Started](docs/getting-started.md) - First-time setup and basic workflows
+- [Getting Started](docs/GETTING_STARTED.md) - First-time setup and basic workflows
 - [Usage Guide](docs/USAGE.md) - Complete command reference, TUI shortcuts, configuration
 - [Installation](docs/INSTALLATION.md) - All installation methods and package managers
 - [Security](docs/SECURITY.md) - Encryption details, best practices, migration guides
 - [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
 
 **Additional Resources**:
-- [Doctor Command](docs/doctor-command.md) - Health check diagnostics
+- [Doctor Command](docs/DOCTOR_COMMAND.md) - Health check diagnostics
 - [CI/CD Integration](docs/CI-CD.md) - GitHub Actions and pipeline examples
-- [Development](docs/development/) - Contributing and building from source
 - [Branch Workflow](docs/BRANCH_WORKFLOW.md) - Git workflow for contributors
 
 ## Building from Source
@@ -168,7 +167,7 @@ go build -o pass-cli .
 go test ./...
 ```
 
-For complete development setup, testing, and contribution guidelines, see [docs/development/](docs/development/).
+For testing guidelines, see [test/README.md](test/README.md). For Git workflow, see [docs/BRANCH_WORKFLOW.md](docs/BRANCH_WORKFLOW.md).
 
 ## FAQ
 
@@ -195,7 +194,7 @@ For more questions and troubleshooting, see [docs/TROUBLESHOOTING.md](docs/TROUB
 
 ## Contributing
 
-Contributions are welcome! See [docs/development/](docs/development/) for guidelines.
+Contributions are welcome! See [docs/BRANCH_WORKFLOW.md](docs/BRANCH_WORKFLOW.md) for Git workflow and contribution guidelines.
 
 ## License
 

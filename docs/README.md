@@ -6,16 +6,20 @@ Welcome to the Pass-CLI documentation. This index helps you find the documentati
 
 Documentation for end users of Pass-CLI.
 
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - First-time setup and basic workflows
 - **[INSTALLATION.md](INSTALLATION.md)** - Installation instructions for all platforms (Homebrew, Scoop, manual installation)
 - **[USAGE.md](USAGE.md)** - Complete usage guide with commands, examples, and workflows
 - **[SECURITY.md](SECURITY.md)** - Security model, encryption details, and best practices
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Common issues and solutions
+- **[DOCTOR_COMMAND.md](DOCTOR_COMMAND.md)** - Health check diagnostics
+- **[MIGRATION.md](MIGRATION.md)** - Migration guides for upgrading vaults
+- **[KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md)** - Known security and functional limitations
 
 ## Contributor Documentation
 
 Documentation for developers contributing to Pass-CLI.
 
-- **[DEVELOPMENT.md](development/README.md)** - Development setup, building from source, project structure, and contribution guidelines
+- **[BRANCH_WORKFLOW.md](BRANCH_WORKFLOW.md)** - Git workflow and branch strategy for contributors
 
 ## Maintainer Documentation
 
@@ -25,24 +29,13 @@ Documentation for project maintainers managing releases and infrastructure.
 - **[CI-CD.md](CI-CD.md)** - Continuous integration and deployment pipeline documentation
 - **[HOMEBREW.md](HOMEBREW.md)** - Homebrew tap maintenance and formula updates
 - **[SCOOP.md](SCOOP.md)** - Scoop bucket maintenance and manifest updates
-
-## Development Notes
-
-Implementation tracking documents and development artifacts (not user-facing).
-
-- **[development/](development/)** - See [development/README.md](development/README.md) for implementation tracking docs, testing checklists, and technical audits
-
-## Archive
-
-Historical documentation artifacts preserved for reference.
-
-- **[archive/](archive/)** - See [archive/README.md](archive/README.md) for archived documentation from past milestones
+- **[DOCUMENTATION_LIFECYCLE.md](DOCUMENTATION_LIFECYCLE.md)** - Documentation management policy and lifecycle rules
 
 ## Quick Links
 
-- **Getting Started**: [INSTALLATION.md](INSTALLATION.md) → [USAGE.md](USAGE.md)
+- **Getting Started**: [GETTING_STARTED.md](GETTING_STARTED.md) → [USAGE.md](USAGE.md)
 - **Security Questions**: [SECURITY.md](SECURITY.md)
-- **Contributing**: [DEVELOPMENT.md](development/README.md)
+- **Contributing**: [BRANCH_WORKFLOW.md](BRANCH_WORKFLOW.md)
 - **Problems**: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 ## Repository Root Documentation
@@ -50,4 +43,3 @@ Historical documentation artifacts preserved for reference.
 Additional documentation in the project root:
 
 - **README.md** (root) - Project overview and quick start
-- **CHANGELOG.md** (root) - Version history and release notes

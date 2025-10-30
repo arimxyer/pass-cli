@@ -345,4 +345,4 @@ Potential workflow improvements:
 - [GoReleaser Documentation](https://goreleaser.com)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [Release Process](RELEASE.md)
-- [Development Guide](development/README.md)
+- [Branch Workflow](BRANCH_WORKFLOW.md)
