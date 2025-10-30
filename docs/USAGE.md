@@ -1494,7 +1494,7 @@ pass-cli change-password --no-keychain  # Disables keychain
 1. **Vault already exists**:
    ```bash
    # Check if vault exists
-   ls ~/.pass/vault.enc
+   ls ~/.pass-cli/vault.enc
    ```
    **Solution**: First-run detection is not needed - your vault is already set up.
 
@@ -1535,7 +1535,7 @@ This provides the same guided setup as automatic first-run detection.
 **Troubleshooting**: If first-run detection should trigger but doesn't:
 ```bash
 # Verify no vault exists
-ls ~/.pass/vault.enc
+ls ~/.pass-cli/vault.enc
 
 # Check if running in TTY
 tty  # Should show /dev/pts/X or similar, not "not a tty"

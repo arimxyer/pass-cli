@@ -70,7 +70,7 @@ Produces machine-readable JSON:
       "status": "pass",
       "message": "vault.enc accessible (600 permissions)",
       "details": {
-        "path": "/home/user/.pass/vault.enc",
+        "path": "/home/user/.pass-cli/vault.enc",
         "exists": true,
         "readable": true,
         "permissions": "600"

@@ -394,7 +394,6 @@ Time includes manual re-entry of credentials. Future in-place migration will be 
 
 - **Documentation**: [docs/SECURITY.md](SECURITY.md), [docs/USAGE.md](USAGE.md)
 - **Issues**: [GitHub Issues](https://github.com/ari1110/pass-cli/issues)
-- **Security**: Email security@example.com for sensitive concerns
 
 ---
 

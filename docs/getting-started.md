@@ -98,7 +98,7 @@ Enable audit logging? (y/n): y
 └────────────────────────────────────────────────────────────┘
 
 Your vault has been created at:
-  /home/user/.pass/vault.enc
+  /home/user/.pass-cli/vault.enc
 
 Next steps:
   • Add your first credential: pass-cli add github
@@ -123,7 +123,7 @@ If you run pass-cli in a script or CI/CD environment without a vault:
 
 ```bash
 $ echo "list" | pass-cli list
-Error: vault file not found: /home/user/.pass/vault.enc
+Error: vault file not found: /home/user/.pass-cli/vault.enc
 
 Run 'pass-cli init' to create a new vault.
 ```
@@ -369,10 +369,10 @@ sudo pacman -S libsecret
 
 ```bash
 # Linux/macOS
-chmod 600 ~/.pass/vault.enc
+chmod 600 ~/.pass-cli/vault.enc
 
 # Windows (PowerShell)
-icacls "$env:USERPROFILE\.pass\vault.enc" /inheritance:r /grant:r "$env:USERNAME:F"
+icacls "$env:USERPROFILE\.pass-cli\vault.enc" /inheritance:r /grant:r "$env:USERNAME:F"
 ```
 
 ## Changing Your Master Password
@@ -390,7 +390,7 @@ Enter current password, then your new password. All credentials are re-encrypted
 pass-cli automatically creates backup files when you modify credentials:
 
 ```bash
-$ ls ~/.pass/
+$ ls ~/.pass-cli/
 vault.enc
 vault.enc.backup.1  # Most recent backup
 vault.enc.backup.2  # Second most recent
@@ -400,16 +400,16 @@ vault.enc.backup.3  # Oldest backup
 To restore from backup:
 
 ```bash
-cp ~/.pass/vault.enc.backup.1 ~/.pass/vault.enc
+cp ~/.pass-cli/vault.enc.backup.1 ~/.pass-cli/vault.enc
 ```
 
 ## Configuration
 
-Customize pass-cli behavior with `~/.pass/config.json`:
+Customize pass-cli behavior with `~/.pass-cli/config.json`:
 
 ```json
 {
-  "vault_path": "/home/user/.pass/vault.enc",
+  "vault_path": "/home/user/.pass-cli/vault.enc",
   "keychain_enabled": true,
   "audit_enabled": true,
   "backup_count": 3,
@@ -440,8 +440,8 @@ Now that you have pass-cli set up:
 
 3. **Configure backups**: Ensure vault backups are included in your backup strategy
    ```bash
-   # Include ~/.pass/ in your backup scripts
-   rsync -av ~/.pass/ /backup/location/pass/
+   # Include ~/.pass-cli/ in your backup scripts
+   rsync -av ~/.pass-cli/ /backup/location/pass/
    ```
 
 4. **Review security best practices**: Learn about secure password management
@@ -457,7 +457,7 @@ Now that you have pass-cli set up:
 - **Command help**: `pass-cli help` or `pass-cli <command> --help`
 - **Troubleshooting**: See [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 - **Security concerns**: See [SECURITY.md](SECURITY.md)
-- **Report issues**: https://github.com/user/pass-cli/issues
+- **Report issues**: https://github.com/ari1110/pass-cli/issues
 
 ## Quick Reference
 

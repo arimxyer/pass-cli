@@ -645,10 +645,9 @@ Pass-CLI has not yet undergone external security audit. We welcome security rese
 
 **DO NOT** file public issues for security vulnerabilities.
 
-Instead:
-- Email: security@example.com
+Instead, use GitHub's private security advisory feature to report vulnerabilities:
+- Visit: https://github.com/ari1110/pass-cli/security/advisories/new
 - Include: Detailed description, reproduction steps, impact assessment
-- Response: Within 48 hours
 - Disclosure: Coordinated disclosure after fix
 
 ### Security Updates
