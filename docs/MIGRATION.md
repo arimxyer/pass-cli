@@ -399,6 +399,6 @@ Time includes manual re-entry of credentials. Future in-place migration will be 
 
 ---
 
-**Documentation Version**: v0.0.1
+**Documentation Version**: v0.8.51
 **Last Updated**: October 2025
 **Status**: Production Ready

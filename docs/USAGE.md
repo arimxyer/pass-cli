@@ -1854,6 +1854,6 @@ See [GETTING_STARTED.md](GETTING_STARTED.md) for complete first-run documentatio
 
 ---
 
-**Documentation Version**: v0.0.1
+**Documentation Version**: v0.8.51
 **Last Updated**: October 2025
 **Status**: Production Ready

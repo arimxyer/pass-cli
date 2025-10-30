@@ -54,33 +54,17 @@ go vet ./...
 golangci-lint run
 ```
 
-### 2. Update Version Numbers
+### 2. Create Release Tag
 
-Use the automated version update script to update all documentation and package manifests:
+**Note:** Version numbers and dates in documentation are **automatically updated** by GitHub Actions when you push a tag. You don't need to manually update them.
 
-```bash
-# Update version across all docs (Bash - use Git Bash on Windows)
-./scripts/update-version.sh v0.1.0
-
-# Review changes
-git diff
-
-# Update CHANGELOG.md with release notes (manual step)
-# Add your release notes to CHANGELOG.md
-
-# Commit version bump
-git add -A
-git commit -m "chore: bump version to v0.1.0"
-```
-
-**What the script updates:**
-- Documentation version footers (USAGE.md, SECURITY.md, etc.)
-- "Last Updated" dates across all documentation
+The `update-docs-version.yml` workflow automatically updates:
+- Documentation version footers (8 files in `docs/`)
+- "Last Updated" dates to current month/year
 - Package manifest versions (homebrew/pass-cli.rb, scoop/pass-cli.json)
 
-**Note:** Package manifest URLs and checksums are automatically updated by GoReleaser during the release process.
-
-### 3. Create Release Tag
+**What you need to do manually:**
+- Update CHANGELOG.md with release notes (if you maintain one)
 
 ```bash
 # Create and push a version tag

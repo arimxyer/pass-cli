@@ -1,7 +1,7 @@
 class PassCli < Formula
   desc "Secure CLI password manager with AES-256-GCM encryption"
   homepage "https://github.com/ari1110/pass-cli"
-  version "0.0.1"
+  version "0.8.51"
   license "MIT"
 
   on_macos do

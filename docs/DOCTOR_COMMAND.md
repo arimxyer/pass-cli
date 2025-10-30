@@ -395,5 +395,6 @@ This is expected. Run `pass-cli init` to create your vault, then `doctor` will s
 
 ---
 
-**Documentation Version**: v0.0.1
+**Documentation Version**: v0.8.51
 **Last Updated**: October 2025
+**Status**: Production Ready
