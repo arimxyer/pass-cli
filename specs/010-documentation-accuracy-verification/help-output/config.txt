@@ -1,0 +1,31 @@
+Manage Pass-CLI configuration settings for terminal warnings and keyboard shortcuts.
+
+Subcommands:
+  init     - Create a new configuration file with examples
+  edit     - Open the configuration file in your default editor
+  validate - Check configuration file for errors
+  reset    - Reset configuration to defaults (creates backup)
+
+Configuration file location:
+  Linux:   ~/.config/pass-cli/config.yml
+  macOS:   ~/Library/Application Support/pass-cli/config.yml
+  Windows: %APPDATA%\pass-cli\config.yml
+
+Usage:
+  pass-cli config [command]
+
+Available Commands:
+  edit        Open configuration file in editor
+  init        Create configuration file with examples
+  reset       Reset configuration to defaults
+  validate    Validate configuration file
+
+Flags:
+  -h, --help   help for config
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output
+
+Use "pass-cli config [command] --help" for more information about a command.

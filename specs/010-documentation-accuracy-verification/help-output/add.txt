@@ -1,0 +1,43 @@
+Add stores a new credential (username and password) for a service in your vault.
+
+You will be prompted for the username and password. The password input will be
+hidden for security. If you want to provide these values via flags, use:
+  --username (-u) for the username
+  --password (-p) for the password (not recommended for security)
+  --category (-c) for organizing credentials (e.g., 'Cloud', 'Databases')
+  --url for the service URL (e.g., login page URL)
+  --notes for additional information
+
+The service name should be descriptive and unique (e.g., "github", "aws-prod", "db-staging").
+
+Usage:
+  pass-cli add <service> [flags]
+
+Examples:
+  # Add a credential with prompts
+  pass-cli add github
+
+  # Add with username flag
+  pass-cli add github --username user@example.com
+
+  # Add with category and URL
+  pass-cli add github -u user@example.com -c "Version Control" --url "https://github.com"
+
+  # Add with notes
+  pass-cli add github --notes "My GitHub account"
+
+  # Add with all metadata fields
+  pass-cli add github -u user@example.com -c "Version Control" --url "https://github.com" --notes "Work account"
+
+Flags:
+  -c, --category string   category for organizing credentials (e.g., 'Cloud', 'Databases')
+  -h, --help              help for add
+      --notes string      optional notes about the credential
+  -p, --password string   password for the credential (not recommended, use prompt instead)
+      --url string        URL associated with the credential (e.g., login page)
+  -u, --username string   username for the credential
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

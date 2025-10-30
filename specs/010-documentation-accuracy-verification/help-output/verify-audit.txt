@@ -1,0 +1,28 @@
+Verify the integrity of an audit log by checking HMAC signatures on all entries.
+
+This command reads an audit log and verifies that all entries have valid HMAC
+signatures. Any tampered or corrupted entries will be reported.
+
+The audit log path can be specified as an argument, or it will default to
+<vault-dir>/audit.log. You can also set PASS_AUDIT_LOG environment variable.
+
+Usage:
+  pass-cli verify-audit [audit-log-path] [flags]
+
+Examples:
+  # Verify default audit log
+  pass-cli verify-audit
+
+  # Verify specific audit log
+  pass-cli verify-audit /path/to/audit.log
+
+  # Verify with environment variable
+  PASS_AUDIT_LOG=/custom/audit.log pass-cli verify-audit
+
+Flags:
+  -h, --help   help for verify-audit
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

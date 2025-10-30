@@ -1,0 +1,33 @@
+Initialize creates a new encrypted vault for storing credentials.
+
+You will be prompted to create a master password that will be used to
+encrypt and decrypt your vault. This password should be strong and memorable.
+
+By default, your vault will be stored at ~/.pass-cli/vault.enc
+
+Use the --use-keychain flag to store the master password in your system's
+keychain (Windows Credential Manager, macOS Keychain, or Linux Secret Service)
+so you don't have to enter it every time.
+
+Usage:
+  pass-cli init [flags]
+
+Examples:
+  # Initialize a new vault
+  pass-cli init
+
+  # Initialize with keychain integration
+  pass-cli init --use-keychain
+
+  # Initialize with custom vault location
+  pass-cli init --vault /path/to/vault.enc
+
+Flags:
+      --enable-audit   enable tamper-evident audit logging for vault operations
+  -h, --help           help for init
+      --use-keychain   store master password in system keychain
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

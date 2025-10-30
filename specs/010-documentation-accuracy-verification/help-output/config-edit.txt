@@ -1,0 +1,18 @@
+Open the configuration file in your default editor.
+
+The editor is determined by:
+  1. EDITOR environment variable
+  2. Platform-specific defaults (notepad on Windows, nano/vim/vi on Linux/macOS)
+
+If no configuration file exists, it will be created with defaults.
+
+Usage:
+  pass-cli config edit [flags]
+
+Flags:
+  -h, --help   help for edit
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

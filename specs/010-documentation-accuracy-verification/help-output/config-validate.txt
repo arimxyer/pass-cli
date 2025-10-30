@@ -1,0 +1,23 @@
+Check the configuration file for errors and display validation results.
+
+Exit codes:
+  0 - Configuration is valid
+  1 - Configuration has errors
+  2 - File system error (cannot read config file)
+
+Validation checks:
+  - Terminal size ranges (1-10000 width, 1-1000 height)
+  - Keybinding conflicts (no duplicate key assignments)
+  - Unknown actions (all keybindings must map to known actions)
+  - Key format (valid key syntax)
+
+Usage:
+  pass-cli config validate [flags]
+
+Flags:
+  -h, --help   help for validate
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

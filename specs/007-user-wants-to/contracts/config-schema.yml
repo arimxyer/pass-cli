@@ -1,0 +1,328 @@
+# Config Schema Contract
+# Feature: 007-user-wants-to
+# Purpose: Define YAML config file structure for user configuration
+
+# This schema documents the expected structure and validation rules
+# for the config.yml file. It serves as a contract between:
+# - Config loader (internal/config/config.go)
+# - Config validators (internal/config/config.go Validate methods)
+# - User documentation (will be generated from this)
+# - Test fixtures (tests/config/fixtures/*.yml)
+
+---
+# Root: Config
+#
+# Top-level configuration object containing all user settings.
+# All fields are optional - missing fields use defaults.
+
+type: object
+properties:
+
+  terminal:
+    type: object
+    description: Terminal size warning configuration
+    properties:
+      warning_enabled:
+        type: boolean
+        description: Enable/disable terminal size warnings
+        default: true
+        example: false
+
+      min_width:
+        type: integer
+        description: Minimum terminal width in columns before warning appears
+        default: 60
+        minimum: 1
+        maximum: 10000
+        example: 80
+        validation_warnings:
+          - condition: value > 500
+            message: "Unusually large value - most terminals are <300 columns"
+
+      min_height:
+        type: integer
+        description: Minimum terminal height in rows before warning appears
+        default: 30
+        minimum: 1
+        maximum: 1000
+        example: 40
+        validation_warnings:
+          - condition: value > 200
+            message: "Unusually large value - most terminals are <100 rows"
+
+  keybindings:
+    type: object
+    description: Custom keyboard shortcuts for actions
+    additionalProperties: false  # Only known actions allowed
+    properties:
+
+      quit:
+        type: string
+        description: Quit application (with confirmation)
+        default: "q"
+        pattern: "^([a-z0-9]|(ctrl|alt|shift)\\+[a-z0-9]|(ctrl|alt|shift)\\+(ctrl|alt|shift)\\+[a-z0-9]|enter|esc|tab|space|f[1-9]|f1[0-2])$"
+        examples:
+          - "q"
+          - "ctrl+c"
+          - "ctrl+q"
+
+      add_credential:
+        type: string
+        description: Open form to add new credential
+        default: "a"
+        pattern: "^([a-z0-9]|(ctrl|alt|shift)\\+[a-z0-9]|(ctrl|alt|shift)\\+(ctrl|alt|shift)\\+[a-z0-9]|enter|esc|tab|space|f[1-9]|f1[0-2])$"
+        examples:
+          - "a"
+          - "n"
+          - "i"
+
+      edit_credential:
+        type: string
+        description: Edit selected credential
+        default: "e"
+        pattern: "^([a-z0-9]|(ctrl|alt|shift)\\+[a-z0-9]|(ctrl|alt|shift)\\+(ctrl|alt|shift)\\+[a-z0-9]|enter|esc|tab|space|f[1-9]|f1[0-2])$"
+        examples:
+          - "e"
+          - "enter"
+
+      delete_credential:
+        type: string
+        description: Delete selected credential (with confirmation)
+        default: "d"
+        pattern: "^([a-z0-9]|(ctrl|alt|shift)\\+[a-z0-9]|(ctrl|alt|shift)\\+(ctrl|alt|shift)\\+[a-z0-9]|enter|esc|tab|space|f[1-9]|f1[0-2])$"
+        examples:
+          - "d"
+          - "del"
+
+      toggle_detail:
+        type: string
+        description: Toggle detail panel visibility
+        default: "tab"
+        pattern: "^([a-z0-9]|(ctrl|alt|shift)\\+[a-z0-9]|(ctrl|alt|shift)\\+(ctrl|alt|shift)\\+[a-z0-9]|enter|esc|tab|space|f[1-9]|f1[0-2])$"
+        examples:
+          - "tab"
+          - "t"
+
+      toggle_sidebar:
+        type: string
+        description: Toggle sidebar visibility
+        default: "s"
+        pattern: "^([a-z0-9]|(ctrl|alt|shift)\\+[a-z0-9]|(ctrl|alt|shift)\\+(ctrl|alt|shift)\\+[a-z0-9]|enter|esc|tab|space|f[1-9]|f1[0-2])$"
+        examples:
+          - "s"
+          - "ctrl+b"
+
+      help:
+        type: string
+        description: Show help modal
+        default: "?"
+        pattern: "^([a-z0-9]|(ctrl|alt|shift)\\+[a-z0-9]|(ctrl|alt|shift)\\+(ctrl|alt|shift)\\+[a-z0-9]|enter|esc|tab|space|f[1-9]|f1[0-2])$"
+        examples:
+          - "?"
+          - "h"
+          - "f1"
+
+      search:
+        type: string
+        description: Activate search/filter
+        default: "/"
+        pattern: "^([a-z0-9]|(ctrl|alt|shift)\\+[a-z0-9]|(ctrl|alt|shift)\\+(ctrl|alt|shift)\\+[a-z0-9]|enter|esc|tab|space|f[1-9]|f1[0-2])$"
+        examples:
+          - "/"
+          - "f"
+          - "ctrl+f"
+
+      confirm:
+        type: string
+        description: Confirm action in forms/dialogs
+        default: "enter"
+        pattern: "^([a-z0-9]|(ctrl|alt|shift)\\+[a-z0-9]|(ctrl|alt|shift)\\+(ctrl|alt|shift)\\+[a-z0-9]|enter|esc|tab|space|f[1-9]|f1[0-2])$"
+        examples:
+          - "enter"
+          - "ctrl+s"
+
+      cancel:
+        type: string
+        description: Cancel action in forms/dialogs
+        default: "esc"
+        pattern: "^([a-z0-9]|(ctrl|alt|shift)\\+[a-z0-9]|(ctrl|alt|shift)\\+(ctrl|alt|shift)\\+[a-z0-9]|enter|esc|tab|space|f[1-9]|f1[0-2])$"
+        examples:
+          - "esc"
+          - "ctrl+c"
+
+---
+# Validation Rules (Cross-Field)
+
+validation_rules:
+
+  - name: no_conflicting_keybindings
+    description: No two actions can map to the same key
+    check: All keybinding values must be unique
+    error_template: "keybindings.{action2} conflicts with keybindings.{action1} (both use '{key}')"
+    severity: error
+
+  - name: no_unknown_actions
+    description: Only recognized action names are allowed in keybindings
+    check: All keys in keybindings object must be in the known actions list
+    known_actions:
+      - quit
+      - add_credential
+      - edit_credential
+      - delete_credential
+      - toggle_detail
+      - toggle_sidebar
+      - help
+      - search
+      - confirm
+      - cancel
+    error_template: "keybindings.{action}: unknown action name (valid actions: quit, add_credential, edit_credential, delete_credential, toggle_detail, toggle_sidebar, help, search, confirm, cancel)"
+    severity: error
+
+  - name: file_size_limit
+    description: Config file must not exceed 100 KB
+    check: File size <= 102400 bytes
+    error_template: "Config file too large (size: {actual_kb} KB, max: 100 KB)"
+    severity: error
+
+  - name: unknown_fields_warning
+    description: Extra fields in YAML are ignored
+    check: Warn on any top-level fields not in schema
+    warning_template: "Unknown field '{field}' (will be ignored)"
+    severity: warning
+
+---
+# Example: Minimal Config
+
+minimal_example: |
+  # Use defaults for everything except min_width
+  terminal:
+    min_width: 80
+
+---
+# Example: Full Config with All Defaults
+
+default_example: |
+  # Terminal size warning settings
+  terminal:
+    warning_enabled: true
+    min_width: 60
+    min_height: 30
+
+  # Keyboard shortcuts
+  keybindings:
+    quit: "q"
+    add_credential: "a"
+    edit_credential: "e"
+    delete_credential: "d"
+    toggle_detail: "tab"
+    toggle_sidebar: "s"
+    help: "?"
+    search: "/"
+    confirm: "enter"
+    cancel: "esc"
+
+---
+# Example: Custom Keybindings
+
+custom_example: |
+  terminal:
+    warning_enabled: true
+    min_width: 80
+    min_height: 40
+
+  keybindings:
+    quit: "ctrl+q"       # Ctrl+Q to quit
+    add_credential: "n"  # N for new
+    edit_credential: "e"
+    delete_credential: "d"
+    toggle_detail: "tab"
+    toggle_sidebar: "ctrl+b"  # Ctrl+B for sidebar
+    help: "f1"           # F1 for help
+    search: "ctrl+f"     # Ctrl+F for search
+    confirm: "enter"
+    cancel: "esc"
+
+---
+# Example: Vim-Style Bindings
+
+vim_example: |
+  terminal:
+    warning_enabled: true
+    min_width: 60
+    min_height: 30
+
+  keybindings:
+    quit: "q"
+    add_credential: "i"      # Insert mode
+    edit_credential: "e"
+    delete_credential: "d"
+    toggle_detail: "tab"
+    toggle_sidebar: "ctrl+w" # Window command
+    help: "?"
+    search: "/"
+    confirm: "enter"
+    cancel: "esc"
+
+---
+# Error Examples
+
+error_examples:
+
+  - name: conflicting_keybindings
+    config: |
+      keybindings:
+        add_credential: "d"
+        delete_credential: "d"  # Conflict!
+    expected_error: "keybindings.delete_credential conflicts with keybindings.add_credential (both use 'd')"
+
+  - name: invalid_terminal_size
+    config: |
+      terminal:
+        min_width: -10  # Invalid
+    expected_error: "terminal.min_width: must be between 1 and 10000 (got: -10)"
+
+  - name: unknown_action
+    config: |
+      keybindings:
+        invalid_action: "x"
+    expected_error: "keybindings.invalid_action: unknown action name (valid actions: quit, add_credential, ...)"
+
+  - name: invalid_key_format
+    config: |
+      keybindings:
+        quit: "ctrl++"  # Invalid format
+    expected_error: "keybindings.quit: invalid format 'ctrl++' (expected: 'key', 'ctrl+key', etc.)"
+
+  - name: empty_keybinding
+    config: |
+      keybindings:
+        quit: ""  # Empty
+    expected_error: "keybindings.quit: empty value not allowed"
+
+---
+# Test Fixtures Reference
+
+# Unit tests should create fixtures in tests/config/fixtures/:
+# - valid_minimal.yml (minimal config)
+# - valid_full.yml (all settings specified)
+# - valid_custom.yml (custom keybindings)
+# - invalid_conflict.yml (conflicting keybindings)
+# - invalid_terminal_size.yml (out of range)
+# - invalid_unknown_action.yml (unknown action name)
+# - invalid_key_format.yml (bad key syntax)
+# - empty.yml (empty file - should use all defaults)
+# - partial.yml (only terminal settings - keybindings use defaults)
+
+---
+# Backward Compatibility
+
+# Version 1.0 (this version):
+# - Initial schema
+# - No versioning needed yet
+
+# Future versions:
+# - If schema changes incompatibly, add version field
+# - Loader should handle old format gracefully
+# - Provide migration guidance in error messages
+
+version: "1.0"

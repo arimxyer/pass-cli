@@ -1,0 +1,40 @@
+List displays all stored credentials with metadata.
+
+Output formats:
+  table    Display as formatted table (default)
+  json     Output as JSON array
+  simple   Simple list of service names only
+
+The --unused flag filters credentials that haven't been accessed recently
+or have never been accessed. Use --days to configure the threshold
+(default: 30 days).
+
+Usage:
+  pass-cli list [flags]
+
+Examples:
+  # List all credentials as table
+  pass-cli list
+
+  # List as JSON
+  pass-cli list --format json
+
+  # List simple service names
+  pass-cli list --format simple
+
+  # Show unused credentials (>30 days)
+  pass-cli list --unused
+
+  # Show credentials unused for >90 days
+  pass-cli list --unused --days 90
+
+Flags:
+      --days int        days threshold for --unused flag (default 30)
+  -f, --format string   output format: table, json, simple (default "table")
+  -h, --help            help for list
+      --unused          show only unused or rarely used credentials
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

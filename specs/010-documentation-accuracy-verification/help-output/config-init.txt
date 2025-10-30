@@ -1,0 +1,14 @@
+Create a new configuration file at the default location with commented examples.
+
+If a configuration file already exists, this command will fail. Use 'config reset' to overwrite.
+
+Usage:
+  pass-cli config init [flags]
+
+Flags:
+  -h, --help   help for init
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

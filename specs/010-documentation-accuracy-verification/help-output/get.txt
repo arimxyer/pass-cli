@@ -1,0 +1,43 @@
+Get retrieves a credential from your vault and copies the password to clipboard.
+
+By default, the password is copied to the clipboard and credential details
+are displayed. Use flags to customize the output:
+
+  --quiet      Output only the requested value (for scripts)
+  --field      Extract a specific field (username, password, category, url, notes, service)
+  --no-clipboard  Skip copying to clipboard
+  --masked     Display password as asterisks (default shows full password)
+
+Automatic usage tracking records where credentials are accessed based on
+your current working directory.
+
+Usage:
+  pass-cli get <service> [flags]
+
+Examples:
+  # Get credential with clipboard copy
+  pass-cli get github
+
+  # Get for scripts (outputs only password)
+  pass-cli get github --quiet
+
+  # Get specific field for scripts
+  pass-cli get github --field username --quiet
+
+  # Get without clipboard
+  pass-cli get github --no-clipboard
+
+  # Get with masked password display
+  pass-cli get github --masked
+
+Flags:
+  -f, --field string   field to extract (username, password, category, url, notes, service) (default "password")
+  -h, --help           help for get
+      --masked         display password as asterisks
+      --no-clipboard   do not copy to clipboard
+  -q, --quiet          output only the requested value (script-friendly)
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

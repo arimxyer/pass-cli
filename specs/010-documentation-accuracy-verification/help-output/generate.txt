@@ -1,0 +1,43 @@
+Generate creates a strong, random password using cryptographic randomness.
+
+By default, generates a 20-character password with lowercase, uppercase,
+digits, and symbols. You can customize the length and character sets.
+
+The generated password is automatically copied to the clipboard and
+displayed on screen.
+
+Usage:
+  pass-cli generate [flags]
+
+Aliases:
+  generate, gen, pwd
+
+Examples:
+  # Generate default password (20 chars, all character types)
+  pass-cli generate
+
+  # Generate 32-character password
+  pass-cli generate --length 32
+
+  # Generate password without symbols (alphanumeric only)
+  pass-cli generate --no-symbols
+
+  # Generate digits-only PIN (8 digits)
+  pass-cli gen --length 8 --no-lower --no-upper --no-symbols
+
+  # Generate without clipboard
+  pass-cli generate --no-clipboard
+
+Flags:
+  -h, --help           help for generate
+  -l, --length int     password length (default 20)
+      --no-clipboard   do not copy to clipboard
+      --no-digits      exclude digits
+      --no-lower       exclude lowercase letters
+      --no-symbols     exclude symbols
+      --no-upper       exclude uppercase letters
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

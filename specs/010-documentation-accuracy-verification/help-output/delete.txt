@@ -1,0 +1,36 @@
+Delete removes one or more credentials from your vault.
+
+By default, you'll see a usage warning if the credential has been accessed before,
+showing where and when it was last used. This helps prevent accidental deletion
+of actively-used credentials.
+
+You can delete multiple credentials at once by providing multiple service names.
+Use --force to skip all confirmation prompts (dangerous!).
+
+Usage:
+  pass-cli delete <service> [service...] [flags]
+
+Aliases:
+  delete, rm, remove
+
+Examples:
+  # Delete a single credential
+  pass-cli delete github
+
+  # Delete multiple credentials
+  pass-cli delete github gitlab bitbucket
+
+  # Delete with alias
+  pass-cli rm old-service
+
+  # Force delete without confirmation (dangerous!)
+  pass-cli delete github --force
+
+Flags:
+  -f, --force   skip confirmation prompts
+  -h, --help    help for delete
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

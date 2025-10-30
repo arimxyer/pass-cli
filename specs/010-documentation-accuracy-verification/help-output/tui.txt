@@ -1,0 +1,33 @@
+Launch an interactive terminal user interface (TUI) for managing credentials.
+
+The TUI provides a visual interface with keyboard shortcuts for:
+  • Browsing credentials by category
+  • Viewing credential details
+  • Adding, editing, and deleting credentials
+  • Copying passwords to clipboard
+  • Toggling password visibility
+
+Keyboard shortcuts:
+  n - New credential
+  e - Edit credential
+  d - Delete credential
+  c - Copy password
+  p - Toggle password visibility
+  / - Search/filter
+  ? - Show help
+  Tab - Cycle focus between panels
+  q - Quit
+
+The TUI will automatically unlock the vault using the system keychain if available,
+otherwise it will prompt for the master password.
+
+Usage:
+  pass-cli tui [flags]
+
+Flags:
+  -h, --help   help for tui
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

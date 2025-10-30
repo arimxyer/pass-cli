@@ -1,0 +1,12 @@
+Display version information including build date and commit hash.
+
+Usage:
+  pass-cli version [flags]
+
+Flags:
+  -h, --help   help for version
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

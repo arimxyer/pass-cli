@@ -1,0 +1,17 @@
+Reset the configuration file to default values.
+
+A backup of the current configuration will be created at:
+  <config-path>.backup
+
+If a backup already exists, it will be overwritten.
+
+Usage:
+  pass-cli config reset [flags]
+
+Flags:
+  -h, --help   help for reset
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output

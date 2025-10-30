@@ -1,0 +1,64 @@
+Update modifies an existing credential in your vault.
+
+You can selectively update individual fields (username, password, category, url, notes) without
+affecting the others. Empty values mean "don't change".
+
+To explicitly clear optional fields (category, url, notes) to empty, use the --clear-* flags.
+These flags take precedence over corresponding value flags.
+
+By default, you'll see a usage warning if the credential has been accessed before,
+showing where and when it was last used. Use --force to skip the confirmation.
+
+Usage:
+  pass-cli update <service> [flags]
+
+Examples:
+  # Update password only (interactive prompt)
+  pass-cli update github
+
+  # Update username only
+  pass-cli update github --username new-user@example.com
+
+  # Update password only
+  pass-cli update github --password newpass123
+
+  # Update category only
+  pass-cli update github --category "Work"
+
+  # Update URL only
+  pass-cli update github --url "https://github.com"
+
+  # Update notes
+  pass-cli update github --notes "Updated account"
+
+  # Clear category field
+  pass-cli update github --clear-category
+
+  # Clear URL field
+  pass-cli update github --clear-url
+
+  # Clear notes field
+  pass-cli update github --clear-notes
+
+  # Update multiple fields
+  pass-cli update github -u user -p pass --notes "New info"
+
+  # Skip confirmation
+  pass-cli update github --force
+
+Flags:
+      --category string   new category
+      --clear-category    clear category field to empty
+      --clear-notes       clear notes field to empty
+      --clear-url         clear URL field to empty
+      --force             skip confirmation prompt
+  -h, --help              help for update
+      --notes string      new notes
+  -p, --password string   new password
+      --url string        new URL
+  -u, --username string   new username
+
+Global Flags:
+      --config string   config file (default is $HOME/.pass-cli/config.yaml)
+      --vault string    vault file path (default is $HOME/.pass-cli/vault.enc)
+  -v, --verbose         verbose output
