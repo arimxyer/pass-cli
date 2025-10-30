@@ -77,6 +77,22 @@ jobs:
           replacement-text: '"version": "${{ steps.version.outputs.no_v }}"'
           encoding: 'utf8'
 
+      - name: Update root README.md version
+        uses: richardrigutins/replace-in-files@v2
+        with:
+          files: 'README.md'
+          search-text: '\*\*Version\*\*: v[0-9]+\.[0-9]+\.[0-9]+'
+          replacement-text: '**Version**: ${{ steps.version.outputs.full }}'
+          encoding: 'utf8'
+
+      - name: Update root README.md date
+        uses: richardrigutins/replace-in-files@v2
+        with:
+          files: 'README.md'
+          search-text: '\*\*Last Updated\*\*: \w+ \d{4}'
+          replacement-text: '**Last Updated**: ${{ steps.date.outputs.date }}'
+          encoding: 'utf8'
+
       - name: Check if there are changes
         id: changes
         run: |
@@ -97,7 +113,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/*.md homebrew/pass-cli.rb scoop/pass-cli.json
+          git add README.md docs/*.md homebrew/pass-cli.rb scoop/pass-cli.json
           git commit -m "docs: update version to ${{ steps.version.outputs.full }} and date to ${{ steps.date.outputs.date }}"
 
           # Push to current branch

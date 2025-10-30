@@ -2,7 +2,7 @@
 
 > A secure, cross-platform command-line password manager designed for developers
 
-**Version**: v0.0.1 | **Status**: Production Ready | **Last Updated**: October 2025
+**Version**: v0.8.51 | **Status**: Production Ready | **Last Updated**: October 2025
 
 Pass-CLI is a fast, secure password and API key manager that stores credentials locally with AES-256-GCM encryption. Built for developers who need quick, script-friendly access to credentials without cloud dependencies.
 
