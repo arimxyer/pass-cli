@@ -256,12 +256,12 @@ goreleaser release --snapshot --clean --skip=publish
 - **Issue**: golangci-lint fails with "binary was built with go X but current version is Y"
 - **Root Cause**: golangci-lint must be built with a Go version >= the project's Go version
 - **Solution**: Pin golangci-lint to a version built with compatible Go
-- **Example**: For Go 1.25+ projects, use golangci-lint v2.5+ with golangci-lint-action v8
+- **Example**: For Go 1.21+ projects, use golangci-lint v1.55+ with golangci-lint-action v6
   ```yaml
   - name: Run golangci-lint
-    uses: golangci/golangci-lint-action@v8
+    uses: golangci/golangci-lint-action@v6
     with:
-      version: v2.5  # Built with Go 1.25+
+      version: v1.55  # Built with Go 1.21+
   ```
 - **Reference**: https://github.com/golangci/golangci-lint/issues/5873
 

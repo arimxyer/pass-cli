@@ -78,7 +78,7 @@ pass-cli --vault /custom/path/vault.enc init
 | Flag | Type | Description |
 |------|------|-------------|
 | `--enable-audit` | bool | Enable tamper-evident audit logging |
-| `--use-keychain` | bool | Store master password in OS keychain (default: true) |
+| `--use-keychain` | bool | Store master password in OS keychain |
 
 #### Password Policy (January 2025)
 
@@ -266,7 +266,7 @@ Password: mySecretPassword123!
 URL:      https://github.com
 Notes:    Personal account
 
-✓ Password copied to clipboard (will clear in 30 seconds)
+✓ Password copied to clipboard (will clear in 5 seconds)
 ```
 
 **Quiet mode:**
@@ -283,7 +283,7 @@ user@example.com
 
 #### Notes
 
-- Clipboard auto-clears after 30 seconds
+- Clipboard auto-clears after 5 seconds
 - Usage tracking records current directory
 - Accessing a credential updates the "last accessed" timestamp
 
@@ -529,7 +529,7 @@ Default character sets:
 - At least one character set must be enabled
 - Minimum length: 8 characters
 - Maximum length: 128 characters
-- Clipboard auto-clears after 30 seconds
+- Clipboard auto-clears after 5 seconds
 
 ---
 
@@ -1053,7 +1053,8 @@ pass-cli get github
 ## Configuration
 
 **Configuration Location** (added January 2025):
-- **Linux/macOS**: `~/.config/pass-cli/config.yml`
+- **Linux**: `~/.config/pass-cli/config.yml`
+- **macOS**: `~/Library/Application Support/pass-cli/config.yml`
 - **Windows**: `%APPDATA%\pass-cli\config.yml`
 
 **Management Commands**:
@@ -1215,7 +1216,7 @@ Both modes access the same encrypted vault file (`~/.pass-cli/vault.enc`).
 | `Esc` | Close modal / Cancel search | Modals, search mode |
 | `Ctrl+C` | Quit application | Any time |
 
-**Note**: Configurable shortcuts (a, e, d, i, s, ?, /, q) can be customized via `~/.config/pass-cli/config.yml`. See [Configuration](#configuration) section for keybinding customization details. Navigation shortcuts (Tab, arrows, Enter, Esc, Ctrl+P, Ctrl+S, Ctrl+C) are hardcoded and cannot be changed.
+**Note**: Configurable shortcuts (a, e, d, i, s, ?, /, q) can be customized via the config file (see [Configuration](#configuration) section for paths). Navigation shortcuts (Tab, arrows, Enter, Esc, Ctrl+P, Ctrl+S, Ctrl+C) are hardcoded and cannot be changed.
 
 ### Search & Filter
 
@@ -1373,7 +1374,7 @@ Press `q` or `Ctrl+C` at any time to quit the TUI and return to shell.
 3. **Toggle detail panel (`i`) on narrow terminals** - Maximize table visibility
 4. **Use `Ctrl+P` to verify passwords** - Catch typos before saving
 5. **Check usage locations before deleting** - Understand credential dependencies
-6. **Press `c` to copy passwords** - Clipboard auto-clears after 30 seconds
+6. **Press `c` to copy passwords** - Clipboard auto-clears after 5 seconds
 
 ## TUI Troubleshooting
 

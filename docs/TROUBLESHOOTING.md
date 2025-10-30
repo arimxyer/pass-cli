@@ -1128,22 +1128,17 @@ cp ~/Dropbox/vault.enc ~/.pass-cli/vault.enc
 
 **Q: How do I change my master password?**
 
-A: Currently requires manual process:
+A: Use the `change-password` command:
 ```bash
-# 1. Export all credentials to temporary file (manually)
-pass-cli list --format json > /tmp/credentials.json
-
-# 2. Initialize new vault with new password
-mv ~/.pass-cli/vault.enc ~/.pass-cli/vault.enc.old
-pass-cli init
-
-# 3. Re-add credentials manually
-# (No automated import yet)
-
-# 4. Verify and delete old vault
-pass-cli list
-rm ~/.pass-cli/vault.enc.old
+pass-cli change-password
 ```
+
+You'll be prompted to:
+1. Enter your current master password
+2. Enter a new master password (must meet security requirements)
+3. Confirm the new master password
+
+The vault will be automatically re-encrypted with the new password.
 
 ---
 

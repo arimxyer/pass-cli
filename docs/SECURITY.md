@@ -443,7 +443,7 @@ pass-cli verify-audit
    ```
 
 2. **Clipboard Security**
-   - Clipboard cleared automatically after 30 seconds
+   - Clipboard cleared automatically after 5 seconds
    - Avoid pasting into untrusted applications
    - Use `--no-clipboard` if concerned
 
