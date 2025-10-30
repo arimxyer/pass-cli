@@ -496,3 +496,8 @@ pass-cli version
 ```
 
 Welcome to secure, simple password management with pass-cli!
+
+---
+
+**Documentation Version**: v0.0.1
+**Last Updated**: October 2025

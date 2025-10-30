@@ -697,3 +697,8 @@ After installation:
 - Read the [Usage Guide](USAGE.md)
 - Review [Security Documentation](SECURITY.md)
 - Check out [Script Integration Examples](../README.md#-script-integration)
+
+---
+
+**Documentation Version**: v0.0.1
+**Last Updated**: October 2025
