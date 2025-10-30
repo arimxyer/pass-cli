@@ -86,7 +86,7 @@ Master Key = PBKDF2(
 
 - **Backward Compatibility**: Vaults with 100k iterations continue to work
 - **Automatic Detection**: Iteration count stored in vault metadata
-- **Migration Path**: Use `pass-cli migrate` to upgrade existing vaults
+- **Migration Path**: Manual migration required (export credentials, reinitialize vault, re-import)
 - **See**: `docs/MIGRATION.md` for detailed upgrade instructions
 
 ### Encryption Process

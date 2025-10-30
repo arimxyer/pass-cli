@@ -161,9 +161,11 @@ The January 2025 security hardening release introduces several important changes
 
 ### Option B: In-Place Migration (Future Feature)
 
+> **⚠️ WARNING**: This feature is **NOT YET IMPLEMENTED**. The `pass-cli migrate` command does not currently exist. Use Option A (Manual Migration) instead.
+
 **Status**: Not yet implemented. Planned for future release.
 
-**Planned Command**:
+**Planned Command** (for future reference only):
 ```bash
 # Future: Migrate vault to 600k iterations in-place
 pass-cli migrate --iterations 600000
