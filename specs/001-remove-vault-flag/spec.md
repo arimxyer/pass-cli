@@ -58,7 +58,7 @@ As an existing user who previously used `--vault` flag, I want clear guidance on
 
 ### Edge Cases
 
-- What happens when vault_path in config.yml points to a non-existent directory? (System should create parent directories or provide clear error)
+- What happens when vault_path in config.yml points to a non-existent directory? (System should create parent directories automatically, matching existing behavior)
 - What happens when vault_path in config.yml contains environment variables like `$HOME` or `~`? (System should expand these to absolute paths)
 - What happens when vault_path in config.yml is a relative path? (System should resolve to absolute path relative to user's home directory)
 - What happens when user has both old vault at default location and creates new vault at custom config location? (Commands use config location; user must manually handle old vault)
