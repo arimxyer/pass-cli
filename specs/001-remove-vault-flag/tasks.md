@@ -130,8 +130,8 @@
 
 **Purpose**: Enhancements that affect multiple user stories and final cleanup
 
-- [ ] T048 Add vault path source reporting to doctor command in cmd/doctor.go (show "default" or "config")
-- [ ] T049 Add vault path display to doctor command output in cmd/doctor.go
+- [x] T048 Add vault path source reporting to doctor command in cmd/doctor.go (show "default" or "config")
+- [x] T049 Add vault path display to doctor command output in cmd/doctor.go
 - [ ] T050 [P] Refactor test/integration_test.go (remove --vault flag usage, use config files or env vars)
 - [ ] T051 [P] Refactor test/list_test.go (remove --vault flag usage)
 - [ ] T052 [P] Refactor test/usage_test.go (remove --vault flag usage)
