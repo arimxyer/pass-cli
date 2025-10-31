@@ -75,9 +75,20 @@ func init() {
 }
 
 // GetVaultPath returns the vault path from config or default
+// Exits with error if config validation fails (FR-012)
 func GetVaultPath() string {
-	// Load config
-	cfg, _ := config.Load()
+	// Load config and check validation
+	cfg, result := config.Load()
+
+	// FR-012: Validate vault_path during config loading and report errors
+	if !result.Valid {
+		fmt.Fprintf(os.Stderr, "Configuration validation failed:\n")
+		for _, err := range result.Errors {
+			fmt.Fprintf(os.Stderr, "  - %s: %s\n", err.Field, err.Message)
+		}
+		fmt.Fprintf(os.Stderr, "\nPlease fix your configuration file and try again.\n")
+		os.Exit(1)
+	}
 
 	var vaultPath string
 	if cfg.VaultPath != "" {
