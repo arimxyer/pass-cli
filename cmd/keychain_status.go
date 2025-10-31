@@ -19,8 +19,7 @@ This is a read-only operation that does not require unlocking the vault.`,
 	Example: `  # Check keychain status for default vault
   pass-cli keychain status
 
-  # Check keychain status for specific vault
-  pass-cli keychain status --vault /path/to/vault.enc`,
+  # For custom vault location, configure vault_path in ~/.pass-cli/config.yml`,
 	RunE: runKeychainStatus,
 }
 

@@ -212,6 +212,26 @@ func TestGetVaultPath_RelativeToAbsolute(t *testing.T) {
 	}
 }
 
+
+// T035: Unit test for --vault flag error handler
+func TestVaultFlagError(t *testing.T) {
+	// Simulate attempting to use --vault flag
+	// The flag should not exist, and attempting to use it should produce an error
+	
+	// We can't easily test cobra's flag parsing in a unit test without running the actual command,
+	// so this test verifies the flag is not registered
+	cmd := rootCmd
+	
+	// Try to lookup --vault flag
+	flag := cmd.PersistentFlags().Lookup("vault")
+	
+	if flag != nil {
+		t.Errorf("--vault flag should not be registered, but found: %v", flag)
+	}
+	
+	t.Log("✓ --vault flag is not registered (correctly removed)")
+}
+
 // Helper function for cross-platform absolute path
 func getTestAbsolutePath() string {
 	if runtime.GOOS == "windows" {

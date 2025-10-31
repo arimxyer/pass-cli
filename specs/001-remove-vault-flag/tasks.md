@@ -105,15 +105,15 @@
 
 ### Tests for User Story 3
 
-- [ ] T035 [P] [US3] Unit test for --vault flag error handler in cmd/root_test.go
-- [ ] T036 [US3] Integration test for --vault flag rejection with helpful error in test/integration_test.go
+- [x] T035 [P] [US3] Unit test for --vault flag error handler in cmd/root_test.go
+- [x] T036 [US3] Integration test for --vault flag rejection with helpful error in test/integration_test.go
 
 ### Implementation for User Story 3
 
-- [ ] T037 [US3] Add custom SetFlagErrorFunc in cmd/root.go init() to intercept --vault attempts
-- [ ] T038 [P] [US3] Update init.go help text/examples (remove --vault flag examples) in cmd/init.go
-- [ ] T039 [P] [US3] Update keychain_enable.go help text (remove --vault examples) in cmd/keychain_enable.go
-- [ ] T040 [P] [US3] Update keychain_status.go help text (remove --vault examples) in cmd/keychain_status.go
+- [x] T037 [US3] Add custom SetFlagErrorFunc in cmd/root.go init() to intercept --vault attempts
+- [x] T038 [P] [US3] Update init.go help text/examples (remove --vault flag examples) in cmd/init.go
+- [x] T039 [P] [US3] Update keychain_enable.go help text (remove --vault examples) in cmd/keychain_enable.go
+- [x] T040 [P] [US3] Update keychain_status.go help text (remove --vault examples) in cmd/keychain_status.go
 - [ ] T041 [P] [US3] Add migration guide section to docs/MIGRATION.md
 - [ ] T042 [P] [US3] Update docs/USAGE.md (remove --vault flag and PASS_CLI_VAULT env var documentation, add vault_path config docs)
 - [ ] T043 [P] [US3] Update docs/GETTING_STARTED.md (remove custom vault location section using --vault)

@@ -66,6 +66,26 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	// T037: Custom flag error handler for migration guidance
+	rootCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
+		// Check if error is about --vault flag
+		if strings.Contains(err.Error(), "vault") && strings.Contains(err.Error(), "flag") {
+			return fmt.Errorf(`the --vault flag has been removed
+
+Instead, configure your vault location in the config file:
+  1. Edit %s/.pass-cli/config.yml
+  2. Add: vault_path: /your/custom/path/vault.enc
+  3. Run your command without the --vault flag
+
+For more details, see the migration guide:
+  https://github.com/username/pass-cli/docs/MIGRATION.md
+
+Original error: %w`, os.Getenv("HOME"), err)
+		}
+		// Return original error for other flag issues
+		return err
+	})
+
 	// Global flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.pass-cli/config.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")

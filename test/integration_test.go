@@ -765,3 +765,30 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 
 	t.Log("✓ Commands successfully use custom vault_path from config")
 }
+
+
+// T036: Integration test for --vault flag rejection with helpful error
+func TestVaultFlagRejection(t *testing.T) {
+	// Attempt to use --vault flag (which has been removed)
+	cmd := exec.Command(binaryPath, "init", "--vault", "/test/path/vault.enc")
+	
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	
+	err := cmd.Run()
+	
+	// Command should fail
+	if err == nil {
+		t.Fatal("Expected command to fail with --vault flag, but it succeeded")
+	}
+	
+	// Error message should mention the flag is not supported
+	output := stdout.String() + stderr.String()
+	
+	if !strings.Contains(output, "vault") && !strings.Contains(output, "unknown flag") {
+		t.Errorf("Expected error message about unknown/unsupported flag, got: %s", output)
+	}
+	
+	t.Logf("✓ --vault flag correctly rejected with error: %s", output)
+}

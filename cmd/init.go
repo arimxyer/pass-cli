@@ -25,6 +25,9 @@ encrypt and decrypt your vault. This password should be strong and memorable.
 
 By default, your vault will be stored at ~/.pass-cli/vault.enc
 
+To use a custom vault location, set vault_path in your config file:
+  ~/.pass-cli/config.yml
+
 Use the --use-keychain flag to store the master password in your system's
 keychain (Windows Credential Manager, macOS Keychain, or Linux Secret Service)
 so you don't have to enter it every time.`,
@@ -32,10 +35,7 @@ so you don't have to enter it every time.`,
   pass-cli init
 
   # Initialize with keychain integration
-  pass-cli init --use-keychain
-
-  # Initialize with custom vault location
-  pass-cli init --vault /path/to/vault.enc`,
+  pass-cli init --use-keychain`,
 	RunE: runInit,
 }
 
