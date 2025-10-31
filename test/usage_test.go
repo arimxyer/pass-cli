@@ -302,7 +302,7 @@ func runCommandWithInputAndVault(t *testing.T, vaultPath, input string, args ...
 		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
-	// Create config file with vault_path instead of using --vault flag
+	// Create config file with vault_path
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 

@@ -75,7 +75,7 @@ func runCommand(t *testing.T, args ...string) (string, string, error) {
 
 	vaultPath := filepath.Join(testDir, testVaultDir, "vault.enc")
 
-	// Create config file with vault_path instead of using --vault flag
+	// Create config file with vault_path
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -98,7 +98,7 @@ func runCommandWithInput(t *testing.T, input string, args ...string) (string, st
 
 	vaultPath := filepath.Join(testDir, testVaultDir, "vault.enc")
 
-	// Create config file with vault_path instead of using --vault flag
+	// Create config file with vault_path
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 

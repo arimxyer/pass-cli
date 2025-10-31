@@ -140,9 +140,9 @@ func TestIntegration_TUIVaultPath(t *testing.T) {
 
 	t.Run("Uses_Default_Vault_Path", func(t *testing.T) {
 		// Verify default vault path behavior
-		// When no --vault flag is provided, uses default path
+		// When no config is provided, uses default path
 
-		// Get version without vault flag - should work
+		// Get version without config - should work
 		versionCmd := exec.Command(binaryPath, "version")
 		output, err := versionCmd.CombinedOutput()
 		if err != nil {
