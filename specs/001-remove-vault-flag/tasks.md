@@ -83,13 +83,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] Implement config-based path resolution in GetVaultPath() in cmd/root.go (check cfg.VaultPath != "")
-- [ ] T027 [US2] Implement os.ExpandEnv() for environment variable expansion in GetVaultPath() in cmd/root.go
-- [ ] T028 [US2] Implement ~ prefix expansion using os.UserHomeDir() in GetVaultPath() in cmd/root.go
-- [ ] T029 [US2] Implement relative to absolute path conversion in GetVaultPath() in cmd/root.go
-- [ ] T030 [US2] Add null byte validation check in validateVaultPath() in internal/config/config.go
-- [ ] T031 [US2] Add relative path warning in validateVaultPath() in internal/config/config.go
-- [ ] T032 [US2] Add non-existent parent directory warning in validateVaultPath() in internal/config/config.go
+- [x] T026 [US2] Implement config-based path resolution in GetVaultPath() in cmd/root.go (check cfg.VaultPath != "")
+- [x] T027 [US2] Implement os.ExpandEnv() for environment variable expansion in GetVaultPath() in cmd/root.go
+- [x] T028 [US2] Implement ~ prefix expansion using os.UserHomeDir() in GetVaultPath() in cmd/root.go
+- [x] T029 [US2] Implement relative to absolute path conversion in GetVaultPath() in cmd/root.go
+- [x] T030 [US2] Add null byte validation check in validateVaultPath() in internal/config/config.go
+- [x] T031 [US2] Add relative path warning in validateVaultPath() in internal/config/config.go
+- [x] T032 [US2] Add non-existent parent directory warning in validateVaultPath() in internal/config/config.go
 - [ ] T033 [US2] Test cross-platform path expansion (Windows %USERPROFILE%, Unix $HOME) in CI
 - [ ] T034 [US2] Audit vault-related error messages in cmd/*.go to ensure resolved path is included (e.g., "vault not found at /resolved/path/vault.enc")
 
