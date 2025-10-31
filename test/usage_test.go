@@ -4,8 +4,10 @@
 package test
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -300,5 +302,19 @@ func runCommandWithInputAndVault(t *testing.T, vaultPath, input string, args ...
 		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
-	return runCommandWithInput(t, input, append([]string{"--vault", vaultPath}, args...)...)
+	// Create config file with vault_path instead of using --vault flag
+	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
+	// Execute command directly (don't call runCommandWithInput which uses different vault)
+	cmd := exec.Command(binaryPath, args...)
+	cmd.Stdin = strings.NewReader(input)
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	return stdout.String(), stderr.String(), err
 }

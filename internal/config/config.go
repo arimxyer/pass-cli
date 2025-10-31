@@ -82,6 +82,11 @@ func GetDefaults() *Config {
 
 // GetConfigPath returns the OS-appropriate config file path using os.UserConfigDir()
 func GetConfigPath() (string, error) {
+	// Check for PASS_CLI_CONFIG environment variable first (for testing)
+	if envPath := os.Getenv("PASS_CLI_CONFIG"); envPath != "" {
+		return envPath, nil
+	}
+
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		// Fallback to home directory if UserConfigDir fails
