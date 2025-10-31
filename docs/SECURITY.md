@@ -528,11 +528,13 @@ pass-cli verify-audit
 
 1. **Testing**
    ```bash
-   # Use separate vault for testing
-   pass-cli --vault /tmp/test-vault.enc init
+   # Use separate vault for testing (configure in config file)
+   echo "vault_path: /tmp/test-vault.enc" > ~/.pass-cli/config-test.yml
+   pass-cli init
 
    # Clean up after testing
    rm -f /tmp/test-vault.enc
+   rm -f ~/.pass-cli/config-test.yml
    ```
 
 2. **Debugging**

@@ -112,8 +112,8 @@ No credentials found.
 
 Guided initialization is **skipped** in these scenarios:
 
-1. **Vault already exists**: If you have an existing vault at the default location, no prompt appears
-2. **Custom vault flag used**: If you specify `--vault /path/to/vault.enc`, initialization is skipped (you're explicitly managing vault location)
+1. **Vault already exists**: If you have an existing vault at the default or configured location, no prompt appears
+2. **Custom vault configured**: If you've configured `vault_path` in your config file, initialization uses that location automatically
 3. **Non-TTY environment**: If running in a script or pipe (stdin is not a terminal), initialization is skipped to avoid blocking
 4. **Commands that don't require vault**: Commands like `version`, `doctor`, `help` don't trigger initialization
 
@@ -144,15 +144,21 @@ This provides the same setup process as guided initialization, but you invoke it
 
 #### Custom Vault Location
 
+To use a custom vault location, configure it in your config file before initialization:
+
 ```bash
-pass-cli init --vault /custom/path/vault.enc
+# Edit config file
+echo "vault_path: /custom/path/vault.enc" > ~/.pass-cli/config.yml
+
+# Then initialize
+pass-cli init
 ```
 
-Creates a vault at a custom location. You'll need to use `--vault` flag with all future commands:
+Future commands will automatically use the configured vault location:
 
 ```bash
-pass-cli add github --vault /custom/path/vault.enc
-pass-cli get github --vault /custom/path/vault.enc
+pass-cli add github
+pass-cli get github
 ```
 
 #### Skip Keychain Integration
@@ -447,7 +453,7 @@ Now that you have pass-cli set up:
 5. **Explore advanced features**:
    - Audit log verification: `pass-cli verify-audit`
    - Custom password generation: `pass-cli generate --length 32 --no-special`
-   - Multiple vault support: `--vault` flag for different vaults
+   - Custom vault location: Configure `vault_path` in config file
 
 ## Getting Help
 
