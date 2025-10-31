@@ -16,9 +16,9 @@
 
 **Purpose**: Verify project is ready for implementation
 
-- [ ] T001 Verify Go 1.21+ installed and all dependencies available (go mod download)
-- [ ] T002 Verify all tests pass on current codebase (go test ./...)
-- [ ] T003 Create feature branch `001-remove-vault-flag` from current branch
+- [x] T001 Verify Go 1.21+ installed and all dependencies available (go mod download)
+- [x] T002 Verify all tests pass on current codebase (go test ./...)
+- [x] T003 Create feature branch `001-remove-vault-flag` from current branch
 
 ---
 
@@ -46,8 +46,8 @@
 
 **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T008 [P] [US1] Unit test for GetVaultPath() with no config (returns default path) in cmd/root_test.go or internal/config/config_test.go
-- [ ] T009 [P] [US1] Unit test for GetVaultPath() with empty vault_path in config in internal/config/config_test.go
+- [x] T008 [P] [US1] Unit test for GetVaultPath() with no config (returns default path) in cmd/root_test.go or internal/config/config_test.go
+- [x] T009 [P] [US1] Unit test for GetVaultPath() with empty vault_path in config in internal/config/config_test.go
 - [ ] T010 [P] [US1] Integration test for `pass-cli init` without config in test/integration_test.go
 - [ ] T011 [P] [US1] Integration test for vault operations with default path in test/integration_test.go
 

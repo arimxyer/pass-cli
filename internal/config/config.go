@@ -504,7 +504,8 @@ func (c *Config) validateVaultPath(result *ValidationResult) *ValidationResult {
 	}
 
 	// 3. Warn on relative paths (will be resolved to home directory)
-	if !filepath.IsAbs(expandedPath) && !isPathWithVariable(c.VaultPath) {
+	// Skip warning if path was originally absolute (even if Unix-style on Windows)
+	if !filepath.IsAbs(expandedPath) && !isPathWithVariable(c.VaultPath) && !filepath.IsAbs(c.VaultPath) {
 		result.Warnings = append(result.Warnings, ValidationWarning{
 			Field:   "vault_path",
 			Message: fmt.Sprintf("relative path '%s' will be resolved relative to home directory", c.VaultPath),
