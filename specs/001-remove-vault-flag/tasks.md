@@ -142,8 +142,9 @@
 - [x] T057 [P] Refactor test/vault_metadata_test.go (remove --vault flag usage) - **COMPLETE**: Refactored 23 command calls, all 11 metadata tests passing
 - [x] T058 [P] Refactor test/vault_remove_test.go (remove --vault flag usage) - **COMPLETE**: Refactored 2 active + 3 TODO, tests passing
 - [x] T059 [P] Refactor test/keychain_integration_test.go (remove --vault flag usage) - **COMPLETE**: Refactored 15 command calls, all 5 keychain integration tests passing
+- [x] T059a [P] Refactor test/tui_integration_test.go (remove --vault flag usage) - **COMPLETE**: Refactored 42 references across 9 test functions + benchmark, all TUI tests passing
 - [x] T060 Create setupTestVaultConfig() helper function in test/ for test isolation
-- [x] T061 Run full test suite and verify all pass (go test ./... -v) - All tests passing!
+- [ ] T061 Run full test suite and verify all pass (go test ./... -v)
 - [ ] T062 Run cross-platform tests in CI (Windows, macOS, Linux) - **REQUIRES CI SETUP**
 - [x] T063 Final grep verification: no --vault in cmd/ except error message - Fixed cmd/init.go error message
 - [~] T064 Final grep verification: no --vault in internal/ - **PARTIAL**: CustomVaultFlag field in FirstRunState needs refactoring (non-blocking)
