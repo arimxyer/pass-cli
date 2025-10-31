@@ -72,14 +72,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T018 [P] [US2] Unit test for custom vault_path resolution in internal/config/config_test.go
-- [ ] T019 [P] [US2] Unit test for ~ expansion in vault path in internal/config/config_test.go
-- [ ] T020 [P] [US2] Unit test for $HOME / %USERPROFILE% expansion in internal/config/config_test.go
-- [ ] T021 [P] [US2] Unit test for relative path → absolute conversion in internal/config/config_test.go
-- [ ] T022 [P] [US2] Unit test for validation warnings on relative paths in internal/config/config_test.go
-- [ ] T023 [P] [US2] Unit test for validation warnings on non-existent parent dirs in internal/config/config_test.go
-- [ ] T024 [P] [US2] Unit test for validation error on null byte in path in internal/config/config_test.go
-- [ ] T025 [US2] Integration test for commands with custom config vault_path in test/integration_test.go
+- [x] T018 [P] [US2] Unit test for custom vault_path resolution in cmd/root_test.go
+- [x] T019 [P] [US2] Unit test for ~ expansion in vault path in cmd/root_test.go
+- [x] T020 [P] [US2] Unit test for $HOME / %USERPROFILE% expansion in cmd/root_test.go
+- [x] T021 [P] [US2] Unit test for relative path → absolute conversion in cmd/root_test.go
+- [x] T022 [P] [US2] Unit test for validation warnings on relative paths in internal/config/config_test.go
+- [x] T023 [P] [US2] Unit test for validation warnings on non-existent parent dirs in internal/config/config_test.go
+- [x] T024 [P] [US2] Unit test for validation error on null byte in path in internal/config/config_test.go
+- [x] T025 [US2] Integration test for commands with custom config vault_path in test/integration_test.go
 
 ### Implementation for User Story 2
 

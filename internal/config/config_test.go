@@ -241,6 +241,13 @@ func getAbsolutePath() string {
 	return "/tmp/vault.enc"
 }
 
+func getAbsolutePathNonExistent() string {
+	if runtime.GOOS == "windows" {
+		return "C:\\NonExistentDir9999\\vault.enc"
+	}
+	return "/nonexistent/dir9999/vault.enc"
+}
+
 // T008 & T009: Unit tests for vault_path configuration
 func TestVaultPathValidation(t *testing.T) {
 	tests := []struct {
@@ -294,6 +301,13 @@ func TestVaultPathValidation(t *testing.T) {
 			vaultPath:      "%USERPROFILE%\\vault.enc",
 			expectErrors:   0,
 			expectWarnings: 0,
+		},
+		{
+			name:           "non-existent parent directory warns",
+			vaultPath:      getAbsolutePathNonExistent(),
+			expectErrors:   0,
+			expectWarnings: 1,
+			warnContains:   "parent directory",
 		},
 	}
 
