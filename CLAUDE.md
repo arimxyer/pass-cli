@@ -167,7 +167,14 @@ Auto-generated from all feature plans. Last updated: 2025-10-30
 ```
 pass-cli/
 ├── cmd/                      # CLI commands (Cobra-based)
-│   ├── tui/                  # TUI components (charmbracelet/bubbletea)
+│   ├── tui/                  # TUI components (rivo/tview)
+│   │   ├── components/       # UI components (sidebar, detail, header)
+│   │   ├── layout/           # Layout management
+│   │   ├── models/           # Data models and state
+│   │   ├── events/           # Event handling
+│   │   ├── styles/           # Visual styling
+│   │   ├── app.go            # Application setup
+│   │   └── main.go           # TUI entry point
 │   ├── root.go               # Root command and global flags
 │   ├── init.go               # Vault initialization
 │   ├── add.go                # Add credential
@@ -176,8 +183,16 @@ pass-cli/
 │   ├── delete.go             # Delete credential
 │   ├── list.go               # List credentials
 │   ├── generate.go           # Generate password
+│   ├── tui.go                # TUI command
+│   ├── usage.go              # Usage tracking
+│   ├── keychain.go           # Keychain commands (parent)
+│   ├── keychain_enable.go    # Enable keychain integration
+│   ├── keychain_status.go    # Keychain status
+│   ├── vault.go              # Vault commands (parent)
+│   ├── vault_remove.go       # Remove vault
 │   ├── change_password.go    # Change vault master password
 │   ├── verify_audit.go       # Verify audit log integrity
+│   ├── doctor.go             # System diagnostics
 │   ├── config.go             # Configuration management
 │   ├── version.go            # Version information
 │   └── helpers.go            # Shared command helpers
@@ -187,13 +202,21 @@ pass-cli/
 │   ├── keychain/             # OS keychain integration (Windows/macOS/Linux)
 │   ├── security/             # Audit logging with HMAC signatures
 │   ├── storage/              # File operations
-│   └── config/               # Configuration handling
+│   ├── config/               # Configuration handling
+│   └── health/               # Health checks for doctor command
 ├── test/                     # Integration and unit tests
-│   ├── tui/                  # TUI integration tests
 │   ├── unit/                 # Unit tests
 │   ├── integration_test.go   # CLI integration tests
 │   ├── keychain_integration_test.go
-│   └── tui_integration_test.go
+│   ├── keychain_enable_test.go
+│   ├── keychain_status_test.go
+│   ├── list_test.go          # List command tests
+│   ├── usage_test.go         # Usage tracking tests
+│   ├── doctor_test.go        # Doctor command tests
+│   ├── firstrun_test.go      # First-run detection tests
+│   ├── vault_metadata_test.go # Vault metadata tests
+│   ├── vault_remove_test.go  # Vault removal tests
+│   └── tui_integration_test.go # TUI integration tests
 ├── specs/                    # Feature specifications (Speckit framework)
 ├── docs/                     # Documentation
 ├── .specify/                 # Speckit framework configuration
