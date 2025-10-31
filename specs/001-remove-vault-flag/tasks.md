@@ -138,10 +138,10 @@
 - [x] T053 [P] Refactor test/doctor_test.go (remove --vault flag, test vault path reporting) - **COMPLETE**: Added config log suppression, updated JSON test
 - [x] T054 [P] Refactor test/firstrun_test.go (remove --vault flag usage) - **COMPLETE**: Refactored 3 tests, renamed CustomVaultFlag test
 - [x] T055 [P] Refactor test/keychain_enable_test.go (remove --vault flag usage) - **COMPLETE**: Refactored active code and updated TODO comments
-- [ ] T056 [P] Refactor test/keychain_status_test.go (remove --vault flag usage) - **IN PROGRESS**
-- [ ] T057 [P] Refactor test/vault_metadata_test.go (remove --vault flag usage) - 23 references remaining
-- [ ] T058 [P] Refactor test/vault_remove_test.go (remove --vault flag usage) - 5 references remaining
-- [ ] T059 [P] Refactor test/keychain_integration_test.go (remove --vault flag usage if exists)
+- [x] T056 [P] Refactor test/keychain_status_test.go (remove --vault flag usage) - **COMPLETE**: Refactored 2 active tests + 3 TODO comments, all tests passing
+- [x] T057 [P] Refactor test/vault_metadata_test.go (remove --vault flag usage) - **COMPLETE**: Refactored 23 command calls, all 11 metadata tests passing
+- [x] T058 [P] Refactor test/vault_remove_test.go (remove --vault flag usage) - **COMPLETE**: Refactored 2 active + 3 TODO, tests passing
+- [x] T059 [P] Refactor test/keychain_integration_test.go (remove --vault flag usage) - **COMPLETE**: Refactored 15 command calls, all 5 keychain integration tests passing
 - [x] T060 Create setupTestVaultConfig() helper function in test/ for test isolation
 - [x] T061 Run full test suite and verify all pass (go test ./... -v) - All tests passing!
 - [ ] T062 Run cross-platform tests in CI (Windows, macOS, Linux) - **REQUIRES CI SETUP**
