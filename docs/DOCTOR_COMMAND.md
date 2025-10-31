@@ -98,11 +98,15 @@ fi
 
 ### Custom Vault Path
 
-```bash
-pass-cli doctor --vault /path/to/custom/vault.enc
-```
+To check a custom vault, configure `vault_path` in your config file:
 
-Check health of a specific vault file instead of the default location.
+```bash
+# Configure custom vault in config file
+echo "vault_path: /path/to/custom/vault.enc" > ~/.pass-cli/config.yml
+
+# Run doctor
+pass-cli doctor
+```
 
 ## Exit Codes
 
@@ -157,7 +161,7 @@ esac
   Recommendation: Run 'pass-cli init' to create a new vault
 ```
 
-**Solution**: Initialize a new vault with `pass-cli init` or specify the correct vault path with `--vault`.
+**Solution**: Initialize a new vault with `pass-cli init` or configure the correct vault path in your config file (`vault_path` setting).
 
 #### Permission Issues (Error)
 

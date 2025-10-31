@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/term"
+	"pass-cli/internal/config"
 	"pass-cli/internal/vault"
 )
 
 var (
-	cfgFile   string
-	vaultPath string
-	verbose   bool
+	cfgFile string
+	verbose bool
 
 	// Version information (set via ldflags during build)
 	version = "dev"
@@ -65,34 +66,138 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	// T037: Custom flag error handler for migration guidance
+	rootCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
+		// Check if error is about --vault flag
+		if strings.Contains(err.Error(), "vault") && strings.Contains(err.Error(), "flag") {
+			return fmt.Errorf(`the --vault flag has been removed
+
+Instead, configure your vault location in the config file:
+  1. Edit %s/.pass-cli/config.yml
+  2. Add: vault_path: /your/custom/path/vault.enc
+  3. Run your command without the --vault flag
+
+For more details, see the migration guide:
+  https://github.com/username/pass-cli/docs/MIGRATION.md
+
+Original error: %w`, os.Getenv("HOME"), err)
+		}
+		// Return original error for other flag issues
+		return err
+	})
+
 	// Global flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.pass-cli/config.yaml)")
-	rootCmd.PersistentFlags().StringVar(&vaultPath, "vault", "", "vault file path (default is $HOME/.pass-cli/vault.enc)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 
 	// Bind flags to viper
 	_ = viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
-	_ = viper.BindPFlag("vault", rootCmd.PersistentFlags().Lookup("vault"))
 }
 
-// GetVaultPath returns the vault path from flag, config, or default
+// GetVaultPath returns the vault path from config or default
+// Exits with error if config validation fails (FR-012)
 func GetVaultPath() string {
-	// Priority: flag > config > default
-	if vaultPath != "" {
-		return vaultPath
+	// Load config and check validation
+	cfg, result := config.Load()
+
+	// FR-012: Validate vault_path during config loading and report errors
+	if !result.Valid {
+		fmt.Fprintf(os.Stderr, "Configuration validation failed:\n")
+		for _, err := range result.Errors {
+			fmt.Fprintf(os.Stderr, "  - %s: %s\n", err.Field, err.Message)
+		}
+		fmt.Fprintf(os.Stderr, "\nPlease fix your configuration file and try again.\n")
+		os.Exit(1)
 	}
 
-	if viper.IsSet("vault") {
-		return viper.GetString("vault")
+	var vaultPath string
+	if cfg.VaultPath != "" {
+		vaultPath = cfg.VaultPath
+	} else {
+		// Default vault path
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return ".pass-cli/vault.enc"
+		}
+		return filepath.Join(home, ".pass-cli", "vault.enc")
 	}
 
-	// Default vault path
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return ".pass-cli/vault.enc"
+	// Expand environment variables
+	vaultPath = os.ExpandEnv(vaultPath)
+
+	// Expand ~ prefix
+	if strings.HasPrefix(vaultPath, "~") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return vaultPath // Return as-is if home unknown
+		}
+		vaultPath = filepath.Join(home, vaultPath[1:])
 	}
 
-	return filepath.Join(home, ".pass-cli", "vault.enc")
+	// Convert relative to absolute path
+	if !filepath.IsAbs(vaultPath) {
+		home, err := os.UserHomeDir()
+		if err == nil {
+			vaultPath = filepath.Join(home, vaultPath)
+		}
+	}
+
+	return vaultPath
+}
+
+// GetVaultPathWithSource returns the vault path and its source ("config" or "default")
+// Exits with error if config validation fails (FR-012)
+func GetVaultPathWithSource() (path string, source string) {
+	// Load config and check validation
+	cfg, result := config.Load()
+
+	// FR-012: Validate vault_path during config loading and report errors
+	if !result.Valid {
+		fmt.Fprintf(os.Stderr, "Configuration validation failed:\n")
+		for _, err := range result.Errors {
+			fmt.Fprintf(os.Stderr, "  - %s: %s\n", err.Field, err.Message)
+		}
+		fmt.Fprintf(os.Stderr, "\nPlease fix your configuration file and try again.\n")
+		os.Exit(1)
+	}
+
+	var vaultPath string
+	var pathSource string
+
+	if cfg.VaultPath != "" {
+		vaultPath = cfg.VaultPath
+		pathSource = "config"
+	} else {
+		// Default vault path
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return ".pass-cli/vault.enc", "default"
+		}
+		vaultPath = filepath.Join(home, ".pass-cli", "vault.enc")
+		pathSource = "default"
+	}
+
+	// Expand environment variables
+	vaultPath = os.ExpandEnv(vaultPath)
+
+	// Expand ~ prefix
+	if strings.HasPrefix(vaultPath, "~") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return vaultPath, pathSource // Return as-is if home unknown
+		}
+		vaultPath = filepath.Join(home, vaultPath[1:])
+	}
+
+	// Convert relative to absolute path
+	if !filepath.IsAbs(vaultPath) {
+		home, err := os.UserHomeDir()
+		if err == nil {
+			vaultPath = filepath.Join(home, vaultPath)
+		}
+	}
+
+	return vaultPath, pathSource
 }
 
 // IsVerbose returns whether verbose mode is enabled
@@ -103,14 +208,8 @@ func IsVerbose() bool {
 // checkFirstRun detects first-run scenarios and triggers guided initialization
 // T065: PersistentPreRunE hook for first-run detection
 func checkFirstRun(cmd *cobra.Command, args []string) error {
-	// Get vault path from flag (or empty string if not set)
-	vaultFlag := ""
-	if vaultPath != "" {
-		vaultFlag = vaultPath
-	}
-
-	// Detect first-run scenario
-	state := vault.DetectFirstRun(cmd.Name(), vaultFlag)
+	// Detect first-run scenario (no longer uses vault flag)
+	state := vault.DetectFirstRun(cmd.Name(), "")
 
 	// If guided init should be triggered
 	if state.ShouldPrompt {

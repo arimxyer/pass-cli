@@ -16,16 +16,59 @@ Guide for upgrading Pass-CLI vaults and adapting to security hardening changes (
 
 The January 2025 security hardening release introduces several important changes:
 
-1. **Increased PBKDF2 Iterations**: 100,000 → 600,000 (6x stronger)
-2. **Password Policy Enforcement**: New complexity requirements for all passwords
-3. **Audit Logging**: Optional tamper-evident logging with HMAC signatures
-4. **Atomic Vault Operations**: Improved rollback safety
+1. **Vault Location Configuration**: `--vault` flag removed, use config file instead
+2. **Increased PBKDF2 Iterations**: 100,000 → 600,000 (6x stronger)
+3. **Password Policy Enforcement**: New complexity requirements for all passwords
+4. **Audit Logging**: Optional tamper-evident logging with HMAC signatures
+5. **Atomic Vault Operations**: Improved rollback safety
 
 **Good News**: Existing vaults continue to work without migration. You can upgrade at your own pace.
 
 ## What Changed
 
-### 1. PBKDF2 Iterations (Crypto Hardening)
+### 1. Vault Location Configuration (Breaking Change)
+
+**The `--vault` flag and `PASS_CLI_VAULT` environment variable have been removed.**
+
+**Before** (Old way - no longer works):
+```bash
+pass-cli --vault /custom/path/vault.enc init
+pass-cli --vault /custom/path/vault.enc add github
+export PASS_CLI_VAULT=/custom/path/vault.enc
+pass-cli get github
+```
+
+**After** (New way - use config file):
+```bash
+# Set custom vault location in config file
+echo "vault_path: /custom/path/vault.enc" > ~/.pass-cli/config.yml
+
+# Now use commands without --vault flag
+pass-cli init
+pass-cli add github
+pass-cli get github
+```
+
+**Why the change?**
+- **Simplicity**: One consistent way to configure vault location
+- **Less error-prone**: No conflict between flag, env var, and config
+- **Better UX**: Users don't need to remember to add `--vault` to every command
+
+**Migration Steps:**
+1. If you use a **default vault location** (`~/.pass-cli/vault.enc`): Nothing to do! Everything works as-is.
+2. If you use a **custom vault location**:
+   - Create or edit `~/.pass-cli/config.yml`
+   - Add: `vault_path: /your/custom/path/vault.enc`
+   - Remove `--vault` flag from scripts and commands
+   - Remove `PASS_CLI_VAULT` from your environment
+
+**Path Expansion Support:**
+- Environment variables: `vault_path: $HOME/.pass-cli/vault.enc`
+- Tilde expansion: `vault_path: ~/my-vault.enc`
+- Relative paths: `vault_path: vault.enc` (resolved relative to home directory)
+- Absolute paths: `vault_path: /custom/absolute/path/vault.enc`
+
+### 2. PBKDF2 Iterations (Crypto Hardening)
 
 | Version | Iterations | Unlock Time (Modern CPU) | Security Benefit |
 |---------|------------|--------------------------|------------------|

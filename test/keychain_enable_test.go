@@ -32,8 +32,13 @@ func TestIntegration_KeychainEnable(t *testing.T) {
 
 	// Step 1: Initialize vault WITHOUT --use-keychain
 	t.Run("1_Init_Without_Keychain", func(t *testing.T) {
+		// Setup config with vault_path
+		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+
 		input := testPassword + "\n" + testPassword + "\n"
-		cmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+		cmd := exec.Command(binaryPath, "init")
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)
 
 		var stdout, stderr bytes.Buffer
@@ -64,7 +69,10 @@ func TestIntegration_KeychainEnable(t *testing.T) {
 
 		// TODO T011: After implementation, test should:
 		// input := testPassword + "\n"
-		// cmd := exec.Command(binaryPath, "--vault", vaultPath, "keychain", "enable")
+		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		// defer cleanup()
+		// cmd := exec.Command(binaryPath, "keychain", "enable")
+		// cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		// cmd.Stdin = strings.NewReader(input)
 		//
 		// var stdout, stderr bytes.Buffer
@@ -98,8 +106,11 @@ func TestIntegration_KeychainEnable(t *testing.T) {
 
 		// TODO T011: After implementation, test should:
 		// // Add credential - should NOT prompt for master password (uses keychain)
+		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		// defer cleanup()
 		// input := "testuser\n" + "testpass123\n" // Only username and credential password
-		// cmd := exec.Command(binaryPath, "--vault", vaultPath, "add", "github.com")
+		// cmd := exec.Command(binaryPath, "add", "github.com")
+		// cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		// cmd.Stdin = strings.NewReader(input)
 		//
 		// var stdout, stderr bytes.Buffer
@@ -124,7 +135,10 @@ func TestIntegration_KeychainEnable(t *testing.T) {
 
 		// TODO T012: After --force flag implementation, test should:
 		// input := testPassword + "\n"
-		// cmd := exec.Command(binaryPath, "--vault", vaultPath, "keychain", "enable", "--force")
+		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		// defer cleanup()
+		// cmd := exec.Command(binaryPath, "keychain", "enable", "--force")
+		// cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		// cmd.Stdin = strings.NewReader(input)
 		//
 		// var stdout, stderr bytes.Buffer

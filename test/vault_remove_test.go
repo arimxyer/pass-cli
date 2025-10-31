@@ -34,8 +34,13 @@ func TestIntegration_VaultRemove(t *testing.T) {
 
 	// Step 1: Initialize vault WITH keychain
 	t.Run("1_Init_With_Keychain", func(t *testing.T) {
+		// Setup config with vault_path
+		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+
 		input := testPassword + "\n" + testPassword + "\n"
-		cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--use-keychain")
+		cmd := exec.Command(binaryPath, "init", "--use-keychain")
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)
 
 		var stdout, stderr bytes.Buffer
@@ -96,8 +101,11 @@ func TestIntegration_VaultRemove(t *testing.T) {
 
 		// TODO T031: After --yes flag implementation:
 		// // Recreate vault for this test
+		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		// defer cleanup()
 		// input := testPassword + "\n" + testPassword + "\n"
-		// cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--use-keychain")
+		// cmd := exec.Command(binaryPath, "init", "--use-keychain")
+		// cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		// cmd.Stdin = strings.NewReader(input)
 		// cmd.Run()
 		//
@@ -129,8 +137,11 @@ func TestIntegration_VaultRemove(t *testing.T) {
 
 		// TODO T030: After implementation:
 		// // Recreate vault
+		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		// defer cleanup()
 		// input := testPassword + "\n" + testPassword + "\n"
-		// cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--use-keychain")
+		// cmd := exec.Command(binaryPath, "init", "--use-keychain")
+		// cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		// cmd.Stdin = strings.NewReader(input)
 		// cmd.Run()
 		//
@@ -170,10 +181,14 @@ func TestIntegration_VaultRemove(t *testing.T) {
 		// successCount := 0
 		// totalRuns := 20
 		//
+		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		// defer cleanup()
+		//
 		// for i := 0; i < totalRuns; i++ {
 		//     // Create vault
 		//     input := testPassword + "\n" + testPassword + "\n"
-		//     cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--use-keychain")
+		//     cmd := exec.Command(binaryPath, "init", "--use-keychain")
+		//     cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		//     cmd.Stdin = strings.NewReader(input)
 		//     cmd.Run()
 		//
@@ -231,9 +246,14 @@ func TestIntegration_VaultRemoveWithMetadata(t *testing.T) {
 		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Initialize vault with audit
 	input := testPassword + "\n" + testPassword + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 
 	var stdout, stderr bytes.Buffer

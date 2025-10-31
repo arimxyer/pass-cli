@@ -60,8 +60,8 @@ func TestDetectFirstRun_VaultMissing_RequiresVault(t *testing.T) {
 	if !state.CommandRequiresVault {
 		t.Error("Expected CommandRequiresVault=true for 'get' command")
 	}
-	if state.CustomVaultFlag {
-		t.Error("Expected CustomVaultFlag=false when no --vault flag")
+	if state.CustomVaultPath {
+		t.Error("Expected CustomVaultPath=false when no custom vault path configured")
 	}
 }
 
@@ -90,8 +90,8 @@ func TestDetectFirstRun_VaultMissing_NoVaultRequired(t *testing.T) {
 	}
 }
 
-// T044: TestDetectFirstRun_CustomVaultFlag - `--vault /tmp/vault` flag set → ShouldPrompt=false
-func TestDetectFirstRun_CustomVaultFlag(t *testing.T) {
+// T044: TestDetectFirstRun_CustomVaultPath - custom vault_path configured → ShouldPrompt=false
+func TestDetectFirstRun_CustomVaultPath(t *testing.T) {
 	// Set default vault path to non-existent file
 	tmpDir := t.TempDir()
 	vaultPath := tmpDir + "/nonexistent.enc"
@@ -106,10 +106,10 @@ func TestDetectFirstRun_CustomVaultFlag(t *testing.T) {
 
 	// Assertions
 	if state.ShouldPrompt {
-		t.Error("Expected ShouldPrompt=false when custom --vault flag is set")
+		t.Error("Expected ShouldPrompt=false when custom vault path is configured")
 	}
-	if !state.CustomVaultFlag {
-		t.Error("Expected CustomVaultFlag=true when --vault flag provided")
+	if !state.CustomVaultPath {
+		t.Error("Expected CustomVaultPath=true when custom vault path is provided")
 	}
 	if state.VaultPath != customVaultPath {
 		t.Errorf("Expected VaultPath=%s, got %s", customVaultPath, state.VaultPath)

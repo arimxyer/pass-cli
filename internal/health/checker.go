@@ -54,11 +54,12 @@ type HealthReport struct {
 
 // CheckOptions contains configuration for health check execution
 type CheckOptions struct {
-	CurrentVersion string // Current binary version
-	GitHubRepo     string // GitHub repository (format: owner/repo)
-	VaultPath      string // Path to vault file
-	VaultDir       string // Directory containing vault
-	ConfigPath     string // Path to config file
+	CurrentVersion   string // Current binary version
+	GitHubRepo       string // GitHub repository (format: owner/repo)
+	VaultPath        string // Path to vault file
+	VaultPathSource  string // Source of vault path ("config" or "default")
+	VaultDir         string // Directory containing vault
+	ConfigPath       string // Path to config file
 }
 
 // DetermineExitCode maps health summary to exit code

@@ -33,8 +33,13 @@ audit_enabled: true
 		t.Fatalf("Failed to create test config: %v", err)
 	}
 
-	// Run doctor command
-	cmd := exec.Command(binaryPath, "doctor", "--vault", vaultPath, "--config", configPath)
+	// Set environment to use test config (which contains vault_path)
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
+	// Run doctor command (vault path comes from config, not flag)
+	cmd := exec.Command(binaryPath, "doctor", "--config", configPath)
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	output, err := cmd.CombinedOutput()
 
 	// Assertions
@@ -75,8 +80,13 @@ func TestDoctorCommand_JSON(t *testing.T) {
 		t.Fatalf("Failed to create test vault: %v", err)
 	}
 
-	// Run doctor command with JSON output
-	cmd := exec.Command(binaryPath, "doctor", "--json", "--vault", vaultPath)
+	// Set environment to use test config
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
+	// Run doctor command with JSON output (vault path comes from config)
+	cmd := exec.Command(binaryPath, "doctor", "--json")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	output, err := cmd.CombinedOutput()
 
 	// Should not fail
@@ -91,20 +101,36 @@ func TestDoctorCommand_JSON(t *testing.T) {
 	}
 
 	// Parse JSON to verify schema
-	var report map[string]interface{}
-	if err := json.Unmarshal(output, &report); err != nil {
+	var result map[string]interface{}
+	if err := json.Unmarshal(output, &result); err != nil {
 		t.Fatalf("Failed to parse JSON output: %v\nOutput:\n%s", err, output)
 	}
 
-	// Verify required fields
+	// Verify root level fields
+	if _, ok := result["report"]; !ok {
+		t.Error("Expected 'report' field in JSON output")
+	}
+	if _, ok := result["vault_path"]; !ok {
+		t.Error("Expected 'vault_path' field in JSON output")
+	}
+	if _, ok := result["vault_path_source"]; !ok {
+		t.Error("Expected 'vault_path_source' field in JSON output")
+	}
+
+	// Verify report structure
+	report, ok := result["report"].(map[string]interface{})
+	if !ok {
+		t.Fatal("Expected 'report' to be an object")
+	}
+
 	if _, ok := report["summary"]; !ok {
-		t.Error("Expected 'summary' field in JSON output")
+		t.Error("Expected 'summary' field in report")
 	}
 	if _, ok := report["checks"]; !ok {
-		t.Error("Expected 'checks' field in JSON output")
+		t.Error("Expected 'checks' field in report")
 	}
 	if _, ok := report["timestamp"]; !ok {
-		t.Error("Expected 'timestamp' field in JSON output")
+		t.Error("Expected 'timestamp' field in report")
 	}
 
 	// Verify summary structure
@@ -128,8 +154,13 @@ func TestDoctorCommand_Quiet(t *testing.T) {
 		t.Fatalf("Failed to create test vault: %v", err)
 	}
 
-	// Run doctor command with quiet mode
-	cmd := exec.Command(binaryPath, "doctor", "--quiet", "--vault", vaultPath)
+	// Set environment to use test config
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
+	// Run doctor command with quiet mode (vault path comes from config)
+	cmd := exec.Command(binaryPath, "doctor", "--quiet")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	output, err := cmd.CombinedOutput()
 
 	// Check exit code (should be 0, 1, or 2)
@@ -163,8 +194,13 @@ func TestDoctorCommand_Offline(t *testing.T) {
 		t.Fatalf("Failed to create test vault: %v", err)
 	}
 
-	// Run doctor command (version check will timeout/fail gracefully)
-	cmd := exec.Command(binaryPath, "doctor", "--vault", vaultPath)
+	// Set environment to use test config
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
+	// Run doctor command (version check will timeout/fail gracefully, vault path from config)
+	cmd := exec.Command(binaryPath, "doctor")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	output, err := cmd.CombinedOutput()
 
 	// Should not crash - exit code 0 or 1 is acceptable
@@ -190,8 +226,13 @@ func TestDoctorCommand_NoVault(t *testing.T) {
 	tmpDir := t.TempDir()
 	vaultPath := filepath.Join(tmpDir, "nonexistent-vault.enc")
 
-	// Run doctor command with non-existent vault
-	cmd := exec.Command(binaryPath, "doctor", "--vault", vaultPath)
+	// Set environment to use test config pointing to non-existent vault
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
+	// Run doctor command with non-existent vault (vault path from config)
+	cmd := exec.Command(binaryPath, "doctor")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	output, err := cmd.CombinedOutput()
 
 	// Should exit with code 2 (errors)

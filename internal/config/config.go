@@ -14,6 +14,7 @@ import (
 type Config struct {
 	Terminal    TerminalConfig    `mapstructure:"terminal"`
 	Keybindings map[string]string `mapstructure:"keybindings"`
+	VaultPath   string            `mapstructure:"vault_path"`
 
 	// LoadErrors populated during config loading (not in YAML)
 	LoadErrors []string `mapstructure:"-"`
@@ -81,6 +82,11 @@ func GetDefaults() *Config {
 
 // GetConfigPath returns the OS-appropriate config file path using os.UserConfigDir()
 func GetConfigPath() (string, error) {
+	// Check for PASS_CLI_CONFIG environment variable first (for testing)
+	if envPath := os.Getenv("PASS_CLI_CONFIG"); envPath != "" {
+		return envPath, nil
+	}
+
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		// Fallback to home directory if UserConfigDir fails
@@ -246,20 +252,32 @@ func detectUnknownFields(v *viper.Viper) []ValidationWarning {
 	return warnings
 }
 
+// shouldLogConfig returns true if config loading should produce log output.
+// Suppresses logging when PASS_CLI_TEST is set to avoid polluting test output.
+func shouldLogConfig() bool {
+	return os.Getenv("PASS_CLI_TEST") == ""
+}
+
 func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 	// T051: Log config load attempt
-	fmt.Fprintf(os.Stderr, "[Config] Loading config from: %s\n", configPath)
+	if shouldLogConfig() {
+		fmt.Fprintf(os.Stderr, "[Config] Loading config from: %s\n", configPath)
+	}
 
 	// Check if config file exists
 	fileInfo, err := os.Stat(configPath)
 	if os.IsNotExist(err) {
 		// No config file, use defaults (not an error)
-		fmt.Fprintf(os.Stderr, "[Config] No config file found, using defaults\n")
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] No config file found, using defaults\n")
+		}
 		return GetDefaults(), &ValidationResult{Valid: true}
 	}
 	if err != nil {
 		// T051: Log file access error
-		fmt.Fprintf(os.Stderr, "[Config] Failed to access config file: %v\n", err)
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] Failed to access config file: %v\n", err)
+		}
 		// File stat error, use defaults
 		return GetDefaults(), &ValidationResult{
 			Valid: false,
@@ -273,7 +291,9 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 	const maxFileSize = 100 * 1024 // 100 KB
 	if fileInfo.Size() > maxFileSize {
 		// T051: Log file size error
-		fmt.Fprintf(os.Stderr, "[Config] Config file too large: %d KB (max: 100 KB)\n", fileInfo.Size()/1024)
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] Config file too large: %d KB (max: 100 KB)\n", fileInfo.Size()/1024)
+		}
 		return GetDefaults(), &ValidationResult{
 			Valid: false,
 			Errors: []ValidationError{
@@ -298,11 +318,14 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 	for action, key := range defaults.Keybindings {
 		v.SetDefault(fmt.Sprintf("keybindings.%s", action), key)
 	}
+	v.SetDefault("vault_path", "")
 
 	// Read and parse YAML
 	if err := v.ReadInConfig(); err != nil {
 		// T051: Log parse error
-		fmt.Fprintf(os.Stderr, "[Config] Failed to parse YAML: %v\n", err)
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] Failed to parse YAML: %v\n", err)
+		}
 		return GetDefaults(), &ValidationResult{
 			Valid: false,
 			Errors: []ValidationError{
@@ -318,7 +341,9 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 	var cfg Config
 	if err := v.Unmarshal(&cfg); err != nil {
 		// T051: Log unmarshal error
-		fmt.Fprintf(os.Stderr, "[Config] Failed to unmarshal config: %v\n", err)
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] Failed to unmarshal config: %v\n", err)
+		}
 		return GetDefaults(), &ValidationResult{
 			Valid: false,
 			Errors: []ValidationError{
@@ -335,15 +360,19 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 
 	// T052: Log validation errors
 	if !validationResult.Valid {
-		fmt.Fprintf(os.Stderr, "[Config] Validation failed with %d error(s)\n", len(validationResult.Errors))
-		for _, err := range validationResult.Errors {
-			fmt.Fprintf(os.Stderr, "[Config]   - %s: %s\n", err.Field, err.Message)
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] Validation failed with %d error(s)\n", len(validationResult.Errors))
+			for _, err := range validationResult.Errors {
+				fmt.Fprintf(os.Stderr, "[Config]   - %s: %s\n", err.Field, err.Message)
+			}
 		}
 		return GetDefaults(), validationResult
 	}
 
 	// T051: Log successful load
-	fmt.Fprintf(os.Stderr, "[Config] Successfully loaded config\n")
+	if shouldLogConfig() {
+		fmt.Fprintf(os.Stderr, "[Config] Successfully loaded config\n")
+	}
 
 	return &cfg, validationResult
 }
@@ -377,6 +406,9 @@ func (c *Config) Validate() *ValidationResult {
 
 	// T032: Validate keybindings
 	result = c.validateKeybindings(result)
+
+	// Validate vault_path
+	result = c.validateVaultPath(result)
 
 	// Set Valid flag based on error count
 	if len(result.Errors) > 0 {
@@ -471,6 +503,78 @@ func (c *Config) validateKeybindings(result *ValidationResult) *ValidationResult
 	}
 
 	return result
+}
+
+// validateVaultPath validates the vault_path configuration field
+func (c *Config) validateVaultPath(result *ValidationResult) *ValidationResult {
+	if c.VaultPath == "" {
+		// Empty is valid - use default
+		return result
+	}
+
+	// 1. Check for obviously malformed paths (null bytes)
+	if containsNullByte(c.VaultPath) {
+		result.Errors = append(result.Errors, ValidationError{
+			Field:   "vault_path",
+			Message: "path contains null byte",
+		})
+		return result
+	}
+
+	// 2. Expand for validation purposes (don't modify original)
+	expandedPath := os.ExpandEnv(c.VaultPath)
+	if len(expandedPath) > 0 && expandedPath[0] == '~' {
+		home, err := os.UserHomeDir()
+		if err == nil {
+			expandedPath = filepath.Join(home, expandedPath[1:])
+		}
+	}
+
+	// 3. Warn on relative paths (will be resolved to home directory)
+	// Skip warning if path was originally absolute (even if Unix-style on Windows)
+	if !filepath.IsAbs(expandedPath) && !isPathWithVariable(c.VaultPath) && !filepath.IsAbs(c.VaultPath) {
+		result.Warnings = append(result.Warnings, ValidationWarning{
+			Field:   "vault_path",
+			Message: fmt.Sprintf("relative path '%s' will be resolved relative to home directory", c.VaultPath),
+		})
+	}
+
+	// 4. Check parent directory is accessible (if absolute)
+	if filepath.IsAbs(expandedPath) {
+		parentDir := filepath.Dir(expandedPath)
+		if _, err := os.Stat(parentDir); err != nil {
+			result.Warnings = append(result.Warnings, ValidationWarning{
+				Field:   "vault_path",
+				Message: fmt.Sprintf("parent directory '%s' does not exist or is not accessible", parentDir),
+			})
+		}
+	}
+
+	return result
+}
+
+// containsNullByte checks if a string contains a null byte
+func containsNullByte(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] == '\x00' {
+			return true
+		}
+	}
+	return false
+}
+
+// isPathWithVariable checks if path contains ~ prefix or environment variable
+func isPathWithVariable(path string) bool {
+	if len(path) > 0 && path[0] == '~' {
+		return true
+	}
+	// Check for $ or % (Unix and Windows env vars)
+	for i := 0; i < len(path); i++ {
+		if path[i] == '$' || path[i] == '%' {
+			return true
+		}
+	}
+	return false
 }
 
 // GetParsedKeybindings returns the parsed keybindings map

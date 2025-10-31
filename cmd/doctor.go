@@ -60,13 +60,17 @@ func init() {
 }
 
 func runDoctor(cmd *cobra.Command, args []string) error {
+	// Get vault path with source
+	vaultPath, vaultSource := GetVaultPathWithSource()
+
 	// Build check options
 	opts := health.CheckOptions{
-		CurrentVersion: version,
-		GitHubRepo:     "ari1110/pass-cli",
-		VaultPath:      GetVaultPath(),
-		VaultDir:       filepath.Dir(GetVaultPath()),
-		ConfigPath:     getConfigPath(),
+		CurrentVersion:  version,
+		GitHubRepo:      "ari1110/pass-cli",
+		VaultPath:       vaultPath,
+		VaultPathSource: vaultSource,
+		VaultDir:        filepath.Dir(vaultPath),
+		ConfigPath:      getConfigPath(),
 	}
 
 	// Run all health checks
@@ -85,11 +89,11 @@ func runDoctor(cmd *cobra.Command, args []string) error {
 
 	// Format output
 	if doctorJSON {
-		if err := outputHealthReportJSON(report); err != nil {
+		if err := outputHealthReportJSON(report, opts); err != nil {
 			return fmt.Errorf("failed to output JSON: %w", err)
 		}
 	} else {
-		outputHumanReadable(report, doctorVerbose)
+		outputHumanReadable(report, opts, doctorVerbose)
 	}
 
 	// Exit with appropriate code
@@ -98,11 +102,16 @@ func runDoctor(cmd *cobra.Command, args []string) error {
 }
 
 // outputHumanReadable formats the health report in a user-friendly way
-func outputHumanReadable(report health.HealthReport, verbose bool) {
+func outputHumanReadable(report health.HealthReport, opts health.CheckOptions, verbose bool) {
 	// Header
 	fmt.Println()
 	fmt.Println("Pass-CLI Health Check Report")
 	fmt.Println("════════════════════════════════════════")
+	fmt.Println()
+
+	// Vault Path Information
+	fmt.Printf("Vault Path: %s\n", opts.VaultPath)
+	fmt.Printf("Path Source: %s\n", opts.VaultPathSource)
 	fmt.Println()
 
 	// Color functions
@@ -165,10 +174,17 @@ func outputHumanReadable(report health.HealthReport, verbose bool) {
 }
 
 // outputHealthReportJSON formats the health report as JSON
-func outputHealthReportJSON(report health.HealthReport) error {
+func outputHealthReportJSON(report health.HealthReport, opts health.CheckOptions) error {
+	// Wrap report with vault path information
+	output := map[string]interface{}{
+		"vault_path":        opts.VaultPath,
+		"vault_path_source": opts.VaultPathSource,
+		"report":            report,
+	}
+
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", "  ")
-	return encoder.Encode(report)
+	return encoder.Encode(output)
 }
 
 // getConfigPath returns the config file path

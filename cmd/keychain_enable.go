@@ -27,11 +27,10 @@ the --use-keychain flag, avoiding the need to recreate the vault.`,
 	Example: `  # Enable keychain for default vault
   pass-cli keychain enable
 
-  # Enable keychain for specific vault
-  pass-cli keychain enable --vault /path/to/vault.enc
-
   # Force overwrite existing keychain entry
-  pass-cli keychain enable --force`,
+  pass-cli keychain enable --force
+
+  # For custom vault location, configure vault_path in ~/.pass-cli/config.yml`,
 	RunE: runKeychainEnable,
 }
 
@@ -62,7 +61,7 @@ func runKeychainEnable(cmd *cobra.Command, args []string) error {
 	// Create vault service
 	vaultService, err := vault.New(vaultPath)
 	if err != nil {
-		return fmt.Errorf("failed to create vault service: %w", err)
+		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
 	}
 
 	if err := vaultService.EnableKeychain(password, forceKeychainEnable); err != nil {
