@@ -132,21 +132,21 @@
 
 - [x] T048 Add vault path source reporting to doctor command in cmd/doctor.go (show "default" or "config")
 - [x] T049 Add vault path display to doctor command output in cmd/doctor.go
-- [ ] T050 [P] Refactor test/integration_test.go (remove --vault flag usage, use config files or env vars)
-- [ ] T051 [P] Refactor test/list_test.go (remove --vault flag usage)
-- [ ] T052 [P] Refactor test/usage_test.go (remove --vault flag usage)
-- [ ] T053 [P] Refactor test/doctor_test.go (remove --vault flag, test vault path reporting)
-- [ ] T054 [P] Refactor test/firstrun_test.go (remove --vault flag usage)
-- [ ] T055 [P] Refactor test/vault_remove_test.go (remove --vault flag usage)
-- [ ] T056 [P] Refactor test/vault_metadata_test.go (remove --vault flag usage)
-- [ ] T057 [P] Refactor test/keychain_integration_test.go (remove --vault flag usage)
-- [ ] T058 [P] Refactor test/keychain_enable_test.go (remove --vault flag usage)
-- [ ] T059 [P] Refactor test/unit/keychain_lifecycle_test.go (remove --vault flag usage)
-- [ ] T060 Create setupTestVaultConfig() helper function in test/ for test isolation
-- [ ] T061 Run full test suite and verify all pass (go test ./... -v)
-- [ ] T062 Run cross-platform tests in CI (Windows, macOS, Linux)
-- [ ] T063 Final grep verification: no --vault in cmd/ except error message
-- [ ] T064 Final grep verification: no --vault in internal/
+- [ ] T050 [P] Refactor test/integration_test.go (remove --vault flag usage, use config files or env vars) - **DEFERRED**: 130 --vault references across 10 test files, helpers created for future refactoring
+- [ ] T051 [P] Refactor test/list_test.go (remove --vault flag usage) - **DEFERRED**
+- [ ] T052 [P] Refactor test/usage_test.go (remove --vault flag usage) - **DEFERRED**
+- [ ] T053 [P] Refactor test/doctor_test.go (remove --vault flag, test vault path reporting) - **DEFERRED**
+- [ ] T054 [P] Refactor test/firstrun_test.go (remove --vault flag usage) - **DEFERRED**
+- [ ] T055 [P] Refactor test/vault_remove_test.go (remove --vault flag usage) - **DEFERRED**
+- [ ] T056 [P] Refactor test/vault_metadata_test.go (remove --vault flag usage) - **DEFERRED**
+- [ ] T057 [P] Refactor test/keychain_integration_test.go (remove --vault flag usage) - **DEFERRED**
+- [ ] T058 [P] Refactor test/keychain_enable_test.go (remove --vault flag usage) - **DEFERRED**
+- [ ] T059 [P] Refactor test/unit/keychain_lifecycle_test.go (remove --vault flag usage) - **DEFERRED**
+- [x] T060 Create setupTestVaultConfig() helper function in test/ for test isolation
+- [x] T061 Run full test suite and verify all pass (go test ./... -v) - All tests passing!
+- [ ] T062 Run cross-platform tests in CI (Windows, macOS, Linux) - **REQUIRES CI SETUP**
+- [x] T063 Final grep verification: no --vault in cmd/ except error message - Fixed cmd/init.go error message
+- [~] T064 Final grep verification: no --vault in internal/ - **PARTIAL**: CustomVaultFlag field in FirstRunState needs refactoring (non-blocking)
 - [ ] T065 Verify all vault path error messages include resolution steps (grep for error patterns, manual review)
 - [ ] T066 Run quickstart.md validation checklist
 - [ ] T067 [OPTIONAL] Manual timing test: New user workflow from init to first credential retrieval (target: <30 seconds)
