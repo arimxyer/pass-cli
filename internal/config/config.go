@@ -252,20 +252,32 @@ func detectUnknownFields(v *viper.Viper) []ValidationWarning {
 	return warnings
 }
 
+// shouldLogConfig returns true if config loading should produce log output.
+// Suppresses logging when PASS_CLI_TEST is set to avoid polluting test output.
+func shouldLogConfig() bool {
+	return os.Getenv("PASS_CLI_TEST") == ""
+}
+
 func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 	// T051: Log config load attempt
-	fmt.Fprintf(os.Stderr, "[Config] Loading config from: %s\n", configPath)
+	if shouldLogConfig() {
+		fmt.Fprintf(os.Stderr, "[Config] Loading config from: %s\n", configPath)
+	}
 
 	// Check if config file exists
 	fileInfo, err := os.Stat(configPath)
 	if os.IsNotExist(err) {
 		// No config file, use defaults (not an error)
-		fmt.Fprintf(os.Stderr, "[Config] No config file found, using defaults\n")
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] No config file found, using defaults\n")
+		}
 		return GetDefaults(), &ValidationResult{Valid: true}
 	}
 	if err != nil {
 		// T051: Log file access error
-		fmt.Fprintf(os.Stderr, "[Config] Failed to access config file: %v\n", err)
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] Failed to access config file: %v\n", err)
+		}
 		// File stat error, use defaults
 		return GetDefaults(), &ValidationResult{
 			Valid: false,
@@ -279,7 +291,9 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 	const maxFileSize = 100 * 1024 // 100 KB
 	if fileInfo.Size() > maxFileSize {
 		// T051: Log file size error
-		fmt.Fprintf(os.Stderr, "[Config] Config file too large: %d KB (max: 100 KB)\n", fileInfo.Size()/1024)
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] Config file too large: %d KB (max: 100 KB)\n", fileInfo.Size()/1024)
+		}
 		return GetDefaults(), &ValidationResult{
 			Valid: false,
 			Errors: []ValidationError{
@@ -309,7 +323,9 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 	// Read and parse YAML
 	if err := v.ReadInConfig(); err != nil {
 		// T051: Log parse error
-		fmt.Fprintf(os.Stderr, "[Config] Failed to parse YAML: %v\n", err)
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] Failed to parse YAML: %v\n", err)
+		}
 		return GetDefaults(), &ValidationResult{
 			Valid: false,
 			Errors: []ValidationError{
@@ -325,7 +341,9 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 	var cfg Config
 	if err := v.Unmarshal(&cfg); err != nil {
 		// T051: Log unmarshal error
-		fmt.Fprintf(os.Stderr, "[Config] Failed to unmarshal config: %v\n", err)
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] Failed to unmarshal config: %v\n", err)
+		}
 		return GetDefaults(), &ValidationResult{
 			Valid: false,
 			Errors: []ValidationError{
@@ -342,15 +360,19 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 
 	// T052: Log validation errors
 	if !validationResult.Valid {
-		fmt.Fprintf(os.Stderr, "[Config] Validation failed with %d error(s)\n", len(validationResult.Errors))
-		for _, err := range validationResult.Errors {
-			fmt.Fprintf(os.Stderr, "[Config]   - %s: %s\n", err.Field, err.Message)
+		if shouldLogConfig() {
+			fmt.Fprintf(os.Stderr, "[Config] Validation failed with %d error(s)\n", len(validationResult.Errors))
+			for _, err := range validationResult.Errors {
+				fmt.Fprintf(os.Stderr, "[Config]   - %s: %s\n", err.Field, err.Message)
+			}
 		}
 		return GetDefaults(), validationResult
 	}
 
 	// T051: Log successful load
-	fmt.Fprintf(os.Stderr, "[Config] Successfully loaded config\n")
+	if shouldLogConfig() {
+		fmt.Fprintf(os.Stderr, "[Config] Successfully loaded config\n")
+	}
 
 	return &cfg, validationResult
 }
