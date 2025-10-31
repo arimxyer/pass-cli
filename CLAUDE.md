@@ -152,13 +152,15 @@ If you think the spec is wrong, unclear, or could be improved:
 
 # pass-cli Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2025-10-20
+Auto-generated from all feature plans. Last updated: 2025-10-30
 
 ## Active Technologies
-- Go 1.25.1 (existing codebase) + Go standard library (`encoding/json`, `os`, `path/filepath`, `net/http`) (011-doctor-command-for)
-- Cobra (CLI framework), go-keyring (keychain), Viper (config), term (TTY detection) (011-doctor-command-for)
-- File-based (vault.meta JSON files, existing audit.log) (012-vault-metadata-for)
-- Go 1.21+ (existing codebase) (011-keychain-lifecycle-management)
+- Go 1.21+ (primary language)
+- Cobra (CLI framework)
+- Viper (configuration management)
+- go-keyring (OS keychain integration)
+- spf13/pflag (flag parsing)
+- File-based storage (encrypted vault files, YAML config files, JSON metadata, audit logs)
 
 ## Project Structure
 
@@ -278,9 +280,9 @@ gosec ./...
 - Footer: `Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>`
 
 ## Recent Changes
+- 001-remove-vault-flag: Added Go 1.21+ + Cobra (CLI framework), Viper (configuration), spf13/pflag (flag parsing)
 - 011-doctor-command-for: Added Go 1.25.1 + stdlib (net/http for version check), Cobra/go-keyring/Viper/term dependencies
 - 012-vault-metadata-for: Added Go 1.21+ (existing codebase) + Go standard library (`encoding/json`, `os`, `path/filepath`)
-- 011-keychain-lifecycle-management: Added Go 1.21+ (existing codebase)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
