@@ -1,11 +1,22 @@
-package tui_test
+package models
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
-	"pass-cli/cmd/tui/models"
 	"pass-cli/internal/vault"
 )
+
+// Test helper - createTestCredentialMetadata creates test credential metadata
+func createTestCredentialMetadata(service, username, category, url string) *vault.CredentialMetadata {
+	return &vault.CredentialMetadata{
+		Service:  service,
+		Username: username,
+		Category: category,
+		URL:      url,
+	}
+}
 
 // TestMatchesCredential_SubstringMatching verifies substring matching logic
 func TestMatchesCredential_SubstringMatching(t *testing.T) {
@@ -18,56 +29,56 @@ func TestMatchesCredential_SubstringMatching(t *testing.T) {
 		{
 			name:  "Match in Service field",
 			query: "git",
-			cred:  CreateTestCredentialMetadata("GitHub", "user", "work", "https://github.com"),
+			cred:  createTestCredentialMetadata("GitHub", "user", "work", "https://github.com"),
 			want:  true,
 		},
 		{
 			name:  "Match in Username field",
 			query: "admin",
-			cred:  CreateTestCredentialMetadata("AWS", "admin@example.com", "cloud", "https://aws.com"),
+			cred:  createTestCredentialMetadata("AWS", "admin@example.com", "cloud", "https://aws.com"),
 			want:  true,
 		},
 		{
 			name:  "Match in URL field",
 			query: "gitlab",
-			cred:  CreateTestCredentialMetadata("GitLab", "dev", "work", "https://gitlab.com/project"),
+			cred:  createTestCredentialMetadata("GitLab", "dev", "work", "https://gitlab.com/project"),
 			want:  true,
 		},
 		{
 			name:  "Match in Category field",
 			query: "personal",
-			cred:  CreateTestCredentialMetadata("Email", "me@example.com", "personal", "https://mail.com"),
+			cred:  createTestCredentialMetadata("Email", "me@example.com", "personal", "https://mail.com"),
 			want:  true,
 		},
 		{
 			name:  "No match - different text",
 			query: "docker",
-			cred:  CreateTestCredentialMetadata("AWS", "user", "cloud", "https://aws.com"),
+			cred:  createTestCredentialMetadata("AWS", "user", "cloud", "https://aws.com"),
 			want:  false,
 		},
 		{
 			name:  "Partial match at beginning",
 			query: "Git",
-			cred:  CreateTestCredentialMetadata("GitHub", "user", "work", "https://github.com"),
+			cred:  createTestCredentialMetadata("GitHub", "user", "work", "https://github.com"),
 			want:  true,
 		},
 		{
 			name:  "Partial match in middle",
 			query: "Hub",
-			cred:  CreateTestCredentialMetadata("GitHub", "user", "work", "https://github.com"),
+			cred:  createTestCredentialMetadata("GitHub", "user", "work", "https://github.com"),
 			want:  true,
 		},
 		{
 			name:  "Partial match at end",
 			query: "mail",
-			cred:  CreateTestCredentialMetadata("Gmail", "user", "personal", "https://gmail.com"),
+			cred:  createTestCredentialMetadata("Gmail", "user", "personal", "https://gmail.com"),
 			want:  true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ss := &models.SearchState{
+			ss := &SearchState{
 				Active: true,
 				Query:  tt.query,
 			}
@@ -92,38 +103,38 @@ func TestMatchesCredential_CaseInsensitive(t *testing.T) {
 		{
 			name:  "Uppercase query, lowercase credential",
 			query: "GITHUB",
-			cred:  CreateTestCredentialMetadata("github", "user", "work", "https://github.com"),
+			cred:  createTestCredentialMetadata("github", "user", "work", "https://github.com"),
 			want:  true,
 		},
 		{
 			name:  "Lowercase query, uppercase credential",
 			query: "github",
-			cred:  CreateTestCredentialMetadata("GITHUB", "user", "work", "https://github.com"),
+			cred:  createTestCredentialMetadata("GITHUB", "user", "work", "https://github.com"),
 			want:  true,
 		},
 		{
 			name:  "Mixed case query",
 			query: "GiTHuB",
-			cred:  CreateTestCredentialMetadata("github", "user", "work", "https://github.com"),
+			cred:  createTestCredentialMetadata("github", "user", "work", "https://github.com"),
 			want:  true,
 		},
 		{
 			name:  "Case insensitive in username",
 			query: "ADMIN",
-			cred:  CreateTestCredentialMetadata("AWS", "admin@example.com", "cloud", "https://aws.com"),
+			cred:  createTestCredentialMetadata("AWS", "admin@example.com", "cloud", "https://aws.com"),
 			want:  true,
 		},
 		{
 			name:  "Case insensitive in category",
 			query: "WoRk",
-			cred:  CreateTestCredentialMetadata("Jira", "user", "work", "https://jira.com"),
+			cred:  createTestCredentialMetadata("Jira", "user", "work", "https://jira.com"),
 			want:  true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ss := &models.SearchState{
+			ss := &SearchState{
 				Active: true,
 				Query:  tt.query,
 			}
@@ -138,7 +149,7 @@ func TestMatchesCredential_CaseInsensitive(t *testing.T) {
 
 // TestMatchesCredential_MultipleFields verifies search across Service/Username/URL/Category (excluding Notes)
 func TestMatchesCredential_MultipleFields(t *testing.T) {
-	cred := CreateTestCredentialMetadata("GitHub", "admin@company.com", "work", "https://github.com/company")
+	cred := createTestCredentialMetadata("GitHub", "admin@company.com", "work", "https://github.com/company")
 
 	// Also test that Notes field is excluded
 	credWithNotes := &vault.CredentialMetadata{
@@ -166,7 +177,7 @@ func TestMatchesCredential_MultipleFields(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ss := &models.SearchState{
+			ss := &SearchState{
 				Active: true,
 				Query:  tt.query,
 			}
@@ -181,7 +192,7 @@ func TestMatchesCredential_MultipleFields(t *testing.T) {
 
 // TestMatchesCredential_EmptyQuery verifies all credentials match when query is empty or search inactive
 func TestMatchesCredential_EmptyQuery(t *testing.T) {
-	cred := CreateTestCredentialMetadata("AWS", "user", "cloud", "https://aws.com")
+	cred := createTestCredentialMetadata("AWS", "user", "cloud", "https://aws.com")
 
 	tests := []struct {
 		name   string
@@ -196,7 +207,7 @@ func TestMatchesCredential_EmptyQuery(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ss := &models.SearchState{
+			ss := &SearchState{
 				Active: tt.active,
 				Query:  tt.query,
 			}
@@ -212,12 +223,12 @@ func TestMatchesCredential_EmptyQuery(t *testing.T) {
 // TestMatchesCredential_ZeroMatches verifies behavior when nothing matches
 func TestMatchesCredential_ZeroMatches(t *testing.T) {
 	credentials := []*vault.CredentialMetadata{
-		CreateTestCredentialMetadata("GitHub", "user1", "work", "https://github.com"),
-		CreateTestCredentialMetadata("GitLab", "user2", "work", "https://gitlab.com"),
-		CreateTestCredentialMetadata("AWS", "admin", "cloud", "https://aws.com"),
+		createTestCredentialMetadata("GitHub", "user1", "work", "https://github.com"),
+		createTestCredentialMetadata("GitLab", "user2", "work", "https://gitlab.com"),
+		createTestCredentialMetadata("AWS", "admin", "cloud", "https://aws.com"),
 	}
 
-	ss := &models.SearchState{
+	ss := &SearchState{
 		Active: true,
 		Query:  "docker",
 	}
@@ -236,7 +247,7 @@ func TestMatchesCredential_ZeroMatches(t *testing.T) {
 
 // TestSearchState_ActivateDeactivate verifies state transitions
 func TestSearchState_ActivateDeactivate(t *testing.T) {
-	ss := &models.SearchState{
+	ss := &SearchState{
 		Active: false,
 		Query:  "",
 	}
@@ -276,15 +287,15 @@ func TestSearchState_ActivateDeactivate(t *testing.T) {
 
 // TestSearchState_NewCredentialAppearsInResults verifies newly added credentials match active search
 func TestSearchState_NewCredentialAppearsInResults(t *testing.T) {
-	ss := &models.SearchState{
+	ss := &SearchState{
 		Active: true,
 		Query:  "github",
 	}
 
 	// Existing credentials
 	existingCreds := []*vault.CredentialMetadata{
-		CreateTestCredentialMetadata("GitHub", "user1", "work", "https://github.com"),
-		CreateTestCredentialMetadata("AWS", "admin", "cloud", "https://aws.com"),
+		createTestCredentialMetadata("GitHub", "user1", "work", "https://github.com"),
+		createTestCredentialMetadata("AWS", "admin", "cloud", "https://aws.com"),
 	}
 
 	// Count initial matches
@@ -300,7 +311,7 @@ func TestSearchState_NewCredentialAppearsInResults(t *testing.T) {
 	}
 
 	// Add new credential that matches search
-	newCred := CreateTestCredentialMetadata("GitHub Enterprise", "user2", "work", "https://github.enterprise.com")
+	newCred := createTestCredentialMetadata("GitHub Enterprise", "user2", "work", "https://github.enterprise.com")
 	allCreds := append(existingCreds, newCred)
 
 	// Count matches after adding new credential
@@ -318,5 +329,88 @@ func TestSearchState_NewCredentialAppearsInResults(t *testing.T) {
 	// Verify the new credential matches
 	if !ss.MatchesCredential(newCred) {
 		t.Error("Expected newly added credential to match active search query")
+	}
+}
+
+// =============================================================================
+// Performance Tests (migrated from test/tui/performance_test.go)
+// =============================================================================
+
+// BenchmarkSearchFiltering_1000Credentials validates search performance meets <100ms requirement
+func BenchmarkSearchFiltering_1000Credentials(b *testing.B) {
+	// Setup: Create 1000 test credentials
+	credentials := make([]vault.CredentialMetadata, 1000)
+	for i := 0; i < 1000; i++ {
+		credentials[i] = vault.CredentialMetadata{
+			Service:  fmt.Sprintf("Service-%d", i),
+			Username: fmt.Sprintf("user%d@example.com", i),
+			Category: "work",
+			URL:      fmt.Sprintf("https://service%d.com", i),
+		}
+	}
+
+	// Add some matching credentials
+	credentials[500].Service = "GitHub"
+	credentials[750].Service = "GitLab"
+
+	searchState := &SearchState{
+		Active: true,
+		Query:  "git",
+	}
+
+	// Benchmark the filtering operation
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		matchCount := 0
+		for j := range credentials {
+			if searchState.MatchesCredential(&credentials[j]) {
+				matchCount++
+			}
+		}
+	}
+}
+
+// TestSearchFiltering_Performance validates <100ms requirement for 1000 credentials
+func TestSearchFiltering_Performance(t *testing.T) {
+	// Create 1000 test credentials
+	credentials := make([]vault.CredentialMetadata, 1000)
+	for i := 0; i < 1000; i++ {
+		credentials[i] = vault.CredentialMetadata{
+			Service:  fmt.Sprintf("Service-%d", i),
+			Username: fmt.Sprintf("user%d@example.com", i),
+			Category: "work",
+			URL:      fmt.Sprintf("https://service%d.com", i),
+		}
+	}
+
+	// Add matching credentials
+	credentials[500].Service = "GitHub"
+	credentials[750].Service = "GitLab"
+
+	searchState := &SearchState{
+		Active: true,
+		Query:  "git",
+	}
+
+	// Measure filtering time
+	start := time.Now()
+	matchCount := 0
+	for i := range credentials {
+		if searchState.MatchesCredential(&credentials[i]) {
+			matchCount++
+		}
+	}
+	elapsed := time.Since(start)
+
+	t.Logf("Search filtering 1000 credentials took %v (found %d matches)", elapsed, matchCount)
+
+	// Validate: Must be under 100ms
+	if elapsed > 100*time.Millisecond {
+		t.Errorf("Search filtering took %v, exceeds 100ms requirement", elapsed)
+	}
+
+	// Sanity check: Should find 2 matches
+	if matchCount != 2 {
+		t.Errorf("Expected 2 matches, got %d", matchCount)
 	}
 }

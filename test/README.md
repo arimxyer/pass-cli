@@ -196,27 +196,8 @@ Keychain integration tests interact with real OS keychains:
 
 ## Test Utilities
 
-### test-tui.bat
-Manual TUI testing script for interactive testing (Windows batch script) - **LEGACY Bubble Tea TUI**
-
-**Location**: `test/test-tui.bat`
-
-**Usage** (run from project root):
-```bash
-# Windows
-test\test-tui.bat
-
-# The script will:
-# 1. Build the pass-cli binary
-# 2. Initialize a test vault (test-tui-vault/vault.enc)
-# 3. Add sample credentials (github.com, gitlab.com, aws.com)
-# 4. Provide instructions to launch the TUI manually
-```
-
-**Purpose**: Quickly set up a test environment for manual TUI testing and exploration (legacy Bubble Tea implementation).
-
 ### setup-tview-test-data.bat / .sh
-**NEW**: Comprehensive test data setup for tview TUI implementation manual testing
+Comprehensive test data setup for tview TUI implementation manual testing
 
 **Location**: `test/setup-tview-test-data.bat` (Windows), `test/setup-tview-test-data.sh` (Unix)
 
