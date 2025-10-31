@@ -32,8 +32,6 @@
 - [ ] T005 [P] Add vault_path default ("") in LoadFromPath() in internal/config/config.go
 - [ ] T006 Create validateVaultPath() function in internal/config/config.go
 - [ ] T007 Wire validateVaultPath() into Config.Validate() in internal/config/config.go
-- [ ] T008 Prepare GetVaultPath() for refactoring in cmd/root.go (document current behavior)
-
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
 ---
@@ -48,19 +46,19 @@
 
 **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T009 [P] [US1] Unit test for GetVaultPath() with no config (returns default path) in cmd/root_test.go or internal/config/config_test.go
-- [ ] T010 [P] [US1] Unit test for GetVaultPath() with empty vault_path in config in internal/config/config_test.go
-- [ ] T011 [P] [US1] Integration test for `pass-cli init` without config in test/integration_test.go
-- [ ] T012 [P] [US1] Integration test for vault operations with default path in test/integration_test.go
+- [ ] T008 [P] [US1] Unit test for GetVaultPath() with no config (returns default path) in cmd/root_test.go or internal/config/config_test.go
+- [ ] T009 [P] [US1] Unit test for GetVaultPath() with empty vault_path in config in internal/config/config_test.go
+- [ ] T010 [P] [US1] Integration test for `pass-cli init` without config in test/integration_test.go
+- [ ] T011 [P] [US1] Integration test for vault operations with default path in test/integration_test.go
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Implement default path resolution in GetVaultPath() in cmd/root.go (use $HOME/.pass-cli/vault.enc when config.VaultPath is empty)
-- [ ] T014 [US1] Remove global vaultPath variable declaration in cmd/root.go
-- [ ] T015 [US1] Remove --vault flag registration from rootCmd.PersistentFlags() in cmd/root.go init()
-- [ ] T016 [US1] Remove Viper binding for vault flag in cmd/root.go init()
-- [ ] T017 [US1] Verify init command works with default vault path (manual test: `go build && ./pass-cli init`)
-- [ ] T018 [US1] Verify get/add/list commands work with default vault path (manual test workflow)
+- [ ] T012 [US1] Verify PASS_CLI_VAULT environment variable is not referenced in GetVaultPath() or any command in cmd/root.go (grep verification)
+- [ ] T013 [US1] Implement default path resolution in GetVaultPath() in cmd/root.go (remove global vaultPath var, use $HOME/.pass-cli/vault.enc when config.VaultPath is empty)
+- [ ] T014 [US1] Remove --vault flag registration from rootCmd.PersistentFlags() in cmd/root.go init()
+- [ ] T015 [US1] Remove Viper binding for vault flag in cmd/root.go init()
+- [ ] T016 [US1] Verify init command works with default vault path (manual test: `go build && ./pass-cli init`)
+- [ ] T017 [US1] Verify get/add/list commands work with default vault path (manual test workflow)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - users can use pass-cli with default vault location
 
@@ -74,25 +72,26 @@
 
 ### Tests for User Story 2
 
-- [ ] T019 [P] [US2] Unit test for custom vault_path resolution in internal/config/config_test.go
-- [ ] T020 [P] [US2] Unit test for ~ expansion in vault path in internal/config/config_test.go
-- [ ] T021 [P] [US2] Unit test for $HOME / %USERPROFILE% expansion in internal/config/config_test.go
-- [ ] T022 [P] [US2] Unit test for relative path → absolute conversion in internal/config/config_test.go
-- [ ] T023 [P] [US2] Unit test for validation warnings on relative paths in internal/config/config_test.go
-- [ ] T024 [P] [US2] Unit test for validation warnings on non-existent parent dirs in internal/config/config_test.go
-- [ ] T025 [P] [US2] Unit test for validation error on null byte in path in internal/config/config_test.go
-- [ ] T026 [US2] Integration test for commands with custom config vault_path in test/integration_test.go
+- [ ] T018 [P] [US2] Unit test for custom vault_path resolution in internal/config/config_test.go
+- [ ] T019 [P] [US2] Unit test for ~ expansion in vault path in internal/config/config_test.go
+- [ ] T020 [P] [US2] Unit test for $HOME / %USERPROFILE% expansion in internal/config/config_test.go
+- [ ] T021 [P] [US2] Unit test for relative path → absolute conversion in internal/config/config_test.go
+- [ ] T022 [P] [US2] Unit test for validation warnings on relative paths in internal/config/config_test.go
+- [ ] T023 [P] [US2] Unit test for validation warnings on non-existent parent dirs in internal/config/config_test.go
+- [ ] T024 [P] [US2] Unit test for validation error on null byte in path in internal/config/config_test.go
+- [ ] T025 [US2] Integration test for commands with custom config vault_path in test/integration_test.go
 
 ### Implementation for User Story 2
 
-- [ ] T027 [US2] Implement config-based path resolution in GetVaultPath() in cmd/root.go (check cfg.VaultPath != "")
-- [ ] T028 [US2] Implement os.ExpandEnv() for environment variable expansion in GetVaultPath() in cmd/root.go
-- [ ] T029 [US2] Implement ~ prefix expansion using os.UserHomeDir() in GetVaultPath() in cmd/root.go
-- [ ] T030 [US2] Implement relative to absolute path conversion in GetVaultPath() in cmd/root.go
-- [ ] T031 [US2] Add null byte validation check in validateVaultPath() in internal/config/config.go
-- [ ] T032 [US2] Add relative path warning in validateVaultPath() in internal/config/config.go
-- [ ] T033 [US2] Add non-existent parent directory warning in validateVaultPath() in internal/config/config.go
-- [ ] T034 [US2] Test cross-platform path expansion (Windows %USERPROFILE%, Unix $HOME) in CI
+- [ ] T026 [US2] Implement config-based path resolution in GetVaultPath() in cmd/root.go (check cfg.VaultPath != "")
+- [ ] T027 [US2] Implement os.ExpandEnv() for environment variable expansion in GetVaultPath() in cmd/root.go
+- [ ] T028 [US2] Implement ~ prefix expansion using os.UserHomeDir() in GetVaultPath() in cmd/root.go
+- [ ] T029 [US2] Implement relative to absolute path conversion in GetVaultPath() in cmd/root.go
+- [ ] T030 [US2] Add null byte validation check in validateVaultPath() in internal/config/config.go
+- [ ] T031 [US2] Add relative path warning in validateVaultPath() in internal/config/config.go
+- [ ] T032 [US2] Add non-existent parent directory warning in validateVaultPath() in internal/config/config.go
+- [ ] T033 [US2] Test cross-platform path expansion (Windows %USERPROFILE%, Unix $HOME) in CI
+- [ ] T034 [US2] Audit vault-related error messages in cmd/*.go to ensure resolved path is included (e.g., "vault not found at /resolved/path/vault.enc")
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work - default vault OR custom config-based vault
 
@@ -116,7 +115,7 @@
 - [ ] T039 [P] [US3] Update keychain_enable.go help text (remove --vault examples) in cmd/keychain_enable.go
 - [ ] T040 [P] [US3] Update keychain_status.go help text (remove --vault examples) in cmd/keychain_status.go
 - [ ] T041 [P] [US3] Add migration guide section to docs/MIGRATION.md
-- [ ] T042 [P] [US3] Update docs/USAGE.md (remove --vault flag documentation, add vault_path config docs)
+- [ ] T042 [P] [US3] Update docs/USAGE.md (remove --vault flag and PASS_CLI_VAULT env var documentation, add vault_path config docs)
 - [ ] T043 [P] [US3] Update docs/GETTING_STARTED.md (remove custom vault location section using --vault)
 - [ ] T044 [P] [US3] Update docs/TROUBLESHOOTING.md (update vault path error solutions)
 - [ ] T045 [P] [US3] Update docs/DOCTOR_COMMAND.md (remove custom vault path section using --vault)
@@ -148,7 +147,10 @@
 - [ ] T062 Run cross-platform tests in CI (Windows, macOS, Linux)
 - [ ] T063 Final grep verification: no --vault in cmd/ except error message
 - [ ] T064 Final grep verification: no --vault in internal/
-- [ ] T065 Run quickstart.md validation checklist
+- [ ] T065 Verify all vault path error messages include resolution steps (grep for error patterns, manual review)
+- [ ] T066 Run quickstart.md validation checklist
+- [ ] T067 [OPTIONAL] Manual timing test: New user workflow from init to first credential retrieval (target: <30 seconds)
+- [ ] T068 [OPTIONAL] Manual timing test: Migration workflow following docs/MIGRATION.md (target: <2 minutes)
 
 ---
 

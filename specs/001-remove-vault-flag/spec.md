@@ -80,14 +80,14 @@ As an existing user who previously used `--vault` flag, I want clear guidance on
 - **FR-004**: System MUST determine vault path using priority: config file > default location
 - **FR-005**: Default vault location MUST be `$HOME/.pass-cli/vault.enc` (expanding `~` and `$HOME` to absolute path)
 - **FR-006**: Config file (`config.yml`) MUST support `vault_path` setting at root level
-- **FR-007**: System MUST expand `~` and environment variables (e.g., `$HOME`, `%USERPROFILE%`) in configured vault paths
+- **FR-007**: System MUST expand `~` prefix and ALL environment variables (using `os.ExpandEnv()` for $VAR on Unix, %VAR% on Windows) in configured vault paths
 - **FR-008**: System MUST convert relative vault paths in config to absolute paths (relative to user's home directory)
 
 #### Configuration Integration
 
 - **FR-009**: Config file structure MUST include optional `vault_path` field at root level (same level as `terminal` and `keybindings`)
 - **FR-010**: When `vault_path` is not specified in config, system MUST use default location without error
-- **FR-011**: When `vault_path` is invalid (malformed path, insufficient permissions), system MUST display clear error message indicating config issue
+- **FR-011**: When `vault_path` is invalid (malformed path), system MUST display clear error message indicating config issue (note: permission errors occur at vault open time, not config validation)
 - **FR-012**: System MUST validate vault_path during config loading and report errors before command execution
 
 #### Command Behavior
