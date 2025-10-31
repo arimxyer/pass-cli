@@ -65,8 +65,13 @@ func TestFirstRun_NonTTY(t *testing.T) {
 		t.Fatalf("Failed to create config: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Run with piped input (non-TTY)
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "--config", configPath, "list")
+	cmd := exec.Command(binaryPath, "--config", configPath, "list")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = bytes.NewReader([]byte{})
 	output, err := cmd.CombinedOutput()
 
@@ -98,8 +103,13 @@ func TestFirstRun_ExistingVault(t *testing.T) {
 		t.Fatalf("Failed to create config: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Run command - should not trigger first-run detection
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "--config", configPath, "list")
+	cmd := exec.Command(binaryPath, "--config", configPath, "list")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	output, err := cmd.CombinedOutput()
 
 	// Output should NOT contain initialization prompts
@@ -114,8 +124,8 @@ func TestFirstRun_ExistingVault(t *testing.T) {
 	}
 }
 
-// T052: TestFirstRun_CustomVaultFlag - `pass-cli --vault /tmp/vault list` → No prompt
-func TestFirstRun_CustomVaultFlag(t *testing.T) {
+// T052: TestFirstRun_CustomVaultPath - custom vault_path in config → No prompt
+func TestFirstRun_CustomVaultPath(t *testing.T) {
 	tmpDir := t.TempDir()
 	customVaultPath := tmpDir + "/custom-vault.enc"
 	configPath := tmpDir + "/config.yaml"
@@ -125,14 +135,19 @@ func TestFirstRun_CustomVaultFlag(t *testing.T) {
 		t.Fatalf("Failed to create config: %v", err)
 	}
 
-	// Run with custom --vault flag (non-existent vault)
-	cmd := exec.Command(binaryPath, "--vault", customVaultPath, "--config", configPath, "list")
+	// Setup config with custom vault_path (non-existent vault)
+	testConfigPath, cleanup := setupTestVaultConfig(t, customVaultPath)
+	defer cleanup()
+
+	// Run with custom vault path in config
+	cmd := exec.Command(binaryPath, "--config", configPath, "list")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	output, err := cmd.CombinedOutput()
 
-	// Should NOT trigger first-run detection (custom vault flag set)
+	// Should NOT trigger first-run detection (custom vault path set in config)
 	outputStr := string(output)
 	if strings.Contains(outputStr, "Would you like to create") {
-		t.Errorf("Expected no first-run prompt with custom --vault flag, got: %s", outputStr)
+		t.Errorf("Expected no first-run prompt with custom vault path in config, got: %s", outputStr)
 	}
 
 	// Should get vault not found error instead
