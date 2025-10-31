@@ -149,7 +149,7 @@
 - [x] T063 Final grep verification: no --vault in cmd/ except error message - Fixed cmd/init.go error message
 - [~] T064 Final grep verification: no --vault in internal/ - **PARTIAL**: CustomVaultFlag field in FirstRunState needs refactoring (non-blocking)
 - [x] T065 Verify all vault path error messages include resolution steps (grep for error patterns, manual review) - **COMPLETE**: All errors show resolved path + resolution (init.go:54, add.go:75, delete.go:54, get.go:73, list.go:90, update.go:98, keychain_enable.go:48, config.go:536-548)
-- [ ] T066 Run quickstart.md validation checklist
+- [x] T066 Run quickstart.md validation checklist - **COMPLETE**: All items pass (unit tests, integration tests, build, --vault error, docs verified)
 - [ ] T067 [OPTIONAL] Manual timing test: New user workflow from init to first credential retrieval (target: <30 seconds)
 - [ ] T068 [OPTIONAL] Manual timing test: Migration workflow following docs/MIGRATION.md (target: <2 minutes)
 
