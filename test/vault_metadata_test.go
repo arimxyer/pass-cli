@@ -37,9 +37,14 @@ func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Initialize vault with audit
 	input := testPassword + "\n" + testPassword + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 
 	var stdout, stderr bytes.Buffer
@@ -62,7 +67,9 @@ func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 	}
 
 	// Run keychain status command (should use fallback self-discovery)
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "keychain", "status")
+	// Reuse parent testConfigPath from deferred setup
+	cmd = exec.Command(binaryPath, "keychain", "status")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	stdout.Reset()
 	stderr.Reset()
 	cmd.Stdout = &stdout
@@ -110,9 +117,14 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
+	// Setup config for vault1
+	testConfigPath1, cleanup1 := setupTestVaultConfig(t, vault1Path)
+	defer cleanup1()
+
 	// Initialize vault1 with audit
 	input1 := testPassword1 + "\n" + testPassword1 + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vault1Path, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath1)
 	cmd.Stdin = strings.NewReader(input1)
 
 	var stdout, stderr bytes.Buffer
@@ -123,9 +135,14 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 		t.Fatalf("Init vault1 failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
 	}
 
+	// Setup config for vault2
+	testConfigPath2, cleanup2 := setupTestVaultConfig(t, vault2Path)
+	defer cleanup2()
+
 	// Initialize vault2 without audit
 	input2 := testPassword2 + "\n" + testPassword2 + "\n"
-	cmd = exec.Command(binaryPath, "--vault", vault2Path, "init")
+	cmd = exec.Command(binaryPath, "init")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath2)
 	cmd.Stdin = strings.NewReader(input2)
 	stdout.Reset()
 	stderr.Reset()
@@ -171,8 +188,13 @@ func TestIntegration_AutoMetadataCreationOnUnlock(t *testing.T) {
 		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	input := testPassword + "\n" + testPassword + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -194,7 +216,9 @@ func TestIntegration_AutoMetadataCreationOnUnlock(t *testing.T) {
 	}
 
 	// Unlock vault (should recreate metadata since audit is enabled in vault)
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "list")
+	// Reuse parent testConfigPath from deferred setup
+	cmd = exec.Command(binaryPath, "list")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(testPassword + "\n")
 	stdout.Reset()
 	stderr.Reset()
@@ -227,8 +251,13 @@ func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	input := testPassword + "\n" + testPassword + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	cmd := exec.Command(binaryPath, "init")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -245,7 +274,9 @@ func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 	}
 
 	// Unlock vault (should still not create metadata)
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "list")
+	// Reuse parent testConfigPath from deferred setup
+	cmd = exec.Command(binaryPath, "list")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(testPassword + "\n")
 	stdout.Reset()
 	stderr.Reset()
@@ -277,9 +308,14 @@ func TestIntegration_MetadataCreatedByInit(t *testing.T) {
 		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Init with --enable-audit
 	input := testPassword + "\n" + testPassword + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -325,9 +361,14 @@ func TestIntegration_MetadataUpdateOnAuditChange(t *testing.T) {
 		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Create vault with audit
 	input := testPassword + "\n" + testPassword + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -355,7 +396,9 @@ func TestIntegration_MetadataUpdateOnAuditChange(t *testing.T) {
 	}
 
 	// Unlock vault (should detect mismatch and update metadata)
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "list")
+	// Reuse parent testConfigPath from deferred setup
+	cmd = exec.Command(binaryPath, "list")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(testPassword + "\n")
 	stdout.Reset()
 	stderr.Reset()
@@ -393,9 +436,14 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Create vault without metadata (simulate old vault)
 	input := testPassword + "\n" + testPassword + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	cmd := exec.Command(binaryPath, "init")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -410,7 +458,9 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 	os.Remove(metaPath)
 
 	// Try to use vault (should work without metadata)
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "list")
+	// Reuse parent testConfigPath from deferred setup
+	cmd = exec.Command(binaryPath, "list")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(testPassword + "\n")
 	stdout.Reset()
 	stderr.Reset()
@@ -422,7 +472,9 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 	}
 
 	// Add credential to verify full functionality
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "add", "test-service")
+	// Reuse parent testConfigPath from deferred setup
+	cmd = exec.Command(binaryPath, "add", "test-service")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(testPassword + "\ntestuser\ntestpass\ntestpass\n")
 	stdout.Reset()
 	stderr.Reset()
@@ -434,7 +486,9 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 	}
 
 	// List credentials
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "list")
+	// Reuse parent testConfigPath from deferred setup
+	cmd = exec.Command(binaryPath, "list")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(testPassword + "\n")
 	stdout.Reset()
 	stderr.Reset()
@@ -473,9 +527,14 @@ func TestIntegration_MetadataDeletedFallback(t *testing.T) {
 		t.Fatalf("Failed to create directory: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Create vault with audit
 	input := testPassword + "\n" + testPassword + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -497,7 +556,9 @@ func TestIntegration_MetadataDeletedFallback(t *testing.T) {
 	}
 
 	// Run keychain status (should use fallback self-discovery)
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "keychain", "status")
+	// Reuse parent testConfigPath from deferred setup
+	cmd = exec.Command(binaryPath, "keychain", "status")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	stdout.Reset()
 	stderr.Reset()
 	cmd.Stdout = &stdout
@@ -548,9 +609,14 @@ func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
 		t.Fatalf("Failed to create directory: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Create vault with audit
 	input := testPassword + "\n" + testPassword + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -576,7 +642,9 @@ func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
 	initialSize := len(initialData)
 
 	// Run command (should discover audit.log and use it)
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "keychain", "status")
+	// Reuse parent testConfigPath from deferred setup
+	cmd = exec.Command(binaryPath, "keychain", "status")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	stdout.Reset()
 	stderr.Reset()
 	cmd.Stdout = &stdout
@@ -619,9 +687,14 @@ func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
 		t.Fatalf("Failed to create directory: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Create vault with audit
 	input := testPassword + "\n" + testPassword + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -643,7 +716,9 @@ func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
 	}
 
 	// Run command (should create new audit.log per FR-013)
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "keychain", "status")
+	// Reuse parent testConfigPath from deferred setup
+	cmd = exec.Command(binaryPath, "keychain", "status")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	stdout.Reset()
 	stderr.Reset()
 	cmd.Stdout = &stdout
@@ -684,9 +759,14 @@ func TestIntegration_UnknownMetadataVersion(t *testing.T) {
 		t.Fatalf("Failed to create directory: %v", err)
 	}
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Create vault with audit
 	input := testPassword + "\n" + testPassword + "\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -710,7 +790,9 @@ func TestIntegration_UnknownMetadataVersion(t *testing.T) {
 	}
 
 	// Run command (should log warning but continue)
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "keychain", "status")
+	// Reuse parent testConfigPath from deferred setup
+	cmd = exec.Command(binaryPath, "keychain", "status")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	stdout.Reset()
 	stderr.Reset()
 	cmd.Stdout = &stdout
