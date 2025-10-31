@@ -14,6 +14,7 @@ import (
 type Config struct {
 	Terminal    TerminalConfig    `mapstructure:"terminal"`
 	Keybindings map[string]string `mapstructure:"keybindings"`
+	VaultPath   string            `mapstructure:"vault_path"`
 
 	// LoadErrors populated during config loading (not in YAML)
 	LoadErrors []string `mapstructure:"-"`
@@ -298,6 +299,7 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 	for action, key := range defaults.Keybindings {
 		v.SetDefault(fmt.Sprintf("keybindings.%s", action), key)
 	}
+	v.SetDefault("vault_path", "")
 
 	// Read and parse YAML
 	if err := v.ReadInConfig(); err != nil {
@@ -377,6 +379,9 @@ func (c *Config) Validate() *ValidationResult {
 
 	// T032: Validate keybindings
 	result = c.validateKeybindings(result)
+
+	// Validate vault_path
+	result = c.validateVaultPath(result)
 
 	// Set Valid flag based on error count
 	if len(result.Errors) > 0 {
@@ -471,6 +476,77 @@ func (c *Config) validateKeybindings(result *ValidationResult) *ValidationResult
 	}
 
 	return result
+}
+
+// validateVaultPath validates the vault_path configuration field
+func (c *Config) validateVaultPath(result *ValidationResult) *ValidationResult {
+	if c.VaultPath == "" {
+		// Empty is valid - use default
+		return result
+	}
+
+	// 1. Check for obviously malformed paths (null bytes)
+	if containsNullByte(c.VaultPath) {
+		result.Errors = append(result.Errors, ValidationError{
+			Field:   "vault_path",
+			Message: "path contains null byte",
+		})
+		return result
+	}
+
+	// 2. Expand for validation purposes (don't modify original)
+	expandedPath := os.ExpandEnv(c.VaultPath)
+	if len(expandedPath) > 0 && expandedPath[0] == '~' {
+		home, err := os.UserHomeDir()
+		if err == nil {
+			expandedPath = filepath.Join(home, expandedPath[1:])
+		}
+	}
+
+	// 3. Warn on relative paths (will be resolved to home directory)
+	if !filepath.IsAbs(expandedPath) && !isPathWithVariable(c.VaultPath) {
+		result.Warnings = append(result.Warnings, ValidationWarning{
+			Field:   "vault_path",
+			Message: fmt.Sprintf("relative path '%s' will be resolved relative to home directory", c.VaultPath),
+		})
+	}
+
+	// 4. Check parent directory is accessible (if absolute)
+	if filepath.IsAbs(expandedPath) {
+		parentDir := filepath.Dir(expandedPath)
+		if _, err := os.Stat(parentDir); err != nil {
+			result.Warnings = append(result.Warnings, ValidationWarning{
+				Field:   "vault_path",
+				Message: fmt.Sprintf("parent directory '%s' does not exist or is not accessible", parentDir),
+			})
+		}
+	}
+
+	return result
+}
+
+// containsNullByte checks if a string contains a null byte
+func containsNullByte(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] == '\x00' {
+			return true
+		}
+	}
+	return false
+}
+
+// isPathWithVariable checks if path contains ~ prefix or environment variable
+func isPathWithVariable(path string) bool {
+	if len(path) > 0 && path[0] == '~' {
+		return true
+	}
+	// Check for $ or % (Unix and Windows env vars)
+	for i := 0; i < len(path); i++ {
+		if path[i] == '$' || path[i] == '%' {
+			return true
+		}
+	}
+	return false
 }
 
 // GetParsedKeybindings returns the parsed keybindings map

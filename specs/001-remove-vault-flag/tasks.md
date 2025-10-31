@@ -28,10 +28,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Add VaultPath field to Config struct in internal/config/config.go
-- [ ] T005 [P] Add vault_path default ("") in LoadFromPath() in internal/config/config.go
-- [ ] T006 Create validateVaultPath() function in internal/config/config.go
-- [ ] T007 Wire validateVaultPath() into Config.Validate() in internal/config/config.go
+- [x] T004 [P] Add VaultPath field to Config struct in internal/config/config.go
+- [x] T005 [P] Add vault_path default ("") in LoadFromPath() in internal/config/config.go
+- [x] T006 Create validateVaultPath() function in internal/config/config.go
+- [x] T007 Wire validateVaultPath() into Config.Validate() in internal/config/config.go
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
 ---
