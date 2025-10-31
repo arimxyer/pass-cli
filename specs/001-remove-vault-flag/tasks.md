@@ -132,16 +132,16 @@
 
 - [x] T048 Add vault path source reporting to doctor command in cmd/doctor.go (show "default" or "config")
 - [x] T049 Add vault path display to doctor command output in cmd/doctor.go
-- [ ] T050 [P] Refactor test/integration_test.go (remove --vault flag usage, use config files or env vars) - **DEFERRED**: 130 --vault references across 10 test files, helpers created for future refactoring
-- [ ] T051 [P] Refactor test/list_test.go (remove --vault flag usage) - **DEFERRED**
-- [ ] T052 [P] Refactor test/usage_test.go (remove --vault flag usage) - **DEFERRED**
-- [ ] T053 [P] Refactor test/doctor_test.go (remove --vault flag, test vault path reporting) - **DEFERRED**
-- [ ] T054 [P] Refactor test/firstrun_test.go (remove --vault flag usage) - **DEFERRED**
-- [ ] T055 [P] Refactor test/vault_remove_test.go (remove --vault flag usage) - **DEFERRED**
-- [ ] T056 [P] Refactor test/vault_metadata_test.go (remove --vault flag usage) - **DEFERRED**
-- [ ] T057 [P] Refactor test/keychain_integration_test.go (remove --vault flag usage) - **DEFERRED**
-- [ ] T058 [P] Refactor test/keychain_enable_test.go (remove --vault flag usage) - **DEFERRED**
-- [ ] T059 [P] Refactor test/unit/keychain_lifecycle_test.go (remove --vault flag usage) - **DEFERRED**
+- [x] T050 [P] Refactor test/integration_test.go (remove --vault flag usage, use config files) - **COMPLETE**: Refactored runCommand() and runCommandWithInput() helpers
+- [x] T051 [P] Refactor test/list_test.go (remove --vault flag usage) - **COMPLETE**: Already clean, 0 references
+- [x] T052 [P] Refactor test/usage_test.go (remove --vault flag usage) - **COMPLETE**: Added PASS_CLI_CONFIG env support, refactored helper
+- [x] T053 [P] Refactor test/doctor_test.go (remove --vault flag, test vault path reporting) - **COMPLETE**: Added config log suppression, updated JSON test
+- [x] T054 [P] Refactor test/firstrun_test.go (remove --vault flag usage) - **COMPLETE**: Refactored 3 tests, renamed CustomVaultFlag test
+- [x] T055 [P] Refactor test/keychain_enable_test.go (remove --vault flag usage) - **COMPLETE**: Refactored active code and updated TODO comments
+- [ ] T056 [P] Refactor test/keychain_status_test.go (remove --vault flag usage) - **IN PROGRESS**
+- [ ] T057 [P] Refactor test/vault_metadata_test.go (remove --vault flag usage) - 23 references remaining
+- [ ] T058 [P] Refactor test/vault_remove_test.go (remove --vault flag usage) - 5 references remaining
+- [ ] T059 [P] Refactor test/keychain_integration_test.go (remove --vault flag usage if exists)
 - [x] T060 Create setupTestVaultConfig() helper function in test/ for test isolation
 - [x] T061 Run full test suite and verify all pass (go test ./... -v) - All tests passing!
 - [ ] T062 Run cross-platform tests in CI (Windows, macOS, Linux) - **REQUIRES CI SETUP**
