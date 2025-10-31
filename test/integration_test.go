@@ -74,16 +74,19 @@ func runCommand(t *testing.T, args ...string) (string, string, error) {
 	t.Helper()
 
 	vaultPath := filepath.Join(testDir, testVaultDir, "vault.enc")
-	fullArgs := append([]string{"--vault", vaultPath}, args...)
 
-	cmd := exec.Command(binaryPath, fullArgs...)
+	// Create config file with vault_path instead of using --vault flag
+	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
+	cmd := exec.Command(binaryPath, args...)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	// Set environment to avoid interference
-	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1")
+	// Set environment to avoid interference and use test config
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 
 	err := cmd.Run()
 	return stdout.String(), stderr.String(), err
@@ -94,16 +97,19 @@ func runCommandWithInput(t *testing.T, input string, args ...string) (string, st
 	t.Helper()
 
 	vaultPath := filepath.Join(testDir, testVaultDir, "vault.enc")
-	fullArgs := append([]string{"--vault", vaultPath}, args...)
 
-	cmd := exec.Command(binaryPath, fullArgs...)
+	// Create config file with vault_path instead of using --vault flag
+	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
+	cmd := exec.Command(binaryPath, args...)
 	cmd.Stdin = strings.NewReader(input)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1")
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 
 	err := cmd.Run()
 	return stdout.String(), stderr.String(), err
@@ -276,15 +282,20 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 
 	// Initialize vault for error tests
 	vaultPath := filepath.Join(testDir, "error-vault", "vault.enc")
+	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	input := testPassword + "\n" + testPassword + "\n" + "n\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
+	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 	cmd.Run()
 
 	t.Run("Wrong_Password", func(t *testing.T) {
 		wrongPassword := "wrong-password\n"
-		cmd := exec.Command(binaryPath, "--vault", vaultPath, "list")
+		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(wrongPassword)
+		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
@@ -302,8 +313,9 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 
 	t.Run("Get_Nonexistent_Credential", func(t *testing.T) {
 		input := testPassword + "\n"
-		cmd := exec.Command(binaryPath, "--vault", vaultPath, "get", "nonexistent.com", "--no-clipboard")
+		cmd := exec.Command(binaryPath, "get", "nonexistent.com", "--no-clipboard")
 		cmd.Stdin = strings.NewReader(input)
+		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
@@ -316,8 +328,9 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 
 	t.Run("Init_Already_Exists", func(t *testing.T) {
 		input := testPassword + "\n" + testPassword + "\n" + "n\n"
-		cmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+		cmd := exec.Command(binaryPath, "init")
 		cmd.Stdin = strings.NewReader(input)
+		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
@@ -335,21 +348,27 @@ func TestIntegration_ScriptFriendly(t *testing.T) {
 
 	// Initialize vault
 	vaultPath := filepath.Join(testDir, "script-vault", "vault.enc")
+	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	input := testPassword + "\n" + testPassword + "\n" + "n\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
+	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 	cmd.Run()
 
 	// Add a credential
 	input = testPassword + "\n" + "apiuser\n" + "apipass123\n"
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "add", "api.test.com")
+	cmd = exec.Command(binaryPath, "add", "api.test.com")
 	cmd.Stdin = strings.NewReader(input)
+	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 	cmd.Run()
 
 	t.Run("Quiet_Output", func(t *testing.T) {
 		input := testPassword + "\n"
-		cmd := exec.Command(binaryPath, "--vault", vaultPath, "get", "api.test.com", "--quiet", "--no-clipboard")
+		cmd := exec.Command(binaryPath, "get", "api.test.com", "--quiet", "--no-clipboard")
 		cmd.Stdin = strings.NewReader(input)
+		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 
 		var stdout bytes.Buffer
 		cmd.Stdout = &stdout
@@ -376,8 +395,9 @@ func TestIntegration_ScriptFriendly(t *testing.T) {
 
 	t.Run("Field_Extraction", func(t *testing.T) {
 		input := testPassword + "\n"
-		cmd := exec.Command(binaryPath, "--vault", vaultPath, "get", "api.test.com", "--field", "username", "--quiet", "--no-clipboard")
+		cmd := exec.Command(binaryPath, "get", "api.test.com", "--field", "username", "--quiet", "--no-clipboard")
 		cmd.Stdin = strings.NewReader(input)
+		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 
 		var stdout bytes.Buffer
 		cmd.Stdout = &stdout
@@ -412,15 +432,20 @@ func TestIntegration_Performance(t *testing.T) {
 
 	// Initialize vault
 	vaultPath := filepath.Join(testDir, "perf-vault", "vault.enc")
+	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	input := testPassword + "\n" + testPassword + "\n" + "n\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
+	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 	cmd.Run()
 
 	// Add initial credential
 	input = testPassword + "\n" + "user\n" + "pass\n"
-	cmd = exec.Command(binaryPath, "--vault", vaultPath, "add", "test.com")
+	cmd = exec.Command(binaryPath, "add", "test.com")
 	cmd.Stdin = strings.NewReader(input)
+	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 	cmd.Run()
 
 	t.Run("Unlock_Performance", func(t *testing.T) {
@@ -428,8 +453,9 @@ func TestIntegration_Performance(t *testing.T) {
 		start := time.Now()
 
 		input := testPassword + "\n"
-		cmd := exec.Command(binaryPath, "--vault", vaultPath, "list")
+		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(input)
+		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 		cmd.Run()
 
 		duration := time.Since(start)
@@ -447,8 +473,9 @@ func TestIntegration_Performance(t *testing.T) {
 		input := testPassword + "\n"
 
 		start := time.Now()
-		cmd := exec.Command(binaryPath, "--vault", vaultPath, "list")
+		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(input)
+		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 		cmd.Run()
 		duration := time.Since(start)
 
@@ -467,9 +494,13 @@ func TestIntegration_StressTest(t *testing.T) {
 
 	// Initialize vault
 	vaultPath := filepath.Join(testDir, "stress-vault", "vault.enc")
+	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	input := testPassword + "\n" + testPassword + "\n" + "n\n"
-	cmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
+	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 	cmd.Run()
 
 	numCredentials := 10 // Reduced for faster test execution (was 100)
@@ -481,8 +512,9 @@ func TestIntegration_StressTest(t *testing.T) {
 			password := fmt.Sprintf("pass%d", i)
 
 			input := testPassword + "\n" + username + "\n" + password + "\n"
-			cmd := exec.Command(binaryPath, "--vault", vaultPath, "add", service)
+			cmd := exec.Command(binaryPath, "add", service)
 			cmd.Stdin = strings.NewReader(input)
+			cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 
 			if err := cmd.Run(); err != nil {
 				t.Fatalf("Failed to add credential %d: %v", i, err)
@@ -492,8 +524,9 @@ func TestIntegration_StressTest(t *testing.T) {
 
 	t.Run("List_Many_Credentials", func(t *testing.T) {
 		input := testPassword + "\n"
-		cmd := exec.Command(binaryPath, "--vault", vaultPath, "list")
+		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(input)
+		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 
 		var stdout bytes.Buffer
 		cmd.Stdout = &stdout
@@ -531,8 +564,9 @@ func TestIntegration_StressTest(t *testing.T) {
 			service := fmt.Sprintf("service-%d.com", idx)
 
 			input := testPassword + "\n"
-			cmd := exec.Command(binaryPath, "--vault", vaultPath, "get", service, "--no-clipboard")
+			cmd := exec.Command(binaryPath, "get", service, "--no-clipboard")
 			cmd.Stdin = strings.NewReader(input)
+			cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
 
 			var stdout bytes.Buffer
 			cmd.Stdout = &stdout
