@@ -114,13 +114,13 @@
 - [x] T038 [P] [US3] Update init.go help text/examples (remove --vault flag examples) in cmd/init.go
 - [x] T039 [P] [US3] Update keychain_enable.go help text (remove --vault examples) in cmd/keychain_enable.go
 - [x] T040 [P] [US3] Update keychain_status.go help text (remove --vault examples) in cmd/keychain_status.go
-- [ ] T041 [P] [US3] Add migration guide section to docs/MIGRATION.md
-- [ ] T042 [P] [US3] Update docs/USAGE.md (remove --vault flag and PASS_CLI_VAULT env var documentation, add vault_path config docs)
-- [ ] T043 [P] [US3] Update docs/GETTING_STARTED.md (remove custom vault location section using --vault)
-- [ ] T044 [P] [US3] Update docs/TROUBLESHOOTING.md (update vault path error solutions)
-- [ ] T045 [P] [US3] Update docs/DOCTOR_COMMAND.md (remove custom vault path section using --vault)
-- [ ] T046 [P] [US3] Update docs/SECURITY.md (update testing recommendations to use config instead of --vault)
-- [ ] T047 [US3] Verify no --vault references remain in docs/ except migration guide (grep search)
+- [x] T041 [P] [US3] Add migration guide section to docs/MIGRATION.md
+- [x] T042 [P] [US3] Update docs/USAGE.md (remove --vault flag and PASS_CLI_VAULT env var documentation, add vault_path config docs)
+- [x] T043 [P] [US3] Update docs/GETTING_STARTED.md (remove custom vault location section using --vault)
+- [x] T044 [P] [US3] Update docs/TROUBLESHOOTING.md (update vault path error solutions)
+- [x] T045 [P] [US3] Update docs/DOCTOR_COMMAND.md (remove custom vault path section using --vault)
+- [x] T046 [P] [US3] Update docs/SECURITY.md (update testing recommendations to use config instead of --vault)
+- [x] T047 [US3] Verify no --vault references remain in docs/ except migration guide (grep search)
 
 **Checkpoint**: All user stories should now be independently functional with clear migration path for existing users
 
