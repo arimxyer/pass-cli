@@ -53,12 +53,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Verify PASS_CLI_VAULT environment variable is not referenced in GetVaultPath() or any command in cmd/root.go (grep verification)
-- [ ] T013 [US1] Implement default path resolution in GetVaultPath() in cmd/root.go (remove global vaultPath var, use $HOME/.pass-cli/vault.enc when config.VaultPath is empty)
-- [ ] T014 [US1] Remove --vault flag registration from rootCmd.PersistentFlags() in cmd/root.go init()
-- [ ] T015 [US1] Remove Viper binding for vault flag in cmd/root.go init()
-- [ ] T016 [US1] Verify init command works with default vault path (manual test: `go build && ./pass-cli init`)
-- [ ] T017 [US1] Verify get/add/list commands work with default vault path (manual test workflow)
+- [x] T012 [US1] Verify PASS_CLI_VAULT environment variable is not referenced in GetVaultPath() or any command in cmd/root.go (grep verification)
+- [x] T013 [US1] Implement default path resolution in GetVaultPath() in cmd/root.go (remove global vaultPath var, use $HOME/.pass-cli/vault.enc when config.VaultPath is empty)
+- [x] T014 [US1] Remove --vault flag registration from rootCmd.PersistentFlags() in cmd/root.go init()
+- [x] T015 [US1] Remove Viper binding for vault flag in cmd/root.go init()
+- [x] T016 [US1] Verify init command works with default vault path (manual test: `go build && ./pass-cli init`)
+- [x] T017 [US1] Verify get/add/list commands work with default vault path (manual test workflow)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - users can use pass-cli with default vault location
 
