@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [develop]
+    branches: [main, develop]
     paths-ignore:
       - '**.md'
       - 'docs/**'
@@ -35,7 +35,7 @@ jobs:
     name: Detect Code Changes
     runs-on: ubuntu-latest
     outputs:
-      code-changed: ${{ steps.filter.outputs.code }}
+      code-changed: ${{ steps.filter.outputs.code-files }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -45,7 +45,7 @@ jobs:
         id: filter
         with:
           filters: |
-            code:
+            code-files:
               - '**/*.go'
               - 'go.mod'
               - 'go.sum'
