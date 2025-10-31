@@ -30,22 +30,28 @@ Available for all commands:
 
 | Flag | Description | Example |
 |------|-------------|---------|
-| `--vault <path>` | Custom vault location | `--vault /custom/path/vault.enc` |
 | `--verbose` | Enable verbose output | `--verbose` |
 | `--help`, `-h` | Show help | `--help` |
 
 ### Global Flag Examples
 
 ```bash
-# Use custom vault location
-pass-cli --vault /secure/vault.enc list
-
 # Enable verbose logging
 pass-cli --verbose get github
 
 # Get help for any command
 pass-cli get --help
 ```
+
+### Custom Vault Location
+
+To use a custom vault location, configure it in your config file (`~/.pass-cli/config.yml`):
+
+```yaml
+vault_path: /custom/path/vault.enc
+```
+
+See [Configuration](#configuration) section for details on path expansion (environment variables, tilde, relative paths).
 
 ## Commands
 
@@ -69,8 +75,9 @@ Creates a new encrypted vault at `~/.pass-cli/vault.enc` and stores the master p
 # Initialize with default location
 pass-cli init
 
-# Initialize with custom location
-pass-cli --vault /custom/path/vault.enc init
+# For custom vault location, configure in config file first:
+# Edit ~/.pass-cli/config.yml and add: vault_path: /custom/path/vault.enc
+# Then run: pass-cli init
 ```
 
 #### Flags
@@ -609,8 +616,7 @@ Stores your vault master password in the OS keychain (Windows Credential Manager
 # Enable keychain for default vault
 pass-cli keychain enable
 
-# Enable keychain for specific vault
-pass-cli keychain enable --vault /path/to/vault.enc
+# For custom vault location, configure vault_path in ~/.pass-cli/config.yml
 
 # Force overwrite existing keychain entry
 pass-cli keychain enable --force
@@ -642,8 +648,7 @@ Shows keychain availability, password storage status, and backend name. This is 
 # Check keychain status for default vault
 pass-cli keychain status
 
-# Check keychain status for specific vault
-pass-cli keychain status --vault /path/to/vault.enc
+# For custom vault location, configure vault_path in ~/.pass-cli/config.yml
 ```
 
 **Output Examples:**
@@ -1027,28 +1032,21 @@ test-db:
 
 ## Environment Variables
 
-### PASS_CLI_VAULT
-
-Override default vault location.
-
-```bash
-# Bash
-export PASS_CLI_VAULT=/custom/path/vault.enc
-pass-cli list
-
-# PowerShell
-$env:PASS_CLI_VAULT = "C:\custom\path\vault.enc"
-pass-cli list
-```
-
 ### PASS_CLI_VERBOSE
 
 Enable verbose logging.
 
 ```bash
+# Bash
 export PASS_CLI_VERBOSE=1
 pass-cli get github
+
+# PowerShell
+$env:PASS_CLI_VERBOSE = "1"
+pass-cli get github
 ```
+
+**Note**: To use a custom vault location, configure `vault_path` in the config file (`~/.pass-cli/config.yml`) instead of using environment variables. See [Configuration](#configuration) section.
 
 ## Configuration
 
@@ -1075,6 +1073,9 @@ pass-cli config reset
 ### Example Configuration
 
 ```yaml
+# Custom vault location (optional)
+vault_path: /custom/path/vault.enc  # Supports env vars ($HOME), tilde (~), relative, absolute paths
+
 # Terminal display thresholds (TUI mode)
 terminal:
   # Enable terminal size warnings (default: true)
@@ -1102,6 +1103,39 @@ keybindings:
 # Modifiers: ctrl+, alt+, shift+
 # Examples: ctrl+q, alt+a, shift+f1
 ```
+
+### Vault Path Configuration
+
+The `vault_path` config field supports flexible path formats:
+
+**Environment Variables (Unix):**
+```yaml
+vault_path: $HOME/.pass-cli/vault.enc
+vault_path: $HOME/secure/vault.enc
+```
+
+**Environment Variables (Windows):**
+```yaml
+vault_path: %USERPROFILE%\Documents\vault.enc
+```
+
+**Tilde Expansion:**
+```yaml
+vault_path: ~/Dropbox/vault.enc
+vault_path: ~/.pass-cli/vault.enc
+```
+
+**Relative Paths** (resolved relative to home directory):
+```yaml
+vault_path: vault.enc  # Resolved to $HOME/vault.enc
+```
+
+**Absolute Paths:**
+```yaml
+vault_path: /custom/absolute/path/vault.enc
+```
+
+If `vault_path` is not specified, defaults to `~/.pass-cli/vault.enc`.
 
 ### Keybinding Customization
 
@@ -1797,12 +1831,12 @@ pass-cli change-password --no-keychain  # Disables keychain
    ```
    **Solution**: First-run detection is not needed - your vault is already set up.
 
-2. **Custom vault flag used**:
+2. **Custom vault configured**:
    ```bash
-   # This skips first-run detection
-   pass-cli list --vault /custom/path.enc
+   # If vault_path is configured in config file
+   # First-run detection uses that location
    ```
-   **Solution**: Initialize custom vault manually: `pass-cli init --vault /custom/path.enc`
+   **Solution**: Configuration is respected - first-run detection will create vault at configured location
 
 3. **Non-TTY environment** (scripts, pipes, CI/CD):
    ```bash
@@ -1811,8 +1845,8 @@ pass-cli change-password --no-keychain  # Disables keychain
    ```
    **Solution**: Initialize vault manually in interactive session first, or use `pass-cli init` explicitly:
    ```bash
-   # In CI/CD or scripts
-   pass-cli init --vault vault.enc < password-input.txt
+   # In CI/CD or scripts (configure vault_path in config file first)
+   pass-cli init < password-input.txt
    ```
 
 4. **Command doesn't require vault**:

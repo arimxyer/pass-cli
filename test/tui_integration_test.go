@@ -20,8 +20,13 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "tui-test-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Initialize vault
-	initCmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	initCmd := exec.Command(binaryPath, "init")
+	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
@@ -38,8 +43,8 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 
 		cmd := exec.Command(binaryPath)
 		cmd.Env = append(os.Environ(),
-			"PASS_CLI_VAULT="+vaultPath,
 			"PASS_CLI_TEST=1",
+			"PASS_CLI_CONFIG="+testConfigPath,
 		)
 
 		// Give it a moment to start, then kill it
@@ -64,7 +69,8 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 
 	t.Run("With_Args_Uses_CLI_Mode", func(t *testing.T) {
 		// Run with arguments - this should use CLI mode, not TUI
-		cmd := exec.Command(binaryPath, "--vault", vaultPath, "version")
+		cmd := exec.Command(binaryPath, "version")
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 
 		output, err := cmd.CombinedOutput()
 		if err != nil {
@@ -103,13 +109,18 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 func TestIntegration_TUIVaultPath(t *testing.T) {
 	testPassword := "Test-Password@123"
 
-	t.Run("Uses_Flag_Vault_Path", func(t *testing.T) {
+	t.Run("Uses_Config_Vault_Path", func(t *testing.T) {
 		// Create vault in custom location
 		customVaultDir := filepath.Join(testDir, "custom-tui-vault")
 		customVaultPath := filepath.Join(customVaultDir, "vault.enc")
 
+		// Setup config with custom vault_path
+		testConfigPath, cleanup := setupTestVaultConfig(t, customVaultPath)
+		defer cleanup()
+
 		// Initialize vault
-		initCmd := exec.Command(binaryPath, "--vault", customVaultPath, "init")
+		initCmd := exec.Command(binaryPath, "init")
+		initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
 		if err := initCmd.Run(); err != nil {
 			t.Fatalf("Failed to initialize custom vault: %v", err)
@@ -124,14 +135,14 @@ func TestIntegration_TUIVaultPath(t *testing.T) {
 			t.Fatal("Vault was not created at custom path")
 		}
 
-		t.Log("TUI respects custom vault path from flag")
+		t.Log("TUI respects custom vault path from config")
 	})
 
 	t.Run("Uses_Default_Vault_Path", func(t *testing.T) {
 		// Verify default vault path behavior
-		// When no --vault flag is provided, uses default path
+		// When no config is provided, uses default path
 
-		// Get version without vault flag - should work
+		// Get version without config - should work
 		versionCmd := exec.Command(binaryPath, "version")
 		output, err := versionCmd.CombinedOutput()
 		if err != nil {
@@ -152,8 +163,13 @@ func TestIntegration_TUIWithExistingVault(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "tui-populated-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Initialize vault
-	initCmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	initCmd := exec.Command(binaryPath, "init")
+	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
@@ -179,7 +195,7 @@ func TestIntegration_TUIWithExistingVault(t *testing.T) {
 
 	for _, cred := range credentials {
 		// Build command with all metadata fields
-		args := []string{"--vault", vaultPath, "add", cred.service, "-u", cred.username, "-p", cred.password}
+		args := []string{"add", cred.service, "-u", cred.username, "-p", cred.password}
 
 		if cred.category != "" {
 			args = append(args, "-c", cred.category)
@@ -194,6 +210,7 @@ func TestIntegration_TUIWithExistingVault(t *testing.T) {
 		}
 
 		addCmd := exec.Command(binaryPath, args...)
+		addCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		addCmd.Stdin = strings.NewReader(testPassword + "\n")
 		if err := addCmd.Run(); err != nil {
 			t.Fatalf("Failed to add credential %s: %v", cred.service, err)
@@ -201,7 +218,8 @@ func TestIntegration_TUIWithExistingVault(t *testing.T) {
 	}
 
 	// Verify credentials were added
-	listCmd := exec.Command(binaryPath, "--vault", vaultPath, "list")
+	listCmd := exec.Command(binaryPath, "list")
+	listCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	listCmd.Stdin = strings.NewReader(testPassword + "\n")
 	output, err := listCmd.CombinedOutput()
 	if err != nil {
@@ -227,8 +245,13 @@ func TestIntegration_TUIKeychainDetection(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "tui-keychain-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Initialize vault without keychain
-	initCmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	initCmd := exec.Command(binaryPath, "init")
+	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
@@ -252,7 +275,12 @@ func TestIntegration_TUIErrorHandling(t *testing.T) {
 		// Try to launch TUI with non-existent vault
 		nonExistentPath := filepath.Join(testDir, "nonexistent", "vault.enc")
 
-		cmd := exec.Command(binaryPath, "--vault", nonExistentPath, "list")
+		// Setup config with non-existent vault path
+		testConfigPath, cleanup := setupTestVaultConfig(t, nonExistentPath)
+		defer cleanup()
+
+		cmd := exec.Command(binaryPath, "list")
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		output, err := cmd.CombinedOutput()
 
 		// Should fail gracefully
@@ -271,8 +299,12 @@ func TestIntegration_TUIErrorHandling(t *testing.T) {
 		// Try with invalid path characters
 		invalidPath := filepath.Join(testDir, "invalid\x00path", "vault.enc")
 
+		// Setup config with invalid vault path
+		testConfigPath, cleanup := setupTestVaultConfig(t, invalidPath)
+		defer cleanup()
+
 		cmd := exec.Command(binaryPath, "version")
-		cmd.Env = append(os.Environ(), "PASS_CLI_VAULT="+invalidPath)
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 
 		// Should not crash - version command should still work
 		output, err := cmd.CombinedOutput()
@@ -313,7 +345,16 @@ func BenchmarkTUIStartup(b *testing.B) {
 	vaultDir := filepath.Join(testDir, "bench-tui-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
-	initCmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	// Create temporary config for benchmark
+	tempDir := b.TempDir()
+	testConfigPath := filepath.Join(tempDir, "config.yml")
+	configContent := []byte(fmt.Sprintf("vault_path: %s\n", vaultPath))
+	if err := os.WriteFile(testConfigPath, configContent, 0644); err != nil {
+		b.Fatalf("Failed to create test config: %v", err)
+	}
+
+	initCmd := exec.Command(binaryPath, "init")
+	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		b.Fatalf("Failed to initialize vault: %v", err)
@@ -325,7 +366,7 @@ func BenchmarkTUIStartup(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		cmd := exec.Command(binaryPath)
-		cmd.Env = append(os.Environ(), "PASS_CLI_VAULT="+vaultPath)
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 
 		if err := cmd.Start(); err != nil {
 			b.Fatalf("Failed to start TUI: %v", err)
@@ -358,8 +399,13 @@ func TestIntegration_TUIComponentIntegration(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "tui-component-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Initialize vault
-	initCmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	initCmd := exec.Command(binaryPath, "init")
+	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
@@ -378,12 +424,13 @@ func TestIntegration_TUIComponentIntegration(t *testing.T) {
 		url := fmt.Sprintf("https://service%d.com", i)
 		notes := fmt.Sprintf("Test notes for service%d", i)
 
-		addCmd := exec.Command(binaryPath, "--vault", vaultPath, "add", service,
+		addCmd := exec.Command(binaryPath, "add", service,
 			"-u", username,
 			"-p", password,
 			"-c", category,
 			"--url", url,
 			"--notes", notes)
+		addCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		addCmd.Stdin = strings.NewReader(testPassword + "\n")
 		if err := addCmd.Run(); err != nil {
 			t.Fatalf("Failed to add credential: %v", err)
@@ -391,7 +438,8 @@ func TestIntegration_TUIComponentIntegration(t *testing.T) {
 	}
 
 	// Verify all credentials are accessible
-	listCmd := exec.Command(binaryPath, "--vault", vaultPath, "list")
+	listCmd := exec.Command(binaryPath, "list")
+	listCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	listCmd.Stdin = strings.NewReader(testPassword + "\n")
 	output, err := listCmd.CombinedOutput()
 	if err != nil {
@@ -415,8 +463,13 @@ func TestIntegration_TUIFullFieldSupport(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "tui-full-fields-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Initialize vault
-	initCmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	initCmd := exec.Command(binaryPath, "init")
+	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
@@ -434,12 +487,13 @@ func TestIntegration_TUIFullFieldSupport(t *testing.T) {
 	url := "https://test-service.com/login"
 	notes := "Test notes for full field support"
 
-	addCmd := exec.Command(binaryPath, "--vault", vaultPath, "add", service,
+	addCmd := exec.Command(binaryPath, "add", service,
 		"-u", username,
 		"-p", password,
 		"-c", category,
 		"--url", url,
 		"--notes", notes)
+	addCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	addCmd.Stdin = strings.NewReader(testPassword + "\n")
 
 	output, err := addCmd.CombinedOutput()
@@ -466,7 +520,8 @@ func TestIntegration_TUIFullFieldSupport(t *testing.T) {
 	}
 
 	// Retrieve the credential using get command
-	getCmd := exec.Command(binaryPath, "--vault", vaultPath, "get", service)
+	getCmd := exec.Command(binaryPath, "get", service)
+	getCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	getCmd.Stdin = strings.NewReader(testPassword + "\n")
 	getOutput, err := getCmd.CombinedOutput()
 	if err != nil {
@@ -498,8 +553,13 @@ func TestIntegration_TUIEmptyOptionalFields(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "tui-empty-fields-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Initialize vault
-	initCmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	initCmd := exec.Command(binaryPath, "init")
+	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
@@ -526,13 +586,14 @@ func TestIntegration_TUIEmptyOptionalFields(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			args := []string{"--vault", vaultPath, "add", tc.service, "-u", tc.username, "-p", tc.password}
+			args := []string{"add", tc.service, "-u", tc.username, "-p", tc.password}
 
 			if tc.includeFlag != "" {
 				args = append(args, tc.includeFlag, tc.flagValue)
 			}
 
 			addCmd := exec.Command(binaryPath, args...)
+			addCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 			addCmd.Stdin = strings.NewReader(testPassword + "\n")
 
 			if err := addCmd.Run(); err != nil {
@@ -540,7 +601,8 @@ func TestIntegration_TUIEmptyOptionalFields(t *testing.T) {
 			}
 
 			// Verify credential can be retrieved
-			getCmd := exec.Command(binaryPath, "--vault", vaultPath, "get", tc.service)
+			getCmd := exec.Command(binaryPath, "get", tc.service)
+			getCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 			getCmd.Stdin = strings.NewReader(testPassword + "\n")
 			output, err := getCmd.CombinedOutput()
 			if err != nil {
@@ -563,8 +625,13 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "tui-update-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Initialize vault
-	initCmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	initCmd := exec.Command(binaryPath, "init")
+	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
@@ -576,28 +643,31 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 
 	// Add initial credential with all fields
 	service := "update-test.com"
-	addCmd := exec.Command(binaryPath, "--vault", vaultPath, "add", service,
+	addCmd := exec.Command(binaryPath, "add", service,
 		"-u", "originaluser",
 		"-p", "originalpass",
 		"-c", "Original Category",
 		"--url", "https://original.com",
 		"--notes", "Original notes")
+	addCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	addCmd.Stdin = strings.NewReader(testPassword + "\n")
 	if err := addCmd.Run(); err != nil {
 		t.Fatalf("Failed to add initial credential: %v", err)
 	}
 
 	t.Run("UpdateUsername", func(t *testing.T) {
-		updateCmd := exec.Command(binaryPath, "--vault", vaultPath, "update", service,
+		updateCmd := exec.Command(binaryPath, "update", service,
 			"-u", "newuser",
 			"--force")
+		updateCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		updateCmd.Stdin = strings.NewReader(testPassword + "\n")
 		if err := updateCmd.Run(); err != nil {
 			t.Fatalf("Failed to update username: %v", err)
 		}
 
 		// Verify update
-		getCmd := exec.Command(binaryPath, "--vault", vaultPath, "get", service, "--no-clipboard")
+		getCmd := exec.Command(binaryPath, "get", service, "--no-clipboard")
+		getCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		getCmd.Stdin = strings.NewReader(testPassword + "\n")
 		output, _ := getCmd.CombinedOutput()
 		if !strings.Contains(string(output), "newuser") {
@@ -606,16 +676,18 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 	})
 
 	t.Run("UpdatePassword", func(t *testing.T) {
-		updateCmd := exec.Command(binaryPath, "--vault", vaultPath, "update", service,
+		updateCmd := exec.Command(binaryPath, "update", service,
 			"-p", "newpass123",
 			"--force")
+		updateCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		updateCmd.Stdin = strings.NewReader(testPassword + "\n")
 		if err := updateCmd.Run(); err != nil {
 			t.Fatalf("Failed to update password: %v", err)
 		}
 
 		// Verify password was updated
-		getCmd := exec.Command(binaryPath, "--vault", vaultPath, "get", service, "--no-clipboard")
+		getCmd := exec.Command(binaryPath, "get", service, "--no-clipboard")
+		getCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		getCmd.Stdin = strings.NewReader(testPassword + "\n")
 		output, _ := getCmd.CombinedOutput()
 		if !strings.Contains(string(output), "newpass123") {
@@ -624,16 +696,18 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 	})
 
 	t.Run("UpdateCategory", func(t *testing.T) {
-		updateCmd := exec.Command(binaryPath, "--vault", vaultPath, "update", service,
+		updateCmd := exec.Command(binaryPath, "update", service,
 			"--category", "New Category",
 			"--force")
+		updateCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		updateCmd.Stdin = strings.NewReader(testPassword + "\n")
 		if err := updateCmd.Run(); err != nil {
 			t.Fatalf("Failed to update category: %v", err)
 		}
 
 		// Verify category was updated
-		getCmd := exec.Command(binaryPath, "--vault", vaultPath, "get", service, "--no-clipboard")
+		getCmd := exec.Command(binaryPath, "get", service, "--no-clipboard")
+		getCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		getCmd.Stdin = strings.NewReader(testPassword + "\n")
 		output, _ := getCmd.CombinedOutput()
 		if !strings.Contains(string(output), "New Category") {
@@ -642,16 +716,18 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 	})
 
 	t.Run("UpdateURL", func(t *testing.T) {
-		updateCmd := exec.Command(binaryPath, "--vault", vaultPath, "update", service,
+		updateCmd := exec.Command(binaryPath, "update", service,
 			"--url", "https://new-url.com",
 			"--force")
+		updateCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		updateCmd.Stdin = strings.NewReader(testPassword + "\n")
 		if err := updateCmd.Run(); err != nil {
 			t.Fatalf("Failed to update URL: %v", err)
 		}
 
 		// Verify URL was updated
-		getCmd := exec.Command(binaryPath, "--vault", vaultPath, "get", service, "--no-clipboard")
+		getCmd := exec.Command(binaryPath, "get", service, "--no-clipboard")
+		getCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		getCmd.Stdin = strings.NewReader(testPassword + "\n")
 		output, _ := getCmd.CombinedOutput()
 		if !strings.Contains(string(output), "https://new-url.com") {
@@ -660,16 +736,18 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 	})
 
 	t.Run("UpdateNotes", func(t *testing.T) {
-		updateCmd := exec.Command(binaryPath, "--vault", vaultPath, "update", service,
+		updateCmd := exec.Command(binaryPath, "update", service,
 			"--notes", "Updated notes content",
 			"--force")
+		updateCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		updateCmd.Stdin = strings.NewReader(testPassword + "\n")
 		if err := updateCmd.Run(); err != nil {
 			t.Fatalf("Failed to update notes: %v", err)
 		}
 
 		// Verify notes were updated
-		getCmd := exec.Command(binaryPath, "--vault", vaultPath, "get", service, "--no-clipboard")
+		getCmd := exec.Command(binaryPath, "get", service, "--no-clipboard")
+		getCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		getCmd.Stdin = strings.NewReader(testPassword + "\n")
 		output, _ := getCmd.CombinedOutput()
 		if !strings.Contains(string(output), "Updated notes content") {
@@ -678,19 +756,21 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 	})
 
 	t.Run("UpdateMultipleFields", func(t *testing.T) {
-		updateCmd := exec.Command(binaryPath, "--vault", vaultPath, "update", service,
+		updateCmd := exec.Command(binaryPath, "update", service,
 			"-u", "finaluser",
 			"--category", "Final Category",
 			"--url", "https://final.com",
 			"--notes", "Final notes",
 			"--force")
+		updateCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		updateCmd.Stdin = strings.NewReader(testPassword + "\n")
 		if err := updateCmd.Run(); err != nil {
 			t.Fatalf("Failed to update multiple fields: %v", err)
 		}
 
 		// Verify all fields were updated
-		getCmd := exec.Command(binaryPath, "--vault", vaultPath, "get", service, "--no-clipboard")
+		getCmd := exec.Command(binaryPath, "get", service, "--no-clipboard")
+		getCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		getCmd.Stdin = strings.NewReader(testPassword + "\n")
 		output, _ := getCmd.CombinedOutput()
 		outputStr := string(output)
@@ -711,18 +791,20 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 
 	t.Run("ClearOptionalFields", func(t *testing.T) {
 		// Clear category, URL, and notes
-		updateCmd := exec.Command(binaryPath, "--vault", vaultPath, "update", service,
+		updateCmd := exec.Command(binaryPath, "update", service,
 			"--clear-category",
 			"--clear-url",
 			"--clear-notes",
 			"--force")
+		updateCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		updateCmd.Stdin = strings.NewReader(testPassword + "\n")
 		if err := updateCmd.Run(); err != nil {
 			t.Fatalf("Failed to clear optional fields: %v", err)
 		}
 
 		// Verify fields were cleared (should not appear in output)
-		getCmd := exec.Command(binaryPath, "--vault", vaultPath, "get", service, "--no-clipboard")
+		getCmd := exec.Command(binaryPath, "get", service, "--no-clipboard")
+		getCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		getCmd.Stdin = strings.NewReader(testPassword + "\n")
 		output, _ := getCmd.CombinedOutput()
 		outputStr := string(output)
@@ -748,8 +830,13 @@ func TestIntegration_TUIDeleteCredential(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "tui-delete-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
+	// Setup config with vault_path
+	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
 	// Initialize vault
-	initCmd := exec.Command(binaryPath, "--vault", vaultPath, "init")
+	initCmd := exec.Command(binaryPath, "init")
+	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
@@ -774,12 +861,13 @@ func TestIntegration_TUIDeleteCredential(t *testing.T) {
 	}
 
 	for _, cred := range credentials {
-		addCmd := exec.Command(binaryPath, "--vault", vaultPath, "add", cred.service,
+		addCmd := exec.Command(binaryPath, "add", cred.service,
 			"-u", cred.username,
 			"-p", cred.password,
 			"-c", cred.category,
 			"--url", cred.url,
 			"--notes", cred.notes)
+		addCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		addCmd.Stdin = strings.NewReader(testPassword + "\n")
 		if err := addCmd.Run(); err != nil {
 			t.Fatalf("Failed to add credential %s: %v", cred.service, err)
@@ -787,7 +875,8 @@ func TestIntegration_TUIDeleteCredential(t *testing.T) {
 	}
 
 	// Verify all credentials exist
-	listCmd := exec.Command(binaryPath, "--vault", vaultPath, "list")
+	listCmd := exec.Command(binaryPath, "list")
+	listCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	listCmd.Stdin = strings.NewReader(testPassword + "\n")
 	listOutput, _ := listCmd.CombinedOutput()
 	listStr := string(listOutput)
@@ -800,14 +889,16 @@ func TestIntegration_TUIDeleteCredential(t *testing.T) {
 
 	// Delete the second credential
 	deleteService := "delete-test2.com"
-	deleteCmd := exec.Command(binaryPath, "--vault", vaultPath, "delete", deleteService, "--force")
+	deleteCmd := exec.Command(binaryPath, "delete", deleteService, "--force")
+	deleteCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	deleteCmd.Stdin = strings.NewReader(testPassword + "\n")
 	if err := deleteCmd.Run(); err != nil {
 		t.Fatalf("Failed to delete credential: %v", err)
 	}
 
 	// Verify deleted credential is not in list
-	listCmd = exec.Command(binaryPath, "--vault", vaultPath, "list")
+	listCmd = exec.Command(binaryPath, "list")
+	listCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	listCmd.Stdin = strings.NewReader(testPassword + "\n")
 	listOutput, _ = listCmd.CombinedOutput()
 	listStr = string(listOutput)
@@ -825,7 +916,8 @@ func TestIntegration_TUIDeleteCredential(t *testing.T) {
 	}
 
 	// Verify get fails for deleted credential
-	getCmd := exec.Command(binaryPath, "--vault", vaultPath, "get", deleteService)
+	getCmd := exec.Command(binaryPath, "get", deleteService)
+	getCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	getCmd.Stdin = strings.NewReader(testPassword + "\n")
 	err := getCmd.Run()
 	if err == nil {
@@ -834,7 +926,8 @@ func TestIntegration_TUIDeleteCredential(t *testing.T) {
 
 	// Verify remaining credentials still have all their metadata
 	for _, cred := range []string{"delete-test1.com", "delete-test3.com"} {
-		getCmd := exec.Command(binaryPath, "--vault", vaultPath, "get", cred, "--no-clipboard")
+		getCmd := exec.Command(binaryPath, "get", cred, "--no-clipboard")
+		getCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		getCmd.Stdin = strings.NewReader(testPassword + "\n")
 		output, err := getCmd.CombinedOutput()
 		if err != nil {

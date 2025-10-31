@@ -189,7 +189,11 @@ pass-cli init
 
 **Option 3: Use different vault location**
 ```bash
-pass-cli --vault /path/to/new/vault.enc init
+# Configure custom vault location in config file
+echo "vault_path: /path/to/new/vault.enc" > ~/.pass-cli/config.yml
+
+# Then initialize
+pass-cli init
 ```
 
 ---
@@ -972,11 +976,14 @@ top
 
 **Solutions**:
 ```bash
-# Split into multiple vaults by purpose
-pass-cli --vault ~/.pass-cli/work.enc init
-pass-cli --vault ~/.pass-cli/personal.enc init
+# Split into multiple vaults by purpose using config files
+echo "vault_path: ~/.pass-cli/work.enc" > ~/.pass-cli/config-work.yml
+pass-cli init  # Creates work vault
 
-# Archive unused credentials
+echo "vault_path: ~/.pass-cli/personal.enc" > ~/.pass-cli/config-personal.yml
+pass-cli init  # Creates personal vault
+
+# Or archive unused credentials
 pass-cli list --unused --days 90
 # Delete unused ones
 ```
@@ -1115,11 +1122,14 @@ cp ~/.pass-cli/vault.enc ~/backups/vault-$(date +%Y%m%d).enc
 
 A: Yes, but carefully:
 ```bash
-# Using cloud storage (manual)
-cp ~/.pass-cli/vault.enc ~/Dropbox/vault.enc
+# Option 1: Symlink to cloud storage
+ln -s ~/Dropbox/vault.enc ~/.pass-cli/vault.enc
 
-# On other machine
-cp ~/Dropbox/vault.enc ~/.pass-cli/vault.enc
+# Option 2: Configure vault_path to point to cloud storage
+echo "vault_path: ~/Dropbox/vault.enc" > ~/.pass-cli/config.yml
+
+# Option 3: Manual copy (requires keeping in sync)
+cp ~/.pass-cli/vault.enc ~/Dropbox/vault.enc
 
 # Warning: Conflicts if editing on multiple machines simultaneously
 ```
@@ -1196,7 +1206,7 @@ A: Not designed for this:
 - Vault is single-user
 - Master password would be shared (insecure)
 - No access control mechanism
-- Use separate vaults per user
+- Solution: Use separate vaults per user, each with their own config file pointing to their vault
 
 ---
 

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"runtime"
 	"testing"
 )
 
@@ -226,6 +227,142 @@ func TestTerminalConfigMerging(t *testing.T) {
 			defaults := GetDefaults()
 			if defaults.Terminal.MinWidth != 60 {
 				t.Errorf("default MinWidth should be 60, got %d", defaults.Terminal.MinWidth)
+			}
+		})
+	}
+}
+
+// Helper function to get platform-appropriate absolute path for testing
+// Uses temp dir so parent directory exists
+func getAbsolutePath() string {
+	if runtime.GOOS == "windows" {
+		return "C:\\Windows\\Temp\\vault.enc"
+	}
+	return "/tmp/vault.enc"
+}
+
+func getAbsolutePathNonExistent() string {
+	if runtime.GOOS == "windows" {
+		return "C:\\NonExistentDir9999\\vault.enc"
+	}
+	return "/nonexistent/dir9999/vault.enc"
+}
+
+// T008 & T009: Unit tests for vault_path configuration
+func TestVaultPathValidation(t *testing.T) {
+	tests := []struct {
+		name          string
+		vaultPath     string
+		expectErrors  int
+		expectWarnings int
+		errorContains string
+		warnContains  string
+	}{
+		{
+			name:           "empty vault_path is valid",
+			vaultPath:      "",
+			expectErrors:   0,
+			expectWarnings: 0,
+		},
+		{
+			name:           "absolute path is valid",
+			vaultPath:      getAbsolutePath(),
+			expectErrors:   0,
+			expectWarnings: 0,
+		},
+		{
+			name:           "tilde path is valid",
+			vaultPath:      "~/vault.enc",
+			expectErrors:   0,
+			expectWarnings: 0,
+		},
+		{
+			name:           "relative path warns",
+			vaultPath:      "vault.enc",
+			expectErrors:   0,
+			expectWarnings: 1,
+			warnContains:   "relative path",
+		},
+		{
+			name:           "null byte errors",
+			vaultPath:      "vault\x00.enc",
+			expectErrors:   1,
+			expectWarnings: 0,
+			errorContains:  "null byte",
+		},
+		{
+			name:           "env var path is valid",
+			vaultPath:      "$HOME/vault.enc",
+			expectErrors:   0,
+			expectWarnings: 0,
+		},
+		{
+			name:           "Windows env var is valid",
+			vaultPath:      "%USERPROFILE%\\vault.enc",
+			expectErrors:   0,
+			expectWarnings: 0,
+		},
+		{
+			name:           "non-existent parent directory warns",
+			vaultPath:      getAbsolutePathNonExistent(),
+			expectErrors:   0,
+			expectWarnings: 1,
+			warnContains:   "parent directory",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &Config{
+				VaultPath: tt.vaultPath,
+			}
+
+			result := &ValidationResult{
+				Valid:    true,
+				Errors:   []ValidationError{},
+				Warnings: []ValidationWarning{},
+			}
+
+			result = cfg.validateVaultPath(result)
+
+			if len(result.Errors) != tt.expectErrors {
+				t.Errorf("expected %d errors, got %d", tt.expectErrors, len(result.Errors))
+				for _, err := range result.Errors {
+					t.Logf("  Error: %s - %s", err.Field, err.Message)
+				}
+			}
+
+			if len(result.Warnings) != tt.expectWarnings {
+				t.Errorf("expected %d warnings, got %d", tt.expectWarnings, len(result.Warnings))
+				for _, warn := range result.Warnings {
+					t.Logf("  Warning: %s - %s", warn.Field, warn.Message)
+				}
+			}
+
+			if tt.errorContains != "" && len(result.Errors) > 0 {
+				found := false
+				for _, err := range result.Errors {
+					if contains(err.Message, tt.errorContains) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("expected error containing '%s', got: %v", tt.errorContains, result.Errors)
+				}
+			}
+
+			if tt.warnContains != "" && len(result.Warnings) > 0 {
+				found := false
+				for _, warn := range result.Warnings {
+					if contains(warn.Message, tt.warnContains) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("expected warning containing '%s', got: %v", tt.warnContains, result.Warnings)
+				}
 			}
 		})
 	}

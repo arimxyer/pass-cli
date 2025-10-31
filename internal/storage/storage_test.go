@@ -79,6 +79,45 @@ func TestStorageService_InitializeVault(t *testing.T) {
 	}
 }
 
+// FR-015: Test that InitializeVault creates parent directories
+func TestStorageService_InitializeVault_CreatesParentDirectories(t *testing.T) {
+	// Create a vault path with nested non-existent directories
+	tmpDir := t.TempDir()
+	nestedPath := filepath.Join(tmpDir, "level1", "level2", "level3", "vault.enc")
+	
+	// Verify parent directories don't exist
+	parentDir := filepath.Dir(nestedPath)
+	if _, err := os.Stat(parentDir); !os.IsNotExist(err) {
+		t.Fatalf("Parent directory should not exist yet")
+	}
+	
+	// Create storage service (this should create parent directories)
+	cryptoService := crypto.NewCryptoService()
+	storageService, err := NewStorageService(cryptoService, nestedPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+	
+	// Verify parent directories were created by NewStorageService
+	if _, err := os.Stat(parentDir); err != nil {
+		t.Fatalf("Parent directories were not created: %v", err)
+	}
+	
+	// Initialize vault
+	password := "TestPassword123!"
+	err = storageService.InitializeVault(password)
+	if err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+	
+	// Verify vault file exists
+	if _, err := os.Stat(nestedPath); os.IsNotExist(err) {
+		t.Fatalf("Vault file was not created at %s", nestedPath)
+	}
+	
+	t.Logf("✓ Vault created with parent directories: %s", nestedPath)
+}
+
 func TestStorageService_LoadSaveVault(t *testing.T) {
 	cryptoService := crypto.NewCryptoService()
 	tempDir := t.TempDir()

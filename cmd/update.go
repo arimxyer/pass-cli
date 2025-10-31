@@ -101,7 +101,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	// Create vault service
 	vaultService, err := vault.New(vaultPath)
 	if err != nil {
-		return fmt.Errorf("failed to create vault service: %w", err)
+		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
 	}
 
 	// Unlock vault

@@ -25,6 +25,9 @@ encrypt and decrypt your vault. This password should be strong and memorable.
 
 By default, your vault will be stored at ~/.pass-cli/vault.enc
 
+To use a custom vault location, set vault_path in your config file:
+  ~/.pass-cli/config.yml
+
 Use the --use-keychain flag to store the master password in your system's
 keychain (Windows Credential Manager, macOS Keychain, or Linux Secret Service)
 so you don't have to enter it every time.`,
@@ -32,10 +35,7 @@ so you don't have to enter it every time.`,
   pass-cli init
 
   # Initialize with keychain integration
-  pass-cli init --use-keychain
-
-  # Initialize with custom vault location
-  pass-cli init --vault /path/to/vault.enc`,
+  pass-cli init --use-keychain`,
 	RunE: runInit,
 }
 
@@ -51,7 +51,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	// Check if vault already exists
 	if _, err := os.Stat(vaultPath); err == nil {
-		return fmt.Errorf("vault already exists at %s\nUse a different location with --vault flag", vaultPath)
+		return fmt.Errorf("vault already exists at %s\n\nTo use a different location, configure vault_path in your config file:\n  ~/.pass-cli/config.yml", vaultPath)
 	}
 
 	fmt.Println("🔐 Initializing new password vault")
@@ -99,7 +99,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 	// Create vault service
 	vaultService, err := vault.New(vaultPath)
 	if err != nil {
-		return fmt.Errorf("failed to create vault service: %w", err)
+		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
 	}
 
 	// T073/DISC-013 fix: Prepare audit parameters if requested
@@ -111,7 +111,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	// Initialize vault (with audit config if requested)
 	if err := vaultService.Initialize(password, useKeychain, auditLogPath, vaultID); err != nil {
-		return fmt.Errorf("failed to initialize vault: %w", err)
+		return fmt.Errorf("failed to initialize vault at %s: %w", vaultPath, err)
 	}
 
 	// Display audit logging status

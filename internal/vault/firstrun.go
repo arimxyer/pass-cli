@@ -26,7 +26,7 @@ type FirstRunState struct {
 	IsFirstRun           bool   // True if vault doesn't exist and command requires it
 	VaultPath            string // Path to vault being checked
 	VaultExists          bool   // Whether vault file exists
-	CustomVaultFlag      bool   // Whether --vault flag was explicitly set
+	CustomVaultPath      bool   // Whether a custom vault path is configured (via config file)
 	CommandRequiresVault bool   // Whether the command being run requires a vault
 	ShouldPrompt         bool   // Whether to trigger guided initialization
 }
@@ -51,11 +51,14 @@ var getDefaultVaultPath = func() string {
 
 // DetectFirstRun checks if this is a first-run scenario requiring guided initialization
 // T055: DetectFirstRun implementation per spec
+// DetectFirstRun checks if this is a first-run scenario requiring guided initialization
+// T055: DetectFirstRun implementation per spec
+// Updated for spec 001: vaultFlag parameter now represents config-based custom path
 func DetectFirstRun(commandName string, vaultFlag string) FirstRunState {
-	// Determine vault path (custom flag or default)
+	// Determine vault path (custom config or default)
 	vaultPath := vaultFlag
-	customVault := vaultFlag != ""
-	if !customVault {
+	customPath := vaultFlag != ""
+	if !customPath {
 		vaultPath = getDefaultVaultPath()
 	}
 
@@ -69,14 +72,14 @@ func DetectFirstRun(commandName string, vaultFlag string) FirstRunState {
 	// Determine if this is first run
 	isFirstRun := !vaultExists && requiresVault
 
-	// Should prompt if: vault missing AND command requires vault AND not using custom vault
-	shouldPrompt := !vaultExists && requiresVault && !customVault
+	// Should prompt if: vault missing AND command requires vault AND not using custom path
+	shouldPrompt := !vaultExists && requiresVault && !customPath
 
 	return FirstRunState{
 		IsFirstRun:           isFirstRun,
 		VaultPath:            vaultPath,
 		VaultExists:          vaultExists,
-		CustomVaultFlag:      customVault,
+		CustomVaultPath:      customPath,
 		CommandRequiresVault: requiresVault,
 		ShouldPrompt:         shouldPrompt,
 	}
