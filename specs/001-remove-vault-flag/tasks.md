@@ -90,8 +90,8 @@
 - [x] T030 [US2] Add null byte validation check in validateVaultPath() in internal/config/config.go
 - [x] T031 [US2] Add relative path warning in validateVaultPath() in internal/config/config.go
 - [x] T032 [US2] Add non-existent parent directory warning in validateVaultPath() in internal/config/config.go
-- [ ] T033 [US2] Test cross-platform path expansion (Windows %USERPROFILE%, Unix $HOME) in CI
-- [ ] T034 [US2] Audit vault-related error messages in cmd/*.go to ensure resolved path is included (e.g., "vault not found at /resolved/path/vault.enc")
+- [x] T033 [US2] Test cross-platform path expansion (Windows %USERPROFILE%, Unix $HOME) in CI
+- [x] T034 [US2] Audit vault-related error messages in cmd/*.go to ensure resolved path is included (e.g., "vault not found at /resolved/path/vault.enc")
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work - default vault OR custom config-based vault
 

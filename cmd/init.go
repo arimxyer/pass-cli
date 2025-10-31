@@ -99,7 +99,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 	// Create vault service
 	vaultService, err := vault.New(vaultPath)
 	if err != nil {
-		return fmt.Errorf("failed to create vault service: %w", err)
+		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
 	}
 
 	// T073/DISC-013 fix: Prepare audit parameters if requested
@@ -111,7 +111,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	// Initialize vault (with audit config if requested)
 	if err := vaultService.Initialize(password, useKeychain, auditLogPath, vaultID); err != nil {
-		return fmt.Errorf("failed to initialize vault: %w", err)
+		return fmt.Errorf("failed to initialize vault at %s: %w", vaultPath, err)
 	}
 
 	// Display audit logging status
