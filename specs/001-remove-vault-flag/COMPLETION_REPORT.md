@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Spec 001-remove-vault-flag has been successfully implemented and validated. All three user stories are functional, all tests pass (18 packages), and documentation is complete. One non-blocking technical debt item (CustomVaultFlag field in internal/) remains as documented technical debt.
+Spec 001-remove-vault-flag has been successfully implemented and validated. All three user stories are functional, all tests pass (18 packages), and documentation is complete. All tasks in Phase 6 are complete.
 
 ### Completion Metrics
 
@@ -18,7 +18,7 @@ Spec 001-remove-vault-flag has been successfully implemented and validated. All 
 | **Functional Completion** | 100% (all user stories working) |
 | **Test Coverage** | ✅ All 18 packages passing |
 | **Documentation** | ✅ Complete (migration guide added) |
-| **Technical Debt** | 1 non-blocking item (documented) |
+| **Technical Debt** | ✅ Zero remaining items |
 | **Breaking Changes** | ✅ Documented in docs/MIGRATION.md |
 
 ---
@@ -75,8 +75,7 @@ Spec 001-remove-vault-flag has been successfully implemented and validated. All 
 - T035-T047: Migration support complete (13 tasks)
 
 ### Phase 6: Polish & Cross-Cutting ✅
-- T048-T066: 19 tasks complete
-- T064: 1 task partial (non-blocking, documented)
+- T048-T066: All 19 tasks complete
 - T067-T068: 2 optional timing tests (not started)
 
 ---
@@ -109,24 +108,13 @@ Spec 001-remove-vault-flag has been successfully implemented and validated. All 
 
 ## Technical Debt
 
-### T064: CustomVaultFlag Field in internal/ (Non-Blocking)
+**Status**: ✅ **ZERO TECHNICAL DEBT**
 
-**Status**: 🟡 **PARTIAL**
-
-**Description**: The `CustomVaultFlag` field exists in `internal/` package and references `--vault` in comments or variable names. This field appears to be legacy/unused code.
-
-**Impact**: Zero functional impact. Spec goals achieved without this cleanup.
-
-**Marked as**: Non-blocking technical debt
-
-**Recommendation**: Create follow-up issue for cleanup during next refactoring cycle.
-
-**Rationale for Deferral**:
-1. Functional completion: 100% (all user stories work)
-2. Test coverage: 100% (all 18 packages passing)
-3. Documentation: Complete
-4. Zero user-facing impact
-5. Cleanup is optimization, not requirement
+All tasks complete. T064 was successfully refactored:
+- Renamed `CustomVaultFlag` → `CustomVaultPath` in [internal/vault/firstrun.go:29](../../internal/vault/firstrun.go#L29)
+- Updated all references and comments to reflect config-based approach
+- Test renamed: `TestDetectFirstRun_CustomVaultFlag` → `TestDetectFirstRun_CustomVaultPath`
+- All 18 packages passing with zero `--vault` references in `internal/`
 
 ---
 
@@ -219,7 +207,7 @@ pass-cli get github
 ## Recommendations
 
 ### Before Merge
-1. ✅ All tasks complete (except T064 non-blocking + T067-T068 optional)
+1. ✅ All tasks complete (T064 refactored + T067-T068 optional)
 2. ✅ All tests passing (18 packages)
 3. ✅ Documentation updated
 4. ✅ Migration guide published
@@ -228,19 +216,18 @@ pass-cli get github
 7. 🔲 **TODO**: Prepare release notes
 
 ### Post-Merge
-1. Create follow-up issue for T064 (CustomVaultFlag cleanup)
-2. Monitor user feedback on migration experience
-3. Consider T067-T068 timing tests for UX validation
+1. Monitor user feedback on migration experience
+2. Consider T067-T068 timing tests for UX validation
 
 ---
 
 ## Constitution Compliance
 
 ### Transparency ✅
-- T064 clearly marked as partial `[~]`
-- Reason documented: "CustomVaultFlag field needs refactoring (non-blocking)"
-- Impact assessed: Zero functional impact
-- User approved: Proceeding with documented technical debt
+- T064 completed as requested by user (Option A)
+- All work accurately tracked and committed
+- Zero shortcuts taken
+- All spec tasks followed exactly
 
 ### Testing ✅
 - TDD approach followed (tests written first)
@@ -256,16 +243,15 @@ pass-cli get github
 
 ## Conclusion
 
-**Spec 001-remove-vault-flag is functionally complete and ready for merge.**
+**Spec 001-remove-vault-flag is 100% complete and ready for merge.**
 
-All three user stories are working, all tests pass, documentation is complete, and migration path is clear. One non-blocking technical debt item (T064) is documented and does not affect functionality.
+All three user stories are working, all tests pass, documentation is complete, migration path is clear, and all tasks (T001-T066) are complete. Zero technical debt remaining.
 
 **Next Steps**:
 1. Update CHANGELOG.md
 2. Bump version to 2.0.0
 3. Merge to main
 4. Create release with migration guide
-5. Create follow-up issue for T064
 
 ---
 
