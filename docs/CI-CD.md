@@ -6,7 +6,7 @@ This document describes the automated CI/CD pipeline for Pass-CLI.
 
 ### CI Workflow (`ci.yml`)
 
-**Trigger**: Push to `main` or `develop` branches, or pull requests
+**Trigger**: Push to `main` branch or pull requests to `main`
 
 **Jobs**:
 
