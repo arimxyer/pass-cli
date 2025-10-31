@@ -51,7 +51,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	// Check if vault already exists
 	if _, err := os.Stat(vaultPath); err == nil {
-		return fmt.Errorf("vault already exists at %s\nUse a different location with --vault flag", vaultPath)
+		return fmt.Errorf("vault already exists at %s\n\nTo use a different location, configure vault_path in your config file:\n  ~/.pass-cli/config.yml", vaultPath)
 	}
 
 	fmt.Println("🔐 Initializing new password vault")
