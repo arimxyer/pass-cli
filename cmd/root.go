@@ -145,6 +145,61 @@ func GetVaultPath() string {
 	return vaultPath
 }
 
+// GetVaultPathWithSource returns the vault path and its source ("config" or "default")
+// Exits with error if config validation fails (FR-012)
+func GetVaultPathWithSource() (path string, source string) {
+	// Load config and check validation
+	cfg, result := config.Load()
+
+	// FR-012: Validate vault_path during config loading and report errors
+	if !result.Valid {
+		fmt.Fprintf(os.Stderr, "Configuration validation failed:\n")
+		for _, err := range result.Errors {
+			fmt.Fprintf(os.Stderr, "  - %s: %s\n", err.Field, err.Message)
+		}
+		fmt.Fprintf(os.Stderr, "\nPlease fix your configuration file and try again.\n")
+		os.Exit(1)
+	}
+
+	var vaultPath string
+	var pathSource string
+
+	if cfg.VaultPath != "" {
+		vaultPath = cfg.VaultPath
+		pathSource = "config"
+	} else {
+		// Default vault path
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return ".pass-cli/vault.enc", "default"
+		}
+		vaultPath = filepath.Join(home, ".pass-cli", "vault.enc")
+		pathSource = "default"
+	}
+
+	// Expand environment variables
+	vaultPath = os.ExpandEnv(vaultPath)
+
+	// Expand ~ prefix
+	if strings.HasPrefix(vaultPath, "~") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return vaultPath, pathSource // Return as-is if home unknown
+		}
+		vaultPath = filepath.Join(home, vaultPath[1:])
+	}
+
+	// Convert relative to absolute path
+	if !filepath.IsAbs(vaultPath) {
+		home, err := os.UserHomeDir()
+		if err == nil {
+			vaultPath = filepath.Join(home, vaultPath)
+		}
+	}
+
+	return vaultPath, pathSource
+}
+
 // IsVerbose returns whether verbose mode is enabled
 func IsVerbose() bool {
 	return verbose || viper.GetBool("verbose")
