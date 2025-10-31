@@ -556,3 +556,126 @@ func TestIntegration_Version(t *testing.T) {
 		t.Errorf("Expected version output to contain 'pass-cli', got: %s", stdout)
 	}
 }
+
+// T010: Integration test for pass-cli init without config (uses default vault path)
+func TestDefaultVaultPath_Init(t *testing.T) {
+	// Create isolated test environment with custom HOME
+	tmpHome, err := os.MkdirTemp("", "pass-cli-home-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp home: %v", err)
+	}
+	defer os.RemoveAll(tmpHome)
+
+	// Set up environment
+	cmd := exec.Command(binaryPath, "init")
+	cmd.Env = append(os.Environ(),
+		fmt.Sprintf("HOME=%s", tmpHome),
+		fmt.Sprintf("USERPROFILE=%s", tmpHome), // Windows
+	)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	cmd.Stdin = strings.NewReader("TestPassword123!\nTestPassword123!\n")
+
+	// Run init command
+	err = cmd.Run()
+	if err != nil {
+		t.Fatalf("Init command failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+	}
+
+	// Verify vault was created at default location
+	expectedVaultPath := filepath.Join(tmpHome, ".pass-cli", "vault.enc")
+	if _, err := os.Stat(expectedVaultPath); os.IsNotExist(err) {
+		t.Fatalf("Expected vault at %s, but it does not exist", expectedVaultPath)
+	}
+
+	t.Logf("✓ Vault created at default location: %s", expectedVaultPath)
+}
+
+// T011: Integration test for vault operations with default path
+func TestDefaultVaultPath_Operations(t *testing.T) {
+	// Create isolated test environment with custom HOME
+	tmpHome, err := os.MkdirTemp("", "pass-cli-home-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp home: %v", err)
+	}
+	defer os.RemoveAll(tmpHome)
+
+	masterPassword := "TestPassword123!"
+
+	// Helper to run commands with isolated HOME
+	runWithHome := func(stdin string, args ...string) (string, string, error) {
+		cmd := exec.Command(binaryPath, args...)
+		cmd.Env = append(os.Environ(),
+			fmt.Sprintf("HOME=%s", tmpHome),
+			fmt.Sprintf("USERPROFILE=%s", tmpHome),
+		)
+
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+		if stdin != "" {
+			cmd.Stdin = strings.NewReader(stdin)
+		}
+
+		err := cmd.Run()
+		return stdout.String(), stderr.String(), err
+	}
+
+	// Step 1: Initialize vault
+	t.Log("Step 1: Initialize vault at default location")
+	initInput := fmt.Sprintf("%s\n%s\n", masterPassword, masterPassword)
+	stdout, stderr, err := runWithHome(initInput, "init")
+	if err != nil {
+		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+	}
+
+	// Verify vault exists
+	vaultPath := filepath.Join(tmpHome, ".pass-cli", "vault.enc")
+	if _, err := os.Stat(vaultPath); os.IsNotExist(err) {
+		t.Fatalf("Vault not created at %s", vaultPath)
+	}
+
+	// Step 2: Add a credential
+	t.Log("Step 2: Add credential using default vault path")
+	addInput := fmt.Sprintf("%s\ntestuser\ntestpass\nhttps://example.com\n", masterPassword)
+	stdout, stderr, err = runWithHome(addInput, "add", "testcred")
+	if err != nil {
+		t.Fatalf("Add failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+	}
+
+	// Step 3: Retrieve the credential
+	t.Log("Step 3: Retrieve credential using default vault path")
+	getInput := fmt.Sprintf("%s\n", masterPassword)
+	stdout, stderr, err = runWithHome(getInput, "get", "testcred", "--field", "username")
+	if err != nil {
+		t.Fatalf("Get failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+	}
+
+	if !strings.Contains(stdout, "testuser") {
+		t.Errorf("Expected username 'testuser', got: %s", stdout)
+	}
+
+	// Step 4: List credentials
+	t.Log("Step 4: List credentials using default vault path")
+	listInput := fmt.Sprintf("%s\n", masterPassword)
+	stdout, stderr, err = runWithHome(listInput, "list")
+	if err != nil {
+		t.Fatalf("List failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+	}
+
+	if !strings.Contains(stdout, "testcred") {
+		t.Errorf("Expected credential 'testcred' in list, got: %s", stdout)
+	}
+
+	// Step 5: Delete the credential
+	t.Log("Step 5: Delete credential using default vault path")
+	deleteInput := fmt.Sprintf("%s\n", masterPassword)
+	stdout, stderr, err = runWithHome(deleteInput, "delete", "testcred")
+	if err != nil {
+		t.Fatalf("Delete failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+	}
+
+	t.Log("✓ All vault operations work with default path")
+}

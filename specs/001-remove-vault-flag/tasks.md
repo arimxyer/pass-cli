@@ -48,8 +48,8 @@
 
 - [x] T008 [P] [US1] Unit test for GetVaultPath() with no config (returns default path) in cmd/root_test.go or internal/config/config_test.go
 - [x] T009 [P] [US1] Unit test for GetVaultPath() with empty vault_path in config in internal/config/config_test.go
-- [ ] T010 [P] [US1] Integration test for `pass-cli init` without config in test/integration_test.go
-- [ ] T011 [P] [US1] Integration test for vault operations with default path in test/integration_test.go
+- [x] T010 [P] [US1] Integration test for `pass-cli init` without config in test/integration_test.go
+- [x] T011 [P] [US1] Integration test for vault operations with default path in test/integration_test.go
 
 ### Implementation for User Story 1
 
