@@ -1,4 +1,0 @@
-# pass-cli/test [pass-cli/test.test]
-test\tui_integration_test.go:349:50: cannot use b (variable of type *testing.B) as *testing.T value in argument to setupTestVaultConfig
-FAIL	pass-cli/test [build failed]
-FAIL
