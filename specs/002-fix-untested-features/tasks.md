@@ -38,19 +38,19 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete. The metadata system is used by ALL three commands (keychain enable, keychain status, vault remove).
 
-- [ ] T004 [Shared] Create `internal/vault/metadata.go` with Metadata struct (version, created_at, last_modified, keychain_enabled, audit_enabled per data-model.md)
-- [ ] T005 [Shared] Implement `LoadMetadata(vaultPath)` function - returns default metadata if file missing (graceful degradation per clarification session 2025-11-04, question #2)
-- [ ] T006 [Shared] Implement `SaveMetadata(vaultPath, metadata)` function - writes JSON to `<vault>.meta.json` with 0600 permissions
-- [ ] T007 [Shared] Implement `DeleteMetadata(vaultPath)` function - removes metadata file (used by vault remove)
-- [ ] T008 [Shared] Add `MetadataPath(vaultPath)` helper function - returns `<vault-path>.meta.json`
-- [ ] T009 [Shared] Add metadata methods to `VaultService` in `internal/vault/vault.go`: LoadMetadata(), SaveMetadata(), DeleteMetadata()
-- [ ] T009a [P] [Shared] Update `cmd/init.go` to save metadata when --use-keychain flag provided:
+- [X] T004 [Shared] Create `internal/vault/metadata.go` with Metadata struct (version, created_at, last_modified, keychain_enabled, audit_enabled per data-model.md)
+- [X] T005 [Shared] Implement `LoadMetadata(vaultPath)` function - returns default metadata if file missing (graceful degradation per clarification session 2025-11-04, question #2)
+- [X] T006 [Shared] Implement `SaveMetadata(vaultPath, metadata)` function - writes JSON to `<vault>.meta.json` with 0600 permissions
+- [X] T007 [Shared] Implement `DeleteMetadata(vaultPath)` function - removes metadata file (used by vault remove)
+- [X] T008 [Shared] Add `MetadataPath(vaultPath)` helper function - returns `<vault-path>.meta.json`
+- [X] T009 [Shared] Add metadata methods to `VaultService` in `internal/vault/vault.go`: LoadMetadata(), SaveMetadata(), DeleteMetadata()
+- [X] T009a [P] [Shared] Update `cmd/init.go` to save metadata when --use-keychain flag provided:
   - After successful vault creation with --use-keychain flag
   - Create metadata using `vault.Metadata{Version: "1.0", KeychainEnabled: true, AuditEnabled: auditEnabled, CreatedAt: time.Now(), LastModified: time.Now()}`
   - Call `vaultService.SaveMetadata(metadata)` before returning success
   - Covers FR-023: Vault initialization with --use-keychain MUST set keychain flag in metadata
-- [ ] T010 [P] [Shared] Create `internal/vault/metadata_test.go` with unit tests: TestLoadMetadata_MissingFile, TestSaveAndLoadMetadata, TestMetadataPermissions
-- [ ] T011 [Shared] Run `go test ./internal/vault -v` - verify all metadata unit tests pass
+- [X] T010 [P] [Shared] Create `internal/vault/metadata_test.go` with unit tests: TestLoadMetadata_MissingFile, TestSaveAndLoadMetadata, TestMetadataPermissions
+- [X] T011 [Shared] Run `go test ./internal/vault -v` - verify all metadata unit tests pass
 
 **Checkpoint**: Foundation ready - metadata system complete and tested. User story implementation can now begin.
 
