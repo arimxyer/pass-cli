@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"pass-cli/internal/keychain"
+	"pass-cli/internal/vault"
 )
 
 // T014: Integration test for corrupted metadata fallback
@@ -56,7 +57,7 @@ func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 	}
 
 	// Verify metadata file created
-	metaPath := filepath.Join(vaultDir, "vault.meta")
+	metaPath := vault.MetadataPath(vaultPath)
 	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
 		t.Fatal("Metadata file was not created")
 	}
@@ -154,10 +155,10 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 	}
 
 	// Verify vault1.meta exists (but not vault2.meta since audit wasn't enabled)
-	meta1Path := filepath.Join(vaultDir, "vault.meta")
+	meta1Path := vault.MetadataPath(vault1Path)
 	if _, err := os.Stat(meta1Path); os.IsNotExist(err) {
-		// Note: Current implementation uses "vault.meta" (fixed name), not "vault1.meta"
-		// This test verifies that metadata correctly identifies vault1 via vault_id field
+		// Note: metadata uses <vault-path>.meta.json naming convention
+		// This test verifies multiple vaults in same directory each have their own metadata
 		t.Skip("Multi-vault in same directory not yet supported - metadata filename is fixed to 'vault.meta'")
 	}
 
@@ -205,7 +206,7 @@ func TestIntegration_AutoMetadataCreationOnUnlock(t *testing.T) {
 	}
 
 	// Verify metadata created by init
-	metaPath := filepath.Join(vaultDir, "vault.meta")
+	metaPath := vault.MetadataPath(vaultPath)
 	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
 		t.Fatal("Metadata should be created by init --enable-audit")
 	}
@@ -268,7 +269,7 @@ func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 	}
 
 	// Verify no metadata created
-	metaPath := filepath.Join(vaultDir, "vault.meta")
+	metaPath := vault.MetadataPath(vaultPath)
 	if _, err := os.Stat(metaPath); !os.IsNotExist(err) {
 		t.Error("Metadata should NOT be created when audit disabled")
 	}
@@ -326,7 +327,7 @@ func TestIntegration_MetadataCreatedByInit(t *testing.T) {
 	}
 
 	// Verify metadata created
-	metaPath := filepath.Join(vaultDir, "vault.meta")
+	metaPath := vault.MetadataPath(vaultPath)
 	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
 		t.Fatal("Metadata file should be created by init --enable-audit")
 	}
@@ -337,12 +338,17 @@ func TestIntegration_MetadataCreatedByInit(t *testing.T) {
 		t.Fatalf("Failed to read metadata: %v", err)
 	}
 
-	if !strings.Contains(string(data), "vault.enc") {
-		t.Error("Metadata should contain vault path")
-	}
-
+	// Check for required fields per data-model.md
 	if !strings.Contains(string(data), "audit_enabled") {
 		t.Error("Metadata should contain audit_enabled field")
+	}
+
+	if !strings.Contains(string(data), "keychain_enabled") {
+		t.Error("Metadata should contain keychain_enabled field")
+	}
+
+	if !strings.Contains(string(data), "version") {
+		t.Error("Metadata should contain version field")
 	}
 
 	t.Logf("✓ Metadata created by init --enable-audit")
@@ -379,7 +385,7 @@ func TestIntegration_MetadataUpdateOnAuditChange(t *testing.T) {
 	}
 
 	// Read initial metadata
-	metaPath := filepath.Join(vaultDir, "vault.meta")
+	metaPath := vault.MetadataPath(vaultPath)
 	initialData, err := os.ReadFile(metaPath)
 	if err != nil {
 		t.Fatalf("Failed to read initial metadata: %v", err)
@@ -454,7 +460,7 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 	}
 
 	// Delete metadata if created (to truly simulate old vault)
-	metaPath := filepath.Join(vaultDir, "vault.meta")
+	metaPath := vault.MetadataPath(vaultPath)
 	os.Remove(metaPath)
 
 	// Try to use vault (should work without metadata)
@@ -550,7 +556,7 @@ func TestIntegration_MetadataDeletedFallback(t *testing.T) {
 	}
 
 	// Delete metadata file
-	metaPath := filepath.Join(vaultDir, "vault.meta")
+	metaPath := vault.MetadataPath(vaultPath)
 	if err := os.Remove(metaPath); err != nil {
 		t.Fatalf("Failed to delete metadata: %v", err)
 	}
@@ -627,7 +633,7 @@ func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
 	}
 
 	// Delete metadata but keep audit.log
-	metaPath := filepath.Join(vaultDir, "vault.meta")
+	metaPath := vault.MetadataPath(vaultPath)
 	if err := os.Remove(metaPath); err != nil {
 		t.Fatalf("Failed to delete metadata: %v", err)
 	}
@@ -710,7 +716,7 @@ func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
 	}
 
 	// Verify metadata still exists
-	metaPath := filepath.Join(vaultDir, "vault.meta")
+	metaPath := vault.MetadataPath(vaultPath)
 	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
 		t.Fatal("Metadata should still exist")
 	}
@@ -777,7 +783,7 @@ func TestIntegration_UnknownMetadataVersion(t *testing.T) {
 	}
 
 	// Read metadata and change version to 99
-	metaPath := filepath.Join(vaultDir, "vault.meta")
+	metaPath := vault.MetadataPath(vaultPath)
 	data, err := os.ReadFile(metaPath)
 	if err != nil {
 		t.Fatalf("Failed to read metadata: %v", err)

@@ -192,7 +192,7 @@ func TestIntegration_KeychainStatusWithMetadata(t *testing.T) {
 	}
 
 	// Verify metadata file created
-	metaPath := filepath.Join(vaultDir, "vault.meta")
+	metaPath := vaultPath + ".meta.json"
 	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
 		t.Fatal("Metadata file was not created")
 	}
