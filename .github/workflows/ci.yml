@@ -69,7 +69,7 @@ jobs:
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.5
-          args: --timeout=3m
+          args: --timeout=3m --build-tags integration
 
   unit-tests:
     name: Unit Tests
