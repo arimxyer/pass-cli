@@ -142,6 +142,9 @@ For complete command reference, flags, and examples, see [docs/USAGE.md](docs/US
 **Keychain Integration**:
 - Master password stored in OS keychain (Windows Credential Manager, macOS Keychain, Linux Secret Service)
 - Automatic unlock when needed
+- Enable/disable anytime: `pass-cli keychain enable` / `pass-cli keychain disable`
+- Check status: `pass-cli keychain status`
+- TUI auto-unlocks when keychain is enabled
 
 **Audit Logging** (Optional):
 - Tamper-evident HMAC-SHA256 signed audit trail

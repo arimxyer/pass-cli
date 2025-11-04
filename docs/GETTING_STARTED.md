@@ -263,6 +263,82 @@ $ pass-cli generate | pbcopy
 $ pass-cli add myservice --password "$(pass-cli generate)"
 ```
 
+## Keychain Integration
+
+pass-cli can store your master password in your OS keychain for convenience, eliminating the need to type it for every operation.
+
+### Enable Keychain Integration
+
+If you didn't enable keychain during initialization, you can enable it anytime:
+
+```bash
+$ pass-cli keychain enable
+
+Master password: ••••••••••••
+✅ Keychain integration enabled for vault at /home/user/.pass-cli/vault.enc
+
+Future commands will not prompt for password when keychain is available.
+```
+
+### Check Keychain Status
+
+View the current keychain integration status:
+
+```bash
+$ pass-cli keychain status
+
+Keychain Status for /home/user/.pass-cli/vault.enc:
+
+✓ System Keychain:        Available (macOS Keychain)
+✓ Password Stored:        Yes
+✓ Backend:                keychain
+✓ Vault Configuration:    Keychain enabled
+
+✓ Keychain integration is properly configured.
+Your vault password is securely stored in the system keychain.
+Future commands will not prompt for password.
+```
+
+**If keychain is not enabled:**
+```bash
+$ pass-cli keychain status
+
+Keychain Status for /home/user/.pass-cli/vault.enc:
+
+✓ System Keychain:        Available (Windows Credential Manager)
+✗ Password Stored:        No
+✓ Vault Configuration:    Keychain not enabled
+
+The system keychain is available but no password is stored for this vault.
+Suggestion: Enable keychain integration with 'pass-cli keychain enable'
+```
+
+### Disable Keychain Integration
+
+To remove your master password from the keychain:
+
+```bash
+pass-cli keychain disable
+```
+
+After disabling, you'll need to enter your master password for each operation.
+
+### Platform-Specific Backends
+
+pass-cli integrates with your operating system's secure credential storage:
+
+- **Windows**: Windows Credential Manager
+- **macOS**: macOS Keychain
+- **Linux**: Secret Service API (gnome-keyring/kwallet)
+
+### TUI Auto-Unlock
+
+When keychain integration is enabled, the TUI (Terminal User Interface) automatically unlocks your vault without prompting for a password:
+
+```bash
+pass-cli tui  # Opens directly, no password prompt
+```
+
 ## Script-Friendly Usage
 
 ### Quiet Mode
@@ -493,6 +569,11 @@ pass-cli doctor
 
 # Change master password
 pass-cli change-password
+
+# Keychain integration
+pass-cli keychain enable         # Store password in OS keychain
+pass-cli keychain status         # Check keychain status
+pass-cli keychain disable        # Remove password from keychain
 
 # Verify audit log
 pass-cli verify-audit

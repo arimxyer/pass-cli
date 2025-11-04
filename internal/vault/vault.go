@@ -130,10 +130,20 @@ func New(vaultPath string) (*VaultService, error) {
 
 	// T010: Load metadata file (if exists) to enable audit logging before vault unlock
 	meta, err := LoadMetadata(vaultPath)
+	metadataFileExists := true
 	if err != nil {
 		// Metadata exists but corrupted - log warning and try fallback (T011)
 		fmt.Fprintf(os.Stderr, "Warning: Failed to load metadata: %v\n", err)
 		meta = nil
+		metadataFileExists = false
+	}
+
+	// Check if metadata file actually exists (LoadMetadata returns default if missing)
+	if meta != nil && !meta.AuditEnabled {
+		// Metadata may be default (file missing) - check if file exists
+		if _, statErr := os.Stat(MetadataPath(vaultPath)); os.IsNotExist(statErr) {
+			metadataFileExists = false
+		}
 	}
 
 	// Initialize audit from metadata
@@ -143,8 +153,8 @@ func New(vaultPath string) (*VaultService, error) {
 		_ = meta // Use meta to avoid unused variable
 	}
 
-	// T011: Fallback self-discovery if metadata missing/failed
-	if meta == nil {
+	// T011: Fallback self-discovery if metadata missing/failed OR audit not enabled but log exists
+	if !metadataFileExists || (meta != nil && !meta.AuditEnabled) {
 		auditLogPath := filepath.Join(filepath.Dir(vaultPath), "audit.log")
 		if _, err := os.Stat(auditLogPath); err == nil {
 			// audit.log exists, enable best-effort audit
@@ -186,15 +196,20 @@ func (v *VaultService) EnableAudit(auditLogPath, vaultID string) error {
 	}
 
 	// T026 (US2): Save metadata file for pre-unlock audit logging
-	meta := &Metadata{
-		Version:         "1.0",
-		AuditEnabled:    true,
-		KeychainEnabled: false, // Will be set by keychain enable command
-	}
-
-	if err := SaveMetadata(v.vaultPath, meta); err != nil {
-		// Non-fatal: audit logger is enabled, metadata save failed
-		fmt.Fprintf(os.Stderr, "Warning: Failed to save metadata: %v\n", err)
+	// Only save metadata if it already exists (explicit enable) or if vault explicitly requested it
+	// Don't create metadata during autodiscovery (best-effort logging)
+	existingMeta, err := LoadMetadata(v.vaultPath)
+	if err == nil && existingMeta != nil {
+		// Check if metadata file actually exists (LoadMetadata returns default if missing)
+		if _, statErr := os.Stat(MetadataPath(v.vaultPath)); statErr == nil {
+			// Metadata exists - update it
+			existingMeta.AuditEnabled = true
+			if err := SaveMetadata(v.vaultPath, existingMeta); err != nil {
+				// Non-fatal: audit logger is enabled, metadata save failed
+				fmt.Fprintf(os.Stderr, "Warning: Failed to save metadata: %v\n", err)
+			}
+		}
+		// else: metadata file doesn't exist, this is autodiscovery, don't create metadata
 	}
 
 	return nil

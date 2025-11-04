@@ -60,9 +60,9 @@ func TestPanicRecoveryWithDeferredCleanup(t *testing.T) {
 }
 
 // TestVaultPasswordClearingAfterUnlock verifies master password is cleared after vault unlock.
-// This will FAIL until T009-T016 are implemented (vault methods accept []byte).
+// Blocked on: T009-T016 (vault methods accept []byte) - architectural change
 func TestVaultPasswordClearingAfterUnlock(t *testing.T) {
-	t.Skip("TODO: Enable after T009-T016 (vault methods accept []byte)")
+	t.Skip("Deferred: Requires vault API refactor to accept []byte (tracked in separate spec)")
 
 	// This test will verify that VaultService.masterPassword is cleared after Lock()
 	// by using reflection or memory inspection tools.

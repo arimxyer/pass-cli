@@ -44,6 +44,11 @@ func LoadMetadata(vaultPath string) (*Metadata, error) {
 		return nil, fmt.Errorf("corrupted metadata file: %w", err)
 	}
 
+	// FR-017: Warn about unknown metadata versions but continue (graceful degradation)
+	if metadata.Version != "1.0" && metadata.Version != "1" {
+		fmt.Fprintf(os.Stderr, "Warning: Unknown metadata version %q (expected \"1.0\"). Continuing with best-effort compatibility.\n", metadata.Version)
+	}
+
 	return &metadata, nil
 }
 

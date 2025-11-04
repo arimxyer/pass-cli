@@ -125,6 +125,14 @@ jobs:
         run: go test -v -tags=integration -timeout 5m ./test
         shell: bash
 
+      - name: Check for TODO-skipped tests
+        run: |
+          if grep -r 't.Skip("TODO:' test/; then
+            echo "ERROR: Found TODO-skipped tests"
+            exit 1
+          fi
+        shell: bash
+
   security:
     name: Security Scan
     runs-on: ubuntu-latest

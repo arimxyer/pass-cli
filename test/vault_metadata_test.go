@@ -5,6 +5,7 @@ package test
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -157,22 +158,38 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 	// Verify vault1.meta exists (but not vault2.meta since audit wasn't enabled)
 	meta1Path := vault.MetadataPath(vault1Path)
 	if _, err := os.Stat(meta1Path); os.IsNotExist(err) {
-		// Note: metadata uses <vault-path>.meta.json naming convention
-		// This test verifies multiple vaults in same directory each have their own metadata
-		t.Skip("Multi-vault in same directory not yet supported - metadata filename is fixed to 'vault.meta'")
+		t.Fatal("Metadata file should exist for vault1")
 	}
 
-	// Read metadata and verify it references vault1
+	// Verify the metadata filename correctly identifies vault1
+	// Metadata naming: <vault-path>.meta.json (e.g., vault1.enc.meta.json)
+	expectedFilename := filepath.Base(vault1Path) + ".meta.json"
+	actualFilename := filepath.Base(meta1Path)
+	if actualFilename != expectedFilename {
+		t.Errorf("Metadata filename should be %q, got %q", expectedFilename, actualFilename)
+	}
+
+	// Verify vault1's metadata is distinct from vault2
+	// (vault2 should NOT have metadata since audit wasn't enabled)
+	meta2Path := vault.MetadataPath(vault2Path)
+	if _, err := os.Stat(meta2Path); !os.IsNotExist(err) {
+		t.Error("vault2 should NOT have metadata (audit not enabled)")
+	}
+
+	// Read and verify metadata content is valid
 	data, err := os.ReadFile(meta1Path)
 	if err != nil {
 		t.Fatalf("Failed to read metadata: %v", err)
 	}
-
-	if !strings.Contains(string(data), "vault1.enc") {
-		t.Error("Metadata should reference vault1.enc in vault_id field")
+	var meta vault.Metadata
+	if err := json.Unmarshal(data, &meta); err != nil {
+		t.Fatalf("Failed to parse metadata: %v", err)
+	}
+	if !meta.AuditEnabled {
+		t.Error("Metadata should show audit_enabled=true")
 	}
 
-	t.Logf("✓ Metadata correctly identifies vault1 among multiple vaults")
+	t.Logf("✓ Metadata correctly identifies vault1 among multiple vaults (via filename: %s)", actualFilename)
 }
 
 // T021: Integration test for automatic metadata creation on vault unlock with audit
@@ -789,8 +806,11 @@ func TestIntegration_UnknownMetadataVersion(t *testing.T) {
 		t.Fatalf("Failed to read metadata: %v", err)
 	}
 
-	// Replace version 1 with version 99
-	modifiedData := strings.Replace(string(data), `"version": 1`, `"version": 99`, 1)
+	// Replace version "1.0" with version "99.0"
+	modifiedData := strings.Replace(string(data), `"version": "1.0"`, `"version": "99.0"`, 1)
+	if !strings.Contains(modifiedData, `"version": "99.0"`) {
+		t.Fatalf("Failed to modify version in metadata (original: %s)", string(data))
+	}
 	if err := os.WriteFile(metaPath, []byte(modifiedData), 0644); err != nil {
 		t.Fatalf("Failed to write modified metadata: %v", err)
 	}
