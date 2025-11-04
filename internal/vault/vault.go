@@ -1071,9 +1071,14 @@ func (v *VaultService) RemoveVault(force bool) (*RemoveVaultResult, error) {
 	// T016: Load metadata to check audit status before vault deletion
 	meta, err := LoadMetadata(v.vaultPath)
 	if err == nil && meta != nil && meta.AuditEnabled {
-		// Note: Audit should already be enabled if vault is unlocked
-		// New metadata schema doesn't store audit path/ID
-		_ = meta // Use meta to avoid unused variable
+		// Initialize audit logging if enabled but not yet initialized
+		if !v.auditEnabled {
+			auditLogPath := filepath.Join(filepath.Dir(v.vaultPath), "audit.log")
+			if err := v.EnableAudit(auditLogPath, v.vaultPath); err != nil {
+				// Best-effort - continue even if audit init fails
+				fmt.Fprintf(os.Stderr, "Warning: Failed to initialize audit: %v\n", err)
+			}
+		}
 	}
 
 	// T017: Log vault_remove_attempt before deletion

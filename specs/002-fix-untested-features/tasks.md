@@ -112,15 +112,15 @@
 
 **NOTE: These tests are currently skipped with TODO markers. Unskip them FIRST, verify they FAIL, then implement.**
 
-- [ ] T022 [US2] Unskip test at `test/vault_remove_test.go:70` - remove `t.Skip("TODO: Implement vault remove command (T030)")`
-- [ ] T023 [US2] Run `go test -v -tags=integration ./test -run TestIntegration_VaultRemove/2_Remove_With_Confirmation` - VERIFY TEST FAILS
-- [ ] T024 [P] [US2] Unskip test at `test/vault_remove_test.go:100` - remove TODO skip for --yes flag test
-- [ ] T025 [P] [US2] Unskip test at `test/vault_remove_test.go:136` - remove TODO skip for orphaned keychain cleanup test
-- [ ] T026 [US2] Find and unskip remaining vault remove tests (check test file for additional TODO markers beyond line 178)
+- [X] T022 [US2] Unskip test at `test/vault_remove_test.go:70` - remove `t.Skip("TODO: Implement vault remove command (T030)")`
+- [X] T023 [US2] Run `go test -v -tags=integration ./test -run TestIntegration_VaultRemove/2_Remove_With_Confirmation` - VERIFY TEST FAILS
+- [X] T024 [P] [US2] Unskip test at `test/vault_remove_test.go:100` - remove TODO skip for --yes flag test
+- [X] T025 [P] [US2] Unskip test at `test/vault_remove_test.go:136` - remove TODO skip for orphaned keychain cleanup test
+- [X] T026 [US2] Find and unskip remaining vault remove tests (check test file for additional TODO markers beyond line 178)
 
 ### Implementation for User Story 2
 
-- [ ] T027 [US2] Implement `vaultRemove()` function in `cmd/vault_remove.go`:
+- [X] T027 [US2] Implement `vaultRemove()` function in `cmd/vault_remove.go`:
   - Check if `--yes` flag provided, otherwise prompt for confirmation with "This will permanently delete..." warning (FR-016)
   - If user cancels confirmation → exit 0 with "Vault removal cancelled" (no audit entry, no deletions)
   - Load metadata using `vaultService.LoadMetadata()`
@@ -132,16 +132,16 @@
   - If all succeeded → write audit entry "vault_remove_success" if audit was enabled (FR-017)
   - **CRITICAL (FR-018)**: Audit entries MUST be written BEFORE metadata deletion
   - Display removal progress: "✓ Keychain entry deleted", "✓ Metadata file deleted", "✓ Vault file deleted"
-- [ ] T028 [US2] Handle orphaned keychain cleanup in `vaultRemove()`:
+- [X] T028 [US2] Handle orphaned keychain cleanup in `vaultRemove()`:
   - If vault file doesn't exist but keychain entry exists → still delete keychain entry
   - Display warning: "⚠ Warning: Vault file not found at <path>"
   - Display: "Cleaning up orphaned keychain entry..."
-- [ ] T029 [US2] Add error handling for partial deletion failures:
+- [X] T029 [US2] Add error handling for partial deletion failures:
   - Continue-on-error pattern: try to delete all resources even if one fails
   - Collect all errors in slice
   - If len(errors) > 0 → display "⚠ Partial removal failure:" with specific failures
   - Exit code 2 for system errors
-- [ ] T030 [US2] Run `go test -v -tags=integration ./test -run TestIntegration_VaultRemove` - VERIFY ALL TESTS PASS (must achieve 100% success rate per FR-019, clarification #5)
+- [X] T030 [US2] Run `go test -v -tags=integration ./test -run TestIntegration_VaultRemove` - VERIFY ALL TESTS PASS (must achieve 100% success rate per FR-019, clarification #5)
 - [ ] T031 [US2] Manual test: Create vault → enable keychain → run `vault remove --yes` → verify complete cleanup
 
 **Checkpoint**: User Story 2 complete - vault remove works reliably (100% success rate), all tests passing

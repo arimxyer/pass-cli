@@ -17,25 +17,28 @@ var (
 )
 
 var vaultRemoveCmd = &cobra.Command{
-	Use:   "remove <path>",
+	Use:   "remove",
 	Short: "Permanently delete a vault file and its keychain entry",
 	Long: `Permanently delete a vault file and its associated keychain entry.
 
 This command will:
   1. Delete the vault file from disk
   2. Remove the master password from the system keychain
-  3. Clean up orphaned keychain entries (FR-012)
+  3. Delete the metadata file
+  4. Clean up orphaned keychain entries (FR-012)
+
+The vault path is read from your config file (~/.pass-cli/config.yml).
 
 IMPORTANT: This operation is irreversible. All stored credentials will be lost.`,
 	Example: `  # Remove vault with confirmation prompt
-  pass-cli vault remove /path/to/vault.enc
+  pass-cli vault remove
 
   # Remove vault without confirmation (for automation)
-  pass-cli vault remove /path/to/vault.enc --yes
+  pass-cli vault remove --yes
 
   # Force removal even if file appears in use
-  pass-cli vault remove /path/to/vault.enc --force`,
-	Args: cobra.ExactArgs(1), // T030: Requires vault path argument
+  pass-cli vault remove --force`,
+	Args: cobra.NoArgs, // T027: Uses vault path from config
 	RunE: runVaultRemove,
 }
 
@@ -47,7 +50,8 @@ func init() {
 }
 
 func runVaultRemove(cmd *cobra.Command, args []string) error {
-	vaultPath := args[0]
+	// T027: Get vault path from config instead of argument
+	vaultPath := GetVaultPath()
 	skipConfirmation := yesFlag || forceFlag
 
 	if !skipConfirmation {
