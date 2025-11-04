@@ -303,9 +303,9 @@ gosec ./...
 - Footer: `Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>`
 
 ## Recent Changes
+- 002-fix-untested-features: Added Go 1.21+
 - 001-remove-vault-flag: Added Go 1.21+ + Cobra (CLI framework), Viper (configuration), spf13/pflag (flag parsing)
 - 011-doctor-command-for: Added Go 1.25.1 + stdlib (net/http for version check), Cobra/go-keyring/Viper/term dependencies
-- 012-vault-metadata-for: Added Go 1.21+ (existing codebase) + Go standard library (`encoding/json`, `os`, `path/filepath`)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
