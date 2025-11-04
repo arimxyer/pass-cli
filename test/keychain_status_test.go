@@ -60,92 +60,85 @@ func TestIntegration_KeychainStatus(t *testing.T) {
 
 	// Step 2: Check status BEFORE enabling keychain
 	t.Run("2_Status_Before_Enable", func(t *testing.T) {
-		// This test will FAIL until cmd/keychain_status.go is implemented (T021)
-		t.Skip("TODO: Implement keychain status command (T021)")
+		// T032: Unskipped - This test will FAIL until cmd/keychain_status.go is implemented
+		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		cmd := exec.Command(binaryPath, "keychain", "status")
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 
-		// TODO T021: After implementation, test should:
-		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
-		// defer cleanup()
-		// cmd := exec.Command(binaryPath, "keychain", "status")
-		// cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		//
-		// var stdout, stderr bytes.Buffer
-		// cmd.Stdout = &stdout
-		// cmd.Stderr = &stderr
-		//
-		// err := cmd.Run()
-		// if err != nil {
-		//     t.Errorf("Status command should not error (exit 0): %v\nStderr: %s", err, stderr.String())
-		// }
-		//
-		// output := stdout.String()
-		// if !strings.Contains(output, "Available") {
-		//     t.Errorf("Expected output to contain 'Available', got: %s", output)
-		// }
-		// if !strings.Contains(output, "No") || !strings.Contains(output, "not enabled") {
-		//     t.Errorf("Expected output to indicate password not stored, got: %s", output)
-		// }
-		// if !strings.Contains(output, "pass-cli keychain enable") {
-		//     t.Errorf("Expected actionable suggestion to enable keychain, got: %s", output)
-		// }
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+		if err != nil {
+			t.Errorf("Status command should not error (exit 0): %v\nStderr: %s", err, stderr.String())
+		}
+
+		output := stdout.String()
+		if !strings.Contains(output, "Available") {
+			t.Errorf("Expected output to contain 'Available', got: %s", output)
+		}
+		if !strings.Contains(output, "No") && !strings.Contains(output, "not enabled") {
+			t.Errorf("Expected output to indicate password not stored, got: %s", output)
+		}
+		if !strings.Contains(output, "pass-cli keychain enable") {
+			t.Errorf("Expected actionable suggestion to enable keychain, got: %s", output)
+		}
 	})
 
 	// Step 3: Enable keychain
 	t.Run("3_Enable_Keychain", func(t *testing.T) {
-		t.Skip("TODO: Implement after T011 (depends on enable command)")
+		// T034: Unskipped - Enable keychain to test status reporting
+		input := testPassword + "\n"
+		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		cmd := exec.Command(binaryPath, "keychain", "enable")
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
+		cmd.Stdin = strings.NewReader(input)
 
-		// TODO T011: After enable command implementation:
-		// input := testPassword + "\n"
-		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
-		// defer cleanup()
-		// cmd := exec.Command(binaryPath, "keychain", "enable")
-		// cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		// cmd.Stdin = strings.NewReader(input)
-		//
-		// var stdout, stderr bytes.Buffer
-		// cmd.Stdout = &stdout
-		// cmd.Stderr = &stderr
-		//
-		// err := cmd.Run()
-		// if err != nil {
-		//     t.Fatalf("Keychain enable failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
-		// }
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+		if err != nil {
+			t.Fatalf("Keychain enable failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+		}
 	})
 
 	// Step 4: Check status AFTER enabling keychain
 	t.Run("4_Status_After_Enable", func(t *testing.T) {
-		t.Skip("TODO: Implement after T011 and T021")
+		// T035: Unskipped - Test status reporting after keychain enabled
+		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		cmd := exec.Command(binaryPath, "keychain", "status")
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 
-		// TODO T021: After status command implementation:
-		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
-		// defer cleanup()
-		// cmd := exec.Command(binaryPath, "keychain", "status")
-		// cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		//
-		// var stdout, stderr bytes.Buffer
-		// cmd.Stdout = &stdout
-		// cmd.Stderr = &stderr
-		//
-		// err := cmd.Run()
-		// if err != nil {
-		//     t.Errorf("Status command should not error (exit 0): %v\nStderr: %s", err, stderr.String())
-		// }
-		//
-		// output := stdout.String()
-		// if !strings.Contains(output, "Available") {
-		//     t.Errorf("Expected output to contain 'Available', got: %s", output)
-		// }
-		// if !strings.Contains(output, "Yes") || !strings.Contains(output, "enabled") {
-		//     t.Errorf("Expected output to indicate password is stored, got: %s", output)
-		// }
-		//
-		// // Verify backend name is displayed (platform-specific)
-		// hasBackend := strings.Contains(output, "Windows Credential Manager") ||
-		//               strings.Contains(output, "macOS Keychain") ||
-		//               strings.Contains(output, "Linux Secret Service")
-		// if !hasBackend {
-		//     t.Errorf("Expected output to contain backend name, got: %s", output)
-		// }
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+		if err != nil {
+			t.Errorf("Status command should not error (exit 0): %v\nStderr: %s", err, stderr.String())
+		}
+
+		output := stdout.String()
+		if !strings.Contains(output, "Available") {
+			t.Errorf("Expected output to contain 'Available', got: %s", output)
+		}
+		if !strings.Contains(output, "Yes") && !strings.Contains(output, "enabled") {
+			t.Errorf("Expected output to indicate password is stored, got: %s", output)
+		}
+
+		// Verify backend name is displayed (platform-specific)
+		hasBackend := strings.Contains(output, "Windows Credential Manager") ||
+			strings.Contains(output, "macOS Keychain") ||
+			strings.Contains(output, "Linux Secret Service")
+		if !hasBackend {
+			t.Errorf("Expected output to contain backend name, got: %s", output)
+		}
 	})
 }
 

@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime"
 
 	"github.com/spf13/cobra"
 
+	"pass-cli/internal/security"
 	"pass-cli/internal/vault"
 )
 
@@ -35,6 +38,22 @@ func runKeychainStatus(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
 	}
 
+	// T036: Load metadata to check audit and keychain enabled status
+	meta, err := vault.LoadMetadata(vaultPath)
+	if err != nil && !os.IsNotExist(err) {
+		// Metadata exists but failed to load - warn but continue
+		fmt.Fprintf(os.Stderr, "Warning: Failed to load metadata: %v\n", err)
+	}
+
+	// T036: Initialize audit if enabled
+	if meta != nil && meta.AuditEnabled {
+		auditLogPath := filepath.Join(filepath.Dir(vaultPath), "audit.log")
+		if err := vaultService.EnableAudit(auditLogPath, vaultPath); err != nil {
+			// Best effort - continue even if audit init fails
+			fmt.Fprintf(os.Stderr, "Warning: Failed to initialize audit: %v\n", err)
+		}
+	}
+
 	status := vaultService.GetKeychainStatus()
 
 	// Display status
@@ -45,20 +64,70 @@ func runKeychainStatus(cmd *cobra.Command, args []string) error {
 		fmt.Printf("✓ System Keychain:        Available (%s)\n", status.BackendName)
 		if status.PasswordStored {
 			fmt.Printf("✓ Password Stored:        Yes\n")
-			fmt.Printf("✓ Backend:                %s\n\n", getBackendImplementation())
-			fmt.Println("Your vault password is securely stored in the system keychain.")
-			fmt.Println("Future commands will not prompt for password.")
+			fmt.Printf("✓ Backend:                %s\n", getBackendImplementation())
+
+			// T036: Display vault configuration and consistency check
+			if meta != nil && meta.KeychainEnabled {
+				fmt.Printf("✓ Vault Configuration:    Keychain enabled\n\n")
+				fmt.Println("✓ Keychain integration is properly configured.")
+				fmt.Println("Your vault password is securely stored in the system keychain.")
+				fmt.Println("Future commands will not prompt for password.")
+			} else if meta != nil && !meta.KeychainEnabled {
+				// T036: Consistency check - password in keychain but not enabled in metadata
+				fmt.Printf("⚠ Vault Configuration:    Keychain not enabled\n\n")
+				fmt.Println("⚠ Inconsistency detected: Password is stored in keychain, but metadata indicates keychain is not enabled.")
+				fmt.Println("This may happen if keychain was manually configured outside of pass-cli commands.")
+			} else {
+				// No metadata - legacy vault
+				fmt.Println()
+				fmt.Println("Your vault password is securely stored in the system keychain.")
+				fmt.Println("Future commands will not prompt for password.")
+			}
 		} else {
-			fmt.Printf("✗ Password Stored:        No\n\n")
-			fmt.Println("The system keychain is available but no password is stored for this vault.")
-			fmt.Println("Run 'pass-cli keychain enable' to store your password and skip future prompts.")
+			fmt.Printf("✗ Password Stored:        No\n")
+
+			// T036: Display vault configuration and consistency check
+			if meta != nil && meta.KeychainEnabled {
+				// T036: Consistency check - metadata says enabled but no password in keychain
+				fmt.Printf("⚠ Vault Configuration:    Keychain enabled\n\n")
+				fmt.Println("⚠ Inconsistency detected: Metadata indicates keychain is enabled, but no password is stored in the keychain.")
+				fmt.Println("Run 'pass-cli keychain enable' to fix this issue.")
+			} else if meta != nil && !meta.KeychainEnabled {
+				fmt.Printf("✓ Vault Configuration:    Keychain not enabled\n\n")
+				fmt.Println("The system keychain is available but no password is stored for this vault.")
+				fmt.Println("Suggestion: Enable keychain integration with 'pass-cli keychain enable'")
+			} else {
+				// No metadata - legacy vault
+				fmt.Println()
+				fmt.Println("The system keychain is available but no password is stored for this vault.")
+				fmt.Println("Suggestion: Enable keychain integration with 'pass-cli keychain enable'")
+			}
 		}
 	} else {
 		// Keychain is not available
 		fmt.Printf("✗ System Keychain:        Not available on this platform\n")
-		fmt.Printf("✗ Password Stored:        N/A\n\n")
-		fmt.Println("System keychain is not accessible. You will be prompted for password on each command.")
-		fmt.Println("See documentation for keychain setup: https://docs.pass-cli.com/keychain")
+		fmt.Printf("✗ Password Stored:        N/A\n")
+
+		// T036: Display vault configuration
+		if meta != nil && meta.KeychainEnabled {
+			fmt.Printf("⚠ Vault Configuration:    Keychain enabled\n\n")
+			fmt.Println("⚠ Warning: Metadata indicates keychain is enabled, but system keychain is not available.")
+			fmt.Println("You will be prompted for password on each command.")
+		} else if meta != nil && !meta.KeychainEnabled {
+			fmt.Printf("✓ Vault Configuration:    Keychain not enabled\n\n")
+			fmt.Println("System keychain is not accessible. You will be prompted for password on each command.")
+			fmt.Println("See documentation for keychain setup: https://docs.pass-cli.com/keychain")
+		} else {
+			// No metadata - legacy vault
+			fmt.Println()
+			fmt.Println("System keychain is not accessible. You will be prompted for password on each command.")
+			fmt.Println("See documentation for keychain setup: https://docs.pass-cli.com/keychain")
+		}
+	}
+
+	// T036: Write audit log entry if audit enabled (FR-013)
+	if meta != nil && meta.AuditEnabled {
+		vaultService.LogAudit(security.EventKeychainStatus, security.OutcomeSuccess, vaultPath)
 	}
 
 	return nil
