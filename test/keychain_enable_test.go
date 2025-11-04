@@ -64,100 +64,93 @@ func TestIntegration_KeychainEnable(t *testing.T) {
 
 	// Step 2: Run keychain enable command
 	t.Run("2_Enable_Keychain", func(t *testing.T) {
-		// This test will FAIL until cmd/keychain_enable.go is implemented (T011)
-		t.Skip("TODO: Implement keychain enable command (T011)")
+		// T012: Unskipped - This test will FAIL until cmd/keychain_enable.go is implemented
+		input := testPassword + "\n"
+		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		cmd := exec.Command(binaryPath, "keychain", "enable")
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
+		cmd.Stdin = strings.NewReader(input)
 
-		// TODO T011: After implementation, test should:
-		// input := testPassword + "\n"
-		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
-		// defer cleanup()
-		// cmd := exec.Command(binaryPath, "keychain", "enable")
-		// cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		// cmd.Stdin = strings.NewReader(input)
-		//
-		// var stdout, stderr bytes.Buffer
-		// cmd.Stdout = &stdout
-		// cmd.Stderr = &stderr
-		//
-		// err := cmd.Run()
-		// if err != nil {
-		//     t.Fatalf("Keychain enable failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
-		// }
-		//
-		// output := stdout.String()
-		// if !strings.Contains(output, "enabled") {
-		//     t.Errorf("Expected success message containing 'enabled', got: %s", output)
-		// }
-		//
-		// // Verify password is NOW in keychain
-		// retrievedPassword, err := ks.Retrieve()
-		// if err != nil {
-		//     t.Fatalf("Password was not stored in keychain: %v", err)
-		// }
-		//
-		// if retrievedPassword != testPassword {
-		//     t.Errorf("Keychain password = %q, want %q", retrievedPassword, testPassword)
-		// }
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+		if err != nil {
+			t.Fatalf("Keychain enable failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+		}
+
+		output := stdout.String()
+		if !strings.Contains(output, "enabled") {
+			t.Errorf("Expected success message containing 'enabled', got: %s", output)
+		}
+
+		// Verify password is NOW in keychain
+		retrievedPassword, err := ks.Retrieve()
+		if err != nil {
+			t.Fatalf("Password was not stored in keychain: %v", err)
+		}
+
+		if retrievedPassword != testPassword {
+			t.Errorf("Keychain password = %q, want %q", retrievedPassword, testPassword)
+		}
 	})
 
 	// Step 3: Verify subsequent commands don't prompt for password
 	t.Run("3_Add_Without_Password_Prompt", func(t *testing.T) {
-		t.Skip("TODO: Implement after T011 (depends on enable command)")
+		// T014: Unskipped - Test idempotent keychain usage
+		// Add credential - should NOT prompt for master password (uses keychain)
+		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		input := "testuser\n" + "testpass123\n" // Only username and credential password
+		cmd := exec.Command(binaryPath, "add", "github.com")
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
+		cmd.Stdin = strings.NewReader(input)
 
-		// TODO T011: After implementation, test should:
-		// // Add credential - should NOT prompt for master password (uses keychain)
-		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
-		// defer cleanup()
-		// input := "testuser\n" + "testpass123\n" // Only username and credential password
-		// cmd := exec.Command(binaryPath, "add", "github.com")
-		// cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		// cmd.Stdin = strings.NewReader(input)
-		//
-		// var stdout, stderr bytes.Buffer
-		// cmd.Stdout = &stdout
-		// cmd.Stderr = &stderr
-		//
-		// err := cmd.Run()
-		// if err != nil {
-		//     t.Fatalf("Add failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
-		// }
-		//
-		// // Should NOT contain "Master password:" prompt
-		// allOutput := stdout.String() + stderr.String()
-		// if strings.Contains(allOutput, "Master password:") {
-		//     t.Error("Unexpected master password prompt - keychain should have been used")
-		// }
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+		if err != nil {
+			t.Fatalf("Add failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+		}
+
+		// Should NOT contain "Master password:" prompt
+		allOutput := stdout.String() + stderr.String()
+		if strings.Contains(allOutput, "Master password:") {
+			t.Error("Unexpected master password prompt - keychain should have been used")
+		}
 	})
 
 	// Step 4: Test --force flag (overwrite existing keychain entry)
 	t.Run("4_Enable_With_Force", func(t *testing.T) {
-		t.Skip("TODO: Implement after T011 and T012 (depends on --force flag)")
+		// T015: Unskipped - Test --force flag
+		input := testPassword + "\n"
+		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		cmd := exec.Command(binaryPath, "keychain", "enable", "--force")
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
+		cmd.Stdin = strings.NewReader(input)
 
-		// TODO T012: After --force flag implementation, test should:
-		// input := testPassword + "\n"
-		// testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
-		// defer cleanup()
-		// cmd := exec.Command(binaryPath, "keychain", "enable", "--force")
-		// cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		// cmd.Stdin = strings.NewReader(input)
-		//
-		// var stdout, stderr bytes.Buffer
-		// cmd.Stdout = &stdout
-		// cmd.Stderr = &stderr
-		//
-		// err := cmd.Run()
-		// if err != nil {
-		//     t.Fatalf("Keychain enable --force failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
-		// }
-		//
-		// // Verify password still in keychain
-		// retrievedPassword, err := ks.Retrieve()
-		// if err != nil {
-		//     t.Fatalf("Password was not in keychain after --force: %v", err)
-		// }
-		//
-		// if retrievedPassword != testPassword {
-		//     t.Errorf("Keychain password = %q, want %q", retrievedPassword, testPassword)
-		// }
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+		if err != nil {
+			t.Fatalf("Keychain enable --force failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+		}
+
+		// Verify password still in keychain
+		retrievedPassword, err := ks.Retrieve()
+		if err != nil {
+			t.Fatalf("Password was not in keychain after --force: %v", err)
+		}
+
+		if retrievedPassword != testPassword {
+			t.Errorf("Keychain password = %q, want %q", retrievedPassword, testPassword)
+		}
 	})
 }

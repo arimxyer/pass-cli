@@ -42,6 +42,8 @@ var (
 	ErrInvalidCredential = errors.New("invalid credential")
 	// ErrKeychainAlreadyEnabled indicates that the keychain is already enabled for the vault.
 	ErrKeychainAlreadyEnabled = errors.New("keychain is already enabled")
+	// ErrKeychainNotEnabled indicates that keychain integration is not enabled for the vault.
+	ErrKeychainNotEnabled = errors.New("keychain integration is not enabled for this vault")
 )
 
 // UsageRecord tracks where and when a credential was accessed
@@ -463,6 +465,16 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 func (v *VaultService) UnlockWithKeychain() error {
 	if !v.keychainService.IsAvailable() {
 		return keychain.ErrKeychainUnavailable
+	}
+
+	// T018: Check metadata to see if keychain is enabled (FR-007)
+	metadata, err := v.LoadMetadata()
+	if err != nil {
+		return fmt.Errorf("failed to load metadata: %w", err)
+	}
+
+	if !metadata.KeychainEnabled {
+		return ErrKeychainNotEnabled
 	}
 
 	password, err := v.keychainService.Retrieve()
@@ -981,21 +993,41 @@ func (v *VaultService) EnableKeychain(password []byte, force bool) error {
 		return keychain.ErrKeychainUnavailable
 	}
 
-	_, err := v.keychainService.Retrieve()
-	if err == nil && !force {
+	// T016: Load metadata to check if already enabled (FR-006)
+	metadata, err := v.LoadMetadata()
+	if err != nil {
+		return fmt.Errorf("failed to load metadata: %w", err)
+	}
+
+	// T016: Check if already enabled (idempotent behavior per FR-006)
+	if metadata.KeychainEnabled && !force {
 		return ErrKeychainAlreadyEnabled
 	}
 
-	// Unlock the vault to verify the password.
-	if err := v.Unlock(password); err != nil {
+	// T016: Make a copy of password before Unlock() clears it
+	// Unlock() has defer crypto.ClearBytes() which will zero the password
+	passwordCopy := make([]byte, len(password))
+	copy(passwordCopy, password)
+	defer crypto.ClearBytes(passwordCopy)
+
+	// Unlock the vault to verify the password (FR-005).
+	if err := v.Unlock(passwordCopy); err != nil {
 		v.LogAudit(security.EventKeychainEnable, security.OutcomeFailure, "")
 		return fmt.Errorf("failed to unlock vault: %w", err)
 	}
 	defer v.Lock()
 
+	// Store original password (not the cleared copy) in keychain
 	if err := v.keychainService.Store(string(password)); err != nil {
 		v.LogAudit(security.EventKeychainEnable, security.OutcomeFailure, "")
 		return fmt.Errorf("failed to store password in keychain: %w", err)
+	}
+
+	// T016: Update metadata.KeychainEnabled = true (FR-003, FR-004)
+	metadata.KeychainEnabled = true
+	if err := v.SaveMetadata(metadata); err != nil {
+		v.LogAudit(security.EventKeychainEnable, security.OutcomeFailure, "")
+		return fmt.Errorf("failed to save metadata: %w", err)
 	}
 
 	v.LogAudit(security.EventKeychainEnable, security.OutcomeSuccess, "")

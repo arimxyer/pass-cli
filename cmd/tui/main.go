@@ -32,13 +32,24 @@ func Run(vaultPath string) error {
 		return fmt.Errorf("failed to initialize vault service: %w", err)
 	}
 
-	// 3. Try keychain unlock
-	err = vaultService.UnlockWithKeychain()
+	// 3. Check metadata to see if keychain is enabled (T019)
+	metadata, err := vaultService.LoadMetadata()
 	if err != nil {
-		// Keychain unlock failed, fall back to password prompt
-		fmt.Println("Keychain unlock unavailable, prompting for password...")
+		return fmt.Errorf("failed to load vault metadata: %w", err)
+	}
 
-		// 4. Prompt for password with max attempts
+	// 4. Try keychain unlock if enabled (T019 - FR-024)
+	if metadata.KeychainEnabled {
+		err = vaultService.UnlockWithKeychain()
+		if err != nil {
+			// T019: Display clear error message (FR-026)
+			fmt.Fprintf(os.Stderr, "Keychain unlock failed: %v\n", err)
+			fmt.Println("Falling back to password prompt...")
+		}
+	}
+
+	// 5. Prompt for password if not unlocked via keychain (T019 - FR-025)
+	if !vaultService.IsUnlocked() {
 		unlocked := false
 		for attempt := 1; attempt <= maxPasswordAttempts; attempt++ {
 			password, err := promptForPassword()
@@ -66,7 +77,7 @@ func Run(vaultPath string) error {
 		}
 	}
 
-	// 5. Launch TUI
+	// 6. Launch TUI
 	if err := launchTUI(vaultService); err != nil {
 		return fmt.Errorf("TUI error: %w", err)
 	}

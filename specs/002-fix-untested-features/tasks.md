@@ -66,14 +66,14 @@
 
 **NOTE: These tests are currently skipped with TODO markers. Unskip them FIRST, verify they FAIL, then implement.**
 
-- [ ] T012 [US1] Unskip test at `test/keychain_enable_test.go:68` - remove `t.Skip("TODO: Implement keychain enable command (T011)")`
-- [ ] T013 [US1] Run `go test -v -tags=integration ./test -run TestIntegration_KeychainEnable/2_Enable_With_Password` - VERIFY TEST FAILS
-- [ ] T014 [P] [US1] Unskip test at `test/keychain_enable_test.go:105` - remove TODO skip for idempotent test
-- [ ] T015 [P] [US1] Unskip test at `test/keychain_enable_test.go:134` - remove TODO skip for --force flag test
+- [X] T012 [US1] Unskip test at `test/keychain_enable_test.go:68` - remove `t.Skip("TODO: Implement keychain enable command (T011)")`
+- [X] T013 [US1] Run `go test -v -tags=integration ./test -run TestIntegration_KeychainEnable/2_Enable_With_Password` - VERIFY TEST FAILS
+- [X] T014 [P] [US1] Unskip test at `test/keychain_enable_test.go:105` - remove TODO skip for idempotent test
+- [X] T015 [P] [US1] Unskip test at `test/keychain_enable_test.go:134` - remove TODO skip for --force flag test
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] Implement `keychainEnable()` function in `cmd/keychain_enable.go`:
+- [X] T016 [US1] Implement `keychainEnable()` function in `cmd/keychain_enable.go`:
   - Load metadata using `vaultService.LoadMetadata()`
   - Check if `metadata.KeychainEnabled==true` and no --force flag → return idempotent success (FR-006, per clarification session 2025-11-04, question #3)
   - Prompt for master password using `readPassword()`
@@ -83,19 +83,19 @@
   - Save metadata with `vaultService.SaveMetadata(metadata)` (FR-003, FR-004)
   - Write audit log entry if `metadata.AuditEnabled==true` (FR-008)
   - Clear password from memory with `defer crypto.ClearBytes(password)`
-- [ ] T017 [US1] Add `--force` flag to `keychainEnableCmd` in `cmd/keychain_enable.go` - allows re-enabling when already enabled (FR-007)
-- [ ] T018 [US1] Update `UnlockWithKeychain()` in `internal/vault/vault.go`:
+- [X] T017 [US1] Add `--force` flag to `keychainEnableCmd` in `cmd/keychain_enable.go` - allows re-enabling when already enabled (FR-007)
+- [X] T018 [US1] Update `UnlockWithKeychain()` in `internal/vault/vault.go`:
   - Load metadata using `v.LoadMetadata()`
   - Check if `metadata.KeychainEnabled==false` → return ErrKeychainNotEnabled (FR-020, FR-021)
   - Retrieve password from keychain
   - If password not found in keychain → return ErrPasswordNotFound (FR-022)
   - Unlock vault with retrieved password
-- [ ] T019 [US1] Update TUI in `cmd/tui/main.go:35`:
+- [X] T019 [US1] Update TUI in `cmd/tui/main.go:35`:
   - Load metadata before attempting keychain unlock
   - Only call `UnlockWithKeychain()` if `metadata.KeychainEnabled==true` (FR-024)
   - If keychain unlock fails, display clear error message (FR-026)
   - Fall back to password prompt (FR-025)
-- [ ] T020 [US1] Run `go test -v -tags=integration ./test -run TestIntegration_KeychainEnable` - VERIFY ALL 3 TESTS PASS
+- [X] T020 [US1] Run `go test -v -tags=integration ./test -run TestIntegration_KeychainEnable` - VERIFY ALL 3 TESTS PASS
 - [ ] T021 [US1] Manual test: Create test vault → run `pass-cli keychain enable` → run `pass-cli tui` → verify no password prompt
 
 **Checkpoint**: User Story 1 complete - keychain enable works, TUI uses keychain, all 3 tests passing
