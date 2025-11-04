@@ -1,7 +1,8 @@
 # Design Improvements - Spec 002 Post-Spec Backlog
 
 **Date:** 2025-11-04
-**Status:** Active - Collecting Improvements
+**Last Updated:** 2025-11-04 (Spec 002 Implementation Complete)
+**Status:** Complete - No New Improvements Identified
 **Purpose:** Document functional/architectural improvements identified during spec 002 clarification that were deferred to maintain scope focus.
 
 ---
@@ -199,6 +200,69 @@ Implement lock file mechanism to prevent concurrent vault access:
 - Cross-platform file locking differences
 - Performance impact of lock checks
 - User experience with lock conflicts
+
+---
+
+### 8.2 Security: File Permissions Hardening
+
+**Current State:**
+- gosec security scan identified 10 issues (mostly MEDIUM severity):
+  - Config files written with 0644 permissions (should be 0600)
+  - Config directories created with 0755 permissions (should be 0750)
+  - Integer overflow risk in keybinding conversion
+  - Expected file inclusion patterns (vault/config operations)
+
+**Proposed Change:**
+- Reduce config file permissions to 0600 (owner-only read/write)
+- Reduce config directory permissions to 0750 (owner full, group read/execute)
+- Add bounds checking for integer conversion in keybinding parser
+- Document G204 (subprocess) and G304 (file inclusion) as expected patterns
+
+**Rationale:**
+- Defense-in-depth: Config files may contain sensitive vault paths
+- Reduces attack surface for multi-user systems
+- Aligns with security best practices for credential management tools
+- Integer overflow could cause undefined behavior in key handling
+
+**Affected Files:**
+- `cmd/config.go` (lines 105, 125, 216, 226): Change WriteFile permissions 0644 → 0600
+- `internal/config/config.go` (line 103): Change MkdirAll permissions 0755 → 0750
+- `internal/storage/storage.go` (line 384): Change MkdirAll permissions 0755 → 0750
+- `internal/config/keybinding.go` (line 136): Add bounds check before int → int16 conversion
+
+**Impact:** Low (security improvement, no functional changes)
+
+**Effort:** Small (4-file change)
+
+**Priority:** Low (pre-existing technical debt, no active exploits)
+
+**Dependencies:** None
+
+**Note:** gosec findings reviewed during spec 002 Phase 6 (T044). Issues are pre-existing technical debt, not introduced by spec 002 changes.
+
+---
+
+## Spec 002 Implementation Review
+
+**Completion Date:** 2025-11-04
+
+**Work Completed:**
+- ✅ Phase 1-5: All user stories (US-001 through US-005)
+- ✅ Phase 6: Quality gates (CI, docs, linting, security scan)
+- ✅ 25 integration tests unskipped and passing
+- ✅ Metadata system implemented
+- ✅ Keychain enable/status commands implemented
+- ✅ Vault remove command implemented with cleanup
+- ✅ Documentation updated (GETTING_STARTED.md, README.md)
+- ✅ CI gate added for TODO-skipped tests
+
+**New Improvements Identified:** 1 (Security: File Permissions Hardening - see 8.2 above)
+
+**Deferred Items:** 1 (Vault Concurrency Safety - already documented as 8.1)
+
+**Recommendation:**
+- Vault Concurrency Safety (8.1): Defer to future spec based on user feedback
+- File Permissions Hardening (8.2): Low priority, can be addressed as technical debt cleanup
 
 ---
 
