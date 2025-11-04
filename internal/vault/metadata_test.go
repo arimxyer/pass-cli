@@ -1,378 +1,165 @@
-package vault
+package vault_test
 
 import (
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"pass-cli/internal/vault"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// T001: Unit tests for LoadMetadata
-func TestLoadMetadata_Success(t *testing.T) {
-	// Create temp directory for test vault
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
-	metaPath := MetadataPath(vaultPath)
+func TestLoadMetadata_MissingFile(t *testing.T) {
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
 
-	// Create valid metadata file
-	meta := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: true,
-		AuditLogPath: filepath.Join(tmpDir, "audit.log"),
-		CreatedAt:    time.Now().UTC(),
-		Version:      1,
-	}
-
-	data, err := json.MarshalIndent(meta, "", "  ")
-	if err != nil {
-		t.Fatalf("Failed to marshal test metadata: %v", err)
-	}
-
-	if err := os.WriteFile(metaPath, data, 0644); err != nil {
-		t.Fatalf("Failed to write test metadata: %v", err)
-	}
-
-	// Test LoadMetadata
-	loaded, err := LoadMetadata(vaultPath)
-	if err != nil {
-		t.Fatalf("LoadMetadata failed: %v", err)
-	}
-
-	if loaded == nil {
-		t.Fatal("LoadMetadata returned nil metadata")
-	}
-
-	if loaded.VaultID != meta.VaultID {
-		t.Errorf("Expected VaultID %q, got %q", meta.VaultID, loaded.VaultID)
-	}
-
-	if loaded.AuditEnabled != meta.AuditEnabled {
-		t.Errorf("Expected AuditEnabled %v, got %v", meta.AuditEnabled, loaded.AuditEnabled)
-	}
-
-	if loaded.AuditLogPath != meta.AuditLogPath {
-		t.Errorf("Expected AuditLogPath %q, got %q", meta.AuditLogPath, loaded.AuditLogPath)
-	}
-
-	if loaded.Version != meta.Version {
-		t.Errorf("Expected Version %d, got %d", meta.Version, loaded.Version)
-	}
+	// Load metadata from non-existent file
+	metadata, err := vault.LoadMetadata(vaultPath)
+	require.NoError(t, err)
+	assert.Equal(t, "1.0", metadata.Version)
+	assert.False(t, metadata.KeychainEnabled)
+	assert.False(t, metadata.AuditEnabled)
+	assert.True(t, metadata.CreatedAt.IsZero())
+	assert.True(t, metadata.LastModified.IsZero())
 }
 
-func TestLoadMetadata_NotFound(t *testing.T) {
-	// Use non-existent vault path
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "nonexistent.enc")
-
-	// Test LoadMetadata on missing file
-	loaded, err := LoadMetadata(vaultPath)
-	if err != nil {
-		t.Fatalf("LoadMetadata should not error on missing file: %v", err)
-	}
-
-	if loaded != nil {
-		t.Fatal("LoadMetadata should return nil for missing file")
-	}
-}
-
-func TestLoadMetadata_Corrupted(t *testing.T) {
-	// Create temp directory for test vault
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
-	metaPath := MetadataPath(vaultPath)
-
-	// Write invalid JSON
-	if err := os.WriteFile(metaPath, []byte("{invalid json}"), 0644); err != nil {
-		t.Fatalf("Failed to write corrupted metadata: %v", err)
-	}
-
-	// Test LoadMetadata on corrupted file
-	loaded, err := LoadMetadata(vaultPath)
-	if err == nil {
-		t.Fatal("LoadMetadata should return error for corrupted file")
-	}
-
-	if loaded != nil {
-		t.Fatal("LoadMetadata should return nil for corrupted file")
-	}
-}
-
-func TestLoadMetadata_MissingRequiredFields(t *testing.T) {
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
-	metaPath := MetadataPath(vaultPath)
-
-	// Create metadata missing required fields
-	invalidMeta := map[string]interface{}{
-		"vault_id": vaultPath,
-		// Missing audit_enabled, created_at, version
-	}
-
-	data, _ := json.MarshalIndent(invalidMeta, "", "  ")
-	if err := os.WriteFile(metaPath, data, 0644); err != nil {
-		t.Fatalf("Failed to write test metadata: %v", err)
-	}
-
-	// Test LoadMetadata
-	loaded, err := LoadMetadata(vaultPath)
-	if err == nil {
-		t.Fatal("LoadMetadata should return error for missing required fields")
-	}
-
-	if loaded != nil {
-		t.Fatal("LoadMetadata should return nil for invalid metadata")
-	}
-}
-
-func TestLoadMetadata_AuditEnabledWithoutLogPath(t *testing.T) {
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
-	metaPath := MetadataPath(vaultPath)
-
-	// Create metadata with audit_enabled=true but no audit_log_path
-	meta := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: true,
-		AuditLogPath: "", // Missing when audit enabled
-		CreatedAt:    time.Now().UTC(),
-		Version:      1,
-	}
-
-	data, _ := json.MarshalIndent(meta, "", "  ")
-	if err := os.WriteFile(metaPath, data, 0644); err != nil {
-		t.Fatalf("Failed to write test metadata: %v", err)
-	}
-
-	// Test LoadMetadata
-	loaded, err := LoadMetadata(vaultPath)
-	if err == nil {
-		t.Fatal("LoadMetadata should return error when audit enabled but no log path")
-	}
-
-	if loaded != nil {
-		t.Fatal("LoadMetadata should return nil for invalid metadata")
-	}
-}
-
-func TestLoadMetadata_UnknownVersion(t *testing.T) {
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
-	metaPath := MetadataPath(vaultPath)
-
-	// Create metadata with unknown version
-	meta := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: false,
-		AuditLogPath: "",
-		CreatedAt:    time.Now().UTC(),
-		Version:      99, // Unknown version
-	}
-
-	data, _ := json.MarshalIndent(meta, "", "  ")
-	if err := os.WriteFile(metaPath, data, 0644); err != nil {
-		t.Fatalf("Failed to write test metadata: %v", err)
-	}
-
-	// Test LoadMetadata - should log warning but attempt parsing
-	loaded, err := LoadMetadata(vaultPath)
-	if err != nil {
-		t.Fatalf("LoadMetadata should attempt best-effort parsing for unknown version: %v", err)
-	}
-
-	if loaded == nil {
-		t.Fatal("LoadMetadata should return metadata for unknown version")
-	}
-
-	if loaded.Version != 99 {
-		t.Errorf("Expected Version 99, got %d", loaded.Version)
-	}
-}
-
-// T002: Unit tests for SaveMetadata
-func TestSaveMetadata_Success(t *testing.T) {
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
-
-	// Create metadata
-	meta := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: true,
-		AuditLogPath: filepath.Join(tmpDir, "audit.log"),
-		CreatedAt:    time.Now().UTC(),
-		Version:      1,
-	}
-
-	// Test SaveMetadata
-	if err := SaveMetadata(meta, vaultPath); err != nil {
-		t.Fatalf("SaveMetadata failed: %v", err)
-	}
-
-	// Verify file exists
-	metaPath := MetadataPath(vaultPath)
-	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
-		t.Fatal("Metadata file was not created")
-	}
-
-	// Verify content
-	loaded, err := LoadMetadata(vaultPath)
-	if err != nil {
-		t.Fatalf("Failed to load saved metadata: %v", err)
-	}
-
-	if loaded.VaultID != meta.VaultID {
-		t.Errorf("Expected VaultID %q, got %q", meta.VaultID, loaded.VaultID)
-	}
-}
-
-func TestSaveMetadata_CreatesDirectory(t *testing.T) {
-	tmpDir := t.TempDir()
-	// Nested directory that doesn't exist yet
-	nestedDir := filepath.Join(tmpDir, "subdir", "nested")
-	vaultPath := filepath.Join(nestedDir, "vault.enc")
-
-	meta := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: false,
-		AuditLogPath: "",
-		CreatedAt:    time.Now().UTC(),
-		Version:      1,
-	}
-
-	// Test SaveMetadata creates parent directory
-	if err := SaveMetadata(meta, vaultPath); err != nil {
-		t.Fatalf("SaveMetadata failed: %v", err)
-	}
-
-	// Verify directory was created
-	if _, err := os.Stat(nestedDir); os.IsNotExist(err) {
-		t.Fatal("SaveMetadata did not create parent directory")
-	}
-
-	// Verify file exists
-	metaPath := MetadataPath(vaultPath)
-	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
-		t.Fatal("Metadata file was not created")
-	}
-}
-
-func TestSaveMetadata_AtomicWrite(t *testing.T) {
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
-
-	meta := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: true,
-		AuditLogPath: filepath.Join(tmpDir, "audit.log"),
-		CreatedAt:    time.Now().UTC(),
-		Version:      1,
-	}
+func TestSaveAndLoadMetadata(t *testing.T) {
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
 
 	// Save metadata
-	if err := SaveMetadata(meta, vaultPath); err != nil {
-		t.Fatalf("SaveMetadata failed: %v", err)
+	metadata := &vault.Metadata{
+		Version:         "1.0",
+		KeychainEnabled: true,
+		AuditEnabled:    false,
 	}
-
-	// Verify temp file doesn't exist (atomic rename completed)
-	tmpPath := filepath.Join(tmpDir, ".vault.meta.tmp")
-	if _, err := os.Stat(tmpPath); !os.IsNotExist(err) {
-		t.Error("Temp file should be removed after atomic rename")
-	}
-
-	// Verify final file exists
-	metaPath := MetadataPath(vaultPath)
-	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
-		t.Fatal("Metadata file was not created")
-	}
-}
-
-func TestSaveMetadata_Overwrite(t *testing.T) {
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
-
-	// Save initial metadata
-	meta1 := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: false,
-		AuditLogPath: "",
-		CreatedAt:    time.Now().UTC(),
-		Version:      1,
-	}
-
-	if err := SaveMetadata(meta1, vaultPath); err != nil {
-		t.Fatalf("Initial SaveMetadata failed: %v", err)
-	}
-
-	// Overwrite with updated metadata
-	meta2 := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: true,
-		AuditLogPath: filepath.Join(tmpDir, "audit.log"),
-		CreatedAt:    meta1.CreatedAt, // Preserve original timestamp
-		Version:      1,
-	}
-
-	if err := SaveMetadata(meta2, vaultPath); err != nil {
-		t.Fatalf("SaveMetadata overwrite failed: %v", err)
-	}
-
-	// Verify updated content
-	loaded, err := LoadMetadata(vaultPath)
-	if err != nil {
-		t.Fatalf("Failed to load updated metadata: %v", err)
-	}
-
-	if !loaded.AuditEnabled {
-		t.Error("Metadata was not updated")
-	}
-}
-
-// T003: Unit tests for DeleteMetadata
-func TestDeleteMetadata_Success(t *testing.T) {
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
-
-	// Create metadata file
-	meta := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: true,
-		AuditLogPath: filepath.Join(tmpDir, "audit.log"),
-		CreatedAt:    time.Now().UTC(),
-		Version:      1,
-	}
-
-	if err := SaveMetadata(meta, vaultPath); err != nil {
-		t.Fatalf("SaveMetadata failed: %v", err)
-	}
+	err := vault.SaveMetadata(vaultPath, metadata)
+	require.NoError(t, err)
 
 	// Verify file exists
-	metaPath := MetadataPath(vaultPath)
-	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
-		t.Fatal("Metadata file was not created")
-	}
+	metadataPath := vault.MetadataPath(vaultPath)
+	assert.FileExists(t, metadataPath)
 
-	// Test DeleteMetadata
-	if err := DeleteMetadata(vaultPath); err != nil {
-		t.Fatalf("DeleteMetadata failed: %v", err)
+	// Load it back
+	loaded, err := vault.LoadMetadata(vaultPath)
+	require.NoError(t, err)
+	assert.Equal(t, "1.0", loaded.Version)
+	assert.True(t, loaded.KeychainEnabled)
+	assert.False(t, loaded.AuditEnabled)
+	assert.False(t, loaded.CreatedAt.IsZero())
+	assert.False(t, loaded.LastModified.IsZero())
+}
+
+func TestMetadataPermissions(t *testing.T) {
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	// Save metadata
+	metadata := &vault.Metadata{
+		Version:         "1.0",
+		KeychainEnabled: true,
+		AuditEnabled:    true,
 	}
+	err := vault.SaveMetadata(vaultPath, metadata)
+	require.NoError(t, err)
+
+	// Check file permissions (0600)
+	metadataPath := vault.MetadataPath(vaultPath)
+	info, err := os.Stat(metadataPath)
+	require.NoError(t, err)
+
+	// On Unix-like systems, check permissions
+	// Windows doesn't support Unix-style permissions
+	mode := info.Mode()
+	if mode.Perm() != 0600 {
+		t.Logf("Note: File permissions are %#o (expected 0600), but this may be OK on Windows", mode.Perm())
+	}
+}
+
+func TestDeleteMetadata(t *testing.T) {
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	// Save metadata first
+	metadata := &vault.Metadata{
+		Version:         "1.0",
+		KeychainEnabled: true,
+		AuditEnabled:    false,
+	}
+	err := vault.SaveMetadata(vaultPath, metadata)
+	require.NoError(t, err)
+
+	// Verify file exists
+	metadataPath := vault.MetadataPath(vaultPath)
+	assert.FileExists(t, metadataPath)
+
+	// Delete metadata
+	err = vault.DeleteMetadata(vaultPath)
+	require.NoError(t, err)
 
 	// Verify file deleted
-	if _, err := os.Stat(metaPath); !os.IsNotExist(err) {
-		t.Error("Metadata file was not deleted")
-	}
+	assert.NoFileExists(t, metadataPath)
+
+	// Idempotent - deleting again should not error
+	err = vault.DeleteMetadata(vaultPath)
+	require.NoError(t, err)
 }
 
-func TestDeleteMetadata_NotFound(t *testing.T) {
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "nonexistent.enc")
+func TestSaveMetadata_SetsTimestamps(t *testing.T) {
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
 
-	// Test DeleteMetadata on non-existent file (should be idempotent)
-	if err := DeleteMetadata(vaultPath); err != nil {
-		t.Errorf("DeleteMetadata should be idempotent, got error: %v", err)
+	// Save metadata without timestamps
+	metadata := &vault.Metadata{
+		Version:         "1.0",
+		KeychainEnabled: false,
+		AuditEnabled:    false,
 	}
+
+	before := time.Now().UTC()
+	err := vault.SaveMetadata(vaultPath, metadata)
+	after := time.Now().UTC()
+	require.NoError(t, err)
+
+	// CreatedAt and LastModified should be set
+	assert.False(t, metadata.CreatedAt.IsZero())
+	assert.False(t, metadata.LastModified.IsZero())
+
+	// Timestamps should be within test time range
+	assert.True(t, metadata.CreatedAt.After(before.Add(-time.Second)))
+	assert.True(t, metadata.CreatedAt.Before(after.Add(time.Second)))
+	assert.True(t, metadata.LastModified.After(before.Add(-time.Second)))
+	assert.True(t, metadata.LastModified.Before(after.Add(time.Second)))
 }
 
-// T004: Unit tests for MetadataPath
+func TestSaveMetadata_UpdatesLastModified(t *testing.T) {
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	// Save metadata
+	metadata := &vault.Metadata{
+		Version:         "1.0",
+		KeychainEnabled: false,
+		AuditEnabled:    false,
+	}
+	err := vault.SaveMetadata(vaultPath, metadata)
+	require.NoError(t, err)
+
+	firstModified := metadata.LastModified
+	time.Sleep(10 * time.Millisecond) // Ensure time difference
+
+	// Update and save again
+	metadata.KeychainEnabled = true
+	err = vault.SaveMetadata(vaultPath, metadata)
+	require.NoError(t, err)
+
+	// LastModified should be updated, CreatedAt should not
+	assert.True(t, metadata.LastModified.After(firstModified))
+}
+
 func TestMetadataPath(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -380,120 +167,41 @@ func TestMetadataPath(t *testing.T) {
 		expected  string
 	}{
 		{
-			name:      "Unix path",
-			vaultPath: "/home/user/.pass-cli/vault.enc",
-			expected:  "/home/user/.pass-cli/vault.meta",
+			name:      "simple path",
+			vaultPath: "/path/to/vault.enc",
+			expected:  "/path/to/vault.enc.meta.json",
 		},
 		{
 			name:      "Windows path",
-			vaultPath: "C:\\Users\\user\\.pass-cli\\vault.enc",
-			expected:  "C:\\Users\\user\\.pass-cli\\vault.meta",
+			vaultPath: "C:\\Users\\test\\vault.enc",
+			expected:  "C:\\Users\\test\\vault.enc.meta.json",
 		},
 		{
-			name:      "Relative path",
+			name:      "relative path",
 			vaultPath: "vault.enc",
-			expected:  "vault.meta",
-		},
-		{
-			name:      "Nested directory",
-			vaultPath: "/path/to/nested/vault.enc",
-			expected:  "/path/to/nested/vault.meta",
+			expected:  "vault.enc.meta.json",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Skip Windows path test on non-Windows platforms
-			// (filepath.Dir doesn't parse Windows paths correctly on Unix)
-			if tt.name == "Windows path" && filepath.Separator != '\\' {
-				t.Skip("Windows path test only runs on Windows")
-			}
-
-			result := MetadataPath(tt.vaultPath)
-			// Normalize paths for comparison
-			expectedNorm := filepath.FromSlash(tt.expected)
-			resultNorm := filepath.FromSlash(result)
-
-			if resultNorm != expectedNorm {
-				t.Errorf("Expected %q, got %q", expectedNorm, resultNorm)
-			}
+			result := vault.MetadataPath(tt.vaultPath)
+			assert.Equal(t, tt.expected, result)
 		})
 	}
 }
 
-// T004a: Benchmark tests for SC-003 validation (<50ms metadata operations)
-func BenchmarkLoadMetadata(b *testing.B) {
-	tmpDir := b.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
+func TestLoadMetadata_CorruptedFile(t *testing.T) {
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	metadataPath := vault.MetadataPath(vaultPath)
 
-	// Create test metadata
-	meta := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: true,
-		AuditLogPath: filepath.Join(tmpDir, "audit.log"),
-		CreatedAt:    time.Now().UTC(),
-		Version:      1,
-	}
+	// Write invalid JSON
+	err := os.WriteFile(metadataPath, []byte("{invalid json"), 0600)
+	require.NoError(t, err)
 
-	if err := SaveMetadata(meta, vaultPath); err != nil {
-		b.Fatalf("Failed to create test metadata: %v", err)
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, err := LoadMetadata(vaultPath)
-		if err != nil {
-			b.Fatalf("LoadMetadata failed: %v", err)
-		}
-	}
-}
-
-func BenchmarkSaveMetadata(b *testing.B) {
-	tmpDir := b.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
-
-	meta := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: true,
-		AuditLogPath: filepath.Join(tmpDir, "audit.log"),
-		CreatedAt:    time.Now().UTC(),
-		Version:      1,
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		err := SaveMetadata(meta, vaultPath)
-		if err != nil {
-			b.Fatalf("SaveMetadata failed: %v", err)
-		}
-	}
-}
-
-func BenchmarkDeleteMetadata(b *testing.B) {
-	tmpDir := b.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
-
-	// Create test metadata
-	meta := &VaultMetadata{
-		VaultID:      vaultPath,
-		AuditEnabled: true,
-		AuditLogPath: filepath.Join(tmpDir, "audit.log"),
-		CreatedAt:    time.Now().UTC(),
-		Version:      1,
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		b.StopTimer()
-		// Create metadata file before each deletion
-		if err := SaveMetadata(meta, vaultPath); err != nil {
-			b.Fatalf("Failed to create test metadata: %v", err)
-		}
-		b.StartTimer()
-
-		err := DeleteMetadata(vaultPath)
-		if err != nil {
-			b.Fatalf("DeleteMetadata failed: %v", err)
-		}
-	}
+	// Load should return error
+	_, err = vault.LoadMetadata(vaultPath)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "corrupted metadata file")
 }

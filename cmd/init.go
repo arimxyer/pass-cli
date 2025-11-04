@@ -114,6 +114,18 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to initialize vault at %s: %w", vaultPath, err)
 	}
 
+	// T009a: Save metadata when --use-keychain flag provided (FR-023)
+	if useKeychain || enableAudit {
+		metadata := &vault.Metadata{
+			Version:         "1.0",
+			KeychainEnabled: useKeychain,
+			AuditEnabled:    enableAudit,
+		}
+		if err := vaultService.SaveMetadata(metadata); err != nil {
+			return fmt.Errorf("failed to save vault metadata: %w", err)
+		}
+	}
+
 	// Display audit logging status
 	if enableAudit && auditLogPath != "" {
 		fmt.Printf("📊 Audit logging enabled: %s\n", auditLogPath)

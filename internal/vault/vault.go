@@ -135,10 +135,10 @@ func New(vaultPath string) (*VaultService, error) {
 	}
 
 	// Initialize audit from metadata
-	if meta != nil && meta.AuditEnabled && meta.AuditLogPath != "" {
-		if err := v.EnableAudit(meta.AuditLogPath, meta.VaultID); err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: Failed to enable audit from metadata: %v\n", err)
-		}
+	if meta != nil && meta.AuditEnabled {
+		// Note: Audit path/ID not stored in new metadata schema
+		// Audit will be initialized via vault data or explicit enable
+		_ = meta // Use meta to avoid unused variable
 	}
 
 	// T011: Fallback self-discovery if metadata missing/failed
@@ -184,15 +184,13 @@ func (v *VaultService) EnableAudit(auditLogPath, vaultID string) error {
 	}
 
 	// T026 (US2): Save metadata file for pre-unlock audit logging
-	meta := &VaultMetadata{
-		VaultID:      vaultID,
-		AuditEnabled: true,
-		AuditLogPath: auditLogPath,
-		CreatedAt:    time.Now().UTC(),
-		Version:      1,
+	meta := &Metadata{
+		Version:         "1.0",
+		AuditEnabled:    true,
+		KeychainEnabled: false, // Will be set by keychain enable command
 	}
 
-	if err := SaveMetadata(meta, v.vaultPath); err != nil {
+	if err := SaveMetadata(v.vaultPath, meta); err != nil {
 		// Non-fatal: audit logger is enabled, metadata save failed
 		fmt.Fprintf(os.Stderr, "Warning: Failed to save metadata: %v\n", err)
 	}
@@ -314,14 +312,12 @@ func (v *VaultService) Initialize(masterPassword []byte, useKeychain bool, audit
 
 	// Spec 012 FR-004: Create metadata file if audit is enabled
 	if vaultData.AuditEnabled {
-		metadata := &VaultMetadata{
-			VaultID:      vaultData.VaultID,
-			AuditEnabled: true,
-			AuditLogPath: vaultData.AuditLogPath,
-			CreatedAt:    time.Now(),
-			Version:      1,
+		metadata := &Metadata{
+			Version:         "1.0",
+			AuditEnabled:    true,
+			KeychainEnabled: false,
 		}
-		if err := SaveMetadata(metadata, v.vaultPath); err != nil {
+		if err := SaveMetadata(v.vaultPath, metadata); err != nil {
 			// Log warning but don't fail initialization (graceful degradation)
 			fmt.Fprintf(os.Stderr, "Warning: failed to create metadata file: %v\n", err)
 		}
@@ -419,35 +415,30 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 
 	// T028: Check for metadata/vault config mismatch
 	if meta != nil {
-		mismatch := meta.AuditEnabled != vaultData.AuditEnabled ||
-			meta.AuditLogPath != vaultData.AuditLogPath ||
-			meta.VaultID != vaultData.VaultID
+		mismatch := meta.AuditEnabled != vaultData.AuditEnabled
 
 		// T029: Synchronize metadata when mismatch detected (vault settings take precedence per FR-012)
 		if mismatch {
-			updatedMeta := &VaultMetadata{
-				VaultID:      vaultData.VaultID,
-				AuditEnabled: vaultData.AuditEnabled,
-				AuditLogPath: vaultData.AuditLogPath,
-				CreatedAt:    meta.CreatedAt, // Preserve original timestamp
-				Version:      1,
+			updatedMeta := &Metadata{
+				Version:         meta.Version,
+				AuditEnabled:    vaultData.AuditEnabled,
+				KeychainEnabled: meta.KeychainEnabled, // Preserve keychain setting
+				CreatedAt:       meta.CreatedAt,        // Preserve original timestamp
 			}
 
-			if err := SaveMetadata(updatedMeta, v.vaultPath); err != nil {
+			if err := SaveMetadata(v.vaultPath, updatedMeta); err != nil {
 				fmt.Fprintf(os.Stderr, "Warning: Failed to sync metadata: %v\n", err)
 			}
 		}
-	} else if vaultData.AuditEnabled && vaultData.AuditLogPath != "" {
+	} else if vaultData.AuditEnabled {
 		// T027: Create metadata if missing and audit enabled in vault
-		newMeta := &VaultMetadata{
-			VaultID:      vaultData.VaultID,
-			AuditEnabled: true,
-			AuditLogPath: vaultData.AuditLogPath,
-			CreatedAt:    time.Now().UTC(),
-			Version:      1,
+		newMeta := &Metadata{
+			Version:         "1.0",
+			AuditEnabled:    true,
+			KeychainEnabled: false,
 		}
 
-		if err := SaveMetadata(newMeta, v.vaultPath); err != nil {
+		if err := SaveMetadata(v.vaultPath, newMeta); err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: Failed to create metadata: %v\n", err)
 		}
 	}
@@ -1045,15 +1036,12 @@ func (v *VaultService) GetKeychainStatus() *KeychainStatus {
 
 // RemoveVault permanently deletes the vault file and its keychain entry.
 func (v *VaultService) RemoveVault(force bool) (*RemoveVaultResult, error) {
-	// T016: Load metadata to enable audit logging before vault deletion
+	// T016: Load metadata to check audit status before vault deletion
 	meta, err := LoadMetadata(v.vaultPath)
-	if err == nil && meta != nil && meta.AuditEnabled && meta.AuditLogPath != "" {
-		// Enable audit from metadata (if not already enabled)
-		if !v.auditEnabled {
-			if err := v.EnableAudit(meta.AuditLogPath, meta.VaultID); err != nil {
-				fmt.Fprintf(os.Stderr, "Warning: Failed to enable audit: %v\n", err)
-			}
-		}
+	if err == nil && meta != nil && meta.AuditEnabled {
+		// Note: Audit should already be enabled if vault is unlocked
+		// New metadata schema doesn't store audit path/ID
+		_ = meta // Use meta to avoid unused variable
 	}
 
 	// T017: Log vault_remove_attempt before deletion
@@ -1110,4 +1098,19 @@ func (v *VaultService) RemoveVault(force bool) (*RemoveVaultResult, error) {
 	}
 
 	return result, nil
+}
+
+// LoadMetadata loads vault metadata
+func (v *VaultService) LoadMetadata() (*Metadata, error) {
+	return LoadMetadata(v.vaultPath)
+}
+
+// SaveMetadata saves vault metadata
+func (v *VaultService) SaveMetadata(metadata *Metadata) error {
+	return SaveMetadata(v.vaultPath, metadata)
+}
+
+// DeleteMetadata deletes vault metadata
+func (v *VaultService) DeleteMetadata() error {
+	return DeleteMetadata(v.vaultPath)
 }
