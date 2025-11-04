@@ -155,7 +155,7 @@ As a developer/maintainer, when I run the full test suite, all tests should exec
 
 - **SC-001**: Users can enable keychain on existing vault and immediately use TUI/CLI without password prompts (end-to-end workflow)
 - **SC-002**: All 25 TODO-skipped tests are unskipped and passing after implementation
-- **SC-003**: Vault remove command achieves 100% success rate across 20 consecutive runs (0 failures acceptable for destructive operations)
+- **SC-003**: Vault remove command achieves 100% success rate across 20 consecutive runs in CI test environment on healthy filesystems (0 failures acceptable for destructive operations)
 - **SC-004**: Keychain status accurately reports state (0 false positives/negatives in test scenarios)
 - **SC-005**: CI pipeline blocks merges containing `t.Skip("TODO:` patterns in test files
 - **SC-006**: Integration test suite completes with 100% pass rate (no skips for unimplemented features)
