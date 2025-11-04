@@ -15,12 +15,14 @@ func TestGetVaultPath_CustomPath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Set XDG_CONFIG_HOME to temp directory
 	origXDG := os.Getenv("XDG_CONFIG_HOME")
-	defer os.Setenv("XDG_CONFIG_HOME", origXDG)
-	os.Setenv("XDG_CONFIG_HOME", tmpDir)
+	defer func() { _ = os.Setenv("XDG_CONFIG_HOME", origXDG) }()
+	if err := os.Setenv("XDG_CONFIG_HOME", tmpDir); err != nil {
+		t.Fatalf("Failed to set XDG_CONFIG_HOME: %v", err)
+	}
 
 	tests := []struct {
 		name         string
@@ -43,15 +45,17 @@ func TestGetVaultPath_CustomPath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create config file
 			configDir := filepath.Join(tmpDir, "pass-cli")
-			os.MkdirAll(configDir, 0755)
+			if err := os.MkdirAll(configDir, 0755); err != nil {
+				t.Fatalf("Failed to create config dir: %v", err)
+			}
 			configPath := filepath.Join(configDir, "config.yml")
-			
+
 			if tt.configYAML != "" {
 				if err := os.WriteFile(configPath, []byte(tt.configYAML), 0644); err != nil {
 					t.Fatalf("Failed to write config: %v", err)
 				}
 			} else {
-				os.Remove(configPath) // Ensure no config exists
+				_ = os.Remove(configPath) // Best effort: ensure no config exists
 			}
 
 			result := GetVaultPath()
@@ -68,11 +72,13 @@ func TestGetVaultPath_TildeExpansion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	origXDG := os.Getenv("XDG_CONFIG_HOME")
-	defer os.Setenv("XDG_CONFIG_HOME", origXDG)
-	os.Setenv("XDG_CONFIG_HOME", tmpDir)
+	defer func() { _ = os.Setenv("XDG_CONFIG_HOME", origXDG) }()
+	if err := os.Setenv("XDG_CONFIG_HOME", tmpDir); err != nil {
+		t.Fatalf("Failed to set XDG_CONFIG_HOME: %v", err)
+	}
 
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -99,7 +105,9 @@ func TestGetVaultPath_TildeExpansion(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			configDir := filepath.Join(tmpDir, "pass-cli")
-			os.MkdirAll(configDir, 0755)
+			if err := os.MkdirAll(configDir, 0755); err != nil {
+				t.Fatalf("Failed to create config dir: %v", err)
+			}
 			configPath := filepath.Join(configDir, "config.yml")
 			
 			configYAML := "vault_path: " + tt.configPath + "\n"
@@ -121,11 +129,13 @@ func TestGetVaultPath_EnvVarExpansion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	origXDG := os.Getenv("XDG_CONFIG_HOME")
-	defer os.Setenv("XDG_CONFIG_HOME", origXDG)
-	os.Setenv("XDG_CONFIG_HOME", tmpDir)
+	defer func() { _ = os.Setenv("XDG_CONFIG_HOME", origXDG) }()
+	if err := os.Setenv("XDG_CONFIG_HOME", tmpDir); err != nil {
+		t.Fatalf("Failed to set XDG_CONFIG_HOME: %v", err)
+	}
 
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -140,9 +150,11 @@ func TestGetVaultPath_EnvVarExpansion(t *testing.T) {
 	}
 
 	configDir := filepath.Join(tmpDir, "pass-cli")
-	os.MkdirAll(configDir, 0755)
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		t.Fatalf("Failed to create config dir: %v", err)
+	}
 	configPath := filepath.Join(configDir, "config.yml")
-	
+
 	configYAML := "vault_path: " + envVar + "\n"
 	if err := os.WriteFile(configPath, []byte(configYAML), 0644); err != nil {
 		t.Fatalf("Failed to write config: %v", err)
@@ -162,11 +174,13 @@ func TestGetVaultPath_RelativeToAbsolute(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	origXDG := os.Getenv("XDG_CONFIG_HOME")
-	defer os.Setenv("XDG_CONFIG_HOME", origXDG)
-	os.Setenv("XDG_CONFIG_HOME", tmpDir)
+	defer func() { _ = os.Setenv("XDG_CONFIG_HOME", origXDG) }()
+	if err := os.Setenv("XDG_CONFIG_HOME", tmpDir); err != nil {
+		t.Fatalf("Failed to set XDG_CONFIG_HOME: %v", err)
+	}
 
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -193,7 +207,9 @@ func TestGetVaultPath_RelativeToAbsolute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			configDir := filepath.Join(tmpDir, "pass-cli")
-			os.MkdirAll(configDir, 0755)
+			if err := os.MkdirAll(configDir, 0755); err != nil {
+				t.Fatalf("Failed to create config dir: %v", err)
+			}
 			configPath := filepath.Join(configDir, "config.yml")
 			
 			configYAML := "vault_path: " + tt.configPath + "\n"

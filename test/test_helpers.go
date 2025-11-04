@@ -23,35 +23,18 @@ func setupTestVaultConfig(t *testing.T, vaultPath string) (configPath string, cl
 
 	// Set environment variable to point to test config
 	oldConfig := os.Getenv("PASS_CLI_CONFIG")
-	os.Setenv("PASS_CLI_CONFIG", configPath)
+	if err := os.Setenv("PASS_CLI_CONFIG", configPath); err != nil {
+		t.Fatalf("Failed to set PASS_CLI_CONFIG: %v", err)
+	}
 
 	// Return cleanup function to restore environment
 	cleanup = func() {
 		if oldConfig != "" {
-			os.Setenv("PASS_CLI_CONFIG", oldConfig)
+			_ = os.Setenv("PASS_CLI_CONFIG", oldConfig) // Best effort cleanup
 		} else {
-			os.Unsetenv("PASS_CLI_CONFIG")
+			_ = os.Unsetenv("PASS_CLI_CONFIG") // Best effort cleanup
 		}
 	}
 
 	return configPath, cleanup
-}
-
-// setupTestVault creates a temporary vault file and config pointing to it.
-// Returns the vault path, config path, and cleanup function.
-func setupTestVault(t *testing.T) (vaultPath string, configPath string, cleanup func()) {
-	t.Helper()
-
-	// Create temporary vault file
-	tempDir := t.TempDir()
-	vaultPath = filepath.Join(tempDir, "test-vault.enc")
-
-	// Create config pointing to this vault
-	configPath, configCleanup := setupTestVaultConfig(t, vaultPath)
-
-	cleanup = func() {
-		configCleanup()
-	}
-
-	return vaultPath, configPath, cleanup
 }
