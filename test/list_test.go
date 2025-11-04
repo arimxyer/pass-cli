@@ -72,9 +72,9 @@ func TestListByProject(t *testing.T) {
 
 		// Access github and aws-dev from web-app repo (creates usage records)
 		originalDir, _ := os.Getwd()
-		defer os.Chdir(originalDir)
+		defer func() { _ = os.Chdir(originalDir) }() // Best effort cleanup
 
-		os.Chdir(webAppRepo)
+		_ = os.Chdir(webAppRepo) // Best effort directory change for test
 		input = testPassword + "\n"
 		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "get", "github", "--no-clipboard")
 		if err != nil {
@@ -88,7 +88,7 @@ func TestListByProject(t *testing.T) {
 		}
 
 		// Access heroku from api repo
-		os.Chdir(apiRepo)
+		_ = os.Chdir(apiRepo) // Best effort directory change for test
 		input = testPassword + "\n"
 		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "get", "heroku", "--no-clipboard")
 		if err != nil {
@@ -96,14 +96,14 @@ func TestListByProject(t *testing.T) {
 		}
 
 		// Access local-db from non-git directory (should be "Ungrouped")
-		os.Chdir(noGitDir)
+		_ = os.Chdir(noGitDir) // Best effort directory change for test
 		input = testPassword + "\n"
 		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "get", "local-db", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access local-db from no-git: %v", err)
 		}
 
-		os.Chdir(originalDir)
+		_ = os.Chdir(originalDir) // Best effort directory change for test
 	})
 
 	// T024: Integration test - list --by-project groups credentials by repository (Acceptance Scenario 1)
@@ -201,21 +201,21 @@ func TestListByProject(t *testing.T) {
 	t.Run("T027_ByProject_Same_Repo_Different_Paths", func(t *testing.T) {
 		// Access github from a subdirectory of my-web-app
 		originalDir, _ := os.Getwd()
-		defer os.Chdir(originalDir)
+		defer func() { _ = os.Chdir(originalDir) }() // Best effort cleanup
 
 		subDir := filepath.Join(testDir, "my-web-app", "src", "components")
 		if err := os.MkdirAll(subDir, 0755); err != nil {
 			t.Fatalf("Failed to create subdirectory: %v", err)
 		}
 
-		os.Chdir(subDir)
+		_ = os.Chdir(subDir) // Best effort directory change for test
 		input := testPassword + "\n"
 		_, _, err := runCommandWithInputAndVault(t, listVaultPath, input, "get", "github", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access github from subdirectory: %v", err)
 		}
 
-		os.Chdir(originalDir)
+		_ = os.Chdir(originalDir) // Best effort directory change for test
 
 		// Now list --by-project should still group under single "my-web-app"
 		input = testPassword + "\n"
@@ -226,7 +226,9 @@ func TestListByProject(t *testing.T) {
 		}
 
 		var result map[string]interface{}
-		json.Unmarshal([]byte(stdout), &result)
+		if err := json.Unmarshal([]byte(stdout), &result); err != nil {
+			t.Fatalf("Failed to unmarshal JSON output: %v", err)
+		}
 		projects := result["projects"].(map[string]interface{})
 
 		// github should still appear only once under my-web-app (not duplicated)
@@ -323,9 +325,9 @@ func TestListByLocation(t *testing.T) {
 
 		// Access web-cred from web-project directory
 		originalDir, _ := os.Getwd()
-		defer os.Chdir(originalDir)
+		defer func() { _ = os.Chdir(originalDir) }() // Best effort cleanup
 
-		os.Chdir(webDir)
+		_ = os.Chdir(webDir) // Best effort directory change for test
 		input = testPassword + "\n"
 		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "get", "web-cred", "--no-clipboard")
 		if err != nil {
@@ -333,7 +335,7 @@ func TestListByLocation(t *testing.T) {
 		}
 
 		// Access api-cred from api-project root
-		os.Chdir(apiDir)
+		_ = os.Chdir(apiDir) // Best effort directory change for test
 		input = testPassword + "\n"
 		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "get", "api-cred", "--no-clipboard")
 		if err != nil {
@@ -341,14 +343,14 @@ func TestListByLocation(t *testing.T) {
 		}
 
 		// Access db-cred from api-project subdirectory
-		os.Chdir(apiSubDir)
+		_ = os.Chdir(apiSubDir) // Best effort directory change for test
 		input = testPassword + "\n"
 		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "get", "db-cred", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access db-cred from api-project/src/handlers: %v", err)
 		}
 
-		os.Chdir(originalDir)
+		_ = os.Chdir(originalDir) // Best effort directory change for test
 	})
 
 	// T037: Integration test - list --location shows only credentials from exact path (Acceptance Scenario 1)
@@ -380,9 +382,9 @@ func TestListByLocation(t *testing.T) {
 	t.Run("T038_Location_Relative_Path", func(t *testing.T) {
 		// Change to testDir and use relative path
 		originalDir, _ := os.Getwd()
-		defer os.Chdir(originalDir)
+		defer func() { _ = os.Chdir(originalDir) }() // Best effort cleanup
 
-		os.Chdir(testDir)
+		_ = os.Chdir(testDir) // Best effort directory change for test
 
 		input := testPassword + "\n"
 		stdout, stderr, err := runCommandWithInputAndVault(t, locationVaultPath, input, "list", "--location", "./web-project")

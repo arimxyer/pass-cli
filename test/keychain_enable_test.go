@@ -27,7 +27,7 @@ func TestIntegration_KeychainEnable(t *testing.T) {
 
 	// Ensure clean state
 	defer cleanupKeychain(t, ks)
-	defer os.RemoveAll(filepath.Dir(vaultPath))
+	defer func() { _ = os.RemoveAll(filepath.Dir(vaultPath)) }() // Best effort cleanup
 
 	// Step 1: Initialize vault WITHOUT --use-keychain
 	t.Run("1_Init_Without_Keychain", func(t *testing.T) {

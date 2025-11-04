@@ -32,7 +32,7 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		os.RemoveAll(vaultDir)
+		_ = os.RemoveAll(vaultDir) // Best effort cleanup
 	})
 
 	t.Run("No_Args_Attempts_TUI_Launch", func(t *testing.T) {
@@ -126,7 +126,7 @@ func TestIntegration_TUIVaultPath(t *testing.T) {
 		}
 
 		t.Cleanup(func() {
-			os.RemoveAll(customVaultDir)
+			_ = os.RemoveAll(customVaultDir) // Best effort cleanup
 		})
 
 		// Verify vault was created at custom path
@@ -175,7 +175,7 @@ func TestIntegration_TUIWithExistingVault(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		os.RemoveAll(vaultDir)
+		_ = os.RemoveAll(vaultDir) // Best effort cleanup
 	})
 
 	// Add some test credentials with all 6 fields
@@ -257,7 +257,7 @@ func TestIntegration_TUIKeychainDetection(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		os.RemoveAll(vaultDir)
+		_ = os.RemoveAll(vaultDir) // Best effort cleanup
 	})
 
 	// Just verify the vault was created - actual keychain testing requires OS support
@@ -359,7 +359,7 @@ func BenchmarkTUIStartup(b *testing.B) {
 		b.Fatalf("Failed to initialize vault: %v", err)
 	}
 
-	defer os.RemoveAll(vaultDir)
+	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
 
 	b.ResetTimer()
 
@@ -378,18 +378,6 @@ func BenchmarkTUIStartup(b *testing.B) {
 		_ = cmd.Process.Kill()
 		_ = cmd.Wait()
 	}
-}
-
-// Helper function to check if TUI is running
-func isTUIRunning(pid int) bool {
-	process, err := os.FindProcess(pid)
-	if err != nil {
-		return false
-	}
-
-	// Try to signal the process
-	err = process.Signal(os.Signal(nil))
-	return err == nil
 }
 
 // TestIntegration_TUIComponentIntegration verifies components work together
@@ -411,7 +399,7 @@ func TestIntegration_TUIComponentIntegration(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		os.RemoveAll(vaultDir)
+		_ = os.RemoveAll(vaultDir) // Best effort cleanup
 	})
 
 	// Add credentials to test list view integration with all 6 fields
@@ -475,7 +463,7 @@ func TestIntegration_TUIFullFieldSupport(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		os.RemoveAll(vaultDir)
+		_ = os.RemoveAll(vaultDir) // Best effort cleanup
 	})
 
 	// Add a credential with all 6 fields populated
@@ -565,7 +553,7 @@ func TestIntegration_TUIEmptyOptionalFields(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		os.RemoveAll(vaultDir)
+		_ = os.RemoveAll(vaultDir) // Best effort cleanup
 	})
 
 	// Add credentials with empty optional fields (category, url, notes)
@@ -637,7 +625,7 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		os.RemoveAll(vaultDir)
+		_ = os.RemoveAll(vaultDir) // Best effort cleanup
 	})
 
 	// Add initial credential with all fields
@@ -842,7 +830,7 @@ func TestIntegration_TUIDeleteCredential(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		os.RemoveAll(vaultDir)
+		_ = os.RemoveAll(vaultDir) // Best effort cleanup
 	})
 
 	// Add multiple credentials with full metadata

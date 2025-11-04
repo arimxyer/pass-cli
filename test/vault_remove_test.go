@@ -29,7 +29,7 @@ func TestIntegration_VaultRemove(t *testing.T) {
 
 	// Ensure clean state
 	defer cleanupKeychain(t, ks)
-	defer os.RemoveAll(filepath.Dir(vaultPath))
+	defer func() { _ = os.RemoveAll(filepath.Dir(vaultPath)) }() // Best effort cleanup
 
 	// Step 1: Initialize vault WITH keychain
 	t.Run("1_Init_With_Keychain", func(t *testing.T) {
@@ -111,7 +111,7 @@ func TestIntegration_VaultRemove(t *testing.T) {
 		cmd := exec.Command(binaryPath, "init", "--use-keychain")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)
-		cmd.Run()
+		_ = cmd.Run() // Best effort setup
 
 		// Remove with --yes flag (no prompt)
 		cmd = exec.Command(binaryPath, "vault", "remove", "--yes")
@@ -154,10 +154,10 @@ func TestIntegration_VaultRemove(t *testing.T) {
 		cmd := exec.Command(binaryPath, "init", "--use-keychain")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)
-		cmd.Run()
+		_ = cmd.Run() // Best effort setup
 
 		// Manually delete vault file (simulate orphaned keychain)
-		os.Remove(vaultPath)
+		_ = os.Remove(vaultPath) // Best effort cleanup to simulate orphaned keychain
 
 		// Remove should still clean up keychain
 		cmd = exec.Command(binaryPath, "vault", "remove", "--yes")
@@ -200,7 +200,7 @@ func TestIntegration_VaultRemove(t *testing.T) {
 			cmd := exec.Command(binaryPath, "init", "--use-keychain")
 			cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 			cmd.Stdin = strings.NewReader(input)
-			cmd.Run()
+			_ = cmd.Run() // Best effort setup
 
 			// Remove vault
 			cmd = exec.Command(binaryPath, "vault", "remove", "--yes")
@@ -223,10 +223,10 @@ func TestIntegration_VaultRemove(t *testing.T) {
 			}
 
 			// Cleanup for next run
-			os.Remove(vaultPath)
+			_ = os.Remove(vaultPath) // Best effort cleanup
 			metaPath := vaultPath + ".meta.json"
-			os.Remove(metaPath)
-			ks.Delete()
+			_ = os.Remove(metaPath) // Best effort cleanup
+			_ = ks.Delete() // Best effort cleanup
 		}
 
 		successRate := float64(successCount) / float64(totalRuns) * 100
@@ -253,7 +253,7 @@ func TestIntegration_VaultRemoveWithMetadata(t *testing.T) {
 
 	// Ensure clean state
 	defer cleanupKeychain(t, ks)
-	defer os.RemoveAll(vaultDir)
+	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
 
 	// Create vault with audit enabled
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {

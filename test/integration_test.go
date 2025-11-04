@@ -62,8 +62,8 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	// Cleanup
-	os.Remove(binaryPath)
-	os.RemoveAll(testDir)
+	_ = os.Remove(binaryPath)       // Best effort cleanup
+	_ = os.RemoveAll(testDir)       // Best effort cleanup
 
 	os.Exit(code)
 }
@@ -205,7 +205,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 
 		// Verify the update
 		input = testPassword + "\n"
-		stdout, stderr, err = runCommandWithInput(t, input, "get", "github.com", "--no-clipboard")
+		stdout, _, err = runCommandWithInput(t, input, "get", "github.com", "--no-clipboard")
 
 		if err != nil {
 			t.Fatalf("Get after update failed: %v", err)
@@ -226,7 +226,10 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 
 		// Verify deletion
 		input = testPassword + "\n"
-		stdout, stderr, err = runCommandWithInput(t, input, "list")
+		stdout, _, err = runCommandWithInput(t, input, "list")
+		if err != nil {
+			t.Fatalf("List after delete failed: %v", err)
+		}
 
 		if strings.Contains(stdout, "gitlab.com") {
 			t.Error("Deleted credential still appears in list")
@@ -288,7 +291,7 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
-	cmd.Run()
+	_ = cmd.Run() // Best effort setup
 
 	t.Run("Wrong_Password", func(t *testing.T) {
 		wrongPassword := "wrong-password\n"
@@ -354,14 +357,14 @@ func TestIntegration_ScriptFriendly(t *testing.T) {
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
-	cmd.Run()
+	_ = cmd.Run() // Best effort setup
 
 	// Add a credential
 	input = testPassword + "\n" + "apiuser\n" + "apipass123\n"
 	cmd = exec.Command(binaryPath, "add", "api.test.com")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
-	cmd.Run()
+	_ = cmd.Run() // Best effort setup
 
 	t.Run("Quiet_Output", func(t *testing.T) {
 		input := testPassword + "\n"
@@ -438,14 +441,14 @@ func TestIntegration_Performance(t *testing.T) {
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
-	cmd.Run()
+	_ = cmd.Run() // Best effort setup
 
 	// Add initial credential
 	input = testPassword + "\n" + "user\n" + "pass\n"
 	cmd = exec.Command(binaryPath, "add", "test.com")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
-	cmd.Run()
+	_ = cmd.Run() // Best effort setup
 
 	t.Run("Unlock_Performance", func(t *testing.T) {
 		// First unlock (no cache) - should be < 500ms
@@ -455,7 +458,7 @@ func TestIntegration_Performance(t *testing.T) {
 		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(input)
 		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
-		cmd.Run()
+		_ = cmd.Run() // Best effort for performance test
 
 		duration := time.Since(start)
 
@@ -475,7 +478,7 @@ func TestIntegration_Performance(t *testing.T) {
 		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(input)
 		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
-		cmd.Run()
+		_ = cmd.Run() // Best effort for performance test
 		duration := time.Since(start)
 
 		// Log for observation (may not have caching yet)
@@ -500,7 +503,7 @@ func TestIntegration_StressTest(t *testing.T) {
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
-	cmd.Run()
+	_ = cmd.Run() // Best effort setup
 
 	numCredentials := 10 // Reduced for faster test execution (was 100)
 
@@ -597,7 +600,7 @@ func TestDefaultVaultPath_Init(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp home: %v", err)
 	}
-	defer os.RemoveAll(tmpHome)
+	defer func() { _ = os.RemoveAll(tmpHome) }() // Best effort cleanup
 
 	// Set up environment
 	cmd := exec.Command(binaryPath, "init")
@@ -633,7 +636,7 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp home: %v", err)
 	}
-	defer os.RemoveAll(tmpHome)
+	defer func() { _ = os.RemoveAll(tmpHome) }() // Best effort cleanup
 
 	masterPassword := "TestPassword123!"
 
@@ -720,7 +723,7 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp home: %v", err)
 	}
-	defer os.RemoveAll(tmpHome)
+	defer func() { _ = os.RemoveAll(tmpHome) }() // Best effort cleanup
 
 	// Create custom vault directory
 	customVaultDir := filepath.Join(tmpHome, "custom", "secure")
