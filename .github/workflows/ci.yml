@@ -10,7 +10,6 @@ on:
       - '.specify/**'
       - 'CLAUDE.md'
       - 'CONTRIBUTING.md'
-      - 'DEVELOPMENT.md'
       - 'LICENSE'
       - '.gitignore'
   pull_request:
@@ -22,7 +21,6 @@ on:
       - '.specify/**'
       - 'CLAUDE.md'
       - 'CONTRIBUTING.md'
-      - 'DEVELOPMENT.md'
       - 'LICENSE'
       - '.gitignore'
 
