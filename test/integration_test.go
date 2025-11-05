@@ -290,14 +290,14 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 	input := testPassword + "\n" + testPassword + "\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
-	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 	_ = cmd.Run() // Best effort setup
 
 	t.Run("Wrong_Password", func(t *testing.T) {
 		wrongPassword := "wrong-password\n"
 		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(wrongPassword)
-		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
@@ -317,7 +317,7 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 		input := testPassword + "\n"
 		cmd := exec.Command(binaryPath, "get", "nonexistent.com", "--no-clipboard")
 		cmd.Stdin = strings.NewReader(input)
-		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
@@ -332,7 +332,7 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 		input := testPassword + "\n" + testPassword + "\n" + "n\n"
 		cmd := exec.Command(binaryPath, "init")
 		cmd.Stdin = strings.NewReader(input)
-		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
@@ -356,21 +356,21 @@ func TestIntegration_ScriptFriendly(t *testing.T) {
 	input := testPassword + "\n" + testPassword + "\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
-	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 	_ = cmd.Run() // Best effort setup
 
 	// Add a credential
 	input = testPassword + "\n" + "apiuser\n" + "apipass123\n"
 	cmd = exec.Command(binaryPath, "add", "api.test.com")
 	cmd.Stdin = strings.NewReader(input)
-	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 	_ = cmd.Run() // Best effort setup
 
 	t.Run("Quiet_Output", func(t *testing.T) {
 		input := testPassword + "\n"
 		cmd := exec.Command(binaryPath, "get", "api.test.com", "--quiet", "--no-clipboard")
 		cmd.Stdin = strings.NewReader(input)
-		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 
 		var stdout bytes.Buffer
 		cmd.Stdout = &stdout
@@ -399,7 +399,7 @@ func TestIntegration_ScriptFriendly(t *testing.T) {
 		input := testPassword + "\n"
 		cmd := exec.Command(binaryPath, "get", "api.test.com", "--field", "username", "--quiet", "--no-clipboard")
 		cmd.Stdin = strings.NewReader(input)
-		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 
 		var stdout bytes.Buffer
 		cmd.Stdout = &stdout
@@ -440,14 +440,14 @@ func TestIntegration_Performance(t *testing.T) {
 	input := testPassword + "\n" + testPassword + "\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
-	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 	_ = cmd.Run() // Best effort setup
 
 	// Add initial credential
 	input = testPassword + "\n" + "user\n" + "pass\n"
 	cmd = exec.Command(binaryPath, "add", "test.com")
 	cmd.Stdin = strings.NewReader(input)
-	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 	_ = cmd.Run() // Best effort setup
 
 	t.Run("Unlock_Performance", func(t *testing.T) {
@@ -457,7 +457,7 @@ func TestIntegration_Performance(t *testing.T) {
 		input := testPassword + "\n"
 		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(input)
-		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 		_ = cmd.Run() // Best effort for performance test
 
 		duration := time.Since(start)
@@ -477,7 +477,7 @@ func TestIntegration_Performance(t *testing.T) {
 		start := time.Now()
 		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(input)
-		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 		_ = cmd.Run() // Best effort for performance test
 		duration := time.Since(start)
 
@@ -502,7 +502,7 @@ func TestIntegration_StressTest(t *testing.T) {
 	input := testPassword + "\n" + testPassword + "\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
-	cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 	_ = cmd.Run() // Best effort setup
 
 	numCredentials := 10 // Reduced for faster test execution (was 100)
@@ -516,7 +516,7 @@ func TestIntegration_StressTest(t *testing.T) {
 			input := testPassword + "\n" + username + "\n" + password + "\n"
 			cmd := exec.Command(binaryPath, "add", service)
 			cmd.Stdin = strings.NewReader(input)
-			cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+			cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 
 			if err := cmd.Run(); err != nil {
 				t.Fatalf("Failed to add credential %d: %v", i, err)
@@ -528,7 +528,7 @@ func TestIntegration_StressTest(t *testing.T) {
 		input := testPassword + "\n"
 		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(input)
-		cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 
 		var stdout bytes.Buffer
 		cmd.Stdout = &stdout
@@ -568,7 +568,7 @@ func TestIntegration_StressTest(t *testing.T) {
 			input := testPassword + "\n"
 			cmd := exec.Command(binaryPath, "get", service, "--no-clipboard")
 			cmd.Stdin = strings.NewReader(input)
-			cmd.Env = append(os.Environ(), "PASS_CLI_CONFIG="+configPath)
+			cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 
 			var stdout bytes.Buffer
 			cmd.Stdout = &stdout
