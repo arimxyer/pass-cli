@@ -21,10 +21,14 @@ func readPassword() ([]byte, error) {
 	// Check if running in test mode first (before terminal check)
 	// This is necessary because on macOS, term.IsTerminal() returns true even in test environments
 	if os.Getenv("PASS_CLI_TEST") == "1" {
-		// In test mode, always use non-TTY input
+		// In test mode, read a line from stdin
+		// Use fmt.Fscanf which doesn't buffer and works reliably across platforms
 		var password string
-		_, err := fmt.Scanln(&password)
-		return []byte(password), err
+		_, err := fmt.Fscanf(os.Stdin, "%s\n", &password)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read password: %w", err)
+		}
+		return []byte(password), nil
 	}
 
 	// Get file descriptor for stdin
