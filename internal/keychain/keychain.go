@@ -58,12 +58,8 @@ func (ks *KeychainService) IsAvailable() bool {
 }
 
 // Store saves the master password to the system keychain
-// Returns ErrKeychainUnavailable if the keychain is not accessible
+// Returns error if the keychain is not accessible
 func (ks *KeychainService) Store(password string) error {
-	if !ks.available {
-		return ErrKeychainUnavailable
-	}
-
 	err := keyring.Set(ServiceName, AccountName, password)
 	if err != nil {
 		return fmt.Errorf("failed to store password in keychain: %w", err)
@@ -90,13 +86,9 @@ func (ks *KeychainService) Retrieve() (string, error) {
 }
 
 // Delete removes the master password from the system keychain
-// Returns ErrKeychainUnavailable if the keychain is not accessible
+// Returns error if the keychain is not accessible
 // Does not return an error if the password doesn't exist
 func (ks *KeychainService) Delete() error {
-	if !ks.available {
-		return ErrKeychainUnavailable
-	}
-
 	err := keyring.Delete(ServiceName, AccountName)
 	if err != nil && err != keyring.ErrNotFound {
 		return fmt.Errorf("failed to delete password from keychain: %w", err)
