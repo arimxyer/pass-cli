@@ -64,6 +64,10 @@ func runKeychainEnable(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
 	}
 
+	if err := vaultService.PingKeychain(); err != nil {
+		return fmt.Errorf("%s", getKeychainUnavailableMessage())
+	}
+
 	if err := vaultService.EnableKeychain(password, forceKeychainEnable); err != nil {
 		if err == vault.ErrKeychainAlreadyEnabled {
 			// FR-008: Graceful no-op if already enabled without --force

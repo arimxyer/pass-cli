@@ -1166,3 +1166,8 @@ func (v *VaultService) SaveMetadata(metadata *Metadata) error {
 func (v *VaultService) DeleteMetadata() error {
 	return DeleteMetadata(v.vaultPath)
 }
+
+// PingKeychain checks if the keychain is available and responsive.
+func (v *VaultService) PingKeychain() error {
+	return v.keychainService.Ping()
+}

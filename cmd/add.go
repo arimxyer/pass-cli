@@ -138,28 +138,3 @@ func runAdd(cmd *cobra.Command, args []string) error {
 
 	return nil
 }
-
-// unlockVault attempts to unlock the vault with keychain or prompts for password
-func unlockVault(vaultService *vault.VaultService) error {
-	// Try keychain first
-	if err := vaultService.UnlockWithKeychain(); err == nil {
-		if IsVerbose() {
-			fmt.Fprintln(os.Stderr, "🔓 Unlocked vault using keychain")
-		}
-		return nil
-	}
-
-	// Prompt for master password
-	fmt.Fprint(os.Stderr, "Master password: ")
-	password, err := readPassword()
-	if err != nil {
-		return fmt.Errorf("failed to read password: %w", err)
-	}
-	fmt.Fprintln(os.Stderr) // newline after password input
-
-	if err := vaultService.Unlock(password); err != nil {
-		return fmt.Errorf("failed to unlock vault: %w", err)
-	}
-
-	return nil
-}

@@ -26,25 +26,30 @@ type KeychainService struct {
 	available bool
 }
 
-// New creates a new KeychainService and checks for keychain availability
+// New creates a new KeychainService
 func New() *KeychainService {
-	ks := &KeychainService{}
-	ks.available = ks.checkAvailability()
-	return ks
+	return &KeychainService{}
 }
 
-// checkAvailability tests if the system keychain is accessible
-func (ks *KeychainService) checkAvailability() bool {
+// Ping tests if the system keychain is accessible.
+// It returns ErrKeychainUnavailable if the keychain is not accessible.
+func (ks *KeychainService) Ping() error {
+	if ks.available {
+		return nil
+	}
+
 	// Try to set and immediately delete a test value
 	testAccount := "pass-cli-availability-test"
 	err := keyring.Set(ServiceName, testAccount, "test")
 	if err != nil {
-		return false
+		return fmt.Errorf("%w: %v", ErrKeychainUnavailable, err)
 	}
 
 	// Clean up test entry
 	_ = keyring.Delete(ServiceName, testAccount)
-	return true
+
+	ks.available = true
+	return nil
 }
 
 // IsAvailable returns whether the system keychain is available
