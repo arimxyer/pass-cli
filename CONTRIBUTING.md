@@ -1,6 +1,6 @@
 # Contributing to Pass-CLI
 
-![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?label=Last%20Updated) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
+![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?label=Last%20Updated)
 
 Thank you for your interest in contributing to Pass-CLI! This document provides guidelines for contributing to the project.
 
