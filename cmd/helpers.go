@@ -18,12 +18,33 @@ import (
 )
 
 // Package-level scanner for test mode stdin reading
-// Shared across multiple readPassword() calls to avoid buffering issues
+// Shared across ALL stdin reads (passwords, usernames, etc.) to avoid buffering issues
 // This ensures consistent cross-platform behavior for piped stdin
 var (
 	testStdinScanner *bufio.Scanner
 	scannerOnce      sync.Once
 )
+
+// readLine reads a line from stdin in test mode using the shared scanner
+// This prevents multiple readers from conflicting when reading piped stdin
+func readLine() (string, error) {
+	if os.Getenv("PASS_CLI_TEST") != "1" {
+		return "", fmt.Errorf("readLine should only be called in test mode")
+	}
+
+	// Initialize scanner once and reuse for all stdin reads
+	scannerOnce.Do(func() {
+		testStdinScanner = bufio.NewScanner(os.Stdin)
+	})
+
+	if !testStdinScanner.Scan() {
+		if err := testStdinScanner.Err(); err != nil {
+			return "", fmt.Errorf("failed to read input: %w", err)
+		}
+		return "", fmt.Errorf("no input provided")
+	}
+	return testStdinScanner.Text(), nil
+}
 
 // readPassword reads a password from stdin with asterisk masking.
 // Returns []byte for secure memory handling (no string conversion).
@@ -31,20 +52,12 @@ func readPassword() ([]byte, error) {
 	// Check if running in test mode first (before terminal check)
 	// This is necessary because on macOS, term.IsTerminal() returns true even in test environments
 	if os.Getenv("PASS_CLI_TEST") == "1" {
-		// In test mode, use bufio.Scanner for reliable cross-platform stdin reading
-		// Create scanner once and reuse for multiple password reads (init calls readPassword twice)
-		// This avoids buffering issues where each fmt.Scanf creates a new reader state
-		scannerOnce.Do(func() {
-			testStdinScanner = bufio.NewScanner(os.Stdin)
-		})
-
-		if !testStdinScanner.Scan() {
-			if err := testStdinScanner.Err(); err != nil {
-				return nil, fmt.Errorf("failed to read password: %w", err)
-			}
-			return nil, fmt.Errorf("no input provided")
+		// In test mode, use shared scanner for all stdin reads
+		line, err := readLine()
+		if err != nil {
+			return nil, fmt.Errorf("failed to read password: %w", err)
 		}
-		return []byte(testStdinScanner.Text()), nil
+		return []byte(line), nil
 	}
 
 	// Get file descriptor for stdin

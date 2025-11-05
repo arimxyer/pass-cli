@@ -90,10 +90,20 @@ func runAdd(cmd *cobra.Command, args []string) error {
 	// Get username if not provided
 	if addUsername == "" {
 		fmt.Print("Username: ")
-		if _, err := fmt.Scanln(&addUsername); err != nil {
-			return fmt.Errorf("failed to read username: %w", err)
+
+		// In test mode, use shared scanner to avoid stdin buffering conflicts
+		if os.Getenv("PASS_CLI_TEST") == "1" {
+			username, err := readLine()
+			if err != nil {
+				return fmt.Errorf("failed to read username: %w", err)
+			}
+			addUsername = strings.TrimSpace(username)
+		} else {
+			if _, err := fmt.Scanln(&addUsername); err != nil {
+				return fmt.Errorf("failed to read username: %w", err)
+			}
+			addUsername = strings.TrimSpace(addUsername)
 		}
-		addUsername = strings.TrimSpace(addUsername)
 	}
 
 	// Get password if not provided
