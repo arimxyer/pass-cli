@@ -154,7 +154,7 @@ jobs:
 
       - name: Fix SARIF format
         run: |
-          jq 'del(.runs[].results[].fixes[]? | select(has("artifactChanges") and (.artifactChanges | type != "array" or length == 0)) | .artifactChanges)' results.sarif > results-fixed.sarif
+          jq '.runs[].results[] |= if .fixes then .fixes |= map(select(.artifactChanges and (.artifactChanges | type == "array" and length > 0))) else . end' results.sarif > results-fixed.sarif
           mv results-fixed.sarif results.sarif
 
       - name: Upload SARIF file
