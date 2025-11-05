@@ -1,5 +1,7 @@
 # CI/CD Pipeline
 
+
+![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 This document describes the automated CI/CD pipeline for Pass-CLI.
 
 ## Workflows

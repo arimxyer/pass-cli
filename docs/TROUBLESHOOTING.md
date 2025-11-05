@@ -1,5 +1,7 @@
 # Troubleshooting Guide
 
+
+![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 Solutions to common issues and frequently asked questions for Pass-CLI.
 
 ## Table of Contents
@@ -1255,8 +1257,3 @@ pass-cli <command> --verbose 2>&1
 - **GitHub Discussions**: [Ask questions](https://github.com/ari1110/pass-cli/discussions)
 - **Security Issues**: Email security@example.com (don't file publicly)
 
----
-
-**Documentation Version**: v0.8.51
-**Last Updated**: October 2025
-**Status**: Production Ready

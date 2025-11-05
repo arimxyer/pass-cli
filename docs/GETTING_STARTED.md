@@ -1,5 +1,7 @@
 # Getting Started with pass-cli
 
+![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
+
 This guide will walk you through your first steps with pass-cli, from installation to managing your first credentials.
 
 ## Table of Contents
@@ -584,8 +586,3 @@ pass-cli version
 
 Welcome to secure, simple password management with pass-cli!
 
----
-
-**Documentation Version**: v0.8.51
-**Last Updated**: October 2025
-**Status**: Production Ready

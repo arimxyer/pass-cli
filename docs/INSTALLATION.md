@@ -1,5 +1,7 @@
 # Installation Guide
 
+
+![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 Complete installation instructions for Pass-CLI across all supported platforms.
 
 ## Table of Contents
@@ -698,8 +700,3 @@ After installation:
 - Review [Security Documentation](SECURITY.md)
 - Check out [Script Integration Examples](../README.md#-script-integration)
 
----
-
-**Documentation Version**: v0.8.51
-**Last Updated**: October 2025
-**Status**: Production Ready

@@ -1,5 +1,7 @@
 # Security Documentation
 
+
+![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 Comprehensive security architecture, cryptographic implementation, and best practices for Pass-CLI.
 
 ## Table of Contents
@@ -710,8 +712,3 @@ pass-cli version
 - [Go Cryptography Documentation](https://pkg.go.dev/crypto)
 - [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)
 
----
-
-**Documentation Version**: v0.8.51
-**Last Updated**: October 2025
-**Status**: Production Ready
