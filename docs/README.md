@@ -1,8 +1,8 @@
 # Pass-CLI Documentation Index
-
+Welcome to the Pass-CLI documentation. This index helps you find the documentation you need quickly.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
-Welcome to the Pass-CLI documentation. This index helps you find the documentation you need quickly.
+
 
 ## User Documentation
 

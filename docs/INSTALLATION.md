@@ -1,8 +1,7 @@
 # Installation Guide
-
+Complete installation instructions for Pass-CLI across all supported platforms.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
-Complete installation instructions for Pass-CLI across all supported platforms.
 
 ## Table of Contents
 

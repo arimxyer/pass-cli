@@ -1,8 +1,8 @@
 # Migration Guide
-
+Guide for upgrading Pass-CLI vaults and adapting to security hardening changes (January 2025 release).
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
-Guide for upgrading Pass-CLI vaults and adapting to security hardening changes (January 2025 release).
+
 
 ## Table of Contents
 

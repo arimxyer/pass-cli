@@ -1,8 +1,8 @@
 # Known Limitations
-
+Documentation of known technical limitations in Pass-CLI and their security implications.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
-Documentation of known technical limitations in Pass-CLI and their security implications.
+
 
 ## Table of Contents
 

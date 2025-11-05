@@ -1,10 +1,6 @@
 # Documentation Lifecycle Policy
 
-
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
-**Version**: 1.0.0
-**Effective**: 2025-10-15
-**Owner**: Repository Maintainers
 
 ## 1. Purpose & Scope
 
@@ -224,5 +220,3 @@ Maintainers MUST follow this policy for all documentation changes. Violations sh
 **Audit Trail**: Every archival decision documented in git commit message provides complete audit trail accessible via `git log --all --grep="archive" --oneline`.
 
 ---
-
-**Version**: 1.0.0 | **Effective**: 2025-10-15 | **Last Amended**: N/A

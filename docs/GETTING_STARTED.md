@@ -1,8 +1,7 @@
 # Getting Started with pass-cli
+This guide will walk you through your first steps with pass-cli, from installation to managing your first credentials.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
-
-This guide will walk you through your first steps with pass-cli, from installation to managing your first credentials.
 
 ## Table of Contents
 
