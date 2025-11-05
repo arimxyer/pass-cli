@@ -613,7 +613,7 @@ func TestDefaultVaultPath_Init(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	cmd.Stdin = strings.NewReader("TestPassword123!\nTestPassword123!\n")
+	cmd.Stdin = strings.NewReader("TestPassword123!\nTestPassword123!\nn\n")
 
 	// Run init command
 	err = cmd.Run()
