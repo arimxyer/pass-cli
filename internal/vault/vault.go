@@ -478,10 +478,6 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 
 // UnlockWithKeychain attempts to unlock using keychain-stored password
 func (v *VaultService) UnlockWithKeychain() error {
-	if !v.keychainService.IsAvailable() {
-		return keychain.ErrKeychainUnavailable
-	}
-
 	// T018: Check metadata to see if keychain is enabled (FR-007)
 	metadata, err := v.LoadMetadata()
 	if err != nil {
@@ -492,6 +488,8 @@ func (v *VaultService) UnlockWithKeychain() error {
 		return ErrKeychainNotEnabled
 	}
 
+	// Attempt to retrieve password from keychain
+	// This uses keyring.Get() which doesn't require GUI authorization on macOS
 	password, err := v.keychainService.Retrieve()
 	if err != nil {
 		return fmt.Errorf("failed to retrieve password from keychain: %w", err)

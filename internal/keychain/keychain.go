@@ -76,10 +76,6 @@ func (ks *KeychainService) Store(password string) error {
 // Returns ErrKeychainUnavailable if the keychain is not accessible
 // Returns ErrPasswordNotFound if no password is stored
 func (ks *KeychainService) Retrieve() (string, error) {
-	if !ks.available {
-		return "", ErrKeychainUnavailable
-	}
-
 	password, err := keyring.Get(ServiceName, AccountName)
 	if err != nil {
 		// go-keyring returns different errors on different platforms

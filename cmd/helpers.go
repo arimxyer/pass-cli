@@ -254,15 +254,13 @@ func formatUsageTable(records []vault.UsageRecord) string {
 
 // unlockVault attempts to unlock the vault with keychain or prompts for password
 func unlockVault(vaultService *vault.VaultService) error {
-	// Ping keychain to check for availability and responsiveness
-	if err := vaultService.PingKeychain(); err == nil {
-		// Keychain is available, try to unlock with it
-		if err := vaultService.UnlockWithKeychain(); err == nil {
-			if IsVerbose() {
-				fmt.Fprintln(os.Stderr, "🔓 Unlocked vault using keychain")
-			}
-			return nil
+	// Try to unlock with keychain (if enabled and available)
+	// This attempts keyring.Get() which doesn't require GUI authorization on macOS
+	if err := vaultService.UnlockWithKeychain(); err == nil {
+		if IsVerbose() {
+			fmt.Fprintln(os.Stderr, "🔓 Unlocked vault using keychain")
 		}
+		return nil
 	}
 
 	// Prompt for master password if keychain fails or is unavailable
