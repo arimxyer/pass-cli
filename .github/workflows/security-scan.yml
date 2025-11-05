@@ -36,7 +36,7 @@ jobs:
 
       - name: Fix SARIF format
         run: |
-          jq '(.runs[].results[].fixes[]? | select(has("artifactChanges")) | .artifactChanges) |= if type != "array" then [] else . end' results.sarif > results-fixed.sarif
+          jq 'del(.runs[].results[].fixes[]? | select(has("artifactChanges") and (.artifactChanges | type != "array" or length == 0)) | .artifactChanges)' results.sarif > results-fixed.sarif
           mv results-fixed.sarif results.sarif
 
       - name: Verify SARIF fix
