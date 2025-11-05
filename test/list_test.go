@@ -26,26 +26,23 @@ func TestListByProject(t *testing.T) {
 		}
 
 		// Add credentials
-		input = testPassword + "\n" + "user1" + "\n" + "pass123" + "\n"
-		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "add", "github")
+		input = testPassword + "\n"
+		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "add", "github", "--username", "user1", "--password", "pass123")
 		if err != nil {
 			t.Fatalf("Failed to add github credential: %v", err)
 		}
 
-		input = testPassword + "\n" + "user2" + "\n" + "pass456" + "\n"
-		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "add", "aws-dev")
+		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "add", "aws-dev", "--username", "user2", "--password", "pass456")
 		if err != nil {
 			t.Fatalf("Failed to add aws-dev credential: %v", err)
 		}
 
-		input = testPassword + "\n" + "user3" + "\n" + "pass789" + "\n"
-		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "add", "heroku")
+		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "add", "heroku", "--username", "user3", "--password", "pass789")
 		if err != nil {
 			t.Fatalf("Failed to add heroku credential: %v", err)
 		}
 
-		input = testPassword + "\n" + "user4" + "\n" + "pass000" + "\n"
-		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "add", "local-db")
+		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "add", "local-db", "--username", "user4", "--password", "pass000")
 		if err != nil {
 			t.Fatalf("Failed to add local-db credential: %v", err)
 		}
@@ -293,20 +290,18 @@ func TestListByLocation(t *testing.T) {
 		}
 
 		// Add credentials
-		input = testPassword + "\n" + "user1" + "\n" + "pass123" + "\n"
-		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "add", "web-cred")
+		input = testPassword + "\n"
+		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "add", "web-cred", "--username", "user1", "--password", "pass123")
 		if err != nil {
 			t.Fatalf("Failed to add web-cred: %v", err)
 		}
 
-		input = testPassword + "\n" + "user2" + "\n" + "pass456" + "\n"
-		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "add", "api-cred")
+		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "add", "api-cred", "--username", "user2", "--password", "pass456")
 		if err != nil {
 			t.Fatalf("Failed to add api-cred: %v", err)
 		}
 
-		input = testPassword + "\n" + "user3" + "\n" + "pass789" + "\n"
-		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "add", "db-cred")
+		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "add", "db-cred", "--username", "user3", "--password", "pass789")
 		if err != nil {
 			t.Fatalf("Failed to add db-cred: %v", err)
 		}

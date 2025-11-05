@@ -29,15 +29,14 @@ func TestUsageCommand(t *testing.T) {
 		}
 
 		// Add credential that will have usage history
-		input = testPassword + "\n" + "testuser" + "\n" + "testpass123" + "\n"
-		_, _, err = runCommandWithInputAndVault(t, usageVaultPath, input, "add", "github")
+		input = testPassword + "\n"
+		_, _, err = runCommandWithInputAndVault(t, usageVaultPath, input, "add", "github", "--username", "testuser", "--password", "testpass123")
 		if err != nil {
 			t.Fatalf("Failed to add github credential: %v", err)
 		}
 
 		// Add credential that will NOT have usage history (never accessed)
-		input = testPassword + "\n" + "user2" + "\n" + "pass456" + "\n"
-		_, _, err = runCommandWithInputAndVault(t, usageVaultPath, input, "add", "never-accessed")
+		_, _, err = runCommandWithInputAndVault(t, usageVaultPath, input, "add", "never-accessed", "--username", "user2", "--password", "pass456")
 		if err != nil {
 			t.Fatalf("Failed to add never-accessed credential: %v", err)
 		}
