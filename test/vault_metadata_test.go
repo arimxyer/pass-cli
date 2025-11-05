@@ -495,9 +495,9 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 
 	// Add credential to verify full functionality
 	// Reuse parent testConfigPath from deferred setup
-	cmd = exec.Command(binaryPath, "add", "test-service")
+	cmd = exec.Command(binaryPath, "add", "test-service", "--username", "testuser", "--password", "testpass")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	cmd.Stdin = strings.NewReader(testPassword + "\ntestuser\ntestpass\ntestpass\n")
+	cmd.Stdin = strings.NewReader(testPassword + "\n")
 	stdout.Reset()
 	stderr.Reset()
 	cmd.Stdout = &stdout

@@ -150,8 +150,8 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 
 		for _, tc := range testCases {
 			t.Run(tc.service, func(t *testing.T) {
-				input := testPassword + "\n" + tc.username + "\n" + tc.password + "\n"
-				stdout, stderr, err := runCommandWithInput(t, input, "add", tc.service)
+				input := testPassword + "\n"
+				stdout, stderr, err := runCommandWithInput(t, input, "add", tc.service, "--username", tc.username, "--password", tc.password)
 
 				if err != nil {
 					t.Fatalf("Add failed for %s: %v\nStdout: %s\nStderr: %s", tc.service, err, stdout, stderr)
@@ -217,8 +217,8 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 	})
 
 	t.Run("6_Delete_Credential", func(t *testing.T) {
-		input := testPassword + "\n" + "y\n" // confirm deletion
-		stdout, stderr, err := runCommandWithInput(t, input, "delete", "gitlab.com")
+		input := testPassword + "\n"
+		stdout, stderr, err := runCommandWithInput(t, input, "delete", "gitlab.com", "--force")
 
 		if err != nil {
 			t.Fatalf("Delete failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
@@ -232,7 +232,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 		}
 
 		if strings.Contains(stdout, "gitlab.com") {
-			t.Error("Deleted credential still appears in list")
+			t.Errorf("Deleted credential still appears in list.\nList output:\n%s", stdout)
 		}
 
 		if !strings.Contains(stdout, "github.com") || !strings.Contains(stdout, "api.service.com") {
@@ -360,8 +360,8 @@ func TestIntegration_ScriptFriendly(t *testing.T) {
 	_ = cmd.Run() // Best effort setup
 
 	// Add a credential
-	input = testPassword + "\n" + "apiuser\n" + "apipass123\n"
-	cmd = exec.Command(binaryPath, "add", "api.test.com")
+	input = testPassword + "\n"
+	cmd = exec.Command(binaryPath, "add", "api.test.com", "--username", "apiuser", "--password", "apipass123")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 	_ = cmd.Run() // Best effort setup
@@ -513,8 +513,8 @@ func TestIntegration_StressTest(t *testing.T) {
 			username := fmt.Sprintf("user%d", i)
 			password := fmt.Sprintf("pass%d", i)
 
-			input := testPassword + "\n" + username + "\n" + password + "\n"
-			cmd := exec.Command(binaryPath, "add", service)
+			input := testPassword + "\n"
+			cmd := exec.Command(binaryPath, "add", service, "--username", username, "--password", password)
 			cmd.Stdin = strings.NewReader(input)
 			cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 
@@ -677,8 +677,8 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 
 	// Step 2: Add a credential
 	t.Log("Step 2: Add credential using default vault path")
-	addInput := fmt.Sprintf("%s\ntestuser\ntestpass\nhttps://example.com\n", masterPassword)
-	stdout, stderr, err = runWithHome(addInput, "add", "testcred")
+	addInput := fmt.Sprintf("%s\n", masterPassword)
+	stdout, stderr, err = runWithHome(addInput, "add", "testcred", "--username", "testuser", "--password", "testpass", "--url", "https://example.com")
 	if err != nil {
 		t.Fatalf("Add failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 	}

@@ -261,8 +261,8 @@ func TestIntegration_KeychainFallback(t *testing.T) {
 
 		// Try to add credential - should now prompt for master password
 		// Reuse parent testConfigPath from deferred setup
-		input := testPassword + "\n" + "testuser\n" + "testpass\n"
-		cmd := exec.Command(binaryPath, "add", "test.com")
+		input := testPassword + "\n"
+		cmd := exec.Command(binaryPath, "add", "test.com", "--username", "testuser", "--password", "testpass")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)
 
