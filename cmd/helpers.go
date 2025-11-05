@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"pass-cli/internal/vault"
@@ -8,11 +9,19 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"sync"
 	"text/tabwriter"
 	"time"
 
 	"github.com/howeyc/gopass"
 	"golang.org/x/term"
+)
+
+// Package-level scanner for test mode stdin reading
+// Shared across multiple readPassword() calls to avoid buffering issues
+var (
+	testStdinScanner *bufio.Scanner
+	scannerOnce      sync.Once
 )
 
 // readPassword reads a password from stdin with asterisk masking.
@@ -21,15 +30,20 @@ func readPassword() ([]byte, error) {
 	// Check if running in test mode first (before terminal check)
 	// This is necessary because on macOS, term.IsTerminal() returns true even in test environments
 	if os.Getenv("PASS_CLI_TEST") == "1" {
-		// In test mode, read a line from stdin
-		// Use fmt.Fscanf with %s (reads until whitespace, including newline)
-		// Don't include \n in format - it causes blocking on macOS
-		var password string
-		_, err := fmt.Fscanf(os.Stdin, "%s", &password)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read password: %w", err)
+		// In test mode, use bufio.Scanner for reliable cross-platform stdin reading
+		// Create scanner once and reuse for multiple password reads (init calls readPassword twice)
+		// This avoids buffering issues where each fmt.Scanf creates a new reader state
+		scannerOnce.Do(func() {
+			testStdinScanner = bufio.NewScanner(os.Stdin)
+		})
+
+		if !testStdinScanner.Scan() {
+			if err := testStdinScanner.Err(); err != nil {
+				return nil, fmt.Errorf("failed to read password: %w", err)
+			}
+			return nil, fmt.Errorf("no input provided")
 		}
-		return []byte(password), nil
+		return []byte(testStdinScanner.Text()), nil
 	}
 
 	// Get file descriptor for stdin
