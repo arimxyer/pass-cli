@@ -22,9 +22,10 @@ func readPassword() ([]byte, error) {
 	// This is necessary because on macOS, term.IsTerminal() returns true even in test environments
 	if os.Getenv("PASS_CLI_TEST") == "1" {
 		// In test mode, read a line from stdin
-		// Use fmt.Fscanf which doesn't buffer and works reliably across platforms
+		// Use fmt.Fscanf with %s (reads until whitespace, including newline)
+		// Don't include \n in format - it causes blocking on macOS
 		var password string
-		_, err := fmt.Fscanf(os.Stdin, "%s\n", &password)
+		_, err := fmt.Fscanf(os.Stdin, "%s", &password)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read password: %w", err)
 		}
