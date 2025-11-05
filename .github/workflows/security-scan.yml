@@ -1,0 +1,59 @@
+name: Security Scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sundays at midnight UTC
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  security-scan:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+          cache: true
+
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: '-no-fail -fmt sarif -out results.sarif ./...'
+
+      - name: Show raw SARIF (before fix)
+        run: |
+          echo "=== Checking for invalid artifactChanges ==="
+          jq '.runs[].results[].fixes[]?.artifactChanges | select(type != "array")' results.sarif || echo "No invalid values found"
+
+      - name: Fix SARIF format
+        run: |
+          jq '(.runs[].results[].fixes[]? | select(has("artifactChanges")) | .artifactChanges) |= if type != "array" then [] else . end' results.sarif > results-fixed.sarif
+          mv results-fixed.sarif results.sarif
+
+      - name: Verify SARIF fix
+        run: |
+          echo "=== Verifying all artifactChanges are arrays ==="
+          jq '.runs[].results[].fixes[]?.artifactChanges | type' results.sarif | sort | uniq
+          echo "=== If only 'array' appears above, the fix worked ==="
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: gosec-sarif-results
+          path: results.sarif
+          retention-days: 30
