@@ -605,6 +605,7 @@ func TestDefaultVaultPath_Init(t *testing.T) {
 	// Set up environment
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(),
+		"PASS_CLI_TEST=1",
 		fmt.Sprintf("HOME=%s", tmpHome),
 		fmt.Sprintf("USERPROFILE=%s", tmpHome), // Windows
 	)
@@ -644,6 +645,7 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 	runWithHome := func(stdin string, args ...string) (string, string, error) {
 		cmd := exec.Command(binaryPath, args...)
 		cmd.Env = append(os.Environ(),
+			"PASS_CLI_TEST=1",
 			fmt.Sprintf("HOME=%s", tmpHome),
 			fmt.Sprintf("USERPROFILE=%s", tmpHome),
 		)
@@ -757,6 +759,7 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 		cmd := exec.Command(binaryPath, args...)
 		// Set HOME, USERPROFILE, and APPDATA to ensure config is found
 		cmd.Env = append(os.Environ(),
+			"PASS_CLI_TEST=1",
 			fmt.Sprintf("HOME=%s", tmpHome),
 			fmt.Sprintf("USERPROFILE=%s", tmpHome),
 			fmt.Sprintf("APPDATA=%s", tmpHome),
