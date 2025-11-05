@@ -741,8 +741,10 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 	}
 
 	configPath := filepath.Join(configDir, "config.yml")
-	// Quote the vault path for proper YAML syntax (especially important on Windows with backslashes)
-	configContent := fmt.Sprintf("vault_path: \"%s\"\nkeychain_enabled: false\n", customVaultPath)
+	// Convert Windows backslashes to forward slashes for YAML compatibility
+	// filepath.ToSlash converts \ to / which works on all platforms including Windows
+	yamlSafePath := filepath.ToSlash(customVaultPath)
+	configContent := fmt.Sprintf("vault_path: \"%s\"\nkeychain_enabled: false\n", yamlSafePath)
 	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
 		t.Fatalf("Failed to write config: %v", err)
 	}
