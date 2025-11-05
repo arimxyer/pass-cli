@@ -208,6 +208,11 @@ func IsVerbose() bool {
 // checkFirstRun detects first-run scenarios and triggers guided initialization
 // T065: PersistentPreRunE hook for first-run detection
 func checkFirstRun(cmd *cobra.Command, args []string) error {
+	// Skip first-run check in test mode
+	if os.Getenv("PASS_CLI_TEST") == "1" {
+		return nil
+	}
+
 	// Detect first-run scenario (no longer uses vault flag)
 	state := vault.DetectFirstRun(cmd.Name(), "")
 
