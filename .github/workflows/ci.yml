@@ -152,6 +152,11 @@ jobs:
         with:
           args: '-no-fail -fmt sarif -out results.sarif ./...'
 
+      - name: Fix SARIF format
+        run: |
+          jq '(.runs[].results[].fixes[]? | select(has("artifactChanges")) | .artifactChanges) |= if type != "array" then [] else . end' results.sarif > results-fixed.sarif
+          mv results-fixed.sarif results.sarif
+
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
         with:
