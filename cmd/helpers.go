@@ -18,6 +18,15 @@ import (
 // readPassword reads a password from stdin with asterisk masking.
 // Returns []byte for secure memory handling (no string conversion).
 func readPassword() ([]byte, error) {
+	// Check if running in test mode first (before terminal check)
+	// This is necessary because on macOS, term.IsTerminal() returns true even in test environments
+	if os.Getenv("PASS_CLI_TEST") == "1" {
+		// In test mode, always use non-TTY input
+		var password string
+		_, err := fmt.Scanln(&password)
+		return []byte(password), err
+	}
+
 	// Get file descriptor for stdin
 	fd := int(os.Stdin.Fd())
 

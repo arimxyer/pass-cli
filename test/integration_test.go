@@ -734,37 +734,27 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 	}
 	customVaultPath := filepath.Join(customVaultDir, "my-vault.enc")
 
-	// Create config directory - match os.UserConfigDir behavior
-	// On Windows: APPDATA\pass-cli, On Unix: XDG_CONFIG_HOME/pass-cli or HOME/.config/pass-cli
-	var configDir string
-	if runtime.GOOS == "windows" {
-		configDir = filepath.Join(tmpHome, "pass-cli")
-	} else {
-		configDir = filepath.Join(tmpHome, ".config", "pass-cli")
-	}
+	// Create config directory at HOME/.pass-cli (where viper looks for it)
+	configDir := filepath.Join(tmpHome, ".pass-cli")
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		t.Fatalf("Failed to create config dir: %v", err)
 	}
-	
+
 	configPath := filepath.Join(configDir, "config.yml")
-	configContent := fmt.Sprintf("vault_path: %s\nkeychain_enabled: false\n", customVaultPath)
+	// Quote the vault path for proper YAML syntax (especially important on Windows with backslashes)
+	configContent := fmt.Sprintf("vault_path: \"%s\"\nkeychain_enabled: false\n", customVaultPath)
 	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
 		t.Fatalf("Failed to write config: %v", err)
 	}
 
 	masterPassword := "TestPassword123!"
 
-	// Helper to run commands with isolated HOME
-	runWithHome := func(stdin string, args ...string) (string, string, error) {
-		cmd := exec.Command(binaryPath, args...)
-		// Set HOME, USERPROFILE, and APPDATA to ensure config is found
-		cmd.Env = append(os.Environ(),
-			"PASS_CLI_TEST=1",
-			fmt.Sprintf("HOME=%s", tmpHome),
-			fmt.Sprintf("USERPROFILE=%s", tmpHome),
-			fmt.Sprintf("APPDATA=%s", tmpHome),
-			fmt.Sprintf("XDG_CONFIG_HOME=%s", tmpHome),
-		)
+	// Helper to run commands with --config flag (os.UserHomeDir doesn't respect env vars)
+	runWithConfig := func(stdin string, args ...string) (string, string, error) {
+		// Prepend --config flag to args
+		configArgs := append([]string{"--config", configPath}, args...)
+		cmd := exec.Command(binaryPath, configArgs...)
+		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1")
 
 		var stdout, stderr bytes.Buffer
 		cmd.Stdout = &stdout
@@ -780,7 +770,7 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 	// Step 1: Initialize vault at custom location
 	t.Log("Step 1: Initialize vault at custom config location")
 	initInput := fmt.Sprintf("%s\n%s\n", masterPassword, masterPassword)
-	stdout, stderr, err := runWithHome(initInput, "init")
+	stdout, stderr, err := runWithConfig(initInput, "init")
 	if err != nil {
 		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 	}
@@ -794,7 +784,7 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 	// Step 2: Verify list command uses custom vault (should show empty vault)
 	t.Log("Step 2: Verify list command reads from custom vault")
 	listInput := fmt.Sprintf("%s\n", masterPassword)
-	stdout, stderr, err = runWithHome(listInput, "list")
+	stdout, stderr, err = runWithConfig(listInput, "list")
 	// List on empty vault may exit 0 or 1, both are acceptable
 	if err != nil && !strings.Contains(stderr, "no credentials") && !strings.Contains(stdout, "No credentials") {
 		t.Logf("List output: %s", stdout)
