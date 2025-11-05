@@ -19,6 +19,7 @@ import (
 
 // Package-level scanner for test mode stdin reading
 // Shared across multiple readPassword() calls to avoid buffering issues
+// This ensures consistent cross-platform behavior for piped stdin
 var (
 	testStdinScanner *bufio.Scanner
 	scannerOnce      sync.Once
