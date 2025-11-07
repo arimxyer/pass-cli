@@ -16,9 +16,7 @@ var configCmd = &cobra.Command{
 	Long: `Manage Pass-CLI configuration settings for terminal warnings and keyboard shortcuts.
 
 Configuration file location:
-  Linux:   ~/.config/pass-cli/config.yml
-  macOS:   ~/Library/Application Support/pass-cli/config.yml
-  Windows: %APPDATA%\pass-cli\config.yml`,
+  All platforms: ~/.pass-cli/config.yml`,
 }
 
 // configInitCmd creates a new config file with examples

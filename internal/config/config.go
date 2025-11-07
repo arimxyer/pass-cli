@@ -80,24 +80,19 @@ func GetDefaults() *Config {
 	return cfg
 }
 
-// GetConfigPath returns the OS-appropriate config file path using os.UserConfigDir()
+// GetConfigPath returns the config file path in ~/.pass-cli/config.yml
 func GetConfigPath() (string, error) {
 	// Check for PASS_CLI_CONFIG environment variable first (for testing)
 	if envPath := os.Getenv("PASS_CLI_CONFIG"); envPath != "" {
 		return envPath, nil
 	}
 
-	configDir, err := os.UserConfigDir()
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		// Fallback to home directory if UserConfigDir fails
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			return "", fmt.Errorf("cannot determine config directory: %w", err)
-		}
-		configDir = filepath.Join(homeDir, ".pass-cli")
-	} else {
-		configDir = filepath.Join(configDir, "pass-cli")
+		return "", fmt.Errorf("cannot determine home directory: %w", err)
 	}
+
+	configDir := filepath.Join(homeDir, ".pass-cli")
 
 	// Ensure directory exists
 	if err := os.MkdirAll(configDir, 0755); err != nil {

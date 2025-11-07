@@ -1052,9 +1052,7 @@ pass-cli get github
 ## Configuration
 
 **Configuration Location** (added January 2025):
-- **Linux**: `~/.config/pass-cli/config.yml`
-- **macOS**: `~/Library/Application Support/pass-cli/config.yml`
-- **Windows**: `%APPDATA%\pass-cli\config.yml`
+- **All platforms**: `~/.pass-cli/config.yml`
 
 **Management Commands**:
 ```bash

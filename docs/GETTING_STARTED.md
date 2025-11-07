@@ -488,7 +488,7 @@ cp ~/.pass-cli/vault.enc.backup.1 ~/.pass-cli/vault.enc
 
 ## Configuration
 
-Customize pass-cli behavior with `~/.pass-cli/config.yaml`:
+Customize pass-cli behavior with `~/.pass-cli/config.yml`:
 
 ```yaml
 vault_path: /home/user/.pass-cli/vault.enc
