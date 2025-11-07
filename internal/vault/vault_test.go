@@ -1471,7 +1471,7 @@ func TestRemoveVault(t *testing.T) {
 		t.Fatalf("EnableKeychain() failed: %v", err)
 	}
 
-	result, err := vault.RemoveVault(false)
+	result, err := vault.RemoveVault(false, false)
 	if err != nil {
 		t.Fatalf("RemoveVault() failed: %v", err)
 	}
@@ -1482,6 +1482,16 @@ func TestRemoveVault(t *testing.T) {
 
 	if !result.KeychainDeleted {
 		t.Error("Keychain entry should have been deleted")
+	}
+
+	// Audit log should be deleted or not found
+	if !result.AuditLogDeleted && !result.AuditLogNotFound {
+		t.Error("Audit log should have been deleted or not found")
+	}
+
+	// Directory should NOT be deleted (removeAll=false)
+	if result.DirectoryDeleted {
+		t.Error("Directory should not have been deleted without --all flag")
 	}
 
 	// Verify that the file is gone
