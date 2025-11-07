@@ -52,6 +52,7 @@ Examples:
 
 For more information, visit: https://github.com/username/pass-cli`,
 		PersistentPreRunE: checkFirstRun,
+		Run:               runRootCommand,
 	}
 )
 
@@ -224,6 +225,46 @@ func GetVaultPathWithSource() (path string, source string) {
 // IsVerbose returns whether verbose mode is enabled
 func IsVerbose() bool {
 	return verbose || viper.GetBool("verbose")
+}
+
+// runRootCommand runs when pass-cli is invoked with no subcommand
+// Launches TUI mode by default, with first-run detection
+func runRootCommand(cmd *cobra.Command, args []string) {
+	// Skip first-run check in test mode - show help instead
+	if os.Getenv("PASS_CLI_TEST") == "1" {
+		_ = cmd.Help()
+		return
+	}
+
+	// Check if custom vault path is configured
+	var customVaultPath string
+	cfg, _ := config.Load()
+	if cfg != nil && cfg.VaultPath != "" {
+		customVaultPath = cfg.VaultPath
+	}
+
+	// Check for first-run scenario
+	state := vault.DetectFirstRun("", customVaultPath)
+
+	// If vault doesn't exist at default location, prompt for guided init
+	if !state.VaultExists && !state.CustomVaultPath {
+		// Check if running in TTY
+		isTTY := term.IsTerminal(int(os.Stdin.Fd()))
+
+		fmt.Println("\n👋 Welcome to Pass-CLI!")
+		fmt.Println("\nIt looks like this is your first time using pass-cli.")
+
+		// Run guided initialization
+		if err := vault.RunGuidedInit(state.VaultPath, isTTY); err != nil {
+			// If user declined or error, exit
+			fmt.Println()
+			return
+		}
+		// After successful init, continue to launch TUI
+	}
+
+	// Launch TUI (same as `pass-cli tui`)
+	runTUI(cmd, args)
 }
 
 // checkFirstRun detects first-run scenarios and triggers guided initialization

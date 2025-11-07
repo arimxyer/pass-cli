@@ -54,6 +54,10 @@ func (ks *KeychainService) Ping() error {
 
 // IsAvailable returns whether the system keychain is available
 func (ks *KeychainService) IsAvailable() bool {
+	// Check availability on demand if not already cached
+	if !ks.available {
+		_ = ks.Ping() // Update cached availability status
+	}
 	return ks.available
 }
 

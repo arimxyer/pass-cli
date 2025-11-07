@@ -239,26 +239,31 @@ func TestMultipleStoreOverwrites(t *testing.T) {
 func TestCheckAvailability(t *testing.T) {
 	ks := New()
 
-	// After lazy initialization changes, New() no longer calls Ping()
-	// So IsAvailable() should return false initially
+	// IsAvailable() now checks availability on demand by calling Ping()
+	// So it should return the actual availability status
 	available := ks.IsAvailable()
-	if available {
-		t.Error("IsAvailable() should be false before Ping() is called (lazy initialization)")
+
+	// Verify consistent behavior by calling IsAvailable() again
+	available2 := ks.IsAvailable()
+	if available != available2 {
+		t.Error("IsAvailable() should return consistent results")
 	}
 
-	// Ping() should set availability based on actual keychain access
+	if available {
+		t.Log("✓ Keychain available on this system")
+	} else {
+		t.Log("✓ Keychain unavailable on this system")
+	}
+
+	// Ping() should return consistent results with IsAvailable()
 	err := ks.Ping()
 	if err == nil {
-		// Ping succeeded, availability should now be true
 		if !ks.IsAvailable() {
 			t.Error("After successful Ping(), IsAvailable() should return true")
 		}
-		t.Log("✓ Keychain available on this system")
 	} else {
-		// Ping failed, availability should remain false
 		if ks.IsAvailable() {
 			t.Error("After failed Ping(), IsAvailable() should return false")
 		}
-		t.Logf("✓ Keychain unavailable on this system: %v", err)
 	}
 }

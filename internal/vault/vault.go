@@ -29,6 +29,9 @@ type RemoveVaultResult struct {
 	KeychainDeleted  bool
 	FileNotFound     bool
 	KeychainNotFound bool
+	AuditLogDeleted  bool
+	AuditLogNotFound bool
+	DirectoryDeleted bool
 }
 
 var (
@@ -1080,7 +1083,7 @@ func (v *VaultService) GetKeychainStatus() *KeychainStatus {
 }
 
 // RemoveVault permanently deletes the vault file and its keychain entry.
-func (v *VaultService) RemoveVault(force bool) (*RemoveVaultResult, error) {
+func (v *VaultService) RemoveVault(force bool, removeAll bool) (*RemoveVaultResult, error) {
 	// T016: Load metadata to check audit status before vault deletion
 	meta, err := LoadMetadata(v.vaultPath)
 	if err == nil && meta != nil && meta.AuditEnabled {
@@ -1145,6 +1148,29 @@ func (v *VaultService) RemoveVault(force bool) (*RemoveVaultResult, error) {
 	// T019: Delete metadata file after final audit entry
 	if err := DeleteMetadata(v.vaultPath); err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: Failed to delete metadata: %v\n", err)
+	}
+
+	// Delete audit log after final audit entries are written
+	auditLogPath := filepath.Join(filepath.Dir(v.vaultPath), "audit.log")
+	err = os.Remove(auditLogPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			result.AuditLogNotFound = true
+		} else {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to delete audit log: %v\n", err)
+		}
+	} else {
+		result.AuditLogDeleted = true
+	}
+
+	// Optionally remove entire directory (including config)
+	if removeAll {
+		vaultDir := filepath.Dir(v.vaultPath)
+		err = os.RemoveAll(vaultDir)
+		if err != nil {
+			return nil, fmt.Errorf("failed to remove directory %s: %w", vaultDir, err)
+		}
+		result.DirectoryDeleted = true
 	}
 
 	return result, nil
