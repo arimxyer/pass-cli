@@ -263,6 +263,14 @@ func runRootCommand(cmd *cobra.Command, args []string) {
 		// After successful init, continue to launch TUI
 	}
 
+	// Verify vault exists before launching TUI
+	vaultPath := GetVaultPath()
+	if _, err := os.Stat(vaultPath); os.IsNotExist(err) {
+		fmt.Fprintf(os.Stderr, "Error: Vault not found at %s\n", vaultPath)
+		fmt.Fprintf(os.Stderr, "Run 'pass-cli init' to create a new vault.\n")
+		os.Exit(1)
+	}
+
 	// Launch TUI (same as `pass-cli tui`)
 	runTUI(cmd, args)
 }
