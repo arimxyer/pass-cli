@@ -248,9 +248,9 @@ func detectUnknownFields(v *viper.Viper) []ValidationWarning {
 }
 
 // shouldLogConfig returns true if config loading should produce log output.
-// Suppresses logging when PASS_CLI_TEST is set to avoid polluting test output.
+// Only logs when PASS_CLI_DEBUG is explicitly set to avoid cluttering output.
 func shouldLogConfig() bool {
-	return os.Getenv("PASS_CLI_TEST") == ""
+	return os.Getenv("PASS_CLI_DEBUG") == "1"
 }
 
 func LoadFromPath(configPath string) (*Config, *ValidationResult) {
