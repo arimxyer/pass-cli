@@ -168,11 +168,24 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 		t.Errorf("Metadata filename should be %q, got %q", expectedFilename, actualFilename)
 	}
 
-	// Verify vault1's metadata is distinct from vault2
-	// (vault2 should NOT have metadata since audit wasn't enabled)
+	// Verify vault2 also has metadata (created for all vaults to track keychain status)
+	// but with audit_enabled=false
 	meta2Path := vault.MetadataPath(vault2Path)
-	if _, err := os.Stat(meta2Path); !os.IsNotExist(err) {
-		t.Error("vault2 should NOT have metadata (audit not enabled)")
+	if _, err := os.Stat(meta2Path); os.IsNotExist(err) {
+		t.Error("vault2 should have metadata (metadata now created for all vaults)")
+	}
+
+	// Verify vault2 metadata shows audit disabled
+	data2, err := os.ReadFile(meta2Path)
+	if err != nil {
+		t.Fatalf("Failed to read vault2 metadata: %v", err)
+	}
+	var meta2 vault.Metadata
+	if err := json.Unmarshal(data2, &meta2); err != nil {
+		t.Fatalf("Failed to parse vault2 metadata: %v", err)
+	}
+	if meta2.AuditEnabled {
+		t.Error("vault2 metadata should show audit_enabled=false")
 	}
 
 	// Read and verify metadata content is valid
@@ -284,13 +297,27 @@ func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
 	}
 
-	// Verify no metadata created
+	// Verify metadata IS created (but with audit_enabled=false)
+	// Metadata is now created for all vaults to track keychain status
 	metaPath := vault.MetadataPath(vaultPath)
-	if _, err := os.Stat(metaPath); !os.IsNotExist(err) {
-		t.Error("Metadata should NOT be created when audit disabled")
+	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
+		t.Error("Metadata should be created even when audit disabled (to track keychain status)")
 	}
 
-	// Unlock vault (should still not create metadata)
+	// Verify metadata shows audit disabled
+	data, err := os.ReadFile(metaPath)
+	if err != nil {
+		t.Fatalf("Failed to read metadata: %v", err)
+	}
+	var meta vault.Metadata
+	if err := json.Unmarshal(data, &meta); err != nil {
+		t.Fatalf("Failed to parse metadata: %v", err)
+	}
+	if meta.AuditEnabled {
+		t.Error("Metadata should show audit_enabled=false when audit disabled")
+	}
+
+	// Unlock vault (metadata should persist)
 	// Reuse parent testConfigPath from deferred setup
 	cmd = exec.Command(binaryPath, "list")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
@@ -304,12 +331,19 @@ func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 		t.Fatalf("List command failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
 	}
 
-	// Verify still no metadata
-	if _, err := os.Stat(metaPath); !os.IsNotExist(err) {
-		t.Error("Metadata should still not exist after unlock when audit disabled")
+	// Verify metadata still exists and shows audit disabled
+	data, err = os.ReadFile(metaPath)
+	if err != nil {
+		t.Fatalf("Failed to read metadata after unlock: %v", err)
+	}
+	if err := json.Unmarshal(data, &meta); err != nil {
+		t.Fatalf("Failed to parse metadata after unlock: %v", err)
+	}
+	if meta.AuditEnabled {
+		t.Error("Metadata should still show audit_enabled=false after unlock")
 	}
 
-	t.Logf("✓ No metadata created for audit-disabled vault")
+	t.Logf("✓ Metadata created with audit_enabled=false for audit-disabled vault")
 }
 
 // T023: Integration test for metadata creation via init --enable-audit
