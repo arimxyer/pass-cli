@@ -375,19 +375,24 @@ func showSuccessMessage(keychainEnabled, auditEnabled bool) {
 }
 
 // createVaultFromConfig creates a new vault from guided init config
-// This is a placeholder - would delegate to existing InitializeVault
 func createVaultFromConfig(config GuidedInitConfig) error {
-	// Ensure parent directory exists
-	vaultDir := filepath.Dir(config.VaultPath)
-	if err := os.MkdirAll(vaultDir, 0700); err != nil {
-		return fmt.Errorf("failed to create vault directory: %w", err)
+	// Create vault service
+	vaultService, err := New(config.VaultPath)
+	if err != nil {
+		return fmt.Errorf("failed to create vault service: %w", err)
 	}
 
-	// Create minimal vault structure for testing
-	// In production, this would call the existing vault initialization logic
-	vaultData := []byte(`{"version":1,"salt":"placeholder","data":"encrypted"}`)
-	if err := os.WriteFile(config.VaultPath, vaultData, 0600); err != nil {
-		return fmt.Errorf("failed to write vault file: %w", err)
+	// Determine audit log path
+	var auditLogPath, vaultID string
+	if config.EnableAuditLog {
+		vaultDir := filepath.Dir(config.VaultPath)
+		auditLogPath = filepath.Join(vaultDir, "audit.log")
+		vaultID = filepath.Base(vaultDir) // Use directory name as vault ID
+	}
+
+	// Initialize vault with proper encryption
+	if err := vaultService.Initialize(config.MasterPassword, config.EnableKeychain, auditLogPath, vaultID); err != nil {
+		return fmt.Errorf("failed to initialize vault: %w", err)
 	}
 
 	return nil
