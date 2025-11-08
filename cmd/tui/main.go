@@ -26,6 +26,18 @@ func Run(vaultPath string) error {
 		vaultPath = getDefaultVaultPath()
 	}
 
+	// 1a. Check if vault exists - if not, trigger guided initialization
+	if _, err := os.Stat(vaultPath); os.IsNotExist(err) {
+		fmt.Println("\n👋 Welcome to Pass-CLI!")
+		fmt.Println("\nIt looks like this is your first time using pass-cli.")
+
+		// Run guided initialization
+		if err := vault.RunGuidedInit(vaultPath, true); err != nil {
+			// User declined or error
+			return fmt.Errorf("vault initialization required: %w", err)
+		}
+	}
+
 	// 2. Initialize vault service
 	vaultService, err := vault.New(vaultPath)
 	if err != nil {

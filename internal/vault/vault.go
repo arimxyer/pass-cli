@@ -330,17 +330,17 @@ func (v *VaultService) Initialize(masterPassword []byte, useKeychain bool, audit
 	// T067: Log vault creation event (FR-019)
 	v.LogAudit(security.EventVaultUnlock, security.OutcomeSuccess, "")
 
-	// Spec 012 FR-004: Create metadata file if audit is enabled
-	if vaultData.AuditEnabled {
-		metadata := &Metadata{
-			Version:         "1.0",
-			AuditEnabled:    true,
-			KeychainEnabled: false,
-		}
-		if err := SaveMetadata(v.vaultPath, metadata); err != nil {
-			// Log warning but don't fail initialization (graceful degradation)
-			fmt.Fprintf(os.Stderr, "Warning: failed to create metadata file: %v\n", err)
-		}
+	// Create metadata file to track vault configuration
+	metadata := &Metadata{
+		Version:         "1.0",
+		AuditEnabled:    vaultData.AuditEnabled,
+		KeychainEnabled: useKeychain && v.keychainService.IsAvailable(),
+		CreatedAt:       time.Now(),
+		LastModified:    time.Now(),
+	}
+	if err := SaveMetadata(v.vaultPath, metadata); err != nil {
+		// Log warning but don't fail initialization (graceful degradation)
+		fmt.Fprintf(os.Stderr, "Warning: failed to create metadata file: %v\n", err)
 	}
 
 	return nil
