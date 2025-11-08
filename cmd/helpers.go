@@ -94,14 +94,12 @@ func getAuditLogPath(vaultPath string) string {
 }
 
 // T072: getVaultID returns a unique identifier for the vault (used for keychain)
-// Uses vault file path as unique identifier
+// Uses directory name as vault ID to match initialization behavior in firstrun.go
 func getVaultID(vaultPath string) string {
-	// Use absolute path as vault ID for keychain
-	absPath, err := filepath.Abs(vaultPath)
-	if err != nil {
-		return vaultPath // Fallback to relative path
-	}
-	return absPath
+	// Use directory name as vault ID to match how it's set during initialization
+	// This ensures audit key retrieval matches how it was stored
+	vaultDir := filepath.Dir(vaultPath)
+	return filepath.Base(vaultDir)
 }
 
 // getKeychainUnavailableMessage returns platform-specific error message when keychain is unavailable
