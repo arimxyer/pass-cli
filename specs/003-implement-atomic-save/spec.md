@@ -105,7 +105,11 @@ After successful vault operations, temporary files created during the save proce
 - **FR-008**: System MUST never leave primary vault file in partially written or corrupted state
 - **FR-009**: System MUST remove backup file after successful vault unlock
 - **FR-010**: System MUST clean up temporary files after successful save operations
-- **FR-011**: System MUST provide clear error messages when save operations fail, including failure reason, vault state confirmation (not modified), and actionable guidance for user resolution
+- **FR-011**: System MUST provide clear error messages when save operations fail, including:
+  - Specific failure reason (e.g., "insufficient disk space", "verification failed")
+  - Vault state confirmation: "Your vault was not modified"
+  - Actionable guidance: Concrete next steps for user (e.g., "Free up at least 50 MB and try again", "Check file permissions for /path/to/vault and try again")
+  - Format: "save failed: {reason}. Your vault was not modified. {specific action}."
 - **FR-012**: System MUST handle disk space exhaustion gracefully without corrupting vault
 - **FR-013**: System MUST handle file permission errors without data loss
 - **FR-014**: System MUST use unique temporary file names combining timestamp and random suffix to prevent conflicts (e.g., `vault.enc.tmp.20251108-143022.a3f8c2`)

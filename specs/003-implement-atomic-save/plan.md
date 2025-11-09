@@ -121,7 +121,8 @@ internal/
 ├── storage/
 │   ├── storage.go           # MODIFIED: Replace SaveVault with atomic save pattern
 │   ├── storage_test.go      # MODIFIED: Add atomic save unit tests
-│   └── atomic_save.go       # NEW: Atomic save implementation (temp file + verify + rename)
+│   ├── atomic_save.go       # NEW: Atomic save implementation (temp file + verify + rename)
+│   └── errors.go            # NEW: Error type definitions (ErrVerificationFailed, etc.)
 ├── vault/
 │   └── vault.go             # MODIFIED: Update backup cleanup logic (remove old backup after unlock)
 └── crypto/

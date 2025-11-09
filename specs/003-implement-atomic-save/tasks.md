@@ -92,10 +92,12 @@
 - [ ] T014 [US1] Replace `SaveVault()` implementation in `internal/storage/storage.go`:
   - Step 1: Generate temp filename (call generateTempFileName)
   - Step 2: Write to temp file (call writeToTempFile)
+  - Step 3: Verification (placeholder - implemented by T020 in US2)
   - Step 4: Atomic rename vault → backup (call atomicRename)
   - Step 5: Atomic rename temp → vault (call atomicRename with fallback)
   - Log state transitions using existing audit infrastructure
   - Handle errors at each step with rollback
+  - Note: Step 3 verification is added by T020-T021 (US2 phase)
 - [ ] T015 [US1] Add audit logging for atomic save events in `SaveVault()`:
   - Log "atomic_save_started" (INFO level)
   - Log "temp_file_created" (DEBUG level)
@@ -272,11 +274,12 @@
   - `go test -coverprofile=coverage.out ./internal/storage`
   - `go tool cover -html=coverage.out -o coverage.html`
   - Assert: Coverage >80% per Constitution Principle IV
-- [ ] T044 Manual testing per quickstart.md debugging section:
+- [ ] T044 Manual testing per quickstart.md "Debugging Tips" section (lines 407-413):
   - Verify vault.enc, vault.enc.backup file presence after save
   - Verify backup removed after unlock
   - Check audit.log for all state transition events
   - Test crash recovery: kill -9 during save, verify vault still unlocks
+  - Verify file permissions: ls -l ~/.config/pass-cli/vault.enc* (should be 0600)
 - [ ] T045 Update CLAUDE.md Recent Changes section with atomic save feature summary
 
 ---
@@ -414,6 +417,20 @@ With multiple developers:
 - **Checkpoints**: Stop after each phase to validate story independently
 - **No shortcuts**: Follow spec exactly (per CLAUDE.md accuracy standards)
 - **Constitution compliance**: Verified in plan.md Constitution Check section
+
+---
+
+## Out of Scope (Per Spec.md)
+
+The following edge cases are explicitly out of scope per spec.md assumptions:
+- **Multi-process/concurrent vault access**: Single-process assumption per Constitution - no locking required
+- **Network filesystems (NFS, SMB)**: Atomic rename guarantees not applicable
+- **Multiple timestamped backups**: N-1 backup strategy sufficient
+
+If these become requirements in future:
+- Multi-process: Add file locking tasks (flock on Unix, LockFileEx on Windows)
+- Network FS: Add filesystem type detection and error handling tasks
+- Multiple backups: Add timestamped backup retention and cleanup tasks
 
 ---
 
