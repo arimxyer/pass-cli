@@ -1094,6 +1094,145 @@ pass-cli list --unused --days 90
 
 ---
 
+### Vault Save Interrupted / Orphaned Temporary Files
+
+**Symptom**: Save operation interrupted (crash, power loss, kill signal) or temporary files (`vault.enc.tmp.*`) left behind
+
+**Cause**: Atomic save process interrupted mid-operation
+
+**Background**: Pass-CLI uses an atomic save pattern to protect against corruption:
+1. Writes to temporary file (`vault.enc.tmp.TIMESTAMP.RANDOM`)
+2. Verifies temp file is decryptable
+3. Renames current vault to backup (`vault.enc.backup`)
+4. Renames temp file to vault (`vault.enc`)
+
+If interrupted, your vault remains safe at step 1-2 (old vault unchanged) or step 3-4 (backup exists).
+
+**Solutions**:
+
+1. **Check vault status after interruption**
+   ```bash
+   # Check which files exist
+   ls -la ~/.pass-cli/
+
+   # Files you may see:
+   # vault.enc                  - Current vault (may be old or new)
+   # vault.enc.backup           - Previous vault state
+   # vault.enc.tmp.20250109-*   - Orphaned temp file from crash
+   ```
+
+2. **Verify current vault is accessible**
+   ```bash
+   # Try to unlock vault
+   pass-cli list
+
+   # If this works, vault is fine
+   # Orphaned temp files can be safely deleted
+   ```
+
+3. **If current vault fails to unlock**
+   ```bash
+   # Check if backup exists
+   ls -la ~/.pass-cli/vault.enc.backup
+
+   # Restore from backup (contains N-1 state)
+   cp ~/.pass-cli/vault.enc.backup ~/.pass-cli/vault.enc
+
+   # Test restored vault
+   pass-cli list
+
+   # You may have lost your most recent changes,
+   # but vault is recovered
+   ```
+
+4. **Clean up orphaned temporary files**
+   ```bash
+   # List temp files
+   ls -la ~/.pass-cli/vault.enc.tmp.*
+
+   # Remove orphaned temp files (safe after vault verified)
+   rm ~/.pass-cli/vault.enc.tmp.*
+
+   # Note: pass-cli automatically cleans these up
+   # on next save operation
+   ```
+
+5. **Identify what was lost**
+   ```bash
+   # If you had to restore from backup, you lost:
+   # - Most recent credential addition/update/deletion
+   # - Most recent password change (if in progress)
+
+   # Check audit log if enabled
+   tail -20 ~/.pass-cli/audit.log
+
+   # Last successful operation shown in audit log
+   ```
+
+**Recovery Decision Matrix**:
+- `vault.enc` accessible → Keep it, delete temp files
+- `vault.enc` corrupted, `vault.enc.backup` exists → Restore backup
+- Both corrupted, `vault.enc.tmp.*` exists → Try unlocking temp file
+- All corrupted → Use external backup or reinitialize
+
+**Prevention**:
+- Regular backups to external location
+- Don't force-kill pass-cli during save operations
+- Ensure sufficient disk space before operations
+- Use UPS for desktop systems
+
+---
+
+### Understanding Vault Backup Lifecycle
+
+**Q: When is `vault.enc.backup` created and removed?**
+
+**A: Backup lifecycle with atomic save**:
+
+1. **Backup Created**: During save operation
+   ```bash
+   # Before save:
+   vault.enc (old data)
+
+   # During save:
+   vault.enc.tmp.20250109-143022.a1b2c3 (new data being written)
+
+   # After verification passes:
+   vault.enc → renamed to → vault.enc.backup (old data)
+   vault.enc.tmp.* → renamed to → vault.enc (new data)
+   ```
+
+2. **Backup Removed**: After next successful unlock
+   ```bash
+   # On next vault unlock:
+   # - Vault decrypts successfully
+   # - Backup is removed (no longer needed)
+   # - Only vault.enc remains
+   ```
+
+3. **Why this pattern?**
+   - Backup proves old vault was valid
+   - If new vault fails to decrypt, backup still available
+   - After successful unlock, new vault proven good
+   - Backup cleanup saves disk space
+
+**Implications**:
+- Backup contains N-1 generation (one save ago)
+- If save fails, backup has your last good state
+- If vault becomes corrupted between saves, backup may help
+- Backup removed after successful unlock (not kept permanently)
+
+**Manual Backup Recommended**:
+```bash
+# Backup before risky operations
+cp ~/.pass-cli/vault.enc ~/backups/vault-$(date +%Y%m%d).enc
+
+# Automated daily backup
+echo '0 0 * * * cp ~/.pass-cli/vault.enc ~/backups/vault-$(date +\%Y\%m\%d).enc' | crontab -
+```
+
+---
+
 ## Frequently Asked Questions
 
 ### General Questions

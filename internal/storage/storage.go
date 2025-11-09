@@ -27,6 +27,11 @@ var (
 	ErrAtomicWriteFailed = errors.New("atomic write operation failed")
 )
 
+// ProgressCallback is invoked at key stages during vault save operations.
+// event: stage identifier (e.g., "atomic_save_started", "verification_passed")
+// metadata: optional contextual information (e.g., file paths, timestamps)
+type ProgressCallback func(event string, metadata ...string)
+
 type VaultMetadata struct {
 	Version    int       `json:"version"`
 	CreatedAt  time.Time `json:"created_at"`
@@ -121,7 +126,12 @@ func (s *StorageService) LoadVault(password string) ([]byte, error) {
 	return plaintext, nil
 }
 
-func (s *StorageService) SaveVault(data []byte, password string) error {
+func (s *StorageService) SaveVault(data []byte, password string, callback ProgressCallback) error {
+	// T015: Notify audit logger of save operation start
+	if callback != nil {
+		callback("atomic_save_started", s.vaultPath)
+	}
+
 	// Load existing vault to get metadata
 	encryptedVault, err := s.loadEncryptedVault()
 	if err != nil {
@@ -148,6 +158,11 @@ func (s *StorageService) SaveVault(data []byte, password string) error {
 		return fmt.Errorf("save failed: %w (your vault was not modified)", err)
 	}
 
+	// T022: Notify after temp file created
+	if callback != nil {
+		callback("temp_file_created", tempPath)
+	}
+
 	// Ensure temp file cleanup on error
 	defer func() {
 		// Best-effort cleanup if we haven't renamed yet
@@ -155,23 +170,50 @@ func (s *StorageService) SaveVault(data []byte, password string) error {
 	}()
 
 	// Step 3: Verification (T021 - verify temp file is decryptable)
+	if callback != nil {
+		callback("verification_started", tempPath)
+	}
+
 	if err := s.verifyTempFile(tempPath, password); err != nil {
 		// Cleanup temp file on verification failure
 		_ = s.cleanupTempFile(tempPath)
 		return fmt.Errorf("save failed during verification (your vault was not modified): %w", err)
 	}
 
+	if callback != nil {
+		callback("verification_passed", tempPath)
+	}
+
 	// Step 4: Atomic rename (vault → backup)
 	backupPath := s.vaultPath + BackupSuffix
+	if callback != nil {
+		callback("atomic_rename_started", s.vaultPath, backupPath)
+	}
+
 	if err := s.atomicRename(s.vaultPath, backupPath); err != nil {
 		return fmt.Errorf("save failed: %w (your vault was not modified)", err)
 	}
 
 	// Step 5: Atomic rename (temp → vault)
+	if callback != nil {
+		callback("atomic_rename_started", tempPath, s.vaultPath)
+	}
+
 	if err := s.atomicRename(tempPath, s.vaultPath); err != nil {
 		// CRITICAL ERROR: Try to restore backup
+		if callback != nil {
+			callback("rollback_started", backupPath, s.vaultPath)
+		}
 		_ = s.atomicRename(backupPath, s.vaultPath)
+		if callback != nil {
+			callback("rollback_completed", s.vaultPath)
+		}
 		return fmt.Errorf("CRITICAL: save failed during final rename. Attempted automatic restore from backup. Error: %w", err)
+	}
+
+	// T034: Notify completion
+	if callback != nil {
+		callback("atomic_save_completed", s.vaultPath)
 	}
 
 	return nil

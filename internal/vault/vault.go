@@ -245,6 +245,40 @@ func (v *VaultService) LogAudit(eventType, outcome, credentialName string) {
 	}
 }
 
+// createAuditCallback returns a storage.ProgressCallback that logs atomic save events
+// to the audit log. Returns nil if audit logging is disabled.
+// T015/T022/T034: Integrate audit logging into atomic save operations
+func (v *VaultService) createAuditCallback() storage.ProgressCallback {
+	if !v.auditEnabled || v.auditLogger == nil {
+		return nil // No callback if audit disabled
+	}
+
+	// Return closure that maps storage events to audit entries
+	return func(event string, metadata ...string) {
+		// Map storage layer events to audit log entries
+		switch event {
+		case "atomic_save_started":
+			// Don't log - too verbose, save is part of higher-level operations
+		case "temp_file_created":
+			// Don't log - internal implementation detail
+		case "verification_started":
+			// Don't log - internal implementation detail
+		case "verification_passed":
+			// Don't log - internal implementation detail
+		case "atomic_rename_started":
+			// Don't log - internal implementation detail
+		case "rollback_started":
+			// Log rollback as it indicates a problem
+			v.LogAudit("vault_save", security.OutcomeFailure, "atomic save rollback initiated")
+		case "rollback_completed":
+			v.LogAudit("vault_save", security.OutcomeFailure, "atomic save rollback completed")
+		case "atomic_save_completed":
+			// Log successful completion
+			v.LogAudit("vault_save", security.OutcomeSuccess, "")
+		}
+	}
+}
+
 // Initialize creates a new vault with a master password
 // T010: Updated signature to accept []byte, T014: Added deferred cleanup
 // T045: Added password policy validation (FR-016)
@@ -315,7 +349,8 @@ func (v *VaultService) Initialize(masterPassword []byte, useKeychain bool, audit
 	}
 
 	// Save initial empty vault
-	if err := v.storageService.SaveVault(data, masterPasswordStr); err != nil {
+	// T015: Pass audit callback for atomic save logging
+	if err := v.storageService.SaveVault(data, masterPasswordStr, v.createAuditCallback()); err != nil {
 		return fmt.Errorf("failed to save initial vault: %w", err)
 	}
 
@@ -538,7 +573,8 @@ func (v *VaultService) save() error {
 	// Convert to string for storage service (TODO: Phase 4 will update storage.go to accept []byte)
 	masterPasswordStr := string(v.masterPassword)
 
-	if err := v.storageService.SaveVault(data, masterPasswordStr); err != nil {
+	// T022: Pass audit callback for atomic save logging
+	if err := v.storageService.SaveVault(data, masterPasswordStr, v.createAuditCallback()); err != nil {
 		return fmt.Errorf("failed to save vault: %w", err)
 	}
 
@@ -985,7 +1021,8 @@ func (v *VaultService) ChangePassword(newPassword []byte) error {
 			return fmt.Errorf("failed to save vault with new password: %w", err)
 		}
 	} else {
-		if err := v.storageService.SaveVault(data, newPasswordStr); err != nil {
+		// T034: Pass audit callback for atomic save logging
+		if err := v.storageService.SaveVault(data, newPasswordStr, v.createAuditCallback()); err != nil {
 			return fmt.Errorf("failed to save vault with new password: %w", err)
 		}
 	}

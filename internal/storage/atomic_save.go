@@ -32,6 +32,7 @@ func randomHexSuffix(length int) string {
 // writeToTempFile writes encrypted data to temporary file with vault permissions (T012)
 func (s *StorageService) writeToTempFile(path string, data []byte) error {
 	// Create temp file with vault permissions (0600)
+	// #nosec G304 -- Temp file path is generated internally with timestamp+random suffix
 	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, VaultPermissions)
 	if err != nil {
 		// Check for disk space or permission errors
@@ -62,6 +63,7 @@ func (s *StorageService) writeToTempFile(path string, data []byte) error {
 // verifyTempFile decrypts and validates temporary file before commit (T020)
 func (s *StorageService) verifyTempFile(path string, password string) error {
 	// Read temp file
+	// #nosec G304 -- Temp file path is generated internally with timestamp+random suffix
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("%w: cannot read temporary file: %v", ErrVerificationFailed, err)

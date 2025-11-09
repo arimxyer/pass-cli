@@ -137,7 +137,7 @@ func TestStorageService_LoadSaveVault(t *testing.T) {
 	}
 
 	// Save test data
-	if err := storage.SaveVault(testData, password); err != nil {
+	if err := storage.SaveVault(testData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -175,7 +175,7 @@ func TestStorageService_VaultNotFound(t *testing.T) {
 	}
 
 	// Test saving to non-existent vault
-	err = storage.SaveVault([]byte("data"), "password")
+	err = storage.SaveVault([]byte("data"), "password", nil)
 	if err != ErrVaultNotFound {
 		t.Errorf("Expected ErrVaultNotFound, got %v", err)
 	}
@@ -226,7 +226,7 @@ func TestStorageService_GetVaultInfo(t *testing.T) {
 	time.Sleep(10 * time.Millisecond) // Ensure time difference
 	originalUpdatedAt := info.UpdatedAt
 
-	if err := storage.SaveVault([]byte("new data"), password); err != nil {
+	if err := storage.SaveVault([]byte("new data"), password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -297,7 +297,7 @@ func TestStorageService_BackupRestore(t *testing.T) {
 		t.Fatalf("InitializeVault failed: %v", err)
 	}
 
-	if err := storage.SaveVault(originalData, password); err != nil {
+	if err := storage.SaveVault(originalData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -314,7 +314,7 @@ func TestStorageService_BackupRestore(t *testing.T) {
 
 	// Modify vault
 	modifiedData := []byte(`{"modified": "data"}`)
-	if err := storage.SaveVault(modifiedData, password); err != nil {
+	if err := storage.SaveVault(modifiedData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -378,7 +378,7 @@ func TestStorageService_AtomicWrite(t *testing.T) {
 
 	// Save some data
 	testData := []byte(`{"test": "data"}`)
-	if err := storage.SaveVault(testData, password); err != nil {
+	if err := storage.SaveVault(testData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -418,7 +418,7 @@ func TestStorageService_EmptyData(t *testing.T) {
 
 	// Save empty data
 	emptyData := []byte("")
-	if err := storage.SaveVault(emptyData, password); err != nil {
+	if err := storage.SaveVault(emptyData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed with empty data: %v", err)
 	}
 
@@ -548,7 +548,7 @@ func TestStorageService_AtomicWriteEdgeCases(t *testing.T) {
 	t.Run("Concurrent writes", func(t *testing.T) {
 		// Save initial data
 		initialData := []byte(`{"initial": "data"}`)
-		if err := storage.SaveVault(initialData, password); err != nil {
+		if err := storage.SaveVault(initialData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -556,11 +556,11 @@ func TestStorageService_AtomicWriteEdgeCases(t *testing.T) {
 		data1 := []byte(`{"write": "1"}`)
 		data2 := []byte(`{"write": "2"}`)
 
-		if err := storage.SaveVault(data1, password); err != nil {
+		if err := storage.SaveVault(data1, password, nil); err != nil {
 			t.Errorf("First write failed: %v", err)
 		}
 
-		if err := storage.SaveVault(data2, password); err != nil {
+		if err := storage.SaveVault(data2, password, nil); err != nil {
 			t.Errorf("Second write failed: %v", err)
 		}
 
@@ -583,7 +583,7 @@ func TestStorageService_AtomicWriteEdgeCases(t *testing.T) {
 			largeData[i] = byte(i % 256)
 		}
 
-		if err := storage.SaveVault(largeData, password); err != nil {
+		if err := storage.SaveVault(largeData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed with large data: %v", err)
 		}
 
@@ -607,7 +607,7 @@ func TestStorageService_AtomicWriteEdgeCases(t *testing.T) {
 
 		// Perform successful save
 		testData := []byte(`{"cleanup": "test"}`)
-		if err := storage.SaveVault(testData, password); err != nil {
+		if err := storage.SaveVault(testData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -643,7 +643,7 @@ func TestStorageService_PermissionScenarios(t *testing.T) {
 
 	t.Run("Correct permissions after write", func(t *testing.T) {
 		testData := []byte(`{"permission": "test"}`)
-		if err := storage.SaveVault(testData, password); err != nil {
+		if err := storage.SaveVault(testData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -730,7 +730,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 		data3 := []byte(`{"iteration": 3}`)
 
 		// Save data1 and backup
-		if err := storage.SaveVault(data1, password); err != nil {
+		if err := storage.SaveVault(data1, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 		if err := storage.CreateBackup(); err != nil {
@@ -738,7 +738,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 		}
 
 		// Save data2 (creates automatic backup)
-		if err := storage.SaveVault(data2, password); err != nil {
+		if err := storage.SaveVault(data2, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -748,7 +748,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 		}
 
 		// Save data3
-		if err := storage.SaveVault(data3, password); err != nil {
+		if err := storage.SaveVault(data3, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -769,7 +769,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 
 	t.Run("Backup file permissions", func(t *testing.T) {
 		data := []byte(`{"backup": "permissions"}`)
-		if err := storage.SaveVault(data, password); err != nil {
+		if err := storage.SaveVault(data, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -796,7 +796,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 
 	t.Run("Restore preserves metadata", func(t *testing.T) {
 		originalData := []byte(`{"preserve": "metadata"}`)
-		if err := storage.SaveVault(originalData, password); err != nil {
+		if err := storage.SaveVault(originalData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -814,7 +814,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 		// Modify vault
 		time.Sleep(10 * time.Millisecond)
 		modifiedData := []byte(`{"modified": "data"}`)
-		if err := storage.SaveVault(modifiedData, password); err != nil {
+		if err := storage.SaveVault(modifiedData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -845,7 +845,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 
 		// Save should create automatic backup
 		testData := []byte(`{"auto": "backup"}`)
-		if err := storage.SaveVault(testData, password); err != nil {
+		if err := storage.SaveVault(testData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -876,7 +876,7 @@ func TestStorageService_SaveFailureRecovery(t *testing.T) {
 	}
 
 	originalData := []byte(`{"original": "data"}`)
-	if err := storage.SaveVault(originalData, password); err != nil {
+	if err := storage.SaveVault(originalData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -1006,7 +1006,7 @@ func TestStorageService_AdditionalEdgeCases(t *testing.T) {
 
 		// Should be able to load with the same long password
 		testData := []byte(`{"test": "data"}`)
-		if err := storage.SaveVault(testData, longPassword); err != nil {
+		if err := storage.SaveVault(testData, longPassword, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -1032,7 +1032,7 @@ func TestStorageService_AdditionalEdgeCases(t *testing.T) {
 		// Data with various special characters and unicode
 		specialData := []byte(`{"unicode": "🔐🔑", "special": "!@#$%^&*()[]{}|\\/<>?", "null": "\u0000"}`)
 
-		if err := storage2.SaveVault(specialData, password); err != nil {
+		if err := storage2.SaveVault(specialData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed with special characters: %v", err)
 		}
 
@@ -1058,7 +1058,7 @@ func TestStorageService_AdditionalEdgeCases(t *testing.T) {
 		// Perform many rapid saves
 		for i := 0; i < 10; i++ {
 			data := []byte(`{"iteration": ` + string(rune(i+'0')) + `}`)
-			if err := storage3.SaveVault(data, password); err != nil {
+			if err := storage3.SaveVault(data, password, nil); err != nil {
 				t.Errorf("SaveVault failed on iteration %d: %v", i, err)
 			}
 		}
@@ -1101,7 +1101,7 @@ func TestStorageService_MetadataValidation(t *testing.T) {
 	// Save and verify UpdatedAt changes
 	time.Sleep(10 * time.Millisecond)
 	testData := []byte(`{"test": "metadata"}`)
-	if err := storage.SaveVault(testData, password); err != nil {
+	if err := storage.SaveVault(testData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -1194,13 +1194,13 @@ func TestAtomicSave_HappyPath(t *testing.T) {
 	}
 
 	initialData := []byte(`{"credentials": [{"name": "initial"}]}`)
-	if err := storage.SaveVault(initialData, password); err != nil {
+	if err := storage.SaveVault(initialData, password, nil); err != nil {
 		t.Fatalf("SaveVault initial failed: %v", err)
 	}
 
 	// Save new data (this should create backup of old data)
 	newData := []byte(`{"credentials": [{"name": "updated"}]}`)
-	if err := storage.SaveVault(newData, password); err != nil {
+	if err := storage.SaveVault(newData, password, nil); err != nil {
 		t.Fatalf("SaveVault new data failed: %v", err)
 	}
 
@@ -1260,7 +1260,7 @@ func TestAtomicSave_VerificationFailure(t *testing.T) {
 
 	// Save valid initial data
 	initialData := []byte(`{"credentials": [{"name": "initial"}]}`)
-	if err := storage.SaveVault(initialData, password); err != nil {
+	if err := storage.SaveVault(initialData, password, nil); err != nil {
 		t.Fatalf("SaveVault initial failed: %v", err)
 	}
 
@@ -1271,7 +1271,7 @@ func TestAtomicSave_VerificationFailure(t *testing.T) {
 	// Attempt to save with wrong password (should fail verification)
 	wrongPassword := "wrong-password"
 	corruptData := []byte(`{"credentials": [{"name": "corrupted"}]}`)
-	err = storage.SaveVault(corruptData, wrongPassword)
+	err = storage.SaveVault(corruptData, wrongPassword, nil)
 
 	// Should return error (verification should fail)
 	if err == nil {
@@ -1353,7 +1353,7 @@ func TestAtomicSave_OrphanedFileCleanup(t *testing.T) {
 
 	// Save vault - should cleanup orphaned files
 	testData := []byte(`{"credentials": [{"name": "test"}]}`)
-	if err := storage.SaveVault(testData, password); err != nil {
+	if err := storage.SaveVault(testData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -1397,7 +1397,7 @@ func TestAtomicSave_CleanupAfterSuccess(t *testing.T) {
 
 	// Perform save operation
 	testData := []byte(`{"credentials": [{"name": "test"}]}`)
-	if err := storage.SaveVault(testData, password); err != nil {
+	if err := storage.SaveVault(testData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -1485,7 +1485,7 @@ func TestAtomicSave_PermissionsInherited(t *testing.T) {
 
 	// Save vault - this creates temp file and renames it
 	testData := []byte(`{"credentials": [{"name": "test"}]}`)
-	if err := storage.SaveVault(testData, password); err != nil {
+	if err := storage.SaveVault(testData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -1564,7 +1564,7 @@ func BenchmarkSaveVault(b *testing.B) {
 
 	// Benchmark SaveVault operations
 	for i := 0; i < b.N; i++ {
-		if err := storage.SaveVault(testData, password); err != nil {
+		if err := storage.SaveVault(testData, password, nil); err != nil {
 			b.Fatalf("SaveVault failed: %v", err)
 		}
 	}

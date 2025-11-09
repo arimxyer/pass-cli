@@ -51,7 +51,7 @@ func TestAtomicSave_PowerLossSimulation(t *testing.T) {
 	}
 
 	initialData := []byte(`{"credentials": [{"name": "initial"}]}`)
-	if err := storageService.SaveVault(initialData, password); err != nil {
+	if err := storageService.SaveVault(initialData, password, nil); err != nil {
 		t.Fatalf("SaveVault initial failed: %v", err)
 	}
 
