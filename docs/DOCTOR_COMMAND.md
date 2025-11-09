@@ -139,7 +139,7 @@ esac
 **Symptom**:
 ```
 ⚠ Version: Update available: v1.2.3 → v1.2.4
-  Recommendation: Update to latest version: https://github.com/user/pass-cli/releases/tag/v1.2.4
+  Recommendation: Update to latest version: https://github.com/ari1110/pass-cli/releases/tag/v1.2.4
 ```
 
 **Solution**: Update pass-cli to the latest version using your package manager or download from GitHub.

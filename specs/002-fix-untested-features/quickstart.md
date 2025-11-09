@@ -160,7 +160,7 @@ import (
     "testing"
     "time"
 
-    "github.com/yourusername/pass-cli/internal/vault"
+    "github.com/ari1110/pass-cli/internal/vault"
     "github.com/stretchr/testify/assert"
     "github.com/stretchr/testify/require"
 )
@@ -229,7 +229,7 @@ package cmd
 import (
     "fmt"
     "github.com/spf13/cobra"
-    "github.com/yourusername/pass-cli/internal/vault"
+    "github.com/ari1110/pass-cli/internal/vault"
 )
 
 func init() {

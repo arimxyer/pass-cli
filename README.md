@@ -122,6 +122,9 @@ pass-cli delete github
 # Generate password
 pass-cli generate --length 32
 
+# Remove vault
+pass-cli vault remove
+
 # Health check
 pass-cli doctor
 ```

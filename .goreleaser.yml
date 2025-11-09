@@ -288,8 +288,22 @@ brews:
 
     # Caveats shown after installation
     caveats: |
-      To get started with Pass-CLI:
-        pass-cli --vault ~/.pass-cli.enc init
+      Pass-CLI: Secure password manager with TUI and CLI interfaces
+
+      First-time users: Run `pass-cli` (no arguments) for guided setup.
+
+      Quick start:
+        pass-cli          - Launch interactive TUI
+        pass-cli init     - Initialize vault manually
+        pass-cli doctor   - Run health checks
+
+      Features:
+        • Interactive TUI for visual management
+        • Keychain integration: pass-cli keychain enable
+        • Usage tracking and audit logging
+
+      Vault location: ~/.pass-cli/vault.enc
+      Complete guide: https://github.com/ari1110/pass-cli/blob/main/docs/GETTING_STARTED.md
 
 # Scoop bucket (automated manifest creation and updates)
 scoops:
@@ -311,5 +325,6 @@ scoops:
 
     # Post-install message (array of PowerShell commands)
     post_install:
-      - "Write-Host 'To get started with Pass-CLI:' -ForegroundColor Green"
-      - "Write-Host '  pass-cli --vault $env:USERPROFILE\\.pass-cli.enc init' -ForegroundColor Cyan"
+      - "Write-Host 'Pass-CLI installed! First-time: Run `pass-cli` for guided setup.' -ForegroundColor Green"
+      - "Write-Host 'TUI: pass-cli | Health check: pass-cli doctor | Enable keychain: pass-cli keychain enable' -ForegroundColor Cyan"
+      - "Write-Host 'Guide: https://github.com/ari1110/pass-cli/blob/main/docs/GETTING_STARTED.md' -ForegroundColor Yellow"

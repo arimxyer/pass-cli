@@ -233,23 +233,35 @@ pass-cli migrate --iterations 600000 --enable-audit
 
 1. **Create new vault in custom location**:
    ```bash
-   pass-cli --vault ~/.pass-cli/vault-new.enc init --enable-audit
+   # Create config for new vault
+   mkdir -p ~/.pass-cli
+   echo "vault_path: ~/.pass-cli/vault-new.enc" > ~/.pass-cli/config-new.yml
+
+   # Initialize new vault
+   pass-cli --config ~/.pass-cli/config-new.yml init --enable-audit
    ```
 
 2. **Add new credentials to new vault**:
    ```bash
-   pass-cli --vault ~/.pass-cli/vault-new.enc add newservice
+   pass-cli --config ~/.pass-cli/config-new.yml add newservice
    ```
 
 3. **Keep old vault for existing credentials**:
    ```bash
-   pass-cli --vault ~/.pass-cli/vault-old.enc get oldservice
+   # Use default config (points to ~/.pass-cli/vault.enc)
+   pass-cli get oldservice
    ```
 
 4. **Switch to new vault when ready**:
    ```bash
-   mv ~/.pass-cli/vault-old.enc ~/.pass-cli/vault-old-backup.enc
+   # Backup old vault
+   mv ~/.pass-cli/vault.enc ~/.pass-cli/vault-old-backup.enc
+
+   # Promote new vault to default
    mv ~/.pass-cli/vault-new.enc ~/.pass-cli/vault.enc
+
+   # Update default config (or remove custom config file)
+   rm ~/.pass-cli/config-new.yml
    ```
 
 ## Backward Compatibility

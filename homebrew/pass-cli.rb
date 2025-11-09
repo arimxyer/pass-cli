@@ -39,16 +39,22 @@ class PassCli < Formula
 
   def caveats
     <<~EOS
-      Pass-CLI is a secure password manager that stores credentials locally.
+      Pass-CLI: Secure password manager with TUI and CLI interfaces
 
-      To get started:
-        1. Initialize your vault: pass-cli init
-        2. Add a credential: pass-cli add myservice
-        3. Retrieve it: pass-cli get myservice
+      First-time users: Run `pass-cli` (no arguments) for guided setup.
 
-      Your vault is stored at: ~/.pass-cli/
+      Quick start:
+        pass-cli          - Launch interactive TUI
+        pass-cli init     - Initialize vault manually
+        pass-cli doctor   - Run health checks
 
-      For more information, run: pass-cli --help
+      Features:
+        • Interactive TUI for visual management
+        • Keychain integration: pass-cli keychain enable
+        • Usage tracking and audit logging
+
+      Vault location: ~/.pass-cli/vault.enc
+      Complete guide: https://github.com/ari1110/pass-cli/blob/main/docs/GETTING_STARTED.md
     EOS
   end
 

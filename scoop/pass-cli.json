@@ -34,24 +34,34 @@
   "post_install": [
     "Write-Host 'Pass-CLI has been installed successfully!' -ForegroundColor Green",
     "Write-Host ''",
-    "Write-Host 'To get started:' -ForegroundColor Yellow",
-    "Write-Host '  1. Initialize your vault: pass-cli init'",
-    "Write-Host '  2. Add a credential: pass-cli add myservice'",
-    "Write-Host '  3. Retrieve it: pass-cli get myservice'",
+    "Write-Host 'First-time users: Run `pass-cli` (no arguments) for guided setup.' -ForegroundColor Yellow",
     "Write-Host ''",
-    "Write-Host 'Your vault will be stored at: ~\\.pass-cli\\' -ForegroundColor Cyan",
-    "Write-Host 'For more information, run: pass-cli --help'"
+    "Write-Host 'Quick start:' -ForegroundColor Yellow",
+    "Write-Host '  pass-cli          - Launch interactive TUI'",
+    "Write-Host '  pass-cli init     - Initialize vault manually'",
+    "Write-Host '  pass-cli doctor   - Run health checks'",
+    "Write-Host ''",
+    "Write-Host 'Your vault will be stored at: ~\\.pass-cli\\vault.enc' -ForegroundColor Cyan",
+    "Write-Host 'Complete guide: https://github.com/ari1110/pass-cli/blob/main/docs/GETTING_STARTED.md'"
   ],
   "notes": [
-    "Pass-CLI stores credentials securely using Windows Credential Manager.",
-    "Your vault is encrypted with AES-256-GCM encryption.",
+    "Pass-CLI: Secure password manager with TUI and CLI interfaces",
     "",
-    "Quick start:",
-    "  pass-cli init       - Initialize a new vault",
-    "  pass-cli add <name> - Add a new credential",
-    "  pass-cli get <name> - Retrieve a credential",
-    "  pass-cli list       - List all credentials",
+    "Key Features:",
+    "  • Interactive TUI for visual credential management",
+    "  • Windows Credential Manager integration (enable: pass-cli keychain enable)",
+    "  • Health diagnostics (run: pass-cli doctor)",
+    "  • Usage tracking across projects",
+    "  • AES-256-GCM encryption with audit logging",
     "",
-    "Run 'pass-cli --help' for full documentation."
+    "Quick commands:",
+    "  pass-cli                 - Launch TUI (first-time: guided setup)",
+    "  pass-cli add <name>      - Add credential",
+    "  pass-cli get <name>      - Retrieve credential",
+    "  pass-cli list            - List all credentials",
+    "  pass-cli keychain enable - Enable auto-unlock",
+    "  pass-cli doctor          - Verify vault health",
+    "",
+    "Documentation: https://github.com/ari1110/pass-cli/blob/main/docs/GETTING_STARTED.md"
   ]
 }
