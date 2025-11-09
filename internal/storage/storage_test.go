@@ -1312,3 +1312,137 @@ func TestAtomicSave_MemoryClearing(t *testing.T) {
 	//
 	// For production, rely on defer crypto.ClearBytes(data) pattern in verifyTempFile
 }
+
+// T028 [US4] TestAtomicSave_OrphanedFileCleanup verifies orphaned temp files are removed
+// Acceptance: Orphaned files removed, new save completes successfully
+func TestAtomicSave_OrphanedFileCleanup(t *testing.T) {
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	password := "test-password"
+
+	// Initialize vault
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	// Create fake orphaned temp files (simulate crashed previous saves)
+	orphan1 := filepath.Join(tempDir, "vault.enc.tmp.20251108-120000.abc123")
+	orphan2 := filepath.Join(tempDir, "vault.enc.tmp.20251108-130000.def456")
+
+	if err := os.WriteFile(orphan1, []byte("orphaned data 1"), 0600); err != nil {
+		t.Fatalf("Failed to create orphan1: %v", err)
+	}
+	if err := os.WriteFile(orphan2, []byte("orphaned data 2"), 0600); err != nil {
+		t.Fatalf("Failed to create orphan2: %v", err)
+	}
+
+	// Verify orphaned files exist
+	if _, err := os.Stat(orphan1); os.IsNotExist(err) {
+		t.Fatal("orphan1 should exist before save")
+	}
+	if _, err := os.Stat(orphan2); os.IsNotExist(err) {
+		t.Fatal("orphan2 should exist before save")
+	}
+
+	// Save vault - should cleanup orphaned files
+	testData := []byte(`{"credentials": [{"name": "test"}]}`)
+	if err := storage.SaveVault(testData, password); err != nil {
+		t.Fatalf("SaveVault failed: %v", err)
+	}
+
+	// Verify orphaned files removed
+	if _, err := os.Stat(orphan1); !os.IsNotExist(err) {
+		t.Error("orphan1 should be removed after save")
+	}
+	if _, err := os.Stat(orphan2); !os.IsNotExist(err) {
+		t.Error("orphan2 should be removed after save")
+	}
+
+	// Verify new save completed successfully
+	loadedData, err := storage.LoadVault(password)
+	if err != nil {
+		t.Fatalf("LoadVault failed: %v", err)
+	}
+
+	if !bytes.Equal(loadedData, testData) {
+		t.Error("Save should succeed after cleanup")
+	}
+}
+
+// T029 [US4] TestAtomicSave_CleanupAfterSuccess verifies no temp files after successful save
+// Acceptance: Only vault.enc and vault.enc.backup exist (no temp files)
+func TestAtomicSave_CleanupAfterSuccess(t *testing.T) {
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	password := "test-password"
+
+	// Initialize vault
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	// Perform save operation
+	testData := []byte(`{"credentials": [{"name": "test"}]}`)
+	if err := storage.SaveVault(testData, password); err != nil {
+		t.Fatalf("SaveVault failed: %v", err)
+	}
+
+	// Check vault directory contents
+	entries, err := os.ReadDir(tempDir)
+	if err != nil {
+		t.Fatalf("ReadDir failed: %v", err)
+	}
+
+	// Should only have vault.enc and vault.enc.backup (no temp files)
+	expectedFiles := map[string]bool{
+		"vault.enc":        false,
+		"vault.enc.backup": false,
+	}
+
+	for _, entry := range entries {
+		if _, ok := expectedFiles[entry.Name()]; ok {
+			expectedFiles[entry.Name()] = true
+		} else {
+			// Any other file (like temp files) is unexpected
+			t.Errorf("Unexpected file in vault directory: %s", entry.Name())
+		}
+	}
+
+	// Verify expected files exist
+	if !expectedFiles["vault.enc"] {
+		t.Error("vault.enc should exist")
+	}
+	if !expectedFiles["vault.enc.backup"] {
+		t.Error("vault.enc.backup should exist")
+	}
+}
+
+// T030 [US4] TestAtomicSave_CleanupAfterUnlock verifies backup removed after unlock
+// Acceptance: Only vault.enc exists (backup removed)
+func TestAtomicSave_CleanupAfterUnlock(t *testing.T) {
+	t.Skip("Backup cleanup happens in vault.Unlock(), tested in vault package")
+
+	// This test would require:
+	// 1. Create vault service (not just storage)
+	// 2. Perform save (creates backup)
+	// 3. Lock vault
+	// 4. Unlock vault
+	// 5. Verify backup removed
+	//
+	// Since backup cleanup is in internal/vault/vault.go:Unlock() (lines 466-474),
+	// this is already tested in the vault package tests
+}
