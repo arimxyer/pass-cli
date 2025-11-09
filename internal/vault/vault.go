@@ -443,7 +443,7 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 				Version:         meta.Version,
 				AuditEnabled:    vaultData.AuditEnabled,
 				KeychainEnabled: meta.KeychainEnabled, // Preserve keychain setting
-				CreatedAt:       meta.CreatedAt,        // Preserve original timestamp
+				CreatedAt:       meta.CreatedAt,       // Preserve original timestamp
 			}
 
 			if err := SaveMetadata(v.vaultPath, updatedMeta); err != nil {

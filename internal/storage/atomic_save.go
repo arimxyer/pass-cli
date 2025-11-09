@@ -20,7 +20,12 @@ func (s *StorageService) generateTempFileName() string {
 // randomHexSuffix generates N-character hex suffix from crypto/rand
 func randomHexSuffix(length int) string {
 	bytes := make([]byte, length/2) // 2 hex chars per byte
-	rand.Read(bytes)                 // crypto/rand, not math/rand
+	// crypto/rand.Read always returns len(bytes), nil in practice
+	// Only returns error if Reader fails (extremely rare, indicates system issue)
+	if _, err := rand.Read(bytes); err != nil {
+		// Fallback to timestamp-based suffix if crypto/rand fails
+		return fmt.Sprintf("%d", time.Now().UnixNano()%1000000)
+	}
 	return fmt.Sprintf("%x", bytes)
 }
 
@@ -36,7 +41,10 @@ func (s *StorageService) writeToTempFile(path string, data []byte) error {
 		// Generic disk space or filesystem error
 		return fmt.Errorf("%w: %v", ErrDiskSpaceExhausted, err)
 	}
-	defer file.Close()
+	defer func() {
+		// Close is best-effort - file already synced, data is on disk
+		_ = file.Close()
+	}()
 
 	// Write encrypted vault data
 	if _, err := file.Write(data); err != nil {

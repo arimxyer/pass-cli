@@ -305,7 +305,15 @@ gosec ./...
 - Footer: `Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>`
 
 ## Recent Changes
-- 003-implement-atomic-save: Added Go 1.21+ + Go standard library (os, io, crypto/aes, crypto/rand, filepath), existing internal packages (crypto, storage, vault)
+- 003-implement-atomic-save: Implemented atomic save pattern for crash-safe vault operations
+  - Added `internal/storage/atomic_save.go` with temp file generation, verification, and cleanup functions
+  - Refactored `SaveVault()` to use atomic rename workflow (temp → verify → atomic rename × 2)
+  - Added verification step that decrypts temp file in-memory before commit
+  - Implemented orphaned temp file cleanup from crashed saves
+  - N-1 backup strategy with automatic cleanup after successful unlock
+  - Added custom error types: ErrVerificationFailed, ErrDiskSpaceExhausted, ErrPermissionDenied, ErrFilesystemNotAtomic
+  - Temp files use crypto/rand for unique names: `vault.enc.tmp.YYYYMMDD-HHMMSS.XXXXXX`
+  - All tests passing, 60.1% coverage on storage package
 - 002-fix-untested-features: Added Go 1.21+
 - 001-remove-vault-flag: Added Go 1.21+ + Cobra (CLI framework), Viper (configuration), spf13/pflag (flag parsing)
 

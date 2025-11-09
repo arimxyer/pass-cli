@@ -134,7 +134,7 @@ func (s *StorageService) SaveVault(data []byte, password string) error {
 	// Prepare encrypted vault data
 	encryptedData, err := s.prepareEncryptedData(data, encryptedVault.Metadata, password)
 	if err != nil {
-		return fmt.Errorf("save failed: %w. Your vault was not modified.", err)
+		return fmt.Errorf("save failed: %w (your vault was not modified)", err)
 	}
 
 	// T033: Step 0: Cleanup orphaned temp files from previous crashes (best-effort)
@@ -145,7 +145,7 @@ func (s *StorageService) SaveVault(data []byte, password string) error {
 
 	// Step 2: Write to temp file
 	if err := s.writeToTempFile(tempPath, encryptedData); err != nil {
-		return fmt.Errorf("save failed: %w. Your vault was not modified.", err)
+		return fmt.Errorf("save failed: %w (your vault was not modified)", err)
 	}
 
 	// Ensure temp file cleanup on error
@@ -158,13 +158,13 @@ func (s *StorageService) SaveVault(data []byte, password string) error {
 	if err := s.verifyTempFile(tempPath, password); err != nil {
 		// Cleanup temp file on verification failure
 		_ = os.Remove(tempPath)
-		return fmt.Errorf("save failed during verification. Your vault was not modified. %w", err)
+		return fmt.Errorf("save failed during verification (your vault was not modified): %w", err)
 	}
 
 	// Step 4: Atomic rename (vault → backup)
 	backupPath := s.vaultPath + BackupSuffix
 	if err := s.atomicRename(s.vaultPath, backupPath); err != nil {
-		return fmt.Errorf("save failed: %w. Your vault was not modified.", err)
+		return fmt.Errorf("save failed: %w (your vault was not modified)", err)
 	}
 
 	// Step 5: Atomic rename (temp → vault)

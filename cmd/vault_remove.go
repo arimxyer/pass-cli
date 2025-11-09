@@ -13,9 +13,9 @@ import (
 )
 
 var (
-	yesFlag    bool
-	forceFlag  bool
-	removeAll  bool
+	yesFlag   bool
+	forceFlag bool
+	removeAll bool
 )
 
 var vaultRemoveCmd = &cobra.Command{
