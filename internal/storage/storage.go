@@ -137,7 +137,10 @@ func (s *StorageService) SaveVault(data []byte, password string) error {
 		return fmt.Errorf("save failed: %w. Your vault was not modified.", err)
 	}
 
-	// T014: Atomic save pattern - Step 1: Generate temp filename
+	// T033: Step 0: Cleanup orphaned temp files from previous crashes (best-effort)
+	s.cleanupOrphanedTempFiles("")
+
+	// T014: Step 1: Generate temp filename
 	tempPath := s.generateTempFileName()
 
 	// Step 2: Write to temp file

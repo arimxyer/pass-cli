@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -98,13 +99,36 @@ func (s *StorageService) atomicRename(oldPath, newPath string) error {
 	return nil
 }
 
-// cleanupTempFile removes temporary file (best-effort, logs warning if fails)
+// cleanupTempFile removes temporary file (best-effort, logs warning if fails) (T031)
 func (s *StorageService) cleanupTempFile(path string) error {
-	// TODO: Implement in User Story 4 (T031)
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		// Log warning but don't fail - cleanup is non-critical
+		fmt.Fprintf(os.Stderr, "Warning: failed to remove temporary file %s: %v\n", path, err)
+		return err
+	}
 	return nil
 }
 
-// cleanupOrphanedTempFiles removes old temp files from crashed previous saves
+// cleanupOrphanedTempFiles removes old temp files from crashed previous saves (T032)
 func (s *StorageService) cleanupOrphanedTempFiles(currentTempPath string) {
-	// TODO: Implement in User Story 4 (T032)
+	vaultDir := filepath.Dir(s.vaultPath)
+	pattern := filepath.Join(vaultDir, "*.tmp.*")
+
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		// Best-effort cleanup, ignore glob errors
+		return
+	}
+
+	for _, orphan := range matches {
+		// Don't delete current temp file
+		if orphan == currentTempPath {
+			continue
+		}
+
+		// Remove orphaned file from previous crashed save
+		if err := os.Remove(orphan); err != nil && !os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "Warning: failed to remove orphaned temp file %s: %v\n", orphan, err)
+		}
+	}
 }
