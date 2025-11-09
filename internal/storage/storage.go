@@ -151,13 +151,13 @@ func (s *StorageService) SaveVault(data []byte, password string) error {
 	// Ensure temp file cleanup on error
 	defer func() {
 		// Best-effort cleanup if we haven't renamed yet
-		_ = os.Remove(tempPath)
+		_ = s.cleanupTempFile(tempPath)
 	}()
 
 	// Step 3: Verification (T021 - verify temp file is decryptable)
 	if err := s.verifyTempFile(tempPath, password); err != nil {
 		// Cleanup temp file on verification failure
-		_ = os.Remove(tempPath)
+		_ = s.cleanupTempFile(tempPath)
 		return fmt.Errorf("save failed during verification (your vault was not modified): %w", err)
 	}
 
