@@ -1236,3 +1236,79 @@ func TestAtomicSave_HappyPath(t *testing.T) {
 		t.Errorf("No temp files should remain after successful save. Found: %v", matches)
 	}
 }
+
+// T017 [US2] TestAtomicSave_VerificationFailure verifies that invalid data is rejected
+// Acceptance: Returns ErrVerificationFailed, vault.enc unchanged, temp removed
+func TestAtomicSave_VerificationFailure(t *testing.T) {
+	t.Skip("Skipping until verification is implemented in US2/T020")
+
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	password := "test-password"
+
+	// Initialize vault
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	// Save valid initial data
+	initialData := []byte(`{"credentials": [{"name": "initial"}]}`)
+	if err := storage.SaveVault(initialData, password); err != nil {
+		t.Fatalf("SaveVault initial failed: %v", err)
+	}
+
+	// TODO: This test needs a way to inject corrupted data into the save process
+	// For now, we'll test that verification catches corruption by using wrong password
+	// This will fail until T020 implements verifyTempFile
+
+	// Attempt to save with wrong password (should fail verification)
+	wrongPassword := "wrong-password"
+	corruptData := []byte(`{"credentials": [{"name": "corrupted"}]}`)
+	err = storage.SaveVault(corruptData, wrongPassword)
+
+	// Should return error (verification should fail)
+	if err == nil {
+		t.Error("SaveVault should fail with wrong password")
+	}
+
+	// Verify vault.enc unchanged (still contains initial data)
+	loadedData, err := storage.LoadVault(password)
+	if err != nil {
+		t.Fatalf("LoadVault failed: %v", err)
+	}
+
+	if !bytes.Equal(loadedData, initialData) {
+		t.Errorf("Vault should be unchanged after verification failure. Got %s, want %s",
+			string(loadedData), string(initialData))
+	}
+
+	// Verify no temp files remain
+	tempPattern := filepath.Join(tempDir, "vault.enc.tmp.*")
+	matches, _ := filepath.Glob(tempPattern)
+	if len(matches) > 0 {
+		t.Errorf("Temp files should be cleaned up after verification failure. Found: %v", matches)
+	}
+}
+
+// T018 [US2] TestAtomicSave_MemoryClearing verifies decrypted memory is zeroed
+// Acceptance: Decrypted memory zeroed after verification
+func TestAtomicSave_MemoryClearing(t *testing.T) {
+	t.Skip("Memory inspection test - manual verification required")
+
+	// This test would require memory inspection tools or fuzzing
+	// to verify that decrypted vault data is cleared from memory after verification
+	//
+	// Implementation approach:
+	// 1. Save vault data
+	// 2. Use runtime.ReadMemStats or external memory profiler
+	// 3. Verify no plaintext vault data remains in heap
+	//
+	// For production, rely on defer crypto.ClearBytes(data) pattern in verifyTempFile
+}

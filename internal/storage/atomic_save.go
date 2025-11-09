@@ -2,6 +2,7 @@ package storage
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -49,9 +50,38 @@ func (s *StorageService) writeToTempFile(path string, data []byte) error {
 	return nil
 }
 
-// verifyTempFile decrypts and validates temporary file before commit
+// verifyTempFile decrypts and validates temporary file before commit (T020)
 func (s *StorageService) verifyTempFile(path string, password string) error {
-	// TODO: Implement in User Story 2 (T020)
+	// Read temp file
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("%w: cannot read temporary file: %v", ErrVerificationFailed, err)
+	}
+
+	// Parse as EncryptedVault structure
+	var encryptedVault EncryptedVault
+	if err := json.Unmarshal(data, &encryptedVault); err != nil {
+		return fmt.Errorf("%w: invalid vault structure: %v", ErrVerificationFailed, err)
+	}
+
+	// Derive key from password and salt
+	key, err := s.cryptoService.DeriveKey([]byte(password), encryptedVault.Metadata.Salt, encryptedVault.Metadata.Iterations)
+	if err != nil {
+		return fmt.Errorf("%w: failed to derive key: %v", ErrVerificationFailed, err)
+	}
+	defer s.cryptoService.ClearKey(key)
+
+	// Decrypt vault data (in-memory verification)
+	decryptedData, err := s.cryptoService.Decrypt(encryptedVault.Data, key)
+	if err != nil {
+		return fmt.Errorf("%w: encrypted data could not be decrypted: %v", ErrVerificationFailed, err)
+	}
+	// CRITICAL: Clear decrypted memory immediately after validation
+	defer s.cryptoService.ClearData(decryptedData)
+
+	// Verification successful - data decrypts correctly
+	// Note: JSON structure validation is the responsibility of the vault layer
+	// Storage layer only verifies that data can be decrypted successfully
 	return nil
 }
 

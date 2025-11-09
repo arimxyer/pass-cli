@@ -151,8 +151,12 @@ func (s *StorageService) SaveVault(data []byte, password string) error {
 		_ = os.Remove(tempPath)
 	}()
 
-	// Step 3: Verification (placeholder - will be implemented in US2/T020)
-	// verifyTempFile will be added here
+	// Step 3: Verification (T021 - verify temp file is decryptable)
+	if err := s.verifyTempFile(tempPath, password); err != nil {
+		// Cleanup temp file on verification failure
+		_ = os.Remove(tempPath)
+		return fmt.Errorf("save failed during verification. Your vault was not modified. %w", err)
+	}
 
 	// Step 4: Atomic rename (vault → backup)
 	backupPath := s.vaultPath + BackupSuffix

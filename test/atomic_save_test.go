@@ -90,3 +90,22 @@ func TestAtomicSave_PowerLossSimulation(t *testing.T) {
 		})
 	}
 }
+
+// T019 [US2] TestAtomicSave_SecurityNoCredentialLogging verifies no sensitive data in logs
+// Acceptance: Audit log NEVER contains decrypted vault content or passwords
+func TestAtomicSave_SecurityNoCredentialLogging(t *testing.T) {
+	t.Skip("Security test - requires audit log inspection, deferred to polish phase")
+
+	// This test would:
+	// 1. Enable verbose logging / audit logging
+	// 2. Perform save operation with real credentials
+	// 3. Read audit log file
+	// 4. Verify log contains only operation outcomes (success/fail)
+	// 5. Verify log NEVER contains:
+	//    - Decrypted vault content
+	//    - Master password
+	//    - Credential values
+	//    - Encryption keys
+	//
+	// Implementation deferred until audit logging is integrated (T015)
+}
