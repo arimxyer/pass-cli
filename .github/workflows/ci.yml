@@ -184,5 +184,5 @@ jobs:
       - name: Run GoReleaser (snapshot)
         uses: goreleaser/goreleaser-action@v6
         with:
-          version: latest
+          version: '~> v6'
           args: build --snapshot --clean
