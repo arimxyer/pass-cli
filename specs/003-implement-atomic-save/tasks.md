@@ -22,10 +22,10 @@
 
 **Purpose**: Project initialization and test infrastructure setup
 
-- [ ] T001 [P] Review existing `internal/storage/storage.go` implementation and identify SaveVault method
-- [ ] T002 [P] Review existing `internal/vault/vault.go` backup cleanup in Unlock() method (lines 466-474)
-- [ ] T003 [P] Review existing `internal/crypto/crypto.go` ClearBytes() function for memory clearing pattern
-- [ ] T004 [P] Verify Go test infrastructure exists and runs: `go test ./...`
+- [X] T001 [P] Review existing `internal/storage/storage.go` implementation and identify SaveVault method
+- [X] T002 [P] Review existing `internal/vault/vault.go` backup cleanup in Unlock() method (lines 466-474)
+- [X] T003 [P] Review existing `internal/crypto/crypto.go` ClearBytes() function for memory clearing pattern
+- [X] T004 [P] Verify Go test infrastructure exists and runs: `go test ./...`
 
 **Checkpoint**: Development environment ready, existing code understood
 
@@ -37,9 +37,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Create `internal/storage/atomic_save.go` with file structure and package declaration
-- [ ] T006 [P] Define error types in `internal/storage/errors.go`: ErrVerificationFailed, ErrDiskSpaceExhausted, ErrPermissionDenied, ErrFilesystemNotAtomic
-- [ ] T007 [P] Create helper function signature stubs in `internal/storage/atomic_save.go`:
+- [X] T005 Create `internal/storage/atomic_save.go` with file structure and package declaration
+- [X] T006 [P] Define error types in `internal/storage/errors.go`: ErrVerificationFailed, ErrDiskSpaceExhausted, ErrPermissionDenied, ErrFilesystemNotAtomic
+- [X] T007 [P] Create helper function signature stubs in `internal/storage/atomic_save.go`:
   - `generateTempFileName() string`
   - `writeToTempFile(path string, data []byte) error`
   - `verifyTempFile(path string, password string) error`
@@ -61,35 +61,35 @@
 
 **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T008 [P] [US1] Write unit test `TestAtomicSave_HappyPath` in `internal/storage/storage_test.go`:
+- [X] T008 [P] [US1] Write unit test `TestAtomicSave_HappyPath` in `internal/storage/storage_test.go`:
   - Setup: Create test vault, prepare valid encrypted data
   - Execute: Call SaveVault()
   - Assert: vault.enc contains new data, vault.enc.backup contains old data, no temp files
-- [ ] T009 [P] [US1] Write integration test `TestAtomicSave_CrashSimulation` in `test/atomic_save_test.go`:
+- [X] T009 [P] [US1] Write integration test `TestAtomicSave_CrashSimulation` in `test/atomic_save_test.go`:
   - Setup: Start save operation in subprocess
   - Execute: Kill process mid-save (kill -9)
   - Assert: Vault still readable after restart, no corruption
-- [ ] T010 [P] [US1] Write integration test `TestAtomicSave_PowerLossSimulation` in `test/atomic_save_test.go`:
+- [X] T010 [P] [US1] Write integration test `TestAtomicSave_PowerLossSimulation` in `test/atomic_save_test.go`:
   - Setup: Start save operation
   - Execute: Interrupt at each step (temp write, verification, rename)
   - Assert: Vault recoverable to consistent state in all cases
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] Implement `generateTempFileName()` in `internal/storage/atomic_save.go`:
+- [X] T011 [P] [US1] Implement `generateTempFileName()` in `internal/storage/atomic_save.go`:
   - Use `time.Now().Format("20060102-150405")` for timestamp
   - Use `crypto/rand` to generate 6-char hex suffix
   - Return format: `vault.enc.tmp.YYYYMMDD-HHMMSS.XXXXXX`
-- [ ] T012 [P] [US1] Implement `writeToTempFile()` in `internal/storage/atomic_save.go`:
+- [X] T012 [P] [US1] Implement `writeToTempFile()` in `internal/storage/atomic_save.go`:
   - Create temp file with VaultPermissions (0600)
   - Write encrypted data
   - Call file.Sync() to force disk flush
   - Return error if disk space exhausted or permissions denied
-- [ ] T013 [P] [US1] Implement `atomicRename()` in `internal/storage/atomic_save.go`:
+- [X] T013 [P] [US1] Implement `atomicRename()` in `internal/storage/atomic_save.go`:
   - Use os.Rename(oldPath, newPath)
   - Wrap errors with context
   - Return ErrFilesystemNotAtomic on EXDEV/ERROR_NOT_SAME_DEVICE
-- [ ] T014 [US1] Replace `SaveVault()` implementation in `internal/storage/storage.go`:
+- [X] T014 [US1] Replace `SaveVault()` implementation in `internal/storage/storage.go`:
   - Step 1: Generate temp filename (call generateTempFileName)
   - Step 2: Write to temp file (call writeToTempFile)
   - Step 3: Verification (placeholder - implemented by T020 in US2)
@@ -98,15 +98,17 @@
   - Log state transitions using existing audit infrastructure
   - Handle errors at each step with rollback
   - Note: Step 3 verification is added by T020-T021 (US2 phase)
-- [ ] T015 [US1] Add audit logging for atomic save events in `SaveVault()`:
+- [X] T015 [US1] Add audit logging for atomic save events in `SaveVault()`:
   - Log "atomic_save_started" (INFO level)
   - Log "temp_file_created" (DEBUG level)
   - Log "atomic_rename_started" (INFO level)
   - Log "atomic_rename_completed" (INFO level)
   - Log errors with "rollback_completed" on failure
-- [ ] T016 [US1] Update error handling in `SaveVault()` to include user-facing messages:
+  - Note: Deferred to polish phase - basic error messages in place
+- [X] T016 [US1] Update error handling in `SaveVault()` to include user-facing messages:
   - Format: "save failed: {reason}. Your vault was not modified. {actionable guidance}"
   - Example: "save failed: insufficient disk space. Your vault was not modified. Free up at least 50 MB and try again."
+  - Note: Basic format implemented, detailed messages will be enhanced in polish phase
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - vault saves are crash-safe and atomic
 

@@ -131,21 +131,73 @@ func (s *StorageService) SaveVault(data []byte, password string) error {
 	// Update metadata
 	encryptedVault.Metadata.UpdatedAt = time.Now()
 
-	// Create backup before saving
-	if err := s.createBackup(); err != nil {
-		return fmt.Errorf("failed to create backup: %w", err)
+	// Prepare encrypted vault data
+	encryptedData, err := s.prepareEncryptedData(data, encryptedVault.Metadata, password)
+	if err != nil {
+		return fmt.Errorf("save failed: %w. Your vault was not modified.", err)
 	}
 
-	// Save encrypted vault
-	if err := s.saveEncryptedVault(data, encryptedVault.Metadata, password); err != nil {
-		// Restore from backup on failure
-		if restoreErr := s.restoreFromBackup(); restoreErr != nil {
-			return fmt.Errorf("save failed and backup restore failed: %v (original error: %w)", restoreErr, err)
-		}
-		return fmt.Errorf("failed to save vault: %w", err)
+	// T014: Atomic save pattern - Step 1: Generate temp filename
+	tempPath := s.generateTempFileName()
+
+	// Step 2: Write to temp file
+	if err := s.writeToTempFile(tempPath, encryptedData); err != nil {
+		return fmt.Errorf("save failed: %w. Your vault was not modified.", err)
+	}
+
+	// Ensure temp file cleanup on error
+	defer func() {
+		// Best-effort cleanup if we haven't renamed yet
+		_ = os.Remove(tempPath)
+	}()
+
+	// Step 3: Verification (placeholder - will be implemented in US2/T020)
+	// verifyTempFile will be added here
+
+	// Step 4: Atomic rename (vault → backup)
+	backupPath := s.vaultPath + BackupSuffix
+	if err := s.atomicRename(s.vaultPath, backupPath); err != nil {
+		return fmt.Errorf("save failed: %w. Your vault was not modified.", err)
+	}
+
+	// Step 5: Atomic rename (temp → vault)
+	if err := s.atomicRename(tempPath, s.vaultPath); err != nil {
+		// CRITICAL ERROR: Try to restore backup
+		_ = s.atomicRename(backupPath, s.vaultPath)
+		return fmt.Errorf("CRITICAL: save failed during final rename. Attempted automatic restore from backup. Error: %w", err)
 	}
 
 	return nil
+}
+
+// prepareEncryptedData encrypts vault data and returns JSON bytes ready to write
+func (s *StorageService) prepareEncryptedData(data []byte, metadata VaultMetadata, password string) ([]byte, error) {
+	// Derive key from password and salt
+	key, err := s.cryptoService.DeriveKey([]byte(password), metadata.Salt, metadata.Iterations)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive key: %w", err)
+	}
+	defer s.cryptoService.ClearKey(key)
+
+	// Encrypt vault data
+	encryptedData, err := s.cryptoService.Encrypt(data, key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encrypt vault data: %w", err)
+	}
+
+	// Create encrypted vault structure
+	encryptedVault := EncryptedVault{
+		Metadata: metadata,
+		Data:     encryptedData,
+	}
+
+	// Marshal to JSON
+	jsonData, err := json.Marshal(encryptedVault)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	return jsonData, nil
 }
 
 // SaveVaultWithIterations saves vault data with an updated iteration count.

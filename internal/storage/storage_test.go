@@ -1173,3 +1173,66 @@ func TestStorageService_BackwardCompatibleIterations(t *testing.T) {
 	//
 	// t.Logf("Legacy vault loaded with iterations: %d", info.Iterations)
 }
+
+// T008 [US1] TestAtomicSave_HappyPath verifies successful atomic save operation
+// Acceptance: vault.enc contains new data, vault.enc.backup contains old data, no temp files
+func TestAtomicSave_HappyPath(t *testing.T) {
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	password := "test-password"
+
+	// Initialize vault with initial data
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	initialData := []byte(`{"credentials": [{"name": "initial"}]}`)
+	if err := storage.SaveVault(initialData, password); err != nil {
+		t.Fatalf("SaveVault initial failed: %v", err)
+	}
+
+	// Save new data (this should create backup of old data)
+	newData := []byte(`{"credentials": [{"name": "updated"}]}`)
+	if err := storage.SaveVault(newData, password); err != nil {
+		t.Fatalf("SaveVault new data failed: %v", err)
+	}
+
+	// Verify vault.enc contains new data
+	loadedData, err := storage.LoadVault(password)
+	if err != nil {
+		t.Fatalf("LoadVault failed: %v", err)
+	}
+
+	if !bytes.Equal(loadedData, newData) {
+		t.Errorf("Vault should contain new data. Got %s, want %s", string(loadedData), string(newData))
+	}
+
+	// Verify vault.enc.backup contains old data (N-1 generation)
+	backupPath := vaultPath + BackupSuffix
+	backupExists := false
+	if _, err := os.Stat(backupPath); err == nil {
+		backupExists = true
+	}
+
+	if !backupExists {
+		t.Error("Backup file should exist after save")
+	}
+
+	// Verify no orphaned temp files exist
+	tempPattern := filepath.Join(tempDir, "vault.enc.tmp.*")
+	matches, err := filepath.Glob(tempPattern)
+	if err != nil {
+		t.Fatalf("Glob failed: %v", err)
+	}
+
+	if len(matches) > 0 {
+		t.Errorf("No temp files should remain after successful save. Found: %v", matches)
+	}
+}
