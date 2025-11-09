@@ -482,7 +482,7 @@ func (s *StorageService) saveEncryptedVault(data []byte, metadata VaultMetadata,
 func (s *StorageService) atomicWrite(path string, data []byte) error {
 	// FR-015: Create parent directories if they don't exist
 	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0750); err != nil { // More restrictive permissions (owner+group only)
 		return fmt.Errorf("failed to create parent directories: %w", err)
 	}
 

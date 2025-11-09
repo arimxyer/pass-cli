@@ -24,6 +24,7 @@ func MetadataPath(vaultPath string) string {
 // LoadMetadata loads metadata from disk, returns default if file missing
 func LoadMetadata(vaultPath string) (*Metadata, error) {
 	path := MetadataPath(vaultPath)
+	// #nosec G304 -- vault path is user-controlled by design for CLI tool
 	data, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
 		// Legacy vault - return default metadata (FR-001)
