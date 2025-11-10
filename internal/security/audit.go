@@ -46,9 +46,10 @@ const (
 
 // Outcome constants
 const (
-	OutcomeSuccess = "success"
-	OutcomeFailure = "failure"
-	OutcomeAttempt = "attempt"
+	OutcomeSuccess    = "success"
+	OutcomeFailure    = "failure"
+	OutcomeAttempt    = "attempt"
+	OutcomeInProgress = "in_progress" // FR-015: For intermediate states during operations
 )
 
 // T059: AuditLogger manages tamper-evident audit logging

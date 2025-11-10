@@ -186,6 +186,10 @@ func (s *StorageService) SaveVault(data []byte, password string, callback Progre
 	}
 
 	if err := s.verifyTempFile(tempPath, password); err != nil {
+		// FR-015: Log verification failure BEFORE cleanup
+		if callback != nil {
+			callback("verification_failed", tempPath, err.Error())
+		}
 		// Cleanup temp file on verification failure
 		_ = s.cleanupTempFile(tempPath)
 		return actionableErrorMessage(err)

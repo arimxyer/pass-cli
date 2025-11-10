@@ -248,6 +248,7 @@ func (v *VaultService) LogAudit(eventType, outcome, credentialName string) {
 // createAuditCallback returns a storage.ProgressCallback that logs atomic save events
 // to the audit log. Returns nil if audit logging is disabled.
 // T015/T022/T034: Integrate audit logging into atomic save operations
+// FR-015: Log ALL atomic save state transitions
 func (v *VaultService) createAuditCallback() storage.ProgressCallback {
 	if !v.auditEnabled || v.auditLogger == nil {
 		return nil // No callback if audit disabled
@@ -255,26 +256,49 @@ func (v *VaultService) createAuditCallback() storage.ProgressCallback {
 
 	// Return closure that maps storage events to audit entries
 	return func(event string, metadata ...string) {
-		// Map storage layer events to audit log entries
+		// FR-015: Log ALL atomic save state transitions
 		switch event {
 		case "atomic_save_started":
-			// Don't log - too verbose, save is part of higher-level operations
+			v.LogAudit("vault_save", security.OutcomeInProgress, "vault save operation initiated")
+
 		case "temp_file_created":
-			// Don't log - internal implementation detail
+			tempPath := ""
+			if len(metadata) > 0 {
+				tempPath = filepath.Base(metadata[0]) // Log filename only, not full path
+			}
+			v.LogAudit("vault_save", security.OutcomeInProgress, fmt.Sprintf("temporary file created: %s", tempPath))
+
 		case "verification_started":
-			// Don't log - internal implementation detail
+			v.LogAudit("vault_save", security.OutcomeInProgress, "vault verification started")
+
 		case "verification_passed":
-			// Don't log - internal implementation detail
+			v.LogAudit("vault_save", security.OutcomeInProgress, "vault verification passed")
+
+		case "verification_failed":
+			reason := "unknown"
+			if len(metadata) > 1 {
+				reason = metadata[1]
+			}
+			v.LogAudit("vault_save", security.OutcomeFailure, fmt.Sprintf("vault verification failed: %s", reason))
+
 		case "atomic_rename_started":
-			// Don't log - internal implementation detail
+			// Log rename operations (called twice during save)
+			oldFile := ""
+			newFile := ""
+			if len(metadata) >= 2 {
+				oldFile = filepath.Base(metadata[0])
+				newFile = filepath.Base(metadata[1])
+			}
+			v.LogAudit("vault_save", security.OutcomeInProgress, fmt.Sprintf("atomic rename: %s → %s", oldFile, newFile))
+
 		case "rollback_started":
-			// Log rollback as it indicates a problem
 			v.LogAudit("vault_save", security.OutcomeFailure, "atomic save rollback initiated")
+
 		case "rollback_completed":
 			v.LogAudit("vault_save", security.OutcomeFailure, "atomic save rollback completed")
+
 		case "atomic_save_completed":
-			// Log successful completion
-			v.LogAudit("vault_save", security.OutcomeSuccess, "")
+			v.LogAudit("vault_save", security.OutcomeSuccess, "vault save completed successfully")
 		}
 	}
 }
