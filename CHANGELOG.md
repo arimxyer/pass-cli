@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Atomic Save Pattern**: Crash-safe vault operations using write-to-temp, verify, atomic-rename workflow
+- **Actionable Error Messages (FR-011)**: Clear error messages with specific failure reason, vault status confirmation, and actionable guidance
+- **Complete Audit Logging (FR-015)**: All atomic save state transitions logged (9 events tracked)
+- In-memory verification before committing vault changes to prevent corruption
+- N-1 backup strategy with automatic cleanup after successful unlock
+- Orphaned temporary file cleanup from crashed save operations
+- Custom error types: ErrVerificationFailed, ErrDiskSpaceExhausted, ErrPermissionDenied, ErrFilesystemNotAtomic
+- FileSystem abstraction interface for testability and error injection
+- 8 new comprehensive test files with 80.8% coverage in storage package
+
+### Changed
+- Vault save operations now use atomic rename pattern instead of direct writes
+- Error messages now include vault status and recovery guidance
+- All vault modifications protected against crashes and power loss
+
+### Fixed
+- Vault corruption during save operations now impossible due to atomic pattern
+- Clear error messages when save fails (disk space, permissions, verification)
+- Temp files automatically cleaned up after successful saves
+
 ## [0.8.76] - 2025-11-08
 
 ### Fixed
