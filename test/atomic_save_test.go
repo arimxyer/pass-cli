@@ -4,11 +4,8 @@ package test
 
 import (
 	"bytes"
-	"os"
-	"os/exec"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"pass-cli/internal/crypto"
 	"pass-cli/internal/storage"
