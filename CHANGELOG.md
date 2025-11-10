@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2025-11-10
+
 ### Added
 - **Atomic Save Pattern**: Crash-safe vault operations using write-to-temp, verify, atomic-rename workflow
 - **Actionable Error Messages (FR-011)**: Clear error messages with specific failure reason, vault status confirmation, and actionable guidance
