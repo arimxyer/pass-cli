@@ -2,25 +2,30 @@ package cmd
 
 import (
 	"bufio"
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"os"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 
 	"pass-cli/internal/vault"
 )
 
 var (
-	updateUsername string
-	updatePassword string
-	updateNotes    string
-	updateCategory string
-	updateURL      string
-	updateForce    bool
-	clearCategory  bool
-	clearURL       bool
-	clearNotes     bool
+	updateUsername         string
+	updatePassword         string
+	updateNotes            string
+	updateCategory         string
+	updateURL              string
+	updateForce            bool
+	clearCategory          bool
+	clearURL               bool
+	clearNotes             bool
+	updateGeneratePassword bool
+	updateGenLength        int
 )
 
 var updateCmd = &cobra.Command{
@@ -34,6 +39,9 @@ affecting the others. Empty values mean "don't change".
 
 To explicitly clear optional fields (category, url, notes) to empty, use the --clear-* flags.
 These flags take precedence over corresponding value flags.
+
+Use --generate to auto-generate a new secure password (password rotation). The generated
+password will be copied to clipboard automatically.
 
 By default, you'll see a usage warning if the credential has been accessed before,
 showing where and when it was last used. Use --force to skip the confirmation.`,
@@ -67,6 +75,12 @@ showing where and when it was last used. Use --force to skip the confirmation.`,
   # Update multiple fields
   pass-cli update github -u user -p pass --notes "New info"
 
+  # Generate new password (password rotation)
+  pass-cli update github --generate
+
+  # Generate new 32-character password
+  pass-cli update github -g --gen-length 32
+
   # Skip confirmation
   pass-cli update github --force`,
 	Args: cobra.ExactArgs(1),
@@ -77,6 +91,8 @@ func init() {
 	rootCmd.AddCommand(updateCmd)
 	updateCmd.Flags().StringVarP(&updateUsername, "username", "u", "", "new username")
 	updateCmd.Flags().StringVarP(&updatePassword, "password", "p", "", "new password")
+	updateCmd.Flags().BoolVarP(&updateGeneratePassword, "generate", "g", false, "auto-generate a new secure password")
+	updateCmd.Flags().IntVar(&updateGenLength, "gen-length", 20, "length of generated password (default: 20)")
 	updateCmd.Flags().StringVar(&updateNotes, "notes", "", "new notes")
 	updateCmd.Flags().StringVar(&updateCategory, "category", "", "new category")
 	updateCmd.Flags().StringVar(&updateURL, "url", "", "new URL")
@@ -84,6 +100,9 @@ func init() {
 	updateCmd.Flags().BoolVar(&clearURL, "clear-url", false, "clear URL field to empty")
 	updateCmd.Flags().BoolVar(&clearNotes, "clear-notes", false, "clear notes field to empty")
 	updateCmd.Flags().BoolVar(&updateForce, "force", false, "skip confirmation prompt")
+
+	// Mark --password and --generate as mutually exclusive
+	updateCmd.MarkFlagsMutuallyExclusive("password", "generate")
 }
 
 func runUpdate(cmd *cobra.Command, args []string) error {
@@ -117,9 +136,25 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to get credential: %w", err)
 	}
 
+	// Handle password generation
+	if updateGeneratePassword {
+		generated, err := generatePasswordForUpdate(updateGenLength)
+		if err != nil {
+			return fmt.Errorf("failed to generate password: %w", err)
+		}
+		updatePassword = generated
+
+		// Copy to clipboard
+		if err := clipboard.WriteAll(updatePassword); err != nil {
+			fmt.Fprintf(os.Stderr, "⚠️  Warning: failed to copy password to clipboard: %v\n", err)
+		} else {
+			fmt.Println("🔐 Generated new password (copied to clipboard)")
+		}
+	}
+
 	// If no flags provided (including clear flags), prompt for what to update
 	if updateUsername == "" && updatePassword == "" && updateNotes == "" && updateCategory == "" && updateURL == "" &&
-		!clearCategory && !clearURL && !clearNotes {
+		!clearCategory && !clearURL && !clearNotes && !updateGeneratePassword {
 		fmt.Println("What would you like to update? (leave empty to keep current value)")
 		fmt.Println()
 
@@ -169,7 +204,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 
 	// Check if anything is being updated
 	if updateUsername == "" && updatePassword == "" && updateNotes == "" && updateCategory == "" && updateURL == "" &&
-		!clearCategory && !clearURL && !clearNotes {
+		!clearCategory && !clearURL && !clearNotes && !updateGeneratePassword {
 		fmt.Println("No changes specified.")
 		return nil
 	}
@@ -269,4 +304,63 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+// generatePasswordForUpdate generates a cryptographically secure password
+// Reuses the same logic as the generate command
+func generatePasswordForUpdate(length int) (string, error) {
+	// Validate length
+	if length < 8 {
+		return "", fmt.Errorf("password length must be at least 8 characters")
+	}
+	if length > 128 {
+		return "", fmt.Errorf("password length cannot exceed 128 characters")
+	}
+
+	// Build character set (always include all types for security)
+	const (
+		lowerChars  = "abcdefghijklmnopqrstuvwxyz"
+		upperChars  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		digitChars  = "0123456789"
+		symbolChars = "!@#$%^&*()_+-=[]{}|;:,.<>?"
+	)
+
+	charset := lowerChars + upperChars + digitChars + symbolChars
+	password := make([]byte, length)
+
+	// Ensure at least one character from each required set
+	requiredSets := []string{lowerChars, upperChars, digitChars, symbolChars}
+	for i, reqSet := range requiredSets {
+		if i >= length {
+			break
+		}
+		setLen := big.NewInt(int64(len(reqSet)))
+		randomIndex, err := rand.Int(rand.Reader, setLen)
+		if err != nil {
+			return "", fmt.Errorf("failed to generate random number: %w", err)
+		}
+		password[i] = reqSet[randomIndex.Int64()]
+	}
+
+	// Fill remaining positions with random chars from full charset
+	charsetLen := big.NewInt(int64(len(charset)))
+	for i := len(requiredSets); i < length; i++ {
+		randomIndex, err := rand.Int(rand.Reader, charsetLen)
+		if err != nil {
+			return "", fmt.Errorf("failed to generate random number: %w", err)
+		}
+		password[i] = charset[randomIndex.Int64()]
+	}
+
+	// Shuffle password to avoid predictable positions
+	for i := length - 1; i > 0; i-- {
+		randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
+		if err != nil {
+			return "", fmt.Errorf("failed to generate random number: %w", err)
+		}
+		j := randomIndex.Int64()
+		password[i], password[j] = password[j], password[i]
+	}
+
+	return string(password), nil
 }
