@@ -79,6 +79,123 @@ func TestAuditLoggingForVaultSave(t *testing.T) {
 	}
 }
 
+// TestAuditCallback_AllEventsLogged verifies FR-015: ALL atomic save state transitions are logged
+func TestAuditCallback_AllEventsLogged(t *testing.T) {
+	// Setup
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	auditLogPath := filepath.Join(tempDir, "audit.log")
+
+	vault, err := New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	// Initialize with audit logging
+	password := []byte("TestPassword123!")
+	if err := vault.Initialize(password, false, auditLogPath, "test-vault"); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	// Unlock with fresh password slice
+	password2 := []byte("TestPassword123!")
+	if err := vault.Unlock(password2); err != nil {
+		t.Fatalf("Failed to unlock vault: %v", err)
+	}
+
+	// Trigger save operation
+	credPass := []byte("cred-password")
+	if err := vault.AddCredential("test", "user", credPass, "", "", ""); err != nil {
+		t.Fatalf("Failed to add credential: %v", err)
+	}
+
+	// Read audit log
+	auditContent, err := os.ReadFile(auditLogPath)
+	if err != nil {
+		t.Fatalf("Failed to read audit log: %v", err)
+	}
+
+	auditText := string(auditContent)
+
+	// FR-015: Verify ALL required events are logged
+	requiredEvents := []string{
+		"vault save operation initiated",        // atomic_save_started
+		"temporary file created",                 // temp_file_created
+		"vault verification started",             // verification_started
+		"vault verification passed",              // verification_passed
+		"atomic rename",                          // atomic_rename_started (x2)
+		"vault save completed successfully",      // atomic_save_completed
+	}
+
+	for _, event := range requiredEvents {
+		if !contains(auditText, event) {
+			t.Errorf("FR-015 violation: Missing required audit event: %q", event)
+		}
+	}
+
+	// Verify at least 2 atomic rename events (vault→backup, temp→vault)
+	renameCount := countOccurrences(auditText, "atomic rename")
+	if renameCount < 2 {
+		t.Errorf("FR-015: Expected at least 2 'atomic rename' events, found %d", renameCount)
+	}
+}
+
+// TestAuditCallback_VerificationFailedEvent verifies verification failures are logged
+func TestAuditCallback_VerificationFailedEvent(t *testing.T) {
+	// This test will be implemented once verification_failed event is added to storage layer
+	// For now, we document the requirement
+	t.Skip("Deferred until verification_failed event is added in Phase 3")
+}
+
+// TestAuditCallback_NoSensitiveData verifies FR-015: No credentials logged
+func TestAuditCallback_NoSensitiveData(t *testing.T) {
+	// Setup
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+	auditLogPath := filepath.Join(tempDir, "audit.log")
+
+	vault, err := New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	password := []byte("MasterPassword123!")
+	if err := vault.Initialize(password, false, auditLogPath, "test-vault"); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	if err := vault.Unlock(password); err != nil {
+		t.Fatalf("Failed to unlock vault: %v", err)
+	}
+
+	// Add credential with known sensitive values
+	sensitivePassword := []byte("SuperSecret123!")
+	sensitiveUsername := "admin"
+	if err := vault.AddCredential("test-service", sensitiveUsername, sensitivePassword, "", "", ""); err != nil {
+		t.Fatalf("Failed to add credential: %v", err)
+	}
+
+	// Read audit log
+	auditContent, err := os.ReadFile(auditLogPath)
+	if err != nil {
+		t.Fatalf("Failed to read audit log: %v", err)
+	}
+
+	auditText := string(auditContent)
+
+	// Verify sensitive data NEVER appears
+	if contains(auditText, "SuperSecret123!") {
+		t.Error("SECURITY VIOLATION: Credential password found in audit log")
+	}
+
+	if contains(auditText, "MasterPassword123!") {
+		t.Error("SECURITY VIOLATION: Master password found in audit log")
+	}
+
+	// Usernames and service names are OK to log (not passwords)
+	// Just verify no password values appear
+}
+
 // Helper to split lines (handles both \n and \r\n)
 func splitLines(s string) []string {
 	var lines []string
@@ -97,4 +214,23 @@ func splitLines(s string) []string {
 		lines = append(lines, s[start:])
 	}
 	return lines
+}
+
+// Helper functions for audit log verification
+func contains(s, substr string) bool {
+	return len(s) > 0 && len(substr) > 0 && (s == substr || len(s) >= len(substr) && (s[:len(substr)] == substr || contains(s[1:], substr)))
+}
+
+func countOccurrences(s, substr string) int {
+	if len(substr) == 0 {
+		return 0
+	}
+	count := 0
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			count++
+			i += len(substr) - 1
+		}
+	}
+	return count
 }
