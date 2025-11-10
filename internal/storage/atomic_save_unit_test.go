@@ -19,7 +19,7 @@ func TestRandomHexSuffix(t *testing.T) {
 
 	// Verify it's hex
 	for _, c := range suffix {
-		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
+		if (c < '0' || c > '9') && (c < 'a' || c > 'f') {
 			t.Errorf("Suffix contains non-hex character: %c", c)
 		}
 	}
