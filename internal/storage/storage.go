@@ -48,9 +48,15 @@ type EncryptedVault struct {
 type StorageService struct {
 	cryptoService *crypto.CryptoService
 	vaultPath     string
+	fs            FileSystem // Abstracted file system for testability
 }
 
 func NewStorageService(cryptoService *crypto.CryptoService, vaultPath string) (*StorageService, error) {
+	return NewStorageServiceWithFS(cryptoService, vaultPath, NewOSFileSystem())
+}
+
+// NewStorageServiceWithFS creates a StorageService with a custom FileSystem (for testing)
+func NewStorageServiceWithFS(cryptoService *crypto.CryptoService, vaultPath string, fs FileSystem) (*StorageService, error) {
 	if cryptoService == nil {
 		return nil, errors.New("crypto service cannot be nil")
 	}
@@ -59,15 +65,20 @@ func NewStorageService(cryptoService *crypto.CryptoService, vaultPath string) (*
 		return nil, ErrInvalidVaultPath
 	}
 
+	if fs == nil {
+		fs = NewOSFileSystem()
+	}
+
 	// Ensure the directory exists
 	dir := filepath.Dir(vaultPath)
-	if err := os.MkdirAll(dir, 0700); err != nil {
+	if err := fs.MkdirAll(dir, 0700); err != nil {
 		return nil, fmt.Errorf("failed to create vault directory: %w", err)
 	}
 
 	return &StorageService{
 		cryptoService: cryptoService,
 		vaultPath:     vaultPath,
+		fs:            fs,
 	}, nil
 }
 
@@ -350,7 +361,7 @@ func (s *StorageService) SetIterations(iterations int) error {
 }
 
 func (s *StorageService) VaultExists() bool {
-	_, err := os.Stat(s.vaultPath)
+	_, err := s.fs.Stat(s.vaultPath)
 	return err == nil
 }
 
@@ -431,7 +442,7 @@ func (s *StorageService) loadEncryptedVault() (*EncryptedVault, error) {
 		return nil, ErrVaultNotFound
 	}
 
-	data, err := os.ReadFile(s.vaultPath)
+	data, err := s.fs.ReadFile(s.vaultPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read vault file: %w", err)
 	}
@@ -482,7 +493,7 @@ func (s *StorageService) saveEncryptedVault(data []byte, metadata VaultMetadata,
 func (s *StorageService) atomicWrite(path string, data []byte) error {
 	// FR-015: Create parent directories if they don't exist
 	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0750); err != nil { // More restrictive permissions (owner+group only)
+	if err := s.fs.MkdirAll(dir, 0750); err != nil { // More restrictive permissions (owner+group only)
 		return fmt.Errorf("failed to create parent directories: %w", err)
 	}
 
@@ -499,7 +510,7 @@ func (s *StorageService) atomicWrite(path string, data []byte) error {
 	defer func() {
 		if tempFile != nil {
 			_ = tempFile.Close()
-			_ = os.Remove(tempPath)
+			_ = s.fs.Remove(tempPath)
 		}
 	}()
 
@@ -520,8 +531,8 @@ func (s *StorageService) atomicWrite(path string, data []byte) error {
 	tempFile = nil // Prevent cleanup in defer
 
 	// Atomic move (rename) to final location
-	if err := os.Rename(tempPath, path); err != nil {
-		_ = os.Remove(tempPath) // Clean up on failure
+	if err := s.fs.Rename(tempPath, path); err != nil {
+		_ = s.fs.Remove(tempPath) // Clean up on failure
 		return fmt.Errorf("failed to move temp file to final location: %w", err)
 	}
 
@@ -534,7 +545,7 @@ func (s *StorageService) atomicWrite(path string, data []byte) error {
 // - Write permissions to vault directory
 func (s *StorageService) preflightChecks() error {
 	// Check if vault exists
-	vaultInfo, err := os.Stat(s.vaultPath)
+	vaultInfo, err := s.fs.Stat(s.vaultPath)
 	if err != nil {
 		return fmt.Errorf("failed to stat vault: %w", err)
 	}
@@ -561,7 +572,7 @@ func (s *StorageService) preflightChecks() error {
 		return fmt.Errorf("no write permission in vault directory: %w", err)
 	}
 	_ = testFile.Close()
-	_ = os.Remove(testPath)
+	_ = s.fs.Remove(testPath)
 
 	return nil
 }
@@ -617,7 +628,7 @@ func (s *StorageService) createBackup() error {
 func (s *StorageService) restoreFromBackup() error {
 	backupPath := s.vaultPath + BackupSuffix
 
-	if _, err := os.Stat(backupPath); os.IsNotExist(err) {
+	if _, err := s.fs.Stat(backupPath); os.IsNotExist(err) {
 		return ErrBackupFailed
 	}
 

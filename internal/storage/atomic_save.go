@@ -64,7 +64,7 @@ func (s *StorageService) writeToTempFile(path string, data []byte) error {
 func (s *StorageService) verifyTempFile(path string, password string) error {
 	// Read temp file
 	// #nosec G304 -- Temp file path is generated internally with timestamp+random suffix
-	data, err := os.ReadFile(path)
+	data, err := s.fs.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("%w: cannot read temporary file: %v", ErrVerificationFailed, err)
 	}
@@ -98,7 +98,7 @@ func (s *StorageService) verifyTempFile(path string, password string) error {
 
 // atomicRename performs atomic file rename (handles platform differences via os.Rename) (T013)
 func (s *StorageService) atomicRename(oldPath, newPath string) error {
-	if err := os.Rename(oldPath, newPath); err != nil {
+	if err := s.fs.Rename(oldPath, newPath); err != nil {
 		// Check for cross-device rename error (filesystem not atomic)
 		if os.IsPermission(err) {
 			return fmt.Errorf("%w: %v", ErrPermissionDenied, err)
@@ -111,7 +111,7 @@ func (s *StorageService) atomicRename(oldPath, newPath string) error {
 
 // cleanupTempFile removes temporary file (best-effort, logs warning if fails) (T031)
 func (s *StorageService) cleanupTempFile(path string) error {
-	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+	if err := s.fs.Remove(path); err != nil && !os.IsNotExist(err) {
 		// Log warning but don't fail - cleanup is non-critical
 		fmt.Fprintf(os.Stderr, "Warning: failed to remove temporary file %s: %v\n", path, err)
 		return err
@@ -124,7 +124,7 @@ func (s *StorageService) cleanupOrphanedTempFiles(currentTempPath string) {
 	vaultDir := filepath.Dir(s.vaultPath)
 	pattern := filepath.Join(vaultDir, "*.tmp.*")
 
-	matches, err := filepath.Glob(pattern)
+	matches, err := s.fs.Glob(pattern)
 	if err != nil {
 		// Best-effort cleanup, ignore glob errors
 		return
@@ -137,7 +137,7 @@ func (s *StorageService) cleanupOrphanedTempFiles(currentTempPath string) {
 		}
 
 		// Remove orphaned file from previous crashed save
-		if err := os.Remove(orphan); err != nil && !os.IsNotExist(err) {
+		if err := s.fs.Remove(orphan); err != nil && !os.IsNotExist(err) {
 			fmt.Fprintf(os.Stderr, "Warning: failed to remove orphaned temp file %s: %v\n", orphan, err)
 		}
 	}
