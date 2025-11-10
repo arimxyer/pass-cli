@@ -3,6 +3,7 @@ package storage
 import (
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -99,6 +100,11 @@ func (s *StorageService) verifyTempFile(path string, password string) error {
 // atomicRename performs atomic file rename (handles platform differences via os.Rename) (T013)
 func (s *StorageService) atomicRename(oldPath, newPath string) error {
 	if err := s.fs.Rename(oldPath, newPath); err != nil {
+		// If error is already one of our custom types, return as-is (for testing)
+		if errors.Is(err, ErrPermissionDenied) || errors.Is(err, ErrFilesystemNotAtomic) {
+			return err
+		}
+
 		// Check for cross-device rename error (filesystem not atomic)
 		if os.IsPermission(err) {
 			return fmt.Errorf("%w: %v", ErrPermissionDenied, err)

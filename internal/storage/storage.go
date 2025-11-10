@@ -155,7 +155,7 @@ func (s *StorageService) SaveVault(data []byte, password string, callback Progre
 	// Prepare encrypted vault data
 	encryptedData, err := s.prepareEncryptedData(data, encryptedVault.Metadata, password)
 	if err != nil {
-		return fmt.Errorf("save failed: %w (your vault was not modified)", err)
+		return actionableErrorMessage(err)
 	}
 
 	// T033: Step 0: Cleanup orphaned temp files from previous crashes (best-effort)
@@ -166,7 +166,7 @@ func (s *StorageService) SaveVault(data []byte, password string, callback Progre
 
 	// Step 2: Write to temp file
 	if err := s.writeToTempFile(tempPath, encryptedData); err != nil {
-		return fmt.Errorf("save failed: %w (your vault was not modified)", err)
+		return actionableErrorMessage(err)
 	}
 
 	// T022: Notify after temp file created
@@ -188,7 +188,7 @@ func (s *StorageService) SaveVault(data []byte, password string, callback Progre
 	if err := s.verifyTempFile(tempPath, password); err != nil {
 		// Cleanup temp file on verification failure
 		_ = s.cleanupTempFile(tempPath)
-		return fmt.Errorf("save failed during verification (your vault was not modified): %w", err)
+		return actionableErrorMessage(err)
 	}
 
 	if callback != nil {
@@ -202,7 +202,7 @@ func (s *StorageService) SaveVault(data []byte, password string, callback Progre
 	}
 
 	if err := s.atomicRename(s.vaultPath, backupPath); err != nil {
-		return fmt.Errorf("save failed: %w (your vault was not modified)", err)
+		return actionableErrorMessage(err)
 	}
 
 	// Step 5: Atomic rename (temp → vault)
@@ -219,7 +219,7 @@ func (s *StorageService) SaveVault(data []byte, password string, callback Progre
 		if callback != nil {
 			callback("rollback_completed", s.vaultPath)
 		}
-		return fmt.Errorf("CRITICAL: save failed during final rename. Attempted automatic restore from backup. Error: %w", err)
+		return criticalErrorMessage(err)
 	}
 
 	// T034: Notify completion
