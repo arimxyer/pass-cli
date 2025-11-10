@@ -12,15 +12,17 @@ type spyFileSystem struct {
 
 	// Rename failure configuration
 	renameCallCount int
-	failRenameAt    int  // Fail rename on Nth call (0 = don't fail)
-	failAllRenames  bool // Fail all rename calls (alias for compatibility)
-	failRename      bool // Alias for failAllRenames
+	failRenameAt    int    // Fail rename on Nth call (0 = don't fail)
+	failRenameAtSet map[int]bool // Fail rename on multiple specific calls
+	failAllRenames  bool   // Fail all rename calls (alias for compatibility)
+	failRename      bool   // Alias for failAllRenames
 }
 
 // NewSpyFileSystem creates a filesystem that delegates to real OS but can fail on demand
 func NewSpyFileSystem() *spyFileSystem {
 	return &spyFileSystem{
-		realFS: &osFileSystem{},
+		realFS:          &osFileSystem{},
+		failRenameAtSet: make(map[int]bool),
 	}
 }
 
@@ -43,8 +45,13 @@ func (s *spyFileSystem) Remove(name string) error {
 func (s *spyFileSystem) Rename(oldpath, newpath string) error {
 	s.renameCallCount++
 
-	// Check if we should fail this specific rename call
+	// Check if we should fail this specific rename call (single)
 	if s.failRenameAt > 0 && s.renameCallCount == s.failRenameAt {
+		return &os.LinkError{Op: "rename", Old: oldpath, New: newpath, Err: os.ErrPermission}
+	}
+
+	// Check if we should fail this specific rename call (multiple)
+	if s.failRenameAtSet[s.renameCallCount] {
 		return &os.LinkError{Op: "rename", Old: oldpath, New: newpath, Err: os.ErrPermission}
 	}
 
