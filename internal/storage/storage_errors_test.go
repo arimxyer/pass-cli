@@ -61,9 +61,7 @@ func TestSaveVault_ErrorMessage_VerificationFailed(t *testing.T) {
 }
 
 // TestSaveVault_ErrorMessage_DiskSpaceExhausted verifies FR-011 for disk space errors
-// TODO: Debug why spy's failOpenFileWithErrFunc isn't being called
 func TestSaveVault_ErrorMessage_DiskSpaceExhausted(t *testing.T) {
-	t.Skip("Spy configuration issue - OpenFile not being intercepted as expected")
 	// Setup
 	cryptoService := crypto.NewCryptoService()
 	tempDir := t.TempDir()

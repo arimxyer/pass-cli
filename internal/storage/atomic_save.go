@@ -34,7 +34,7 @@ func randomHexSuffix(length int) string {
 func (s *StorageService) writeToTempFile(path string, data []byte) error {
 	// Create temp file with vault permissions (0600)
 	// #nosec G304 -- Temp file path is generated internally with timestamp+random suffix
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, VaultPermissions)
+	file, err := s.fs.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, VaultPermissions)
 	if err != nil {
 		// Check for disk space or permission errors
 		if os.IsPermission(err) {
