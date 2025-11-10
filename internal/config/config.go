@@ -15,6 +15,7 @@ type Config struct {
 	Terminal    TerminalConfig    `mapstructure:"terminal"`
 	Keybindings map[string]string `mapstructure:"keybindings"`
 	VaultPath   string            `mapstructure:"vault_path"`
+	Theme       string            `mapstructure:"theme"`
 
 	// LoadErrors populated during config loading (not in YAML)
 	LoadErrors []string `mapstructure:"-"`
@@ -70,6 +71,7 @@ func GetDefaults() *Config {
 			"confirm":           "enter",
 			"cancel":            "esc",
 		},
+		Theme:      "dracula",
 		LoadErrors: []string{},
 	}
 
@@ -146,9 +148,13 @@ func OpenEditor(filePath string) error {
 // GetDefaultConfigTemplate returns the default config file content with comments.
 func GetDefaultConfigTemplate() string {
 	return `# Pass-CLI Configuration File
-# 
-# This file allows you to customize terminal size warnings and keyboard shortcuts.
+#
+# This file allows you to customize terminal size warnings, keyboard shortcuts, and theme.
 # All settings are optional - missing values will use defaults.
+
+# TUI Theme (valid: dracula, nord, gruvbox, monokai)
+# Default: dracula
+theme: "dracula"
 
 # Terminal size warning configuration
 terminal:
@@ -233,6 +239,8 @@ func detectUnknownFields(v *viper.Viper) []ValidationWarning {
 		"keybindings.search":            true,
 		"keybindings.confirm":           true,
 		"keybindings.cancel":            true,
+		"theme":                         true,
+		"vault_path":                    true,
 	}
 
 	// Check for unknown fields
@@ -315,6 +323,7 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 		v.SetDefault(fmt.Sprintf("keybindings.%s", action), key)
 	}
 	v.SetDefault("vault_path", "")
+	v.SetDefault("theme", defaults.Theme)
 
 	// Read and parse YAML
 	if err := v.ReadInConfig(); err != nil {
@@ -405,6 +414,9 @@ func (c *Config) Validate() *ValidationResult {
 
 	// Validate vault_path
 	result = c.validateVaultPath(result)
+
+	// Validate theme
+	result = c.validateTheme(result)
 
 	// Set Valid flag based on error count
 	if len(result.Errors) > 0 {
@@ -580,4 +592,30 @@ func (c *Config) GetParsedKeybindings() map[string]*Keybinding {
 		return make(map[string]*Keybinding)
 	}
 	return c.ParsedKeybindings
+}
+
+// validateTheme validates the theme configuration
+func (c *Config) validateTheme(result *ValidationResult) *ValidationResult {
+	// Empty theme means use default
+	if c.Theme == "" {
+		c.Theme = "dracula"
+		return result
+	}
+
+	// Check if theme is valid
+	validThemes := map[string]bool{
+		"dracula": true,
+		"nord":    true,
+		"gruvbox": true,
+		"monokai": true,
+	}
+
+	if !validThemes[c.Theme] {
+		result.Errors = append(result.Errors, ValidationError{
+			Field:   "theme",
+			Message: fmt.Sprintf("unknown theme '%s' (valid themes: dracula, nord, gruvbox, monokai)", c.Theme),
+		})
+	}
+
+	return result
 }

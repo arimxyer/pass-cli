@@ -133,6 +133,12 @@ func LaunchTUI(vaultService *vault.VaultService) error {
 	// 1. Load user configuration (T022)
 	cfg, validationResult := config.Load()
 
+	// Apply theme from config
+	if err := styles.SetTheme(cfg.Theme); err != nil {
+		// Invalid theme, but don't fail - just use default
+		fmt.Fprintf(os.Stderr, "Warning: %v, using default theme\n", err)
+	}
+
 	// 1. Create tview.Application
 	app := NewApp()
 
