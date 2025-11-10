@@ -93,6 +93,14 @@ Original error: %w`, os.Getenv("HOME"), err)
 
 	// Bind flags to viper
 	_ = viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
+
+	// Configure command groups for better help organization
+	rootCmd.AddGroup(
+		&cobra.Group{ID: "vault", Title: "Vault Management:"},
+		&cobra.Group{ID: "credentials", Title: "Credential Operations:"},
+		&cobra.Group{ID: "security", Title: "Security & Integration:"},
+		&cobra.Group{ID: "utilities", Title: "Utilities:"},
+	)
 }
 
 // GetVaultPath returns the vault path from config or default

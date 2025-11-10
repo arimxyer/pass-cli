@@ -31,6 +31,7 @@ const (
 
 var generateCmd = &cobra.Command{
 	Use:     "generate",
+	GroupID: "security",
 	Aliases: []string{"gen", "pwd"},
 	Short:   "Generate a cryptographically secure password",
 	Long: `Generate creates a strong, random password using cryptographic randomness.

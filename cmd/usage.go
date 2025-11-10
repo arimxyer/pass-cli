@@ -12,8 +12,9 @@ import (
 
 // T015: usage command with Cobra structure
 var usageCmd = &cobra.Command{
-	Use:   "usage <service>",
-	Short: "Display detailed usage history for a credential",
+	Use:     "usage <service>",
+	GroupID: "utilities",
+	Short:   "Display detailed usage history for a credential",
 	Long: `Display detailed usage history for a specific credential across all locations.
 
 Shows where and when a credential was accessed, including:

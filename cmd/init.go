@@ -16,8 +16,9 @@ var (
 )
 
 var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Initialize a new password vault",
+	Use:     "init",
+	GroupID: "vault",
+	Short:   "Initialize a new password vault",
 	Long: `Initialize creates a new encrypted vault for storing credentials.
 
 You will be prompted to create a master password that will be used to

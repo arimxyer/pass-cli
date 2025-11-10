@@ -20,8 +20,9 @@ var (
 )
 
 var getCmd = &cobra.Command{
-	Use:   "get <service>",
-	Short: "Retrieve a credential from the vault",
+	Use:     "get <service>",
+	GroupID: "credentials",
+	Short:   "Retrieve a credential from the vault",
 	Long: `Get retrieves a credential from your vault and copies the password to clipboard.
 
 By default, the password is copied to the clipboard and credential details

@@ -11,8 +11,9 @@ import (
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "Manage Pass-CLI configuration",
+	Use:     "config",
+	GroupID: "utilities",
+	Short:   "Manage Pass-CLI configuration",
 	Long: `Manage Pass-CLI configuration settings for terminal warnings and keyboard shortcuts.
 
 Configuration file location:

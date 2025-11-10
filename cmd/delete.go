@@ -16,6 +16,7 @@ var (
 
 var deleteCmd = &cobra.Command{
 	Use:     "delete <service> [service...]",
+	GroupID: "credentials",
 	Aliases: []string{"rm", "remove"},
 	Short:   "Delete credentials from the vault",
 	Long: `Delete removes one or more credentials from your vault.

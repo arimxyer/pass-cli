@@ -20,8 +20,9 @@ var (
 )
 
 var doctorCmd = &cobra.Command{
-	Use:   "doctor",
-	Short: "Check vault health and system configuration",
+	Use:     "doctor",
+	GroupID: "utilities",
+	Short:   "Check vault health and system configuration",
 	Long: `Run comprehensive health checks on your pass-cli installation.
 
 The doctor command verifies:

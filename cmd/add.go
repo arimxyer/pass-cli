@@ -19,8 +19,9 @@ var (
 )
 
 var addCmd = &cobra.Command{
-	Use:   "add <service>",
-	Short: "Add a new credential to the vault",
+	Use:     "add <service>",
+	GroupID: "credentials",
+	Short:   "Add a new credential to the vault",
 	Long: `Add stores a new credential (username and password) for a service in your vault.
 
 You will be prompted for the username and password. The password input will be

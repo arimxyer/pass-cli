@@ -24,8 +24,9 @@ var (
 )
 
 var updateCmd = &cobra.Command{
-	Use:   "update <service>",
-	Short: "Update an existing credential",
+	Use:     "update <service>",
+	GroupID: "credentials",
+	Short:   "Update an existing credential",
 	Long: `Update modifies an existing credential in your vault.
 
 You can selectively update individual fields (username, password, category, url, notes) without
