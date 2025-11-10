@@ -62,8 +62,8 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	// Cleanup
-	_ = os.Remove(binaryPath)       // Best effort cleanup
-	_ = os.RemoveAll(testDir)       // Best effort cleanup
+	_ = os.Remove(binaryPath) // Best effort cleanup
+	_ = os.RemoveAll(testDir) // Best effort cleanup
 
 	os.Exit(code)
 }
@@ -560,7 +560,7 @@ func TestIntegration_StressTest(t *testing.T) {
 
 	t.Run("Get_Random_Credentials", func(t *testing.T) {
 		// Test getting random credentials (adjusted for numCredentials)
-		testIndices := []int{0, numCredentials/4, numCredentials/2, 3*numCredentials/4, numCredentials-1}
+		testIndices := []int{0, numCredentials / 4, numCredentials / 2, 3 * numCredentials / 4, numCredentials - 1}
 
 		for _, idx := range testIndices {
 			service := fmt.Sprintf("service-%d.com", idx)
@@ -797,29 +797,28 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 	t.Log("✓ Commands successfully use custom vault_path from config")
 }
 
-
 // T036: Integration test for --vault flag rejection with helpful error
 func TestVaultFlagRejection(t *testing.T) {
 	// Attempt to use --vault flag (which has been removed)
 	cmd := exec.Command(binaryPath, "init", "--vault", "/test/path/vault.enc")
-	
+
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	
+
 	err := cmd.Run()
-	
+
 	// Command should fail
 	if err == nil {
 		t.Fatal("Expected command to fail with --vault flag, but it succeeded")
 	}
-	
+
 	// Error message should mention the flag is not supported
 	output := stdout.String() + stderr.String()
-	
+
 	if !strings.Contains(output, "vault") && !strings.Contains(output, "unknown flag") {
 		t.Errorf("Expected error message about unknown/unsupported flag, got: %s", output)
 	}
-	
+
 	t.Logf("✓ --vault flag correctly rejected with error: %s", output)
 }

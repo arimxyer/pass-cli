@@ -245,6 +245,64 @@ func (v *VaultService) LogAudit(eventType, outcome, credentialName string) {
 	}
 }
 
+// createAuditCallback returns a storage.ProgressCallback that logs atomic save events
+// to the audit log. Returns nil if audit logging is disabled.
+// T015/T022/T034: Integrate audit logging into atomic save operations
+// FR-015: Log ALL atomic save state transitions
+func (v *VaultService) createAuditCallback() storage.ProgressCallback {
+	if !v.auditEnabled || v.auditLogger == nil {
+		return nil // No callback if audit disabled
+	}
+
+	// Return closure that maps storage events to audit entries
+	return func(event string, metadata ...string) {
+		// FR-015: Log ALL atomic save state transitions
+		switch event {
+		case "atomic_save_started":
+			v.LogAudit("vault_save", security.OutcomeInProgress, "vault save operation initiated")
+
+		case "temp_file_created":
+			tempPath := ""
+			if len(metadata) > 0 {
+				tempPath = filepath.Base(metadata[0]) // Log filename only, not full path
+			}
+			v.LogAudit("vault_save", security.OutcomeInProgress, fmt.Sprintf("temporary file created: %s", tempPath))
+
+		case "verification_started":
+			v.LogAudit("vault_save", security.OutcomeInProgress, "vault verification started")
+
+		case "verification_passed":
+			v.LogAudit("vault_save", security.OutcomeInProgress, "vault verification passed")
+
+		case "verification_failed":
+			reason := "unknown"
+			if len(metadata) > 1 {
+				reason = metadata[1]
+			}
+			v.LogAudit("vault_save", security.OutcomeFailure, fmt.Sprintf("vault verification failed: %s", reason))
+
+		case "atomic_rename_started":
+			// Log rename operations (called twice during save)
+			oldFile := ""
+			newFile := ""
+			if len(metadata) >= 2 {
+				oldFile = filepath.Base(metadata[0])
+				newFile = filepath.Base(metadata[1])
+			}
+			v.LogAudit("vault_save", security.OutcomeInProgress, fmt.Sprintf("atomic rename: %s → %s", oldFile, newFile))
+
+		case "rollback_started":
+			v.LogAudit("vault_save", security.OutcomeFailure, "atomic save rollback initiated")
+
+		case "rollback_completed":
+			v.LogAudit("vault_save", security.OutcomeFailure, "atomic save rollback completed")
+
+		case "atomic_save_completed":
+			v.LogAudit("vault_save", security.OutcomeSuccess, "vault save completed successfully")
+		}
+	}
+}
+
 // Initialize creates a new vault with a master password
 // T010: Updated signature to accept []byte, T014: Added deferred cleanup
 // T045: Added password policy validation (FR-016)
@@ -315,7 +373,8 @@ func (v *VaultService) Initialize(masterPassword []byte, useKeychain bool, audit
 	}
 
 	// Save initial empty vault
-	if err := v.storageService.SaveVault(data, masterPasswordStr); err != nil {
+	// T015: Pass audit callback for atomic save logging
+	if err := v.storageService.SaveVault(data, masterPasswordStr, v.createAuditCallback()); err != nil {
 		return fmt.Errorf("failed to save initial vault: %w", err)
 	}
 
@@ -443,7 +502,7 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 				Version:         meta.Version,
 				AuditEnabled:    vaultData.AuditEnabled,
 				KeychainEnabled: meta.KeychainEnabled, // Preserve keychain setting
-				CreatedAt:       meta.CreatedAt,        // Preserve original timestamp
+				CreatedAt:       meta.CreatedAt,       // Preserve original timestamp
 			}
 
 			if err := SaveMetadata(v.vaultPath, updatedMeta); err != nil {
@@ -538,7 +597,8 @@ func (v *VaultService) save() error {
 	// Convert to string for storage service (TODO: Phase 4 will update storage.go to accept []byte)
 	masterPasswordStr := string(v.masterPassword)
 
-	if err := v.storageService.SaveVault(data, masterPasswordStr); err != nil {
+	// T022: Pass audit callback for atomic save logging
+	if err := v.storageService.SaveVault(data, masterPasswordStr, v.createAuditCallback()); err != nil {
 		return fmt.Errorf("failed to save vault: %w", err)
 	}
 
@@ -985,7 +1045,8 @@ func (v *VaultService) ChangePassword(newPassword []byte) error {
 			return fmt.Errorf("failed to save vault with new password: %w", err)
 		}
 	} else {
-		if err := v.storageService.SaveVault(data, newPasswordStr); err != nil {
+		// T034: Pass audit callback for atomic save logging
+		if err := v.storageService.SaveVault(data, newPasswordStr, v.createAuditCallback()); err != nil {
 			return fmt.Errorf("failed to save vault with new password: %w", err)
 		}
 	}

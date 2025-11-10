@@ -8,6 +8,8 @@ import (
 
 // setupTestVaultConfig creates a temporary config file with a custom vault_path
 // and returns the config file path and cleanup function.
+//
+//nolint:unused // Used in integration tests (build tag: integration)
 func setupTestVaultConfig(t *testing.T, vaultPath string) (configPath string, cleanup func()) {
 	t.Helper()
 

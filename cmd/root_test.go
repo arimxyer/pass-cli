@@ -109,7 +109,7 @@ func TestGetVaultPath_TildeExpansion(t *testing.T) {
 				t.Fatalf("Failed to create config dir: %v", err)
 			}
 			configPath := filepath.Join(configDir, "config.yml")
-			
+
 			configYAML := "vault_path: " + tt.configPath + "\n"
 			if err := os.WriteFile(configPath, []byte(configYAML), 0644); err != nil {
 				t.Fatalf("Failed to write config: %v", err)
@@ -211,7 +211,7 @@ func TestGetVaultPath_RelativeToAbsolute(t *testing.T) {
 				t.Fatalf("Failed to create config dir: %v", err)
 			}
 			configPath := filepath.Join(configDir, "config.yml")
-			
+
 			configYAML := "vault_path: " + tt.configPath + "\n"
 			if err := os.WriteFile(configPath, []byte(configYAML), 0644); err != nil {
 				t.Fatalf("Failed to write config: %v", err)
@@ -228,23 +228,22 @@ func TestGetVaultPath_RelativeToAbsolute(t *testing.T) {
 	}
 }
 
-
 // T035: Unit test for --vault flag error handler
 func TestVaultFlagError(t *testing.T) {
 	// Simulate attempting to use --vault flag
 	// The flag should not exist, and attempting to use it should produce an error
-	
+
 	// We can't easily test cobra's flag parsing in a unit test without running the actual command,
 	// so this test verifies the flag is not registered
 	cmd := rootCmd
-	
+
 	// Try to lookup --vault flag
 	flag := cmd.PersistentFlags().Lookup("vault")
-	
+
 	if flag != nil {
 		t.Errorf("--vault flag should not be registered, but found: %v", flag)
 	}
-	
+
 	t.Log("✓ --vault flag is not registered (correctly removed)")
 }
 

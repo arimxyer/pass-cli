@@ -225,7 +225,7 @@ func TestIntegration_VaultRemove(t *testing.T) {
 			_ = os.Remove(vaultPath) // Best effort cleanup
 			metaPath := vaultPath + ".meta.json"
 			_ = os.Remove(metaPath) // Best effort cleanup
-			_ = ks.Delete() // Best effort cleanup
+			_ = ks.Delete()         // Best effort cleanup
 		}
 
 		successRate := float64(successCount) / float64(totalRuns) * 100

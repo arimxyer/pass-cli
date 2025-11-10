@@ -84,37 +84,37 @@ func TestStorageService_InitializeVault_CreatesParentDirectories(t *testing.T) {
 	// Create a vault path with nested non-existent directories
 	tmpDir := t.TempDir()
 	nestedPath := filepath.Join(tmpDir, "level1", "level2", "level3", "vault.enc")
-	
+
 	// Verify parent directories don't exist
 	parentDir := filepath.Dir(nestedPath)
 	if _, err := os.Stat(parentDir); !os.IsNotExist(err) {
 		t.Fatalf("Parent directory should not exist yet")
 	}
-	
+
 	// Create storage service (this should create parent directories)
 	cryptoService := crypto.NewCryptoService()
 	storageService, err := NewStorageService(cryptoService, nestedPath)
 	if err != nil {
 		t.Fatalf("NewStorageService failed: %v", err)
 	}
-	
+
 	// Verify parent directories were created by NewStorageService
 	if _, err := os.Stat(parentDir); err != nil {
 		t.Fatalf("Parent directories were not created: %v", err)
 	}
-	
+
 	// Initialize vault
 	password := "TestPassword123!"
 	err = storageService.InitializeVault(password)
 	if err != nil {
 		t.Fatalf("InitializeVault failed: %v", err)
 	}
-	
+
 	// Verify vault file exists
 	if _, err := os.Stat(nestedPath); os.IsNotExist(err) {
 		t.Fatalf("Vault file was not created at %s", nestedPath)
 	}
-	
+
 	t.Logf("✓ Vault created with parent directories: %s", nestedPath)
 }
 
@@ -137,7 +137,7 @@ func TestStorageService_LoadSaveVault(t *testing.T) {
 	}
 
 	// Save test data
-	if err := storage.SaveVault(testData, password); err != nil {
+	if err := storage.SaveVault(testData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -175,7 +175,7 @@ func TestStorageService_VaultNotFound(t *testing.T) {
 	}
 
 	// Test saving to non-existent vault
-	err = storage.SaveVault([]byte("data"), "password")
+	err = storage.SaveVault([]byte("data"), "password", nil)
 	if err != ErrVaultNotFound {
 		t.Errorf("Expected ErrVaultNotFound, got %v", err)
 	}
@@ -226,7 +226,7 @@ func TestStorageService_GetVaultInfo(t *testing.T) {
 	time.Sleep(10 * time.Millisecond) // Ensure time difference
 	originalUpdatedAt := info.UpdatedAt
 
-	if err := storage.SaveVault([]byte("new data"), password); err != nil {
+	if err := storage.SaveVault([]byte("new data"), password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -297,7 +297,7 @@ func TestStorageService_BackupRestore(t *testing.T) {
 		t.Fatalf("InitializeVault failed: %v", err)
 	}
 
-	if err := storage.SaveVault(originalData, password); err != nil {
+	if err := storage.SaveVault(originalData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -314,7 +314,7 @@ func TestStorageService_BackupRestore(t *testing.T) {
 
 	// Modify vault
 	modifiedData := []byte(`{"modified": "data"}`)
-	if err := storage.SaveVault(modifiedData, password); err != nil {
+	if err := storage.SaveVault(modifiedData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -378,7 +378,7 @@ func TestStorageService_AtomicWrite(t *testing.T) {
 
 	// Save some data
 	testData := []byte(`{"test": "data"}`)
-	if err := storage.SaveVault(testData, password); err != nil {
+	if err := storage.SaveVault(testData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -418,7 +418,7 @@ func TestStorageService_EmptyData(t *testing.T) {
 
 	// Save empty data
 	emptyData := []byte("")
-	if err := storage.SaveVault(emptyData, password); err != nil {
+	if err := storage.SaveVault(emptyData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed with empty data: %v", err)
 	}
 
@@ -548,7 +548,7 @@ func TestStorageService_AtomicWriteEdgeCases(t *testing.T) {
 	t.Run("Concurrent writes", func(t *testing.T) {
 		// Save initial data
 		initialData := []byte(`{"initial": "data"}`)
-		if err := storage.SaveVault(initialData, password); err != nil {
+		if err := storage.SaveVault(initialData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -556,11 +556,11 @@ func TestStorageService_AtomicWriteEdgeCases(t *testing.T) {
 		data1 := []byte(`{"write": "1"}`)
 		data2 := []byte(`{"write": "2"}`)
 
-		if err := storage.SaveVault(data1, password); err != nil {
+		if err := storage.SaveVault(data1, password, nil); err != nil {
 			t.Errorf("First write failed: %v", err)
 		}
 
-		if err := storage.SaveVault(data2, password); err != nil {
+		if err := storage.SaveVault(data2, password, nil); err != nil {
 			t.Errorf("Second write failed: %v", err)
 		}
 
@@ -583,7 +583,7 @@ func TestStorageService_AtomicWriteEdgeCases(t *testing.T) {
 			largeData[i] = byte(i % 256)
 		}
 
-		if err := storage.SaveVault(largeData, password); err != nil {
+		if err := storage.SaveVault(largeData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed with large data: %v", err)
 		}
 
@@ -607,7 +607,7 @@ func TestStorageService_AtomicWriteEdgeCases(t *testing.T) {
 
 		// Perform successful save
 		testData := []byte(`{"cleanup": "test"}`)
-		if err := storage.SaveVault(testData, password); err != nil {
+		if err := storage.SaveVault(testData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -643,7 +643,7 @@ func TestStorageService_PermissionScenarios(t *testing.T) {
 
 	t.Run("Correct permissions after write", func(t *testing.T) {
 		testData := []byte(`{"permission": "test"}`)
-		if err := storage.SaveVault(testData, password); err != nil {
+		if err := storage.SaveVault(testData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -730,7 +730,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 		data3 := []byte(`{"iteration": 3}`)
 
 		// Save data1 and backup
-		if err := storage.SaveVault(data1, password); err != nil {
+		if err := storage.SaveVault(data1, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 		if err := storage.CreateBackup(); err != nil {
@@ -738,7 +738,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 		}
 
 		// Save data2 (creates automatic backup)
-		if err := storage.SaveVault(data2, password); err != nil {
+		if err := storage.SaveVault(data2, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -748,7 +748,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 		}
 
 		// Save data3
-		if err := storage.SaveVault(data3, password); err != nil {
+		if err := storage.SaveVault(data3, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -769,7 +769,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 
 	t.Run("Backup file permissions", func(t *testing.T) {
 		data := []byte(`{"backup": "permissions"}`)
-		if err := storage.SaveVault(data, password); err != nil {
+		if err := storage.SaveVault(data, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -796,7 +796,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 
 	t.Run("Restore preserves metadata", func(t *testing.T) {
 		originalData := []byte(`{"preserve": "metadata"}`)
-		if err := storage.SaveVault(originalData, password); err != nil {
+		if err := storage.SaveVault(originalData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -814,7 +814,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 		// Modify vault
 		time.Sleep(10 * time.Millisecond)
 		modifiedData := []byte(`{"modified": "data"}`)
-		if err := storage.SaveVault(modifiedData, password); err != nil {
+		if err := storage.SaveVault(modifiedData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -845,7 +845,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 
 		// Save should create automatic backup
 		testData := []byte(`{"auto": "backup"}`)
-		if err := storage.SaveVault(testData, password); err != nil {
+		if err := storage.SaveVault(testData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -876,7 +876,7 @@ func TestStorageService_SaveFailureRecovery(t *testing.T) {
 	}
 
 	originalData := []byte(`{"original": "data"}`)
-	if err := storage.SaveVault(originalData, password); err != nil {
+	if err := storage.SaveVault(originalData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -1006,7 +1006,7 @@ func TestStorageService_AdditionalEdgeCases(t *testing.T) {
 
 		// Should be able to load with the same long password
 		testData := []byte(`{"test": "data"}`)
-		if err := storage.SaveVault(testData, longPassword); err != nil {
+		if err := storage.SaveVault(testData, longPassword, nil); err != nil {
 			t.Fatalf("SaveVault failed: %v", err)
 		}
 
@@ -1032,7 +1032,7 @@ func TestStorageService_AdditionalEdgeCases(t *testing.T) {
 		// Data with various special characters and unicode
 		specialData := []byte(`{"unicode": "🔐🔑", "special": "!@#$%^&*()[]{}|\\/<>?", "null": "\u0000"}`)
 
-		if err := storage2.SaveVault(specialData, password); err != nil {
+		if err := storage2.SaveVault(specialData, password, nil); err != nil {
 			t.Fatalf("SaveVault failed with special characters: %v", err)
 		}
 
@@ -1058,7 +1058,7 @@ func TestStorageService_AdditionalEdgeCases(t *testing.T) {
 		// Perform many rapid saves
 		for i := 0; i < 10; i++ {
 			data := []byte(`{"iteration": ` + string(rune(i+'0')) + `}`)
-			if err := storage3.SaveVault(data, password); err != nil {
+			if err := storage3.SaveVault(data, password, nil); err != nil {
 				t.Errorf("SaveVault failed on iteration %d: %v", i, err)
 			}
 		}
@@ -1101,7 +1101,7 @@ func TestStorageService_MetadataValidation(t *testing.T) {
 	// Save and verify UpdatedAt changes
 	time.Sleep(10 * time.Millisecond)
 	testData := []byte(`{"test": "metadata"}`)
-	if err := storage.SaveVault(testData, password); err != nil {
+	if err := storage.SaveVault(testData, password, nil); err != nil {
 		t.Fatalf("SaveVault failed: %v", err)
 	}
 
@@ -1172,4 +1172,417 @@ func TestStorageService_BackwardCompatibleIterations(t *testing.T) {
 	// }
 	//
 	// t.Logf("Legacy vault loaded with iterations: %d", info.Iterations)
+}
+
+// T008 [US1] TestAtomicSave_HappyPath verifies successful atomic save operation
+// Acceptance: vault.enc contains new data, vault.enc.backup contains old data, no temp files
+func TestAtomicSave_HappyPath(t *testing.T) {
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	password := "test-password"
+
+	// Initialize vault with initial data
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	initialData := []byte(`{"credentials": [{"name": "initial"}]}`)
+	if err := storage.SaveVault(initialData, password, nil); err != nil {
+		t.Fatalf("SaveVault initial failed: %v", err)
+	}
+
+	// Save new data (this should create backup of old data)
+	newData := []byte(`{"credentials": [{"name": "updated"}]}`)
+	if err := storage.SaveVault(newData, password, nil); err != nil {
+		t.Fatalf("SaveVault new data failed: %v", err)
+	}
+
+	// Verify vault.enc contains new data
+	loadedData, err := storage.LoadVault(password)
+	if err != nil {
+		t.Fatalf("LoadVault failed: %v", err)
+	}
+
+	if !bytes.Equal(loadedData, newData) {
+		t.Errorf("Vault should contain new data. Got %s, want %s", string(loadedData), string(newData))
+	}
+
+	// Verify vault.enc.backup contains old data (N-1 generation)
+	backupPath := vaultPath + BackupSuffix
+	backupExists := false
+	if _, err := os.Stat(backupPath); err == nil {
+		backupExists = true
+	}
+
+	if !backupExists {
+		t.Error("Backup file should exist after save")
+	}
+
+	// Verify no orphaned temp files exist
+	tempPattern := filepath.Join(tempDir, "vault.enc.tmp.*")
+	matches, err := filepath.Glob(tempPattern)
+	if err != nil {
+		t.Fatalf("Glob failed: %v", err)
+	}
+
+	if len(matches) > 0 {
+		t.Errorf("No temp files should remain after successful save. Found: %v", matches)
+	}
+}
+
+// T017 [US2] TestAtomicSave_VerificationFailure verifies that invalid data is rejected
+// Acceptance: Returns ErrVerificationFailed, vault.enc unchanged, temp removed
+func TestAtomicSave_VerificationFailure(t *testing.T) {
+	t.Skip("Skipping until verification is implemented in US2/T020")
+
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	password := "test-password"
+
+	// Initialize vault
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	// Save valid initial data
+	initialData := []byte(`{"credentials": [{"name": "initial"}]}`)
+	if err := storage.SaveVault(initialData, password, nil); err != nil {
+		t.Fatalf("SaveVault initial failed: %v", err)
+	}
+
+	// TODO: This test needs a way to inject corrupted data into the save process
+	// For now, we'll test that verification catches corruption by using wrong password
+	// This will fail until T020 implements verifyTempFile
+
+	// Attempt to save with wrong password (should fail verification)
+	wrongPassword := "wrong-password"
+	corruptData := []byte(`{"credentials": [{"name": "corrupted"}]}`)
+	err = storage.SaveVault(corruptData, wrongPassword, nil)
+
+	// Should return error (verification should fail)
+	if err == nil {
+		t.Error("SaveVault should fail with wrong password")
+	}
+
+	// Verify vault.enc unchanged (still contains initial data)
+	loadedData, err := storage.LoadVault(password)
+	if err != nil {
+		t.Fatalf("LoadVault failed: %v", err)
+	}
+
+	if !bytes.Equal(loadedData, initialData) {
+		t.Errorf("Vault should be unchanged after verification failure. Got %s, want %s",
+			string(loadedData), string(initialData))
+	}
+
+	// Verify no temp files remain
+	tempPattern := filepath.Join(tempDir, "vault.enc.tmp.*")
+	matches, _ := filepath.Glob(tempPattern)
+	if len(matches) > 0 {
+		t.Errorf("Temp files should be cleaned up after verification failure. Found: %v", matches)
+	}
+}
+
+// T018 [US2] TestAtomicSave_MemoryClearing verifies decrypted memory is zeroed
+// Acceptance: Decrypted memory zeroed after verification
+func TestAtomicSave_MemoryClearing(t *testing.T) {
+	t.Skip("Memory inspection test - manual verification required")
+
+	// This test would require memory inspection tools or fuzzing
+	// to verify that decrypted vault data is cleared from memory after verification
+	//
+	// Implementation approach:
+	// 1. Save vault data
+	// 2. Use runtime.ReadMemStats or external memory profiler
+	// 3. Verify no plaintext vault data remains in heap
+	//
+	// For production, rely on defer crypto.ClearBytes(data) pattern in verifyTempFile
+}
+
+// T028 [US4] TestAtomicSave_OrphanedFileCleanup verifies orphaned temp files are removed
+// Acceptance: Orphaned files removed, new save completes successfully
+func TestAtomicSave_OrphanedFileCleanup(t *testing.T) {
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	password := "test-password"
+
+	// Initialize vault
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	// Create fake orphaned temp files (simulate crashed previous saves)
+	orphan1 := filepath.Join(tempDir, "vault.enc.tmp.20251108-120000.abc123")
+	orphan2 := filepath.Join(tempDir, "vault.enc.tmp.20251108-130000.def456")
+
+	if err := os.WriteFile(orphan1, []byte("orphaned data 1"), 0600); err != nil {
+		t.Fatalf("Failed to create orphan1: %v", err)
+	}
+	if err := os.WriteFile(orphan2, []byte("orphaned data 2"), 0600); err != nil {
+		t.Fatalf("Failed to create orphan2: %v", err)
+	}
+
+	// Verify orphaned files exist
+	if _, err := os.Stat(orphan1); os.IsNotExist(err) {
+		t.Fatal("orphan1 should exist before save")
+	}
+	if _, err := os.Stat(orphan2); os.IsNotExist(err) {
+		t.Fatal("orphan2 should exist before save")
+	}
+
+	// Save vault - should cleanup orphaned files
+	testData := []byte(`{"credentials": [{"name": "test"}]}`)
+	if err := storage.SaveVault(testData, password, nil); err != nil {
+		t.Fatalf("SaveVault failed: %v", err)
+	}
+
+	// Verify orphaned files removed
+	if _, err := os.Stat(orphan1); !os.IsNotExist(err) {
+		t.Error("orphan1 should be removed after save")
+	}
+	if _, err := os.Stat(orphan2); !os.IsNotExist(err) {
+		t.Error("orphan2 should be removed after save")
+	}
+
+	// Verify new save completed successfully
+	loadedData, err := storage.LoadVault(password)
+	if err != nil {
+		t.Fatalf("LoadVault failed: %v", err)
+	}
+
+	if !bytes.Equal(loadedData, testData) {
+		t.Error("Save should succeed after cleanup")
+	}
+}
+
+// T029 [US4] TestAtomicSave_CleanupAfterSuccess verifies no temp files after successful save
+// Acceptance: Only vault.enc and vault.enc.backup exist (no temp files)
+func TestAtomicSave_CleanupAfterSuccess(t *testing.T) {
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	password := "test-password"
+
+	// Initialize vault
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	// Perform save operation
+	testData := []byte(`{"credentials": [{"name": "test"}]}`)
+	if err := storage.SaveVault(testData, password, nil); err != nil {
+		t.Fatalf("SaveVault failed: %v", err)
+	}
+
+	// Check vault directory contents
+	entries, err := os.ReadDir(tempDir)
+	if err != nil {
+		t.Fatalf("ReadDir failed: %v", err)
+	}
+
+	// Should only have vault.enc and vault.enc.backup (no temp files)
+	expectedFiles := map[string]bool{
+		"vault.enc":        false,
+		"vault.enc.backup": false,
+	}
+
+	for _, entry := range entries {
+		if _, ok := expectedFiles[entry.Name()]; ok {
+			expectedFiles[entry.Name()] = true
+		} else {
+			// Any other file (like temp files) is unexpected
+			t.Errorf("Unexpected file in vault directory: %s", entry.Name())
+		}
+	}
+
+	// Verify expected files exist
+	if !expectedFiles["vault.enc"] {
+		t.Error("vault.enc should exist")
+	}
+	if !expectedFiles["vault.enc.backup"] {
+		t.Error("vault.enc.backup should exist")
+	}
+}
+
+// T030 [US4] TestAtomicSave_CleanupAfterUnlock verifies backup removed after unlock
+// Acceptance: Only vault.enc exists (backup removed)
+func TestAtomicSave_CleanupAfterUnlock(t *testing.T) {
+	t.Skip("Backup cleanup happens in vault.Unlock(), tested in vault package")
+
+	// This test would require:
+	// 1. Create vault service (not just storage)
+	// 2. Perform save (creates backup)
+	// 3. Lock vault
+	// 4. Unlock vault
+	// 5. Verify backup removed
+	//
+	// Since backup cleanup is in internal/vault/vault.go:Unlock() (lines 466-474),
+	// this is already tested in the vault package tests
+}
+
+// T037 [Polish] TestAtomicSave_PermissionsInherited verifies temp file and vault.enc have correct permissions
+// Acceptance: Temp file created with 0600, vault.enc retains 0600 after rename
+func TestAtomicSave_PermissionsInherited(t *testing.T) {
+	// Skip on Windows - Windows file permissions work differently (ACLs vs Unix mode bits)
+	// On Windows, os.OpenFile with 0600 mode creates file with default ACLs
+	// Proper Windows permission checking requires using syscall.GetSecurityInfo
+	if os.PathSeparator == '\\' {
+		t.Skip("File permission testing requires platform-specific ACL checks on Windows")
+	}
+
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	password := "test-password"
+
+	// Initialize vault (creates vault.enc with 0600)
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	// Verify initial vault.enc has 0600 permissions
+	initialInfo, err := os.Stat(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to stat vault.enc: %v", err)
+	}
+	initialMode := initialInfo.Mode().Perm()
+	if initialMode != VaultPermissions {
+		t.Errorf("Initial vault.enc should have 0600 permissions, got %04o", initialMode)
+	}
+
+	// Save vault - this creates temp file and renames it
+	testData := []byte(`{"credentials": [{"name": "test"}]}`)
+	if err := storage.SaveVault(testData, password, nil); err != nil {
+		t.Fatalf("SaveVault failed: %v", err)
+	}
+
+	// Verify vault.enc still has 0600 permissions after save
+	finalInfo, err := os.Stat(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to stat vault.enc after save: %v", err)
+	}
+	finalMode := finalInfo.Mode().Perm()
+	if finalMode != VaultPermissions {
+		t.Errorf("vault.enc after save should have 0600 permissions, got %04o", finalMode)
+	}
+
+	// Verify backup also has 0600 permissions
+	backupPath := vaultPath + BackupSuffix
+	backupInfo, err := os.Stat(backupPath)
+	if err != nil {
+		t.Fatalf("Failed to stat vault.enc.backup: %v", err)
+	}
+	backupMode := backupInfo.Mode().Perm()
+	if backupMode != VaultPermissions {
+		t.Errorf("vault.enc.backup should have 0600 permissions, got %04o", backupMode)
+	}
+}
+
+// T038 [Polish] TestAtomicSave_DiskSpaceExhausted verifies error handling for insufficient disk space
+// Acceptance: Returns ErrDiskSpaceExhausted, vault.enc unchanged
+// Note: This test is best-effort as simulating disk space exhaustion is platform-specific and difficult
+func TestAtomicSave_DiskSpaceExhausted(t *testing.T) {
+	t.Skip("Simulating disk space exhaustion requires platform-specific mocking or filesystem manipulation")
+
+	// This test would require:
+	// 1. Create a filesystem with limited space (e.g., using dd to create small loopback device on Unix)
+	// 2. Initialize vault on that filesystem
+	// 3. Attempt to save vault with data larger than available space
+	// 4. Verify SaveVault returns error wrapping ErrDiskSpaceExhausted
+	// 5. Verify vault.enc unchanged (still contains old data)
+	//
+	// Platform-specific implementation:
+	// - Unix: Create loopback device, mount, run test, unmount
+	// - Windows: Use FSUTIL to create virtual disk with quota
+	// - Cross-platform: Mock os.OpenFile/Write to return "no space left" error
+	//
+	// For now, this error path is tested indirectly in writeToTempFile() error handling
+}
+
+// T035 [Polish] BenchmarkSaveVault benchmarks SaveVault() with typical 50KB vault
+// Acceptance: Completes in <5 seconds per SC-009
+func BenchmarkSaveVault(b *testing.B) {
+	cryptoService := crypto.NewCryptoService()
+	tempDir := b.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		b.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	password := "benchmark-password"
+
+	// Initialize vault
+	if err := storage.InitializeVault(password); err != nil {
+		b.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	// Create typical 50KB vault data (simulating ~100 credentials with metadata)
+	typicalVaultSize := 50 * 1024 // 50KB
+	testData := make([]byte, typicalVaultSize)
+	copy(testData, []byte(`{"credentials":[`))
+	for i := 0; i < typicalVaultSize-50; i++ {
+		testData[i+20] = byte('x')
+	}
+	copy(testData[typicalVaultSize-5:], []byte(`]}`))
+
+	b.ResetTimer()
+
+	// Benchmark SaveVault operations
+	for i := 0; i < b.N; i++ {
+		if err := storage.SaveVault(testData, password, nil); err != nil {
+			b.Fatalf("SaveVault failed: %v", err)
+		}
+	}
+}
+
+// T036 [Polish] BenchmarkSaveVault_Rollback benchmarks SaveVault() with verification failure
+// Acceptance: Rollback completes in <1 second per SC-008
+func BenchmarkSaveVault_Rollback(b *testing.B) {
+	b.Skip("Verification failure requires corrupting encrypted data, which is difficult to trigger reliably in benchmark")
+
+	// This benchmark would require:
+	// 1. Mock cryptoService.Encrypt() to return corrupted data
+	// 2. Call SaveVault() which should fail verification
+	// 3. Measure rollback time (temp file cleanup)
+	// 4. Verify rollback completes in <1 second
+	//
+	// Implementation challenge: CryptoService is not an interface, so mocking is difficult
+	// Alternative: Measure rollback indirectly by instrumenting cleanup timing in SaveVault()
+	//
+	// For now, rollback performance is validated through manual testing per T044
 }

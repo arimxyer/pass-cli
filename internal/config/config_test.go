@@ -251,12 +251,12 @@ func getAbsolutePathNonExistent() string {
 // T008 & T009: Unit tests for vault_path configuration
 func TestVaultPathValidation(t *testing.T) {
 	tests := []struct {
-		name          string
-		vaultPath     string
-		expectErrors  int
+		name           string
+		vaultPath      string
+		expectErrors   int
 		expectWarnings int
-		errorContains string
-		warnContains  string
+		errorContains  string
+		warnContains   string
 	}{
 		{
 			name:           "empty vault_path is valid",

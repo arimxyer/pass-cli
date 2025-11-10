@@ -266,10 +266,40 @@ This ensures:
 
 ### Backup Strategy
 
-Before each vault update:
-1. Current vault backed up to `.vault.enc.backup`
-2. New vault written atomically
-3. Backup kept for disaster recovery
+**Automatic Backup Files** (since atomic save implementation):
+
+Before each vault save operation, pass-cli creates an N-1 backup:
+1. New vault data written to temporary file (`vault.enc.tmp.TIMESTAMP.RANDOM`)
+2. Temporary file verified (decryption test)
+3. Current vault renamed to `vault.enc.backup` (N-1 generation)
+4. Temporary file renamed to `vault.enc` (becomes current)
+5. Backup removed after next successful unlock (confirms new vault works)
+
+**Security Implications**:
+
+- ⚠️ **Backup files contain unencrypted vault structure**: `vault.enc.backup` is AES-256-GCM encrypted (same as vault), but still sensitive
+- ✅ **File permissions**: Backup automatically inherits vault permissions (0600 - owner read/write only)
+- ⚠️ **Temporary files**: `vault.enc.tmp.*` files may remain if process crashes (cleaned up automatically on next save)
+- ✅ **Automatic cleanup**: Backup removed after successful unlock, minimizing exposure window
+- ⚠️ **Contains N-1 state**: Backup has previous vault version (not current), may contain deleted credentials
+
+**Manual Backup Recommendations**:
+
+```bash
+# Create timestamped backups (recommended)
+cp ~/.pass-cli/vault.enc ~/backups/vault-$(date +%Y%m%d).enc
+
+# Set correct permissions on manual backups
+chmod 600 ~/backups/vault-*.enc
+
+# Store backups on encrypted drive or secure location
+# Do NOT store in cloud storage without additional encryption
+```
+
+**What Files May Exist**:
+- `vault.enc` - Current encrypted vault (always present when unlocked)
+- `vault.enc.backup` - Previous vault state (present between saves, removed after unlock)
+- `vault.enc.tmp.YYYYMMDD-HHMMSS.XXXXXX` - Orphaned temp files from crashes (auto-cleaned)
 
 ### Audit Logging (Optional)
 

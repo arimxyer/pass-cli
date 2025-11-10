@@ -475,16 +475,45 @@ pass-cli automatically creates backup files when you modify credentials:
 ```bash
 $ ls ~/.pass-cli/
 vault.enc
-vault.enc.backup.1  # Most recent backup
-vault.enc.backup.2  # Second most recent
-vault.enc.backup.3  # Oldest backup
+vault.enc.backup  # Most recent backup (N-1 generation)
 ```
 
-To restore from backup:
+**Note**: pass-cli uses an N-1 backup strategy. The `.backup` file contains the immediately previous vault state. This backup is automatically removed after you successfully unlock your vault, confirming the new vault is readable.
+
+To restore from backup if your vault becomes corrupted:
 
 ```bash
-cp ~/.pass-cli/vault.enc.backup.1 ~/.pass-cli/vault.enc
+cp ~/.pass-cli/vault.enc.backup ~/.pass-cli/vault.enc
 ```
+
+### How Vault Saves Work
+
+pass-cli uses an **atomic save pattern** to protect your vault from corruption during crashes or power loss:
+
+**Save Process**:
+1. **Write to temporary file** - New data is written to `vault.enc.tmp.YYYYMMDD-HHMMSS.XXXXXX`
+2. **Verification** - Temporary file is decrypted in-memory to confirm it's valid
+3. **Atomic rename** - Current vault renamed to `vault.enc.backup`
+4. **Atomic rename** - Temporary file renamed to `vault.enc`
+5. **Cleanup** - Backup removed after next successful unlock
+
+**Why This Matters**:
+- If the process crashes during save, your vault remains unchanged (step 1-2)
+- If power is lost during rename, you have either the old vault OR the new vault, never corrupted data (step 3-4)
+- Temporary files are automatically cleaned up on next save
+
+**Files You May See**:
+- `vault.enc` - Your active encrypted vault
+- `vault.enc.backup` - Previous vault state (removed after unlock)
+- `vault.enc.tmp.*` - Temporary files (automatically cleaned up)
+
+**Recovery**:
+If your vault file becomes unreadable due to filesystem issues:
+1. Check if `vault.enc.backup` exists
+2. Rename it to `vault.enc`: `mv ~/.pass-cli/vault.enc.backup ~/.pass-cli/vault.enc`
+3. Re-unlock your vault
+
+**Note**: The backup contains N-1 generation data, so you may lose your most recent changes if you restore from backup.
 
 ## Configuration
 

@@ -27,6 +27,11 @@ var (
 	ErrAtomicWriteFailed = errors.New("atomic write operation failed")
 )
 
+// ProgressCallback is invoked at key stages during vault save operations.
+// event: stage identifier (e.g., "atomic_save_started", "verification_passed")
+// metadata: optional contextual information (e.g., file paths, timestamps)
+type ProgressCallback func(event string, metadata ...string)
+
 type VaultMetadata struct {
 	Version    int       `json:"version"`
 	CreatedAt  time.Time `json:"created_at"`
@@ -43,9 +48,15 @@ type EncryptedVault struct {
 type StorageService struct {
 	cryptoService *crypto.CryptoService
 	vaultPath     string
+	fs            FileSystem // Abstracted file system for testability
 }
 
 func NewStorageService(cryptoService *crypto.CryptoService, vaultPath string) (*StorageService, error) {
+	return NewStorageServiceWithFS(cryptoService, vaultPath, NewOSFileSystem())
+}
+
+// NewStorageServiceWithFS creates a StorageService with a custom FileSystem (for testing)
+func NewStorageServiceWithFS(cryptoService *crypto.CryptoService, vaultPath string, fs FileSystem) (*StorageService, error) {
 	if cryptoService == nil {
 		return nil, errors.New("crypto service cannot be nil")
 	}
@@ -54,15 +65,20 @@ func NewStorageService(cryptoService *crypto.CryptoService, vaultPath string) (*
 		return nil, ErrInvalidVaultPath
 	}
 
+	if fs == nil {
+		fs = NewOSFileSystem()
+	}
+
 	// Ensure the directory exists
 	dir := filepath.Dir(vaultPath)
-	if err := os.MkdirAll(dir, 0700); err != nil {
+	if err := fs.MkdirAll(dir, 0700); err != nil {
 		return nil, fmt.Errorf("failed to create vault directory: %w", err)
 	}
 
 	return &StorageService{
 		cryptoService: cryptoService,
 		vaultPath:     vaultPath,
+		fs:            fs,
 	}, nil
 }
 
@@ -121,7 +137,12 @@ func (s *StorageService) LoadVault(password string) ([]byte, error) {
 	return plaintext, nil
 }
 
-func (s *StorageService) SaveVault(data []byte, password string) error {
+func (s *StorageService) SaveVault(data []byte, password string, callback ProgressCallback) error {
+	// T015: Notify audit logger of save operation start
+	if callback != nil {
+		callback("atomic_save_started", s.vaultPath)
+	}
+
 	// Load existing vault to get metadata
 	encryptedVault, err := s.loadEncryptedVault()
 	if err != nil {
@@ -131,21 +152,116 @@ func (s *StorageService) SaveVault(data []byte, password string) error {
 	// Update metadata
 	encryptedVault.Metadata.UpdatedAt = time.Now()
 
-	// Create backup before saving
-	if err := s.createBackup(); err != nil {
-		return fmt.Errorf("failed to create backup: %w", err)
+	// Prepare encrypted vault data
+	encryptedData, err := s.prepareEncryptedData(data, encryptedVault.Metadata, password)
+	if err != nil {
+		return actionableErrorMessage(err)
 	}
 
-	// Save encrypted vault
-	if err := s.saveEncryptedVault(data, encryptedVault.Metadata, password); err != nil {
-		// Restore from backup on failure
-		if restoreErr := s.restoreFromBackup(); restoreErr != nil {
-			return fmt.Errorf("save failed and backup restore failed: %v (original error: %w)", restoreErr, err)
+	// T033: Step 0: Cleanup orphaned temp files from previous crashes (best-effort)
+	s.cleanupOrphanedTempFiles("")
+
+	// T014: Step 1: Generate temp filename
+	tempPath := s.generateTempFileName()
+
+	// Step 2: Write to temp file
+	if err := s.writeToTempFile(tempPath, encryptedData); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// T022: Notify after temp file created
+	if callback != nil {
+		callback("temp_file_created", tempPath)
+	}
+
+	// Ensure temp file cleanup on error
+	defer func() {
+		// Best-effort cleanup if we haven't renamed yet
+		_ = s.cleanupTempFile(tempPath)
+	}()
+
+	// Step 3: Verification (T021 - verify temp file is decryptable)
+	if callback != nil {
+		callback("verification_started", tempPath)
+	}
+
+	if err := s.verifyTempFile(tempPath, password); err != nil {
+		// FR-015: Log verification failure BEFORE cleanup
+		if callback != nil {
+			callback("verification_failed", tempPath, err.Error())
 		}
-		return fmt.Errorf("failed to save vault: %w", err)
+		// Cleanup temp file on verification failure
+		_ = s.cleanupTempFile(tempPath)
+		return actionableErrorMessage(err)
+	}
+
+	if callback != nil {
+		callback("verification_passed", tempPath)
+	}
+
+	// Step 4: Atomic rename (vault → backup)
+	backupPath := s.vaultPath + BackupSuffix
+	if callback != nil {
+		callback("atomic_rename_started", s.vaultPath, backupPath)
+	}
+
+	if err := s.atomicRename(s.vaultPath, backupPath); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// Step 5: Atomic rename (temp → vault)
+	if callback != nil {
+		callback("atomic_rename_started", tempPath, s.vaultPath)
+	}
+
+	if err := s.atomicRename(tempPath, s.vaultPath); err != nil {
+		// CRITICAL ERROR: Try to restore backup
+		if callback != nil {
+			callback("rollback_started", backupPath, s.vaultPath)
+		}
+		_ = s.atomicRename(backupPath, s.vaultPath)
+		if callback != nil {
+			callback("rollback_completed", s.vaultPath)
+		}
+		return criticalErrorMessage(err)
+	}
+
+	// T034: Notify completion
+	if callback != nil {
+		callback("atomic_save_completed", s.vaultPath)
 	}
 
 	return nil
+}
+
+// prepareEncryptedData encrypts vault data and returns JSON bytes ready to write
+func (s *StorageService) prepareEncryptedData(data []byte, metadata VaultMetadata, password string) ([]byte, error) {
+	// Derive key from password and salt
+	key, err := s.cryptoService.DeriveKey([]byte(password), metadata.Salt, metadata.Iterations)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive key: %w", err)
+	}
+	defer s.cryptoService.ClearKey(key)
+
+	// Encrypt vault data
+	encryptedData, err := s.cryptoService.Encrypt(data, key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encrypt vault data: %w", err)
+	}
+
+	// Create encrypted vault structure
+	encryptedVault := EncryptedVault{
+		Metadata: metadata,
+		Data:     encryptedData,
+	}
+
+	// Marshal to JSON
+	jsonData, err := json.Marshal(encryptedVault)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	return jsonData, nil
 }
 
 // SaveVaultWithIterations saves vault data with an updated iteration count.
@@ -249,7 +365,7 @@ func (s *StorageService) SetIterations(iterations int) error {
 }
 
 func (s *StorageService) VaultExists() bool {
-	_, err := os.Stat(s.vaultPath)
+	_, err := s.fs.Stat(s.vaultPath)
 	return err == nil
 }
 
@@ -330,7 +446,7 @@ func (s *StorageService) loadEncryptedVault() (*EncryptedVault, error) {
 		return nil, ErrVaultNotFound
 	}
 
-	data, err := os.ReadFile(s.vaultPath)
+	data, err := s.fs.ReadFile(s.vaultPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read vault file: %w", err)
 	}
@@ -381,7 +497,7 @@ func (s *StorageService) saveEncryptedVault(data []byte, metadata VaultMetadata,
 func (s *StorageService) atomicWrite(path string, data []byte) error {
 	// FR-015: Create parent directories if they don't exist
 	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := s.fs.MkdirAll(dir, 0750); err != nil { // More restrictive permissions (owner+group only)
 		return fmt.Errorf("failed to create parent directories: %w", err)
 	}
 
@@ -398,7 +514,7 @@ func (s *StorageService) atomicWrite(path string, data []byte) error {
 	defer func() {
 		if tempFile != nil {
 			_ = tempFile.Close()
-			_ = os.Remove(tempPath)
+			_ = s.fs.Remove(tempPath)
 		}
 	}()
 
@@ -419,8 +535,8 @@ func (s *StorageService) atomicWrite(path string, data []byte) error {
 	tempFile = nil // Prevent cleanup in defer
 
 	// Atomic move (rename) to final location
-	if err := os.Rename(tempPath, path); err != nil {
-		_ = os.Remove(tempPath) // Clean up on failure
+	if err := s.fs.Rename(tempPath, path); err != nil {
+		_ = s.fs.Remove(tempPath) // Clean up on failure
 		return fmt.Errorf("failed to move temp file to final location: %w", err)
 	}
 
@@ -433,7 +549,7 @@ func (s *StorageService) atomicWrite(path string, data []byte) error {
 // - Write permissions to vault directory
 func (s *StorageService) preflightChecks() error {
 	// Check if vault exists
-	vaultInfo, err := os.Stat(s.vaultPath)
+	vaultInfo, err := s.fs.Stat(s.vaultPath)
 	if err != nil {
 		return fmt.Errorf("failed to stat vault: %w", err)
 	}
@@ -460,7 +576,7 @@ func (s *StorageService) preflightChecks() error {
 		return fmt.Errorf("no write permission in vault directory: %w", err)
 	}
 	_ = testFile.Close()
-	_ = os.Remove(testPath)
+	_ = s.fs.Remove(testPath)
 
 	return nil
 }
@@ -516,7 +632,7 @@ func (s *StorageService) createBackup() error {
 func (s *StorageService) restoreFromBackup() error {
 	backupPath := s.vaultPath + BackupSuffix
 
-	if _, err := os.Stat(backupPath); os.IsNotExist(err) {
+	if _, err := s.fs.Stat(backupPath); os.IsNotExist(err) {
 		return ErrBackupFailed
 	}
 

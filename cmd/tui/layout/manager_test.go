@@ -588,7 +588,7 @@ func simulateApp(t *testing.T) *tview.Application {
 // TestSidebarToggleCycles verifies sidebar toggle cycles through nil → false → true → nil
 func TestSidebarToggleCycles(t *testing.T) {
 	app := simulateApp(t)
-	appState := models.NewAppState(nil)         // nil vault for testing
+	appState := models.NewAppState(nil)        // nil vault for testing
 	lm := NewLayoutManager(app, appState, nil) // nil config for testing
 
 	// Initial state should be Auto (nil)

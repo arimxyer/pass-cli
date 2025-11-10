@@ -100,7 +100,7 @@ func runConfigInit(cmd *cobra.Command, args []string) {
 
 	// Write default config template
 	template := config.GetDefaultConfigTemplate()
-	if err := os.WriteFile(configPath, []byte(template), 0644); err != nil {
+	if err := os.WriteFile(configPath, []byte(template), 0600); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Failed to create config file: %v\n", err)
 		os.Exit(2)
 	}
@@ -120,7 +120,7 @@ func runConfigEdit(cmd *cobra.Command, args []string) {
 	// If config file doesn't exist, create it with defaults
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		template := config.GetDefaultConfigTemplate()
-		if err := os.WriteFile(configPath, []byte(template), 0644); err != nil {
+		if err := os.WriteFile(configPath, []byte(template), 0600); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Failed to create config file: %v\n", err)
 			os.Exit(2)
 		}
@@ -204,6 +204,7 @@ func runConfigReset(cmd *cobra.Command, args []string) {
 		backupPath := configPath + ".backup"
 
 		// Read current config
+		// #nosec G304 -- config path comes from GetConfigPath(), user-controlled by design for CLI tool
 		currentConfig, err := os.ReadFile(configPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Failed to read current config: %v\n", err)
@@ -211,7 +212,7 @@ func runConfigReset(cmd *cobra.Command, args []string) {
 		}
 
 		// Write backup
-		if err := os.WriteFile(backupPath, currentConfig, 0644); err != nil {
+		if err := os.WriteFile(backupPath, currentConfig, 0600); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Failed to create backup: %v\n", err)
 			os.Exit(2)
 		}
@@ -221,7 +222,7 @@ func runConfigReset(cmd *cobra.Command, args []string) {
 
 	// Write default config template
 	template := config.GetDefaultConfigTemplate()
-	if err := os.WriteFile(configPath, []byte(template), 0644); err != nil {
+	if err := os.WriteFile(configPath, []byte(template), 0600); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Failed to write config file: %v\n", err)
 		os.Exit(2)
 	}

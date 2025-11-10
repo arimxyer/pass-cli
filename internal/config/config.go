@@ -95,7 +95,7 @@ func GetConfigPath() (string, error) {
 	configDir := filepath.Join(homeDir, ".pass-cli")
 
 	// Ensure directory exists
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+	if err := os.MkdirAll(configDir, 0750); err != nil { // More restrictive permissions (owner+group only)
 		return "", fmt.Errorf("cannot create config directory: %w", err)
 	}
 
@@ -134,6 +134,7 @@ func OpenEditor(filePath string) error {
 		return err
 	}
 
+	// #nosec G204 -- editor is user-configured via EDITOR env var or config, intended behavior for CLI tool
 	cmd := exec.Command(editor, filePath)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

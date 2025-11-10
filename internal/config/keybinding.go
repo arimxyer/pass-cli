@@ -133,6 +133,7 @@ func ParseKeybinding(keyStr string) (tcell.Key, rune, tcell.ModMask, error) {
 		if num, err := strconv.Atoi(keyPart[1:]); err == nil {
 			if num >= 1 && num <= 12 {
 				// tcell.KeyF1 through tcell.KeyF12 are sequential
+				// #nosec G115 -- num is bounded [1,12] by validation, safe conversion to tcell.Key
 				return tcell.KeyF1 + tcell.Key(num-1), 0, mods, nil
 			}
 		}
