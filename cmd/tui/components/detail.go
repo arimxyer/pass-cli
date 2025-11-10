@@ -251,6 +251,69 @@ func (dv *DetailView) CopyPasswordToClipboard() error {
 	return nil
 }
 
+// CopyFieldToClipboard copies a specified field to clipboard.
+// Supported fields: "username", "password", "url", "notes", "service", "category"
+// Returns error if no credential selected, invalid field, or clipboard operation fails.
+func (dv *DetailView) CopyFieldToClipboard(field string) error {
+	cred := dv.appState.GetSelectedCredential()
+	if cred == nil {
+		return fmt.Errorf("no credential selected")
+	}
+
+	var value string
+	needsFullCred := field == "password" // Only password requires full credential fetch
+
+	if needsFullCred {
+		// Fetch full credential for password
+		fullCred, err := dv.appState.GetFullCredential(cred.Service)
+		if err != nil {
+			return fmt.Errorf("failed to get credential: %w", err)
+		}
+		value = string(fullCred.Password)
+
+		// Zero password bytes after use
+		defer func() {
+			for i := range fullCred.Password {
+				fullCred.Password[i] = 0
+			}
+		}()
+	} else {
+		// Get value from credential summary
+		switch field {
+		case "username":
+			value = cred.Username
+		case "url":
+			value = cred.URL
+		case "notes":
+			value = cred.Notes
+		case "service":
+			value = cred.Service
+		case "category":
+			value = cred.Category
+		default:
+			return fmt.Errorf("invalid field: %s", field)
+		}
+	}
+
+	// Check if field is empty
+	if value == "" {
+		return fmt.Errorf("%s is empty", field)
+	}
+
+	// Copy to clipboard
+	err := clipboard.WriteAll(value)
+	if err != nil {
+		return fmt.Errorf("failed to copy to clipboard: %w", err)
+	}
+
+	// Track field access
+	if err := dv.appState.RecordFieldAccess(cred.Service, field); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to track %s access: %v\n", field, err)
+	}
+
+	return nil
+}
+
 // applyStyles applies theme colors and borders to the detail view.
 // Uses theme system for consistent styling.
 func (dv *DetailView) applyStyles() {

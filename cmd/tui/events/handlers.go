@@ -158,7 +158,7 @@ func (eh *EventHandler) handleGlobalKey(event *tcell.EventKey) *tcell.EventKey {
 		return nil
 	}
 
-	// Additional non-configurable shortcuts (password operations)
+	// Additional non-configurable shortcuts (password operations and field copying)
 	// These are not in the config spec but should stay as they are context-specific
 	if event.Key() == tcell.KeyRune {
 		switch event.Rune() {
@@ -167,6 +167,15 @@ func (eh *EventHandler) handleGlobalKey(event *tcell.EventKey) *tcell.EventKey {
 			return nil
 		case 'c':
 			eh.handleCopyPassword()
+			return nil
+		case 'u':
+			eh.handleCopyField("username")
+			return nil
+		case 'l':
+			eh.handleCopyField("url")
+			return nil
+		case 'n':
+			eh.handleCopyField("notes")
 			return nil
 		}
 	}
@@ -283,6 +292,25 @@ func (eh *EventHandler) handleCopyPassword() {
 	}
 }
 
+// handleCopyField copies a specified field to clipboard.
+func (eh *EventHandler) handleCopyField(field string) {
+	if eh.detailView == nil {
+		return
+	}
+
+	err := eh.detailView.CopyFieldToClipboard(field)
+	if err != nil {
+		eh.statusBar.ShowError(err)
+	} else {
+		// Capitalize first letter for display
+		displayField := field
+		if len(displayField) > 0 {
+			displayField = string(displayField[0]-32) + displayField[1:]
+		}
+		eh.statusBar.ShowSuccess(fmt.Sprintf("%s copied to clipboard!", displayField))
+	}
+}
+
 // handleToggleDetailPanel toggles the detail panel visibility through three states.
 // Cycles: Auto (responsive) -> Hide -> Show -> Auto
 // Displays status bar message showing the new state.
@@ -390,7 +418,14 @@ func (eh *EventHandler) handleShowHelp() {
 	addShortcut(getKey("edit_credential"), "Edit credential")
 	addShortcut(getKey("delete_credential"), "Delete credential")
 	addShortcut("p", "Toggle password visibility")
-	addShortcut("c", "Copy password to clipboard")
+	row++ // Blank line (just skip row, don't add cells)
+
+	// Copy section
+	addSection("Copy to Clipboard")
+	addShortcut("c", "Copy password")
+	addShortcut("u", "Copy username")
+	addShortcut("l", "Copy URL")
+	addShortcut("n", "Copy notes")
 	row++ // Blank line (just skip row, don't add cells)
 
 	// View section
