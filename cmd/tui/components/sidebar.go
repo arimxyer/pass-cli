@@ -3,6 +3,7 @@ package components
 import (
 	"sort"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"pass-cli/cmd/tui/models"
 	"pass-cli/cmd/tui/styles"
@@ -30,9 +31,12 @@ type Sidebar struct {
 func NewSidebar(appState *models.AppState) *Sidebar {
 	theme := styles.GetCurrentTheme()
 
-	// Create root node
+	// Create root node with theme background
+	rootStyle := tcell.StyleDefault.
+		Foreground(theme.BorderColor).
+		Background(theme.Background)
 	root := tview.NewTreeNode("All Credentials").
-		SetColor(theme.BorderColor). // Cyan accent color
+		SetTextStyle(rootStyle).
 		SetSelectable(true).
 		SetExpanded(true)
 
@@ -96,10 +100,13 @@ func (s *Sidebar) Refresh() {
 
 	// Build category nodes with credential children
 	for _, category := range categories {
-		// Create category node with NodeReference
+		// Create category node with theme background
+		categoryStyle := tcell.StyleDefault.
+			Foreground(theme.TextPrimary).
+			Background(theme.Background)
 		categoryNode := tview.NewTreeNode(category).
 			SetSelectable(true).
-			SetColor(theme.TextPrimary). // White text
+			SetTextStyle(categoryStyle).
 			SetReference(NodeReference{Kind: "category", Value: category}).
 			SetExpanded(false) // Collapsed by default
 
@@ -110,11 +117,14 @@ func (s *Sidebar) Refresh() {
 		})
 
 		// Add credential nodes from sorted list
+		credStyle := tcell.StyleDefault.
+			Foreground(theme.TextSecondary).
+			Background(theme.Background)
 		for _, cred := range credList {
-			// Create credential node with NodeReference
+			// Create credential node with theme background
 			credNode := tview.NewTreeNode(cred.Service).
 				SetSelectable(true).
-				SetColor(theme.TextSecondary). // Gray text to distinguish from category
+				SetTextStyle(credStyle).
 				SetReference(NodeReference{Kind: "credential", Value: cred.Service})
 
 			categoryNode.AddChild(credNode)
@@ -173,5 +183,10 @@ func (s *Sidebar) onSelect(node *tview.TreeNode) {
 // applyStyles applies borders, colors, and title to the sidebar.
 // Uses rounded borders with cyan accent color and dark background.
 func (s *Sidebar) applyStyles() {
+	theme := styles.GetCurrentTheme()
 	styles.ApplyBorderedStyle(s.TreeView, "Categories", true)
+	// Explicitly set background to ensure it applies to tree area
+	s.SetBackgroundColor(theme.Background)
+	// Set graphics color for tree structure lines
+	s.SetGraphicsColor(theme.TextSecondary)
 }
