@@ -98,16 +98,6 @@ jobs:
           cache: true
           cache-dependency-path: go.sum
 
-      - name: Cache Go build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-build-
-
       - name: Run unit tests
         run: go test -v -coverprofile=coverage.txt -covermode=atomic ./...
         shell: bash
@@ -136,16 +126,6 @@ jobs:
           go-version: '1.25'
           cache: true
           cache-dependency-path: go.sum
-
-      - name: Cache Go build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-build-race-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-build-race-
 
       - name: Run tests with race detector
         run: |
@@ -177,16 +157,6 @@ jobs:
           go-version: '1.25'
           cache: true
           cache-dependency-path: go.sum
-
-      - name: Cache Go build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-build-
 
       - name: Run integration tests
         run: go test -v -tags=integration -timeout 2m ./test
@@ -251,16 +221,6 @@ jobs:
           go-version: '1.25'
           cache: true
           cache-dependency-path: go.sum
-
-      - name: Cache Go build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-build-
 
       - name: Run GoReleaser (snapshot)
         uses: goreleaser/goreleaser-action@v6
