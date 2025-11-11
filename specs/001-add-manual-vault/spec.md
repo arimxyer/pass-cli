@@ -5,6 +5,12 @@
 **Status**: Draft
 **Input**: User description: "Add manual vault backup and restore commands to expose existing backup functionality. Users can manually create backups of their vault, restore from backup files when vault is corrupted or deleted, and view backup information. This complements the automatic backup system and provides file recovery capabilities distinct from password recovery."
 
+## Clarifications
+
+### Session 2025-11-11
+
+- Q: FR-005 vs FR-013 conflict - Does manual backup create timestamped filename or use standard `.backup` suffix? → A: vault.enc.[timestamp].manual.backup
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Restore Corrupted Vault from Backup (Priority: P1)
@@ -36,9 +42,9 @@ A user is about to perform a risky operation (bulk password changes, vault migra
 
 **Acceptance Scenarios**:
 
-1. **Given** vault is unlocked, **When** user runs manual backup command, **Then** system creates backup with timestamp in filename
+1. **Given** vault is unlocked, **When** user runs manual backup command, **Then** system creates backup with naming pattern `vault.enc.[timestamp].manual.backup`
 2. **Given** vault is locked, **When** user runs manual backup command, **Then** system creates backup without requiring unlock
-3. **Given** backup already exists, **When** user creates new manual backup, **Then** system overwrites old backup with new one
+3. **Given** previous manual backups exist, **When** user creates new manual backup, **Then** system creates new timestamped file (keeps history of manual backups)
 4. **Given** backup succeeds, **When** system completes operation, **Then** system displays confirmation with backup file path and timestamp
 5. **Given** insufficient disk space, **When** backup is attempted, **Then** system displays clear error and does not corrupt existing backup
 6. **Given** backup directory lacks write permissions, **When** backup is attempted, **Then** system displays permission error with troubleshooting guidance
@@ -59,7 +65,7 @@ A user wants to verify their backup safety net exists. They run the backup info 
 2. **Given** backup does not exist, **When** user runs backup info command, **Then** system displays message indicating no backup available and suggests creating one
 3. **Given** backup is older than 30 days, **When** user views info, **Then** system displays warning that backup may be stale
 4. **Given** backup file exists but is unreadable, **When** user views info, **Then** system indicates backup corruption risk
-5. **Given** multiple backup files exist (edge case from manual copies), **When** user views info, **Then** system identifies which backup would be used for restoration
+5. **Given** multiple manual backup files exist, **When** user views info, **Then** system displays all available backups and identifies which one would be used for restoration (most recent)
 
 ---
 
@@ -79,10 +85,10 @@ A user wants to verify their backup safety net exists. They run the backup info 
 ### Functional Requirements
 
 - **FR-001**: System MUST provide a command to manually create a backup of the current vault file
-- **FR-002**: System MUST provide a command to restore vault from the most recent backup file
+- **FR-002**: System MUST provide a command to restore vault from the most recent backup file (automatic or manual, determined by file timestamp)
 - **FR-003**: System MUST provide a command to view backup status and information
 - **FR-004**: Manual backup command MUST work regardless of vault lock state (locked or unlocked)
-- **FR-005**: Backup creation MUST include timestamp in backup filename for identification
+- **FR-005**: Manual backup creation MUST use naming pattern `vault.enc.[timestamp].manual.backup` for identification and history retention
 - **FR-006**: System MUST verify backup file integrity before using it for restoration
 - **FR-007**: Restore command MUST warn user that current vault will be overwritten and require confirmation
 - **FR-008**: System MUST display clear error messages when backup does not exist
@@ -90,7 +96,7 @@ A user wants to verify their backup safety net exists. They run the backup info 
 - **FR-010**: System MUST handle permission errors with actionable troubleshooting guidance
 - **FR-011**: Backup info command MUST display backup creation timestamp, file size, and location
 - **FR-012**: System MUST warn users when backup is older than 30 days
-- **FR-013**: System MUST use the standard backup file naming convention (`.backup` suffix)
+- **FR-013**: System MUST distinguish between automatic backups (`.backup` suffix) and manual backups (`.manual.backup` suffix with timestamp)
 - **FR-014**: Restore operation MUST preserve original vault permissions
 - **FR-015**: System MUST prevent backup corruption by using atomic file operations
 - **FR-016**: Commands MUST be organized under `pass vault backup` subcommand group
@@ -98,10 +104,14 @@ A user wants to verify their backup safety net exists. They run the backup info 
 - **FR-018**: System MUST handle cases where backup directory does not exist (create if needed)
 - **FR-019**: Manual backups MUST be compatible with automatic backups (same format and restoration process)
 - **FR-020**: System MUST provide verbose output mode showing detailed operation progress
+- **FR-021**: Backup info command MUST display all available backups (both automatic and manual) sorted by creation timestamp
 
 ### Key Entities
 
-- **Backup File**: A copy of the vault file created either automatically during saves or manually via command. Stored at `vault.enc.backup` with the same encryption and format as the primary vault. Contains complete snapshot of all credentials at backup time.
+- **Backup File**: A copy of the vault file created either automatically during saves or manually via command. Two types exist:
+  - **Automatic backups**: Created during vault saves, stored as `vault.enc.backup` (overwrites previous automatic backup, N-1 strategy)
+  - **Manual backups**: Created via backup command, stored as `vault.enc.[timestamp].manual.backup` (retains history of manual backups)
+  Both types use the same encryption and format as the primary vault, containing complete snapshots of all credentials at backup time.
 
 - **Vault Metadata**: Information about the vault and its backup including file paths, creation timestamps, file sizes, and integrity status. Used to determine backup availability and age.
 
@@ -123,11 +133,12 @@ A user wants to verify their backup safety net exists. They run the backup info 
 ## Assumptions
 
 - Vault file and backup file are stored in the same directory (standard pass-cli configuration)
-- Users have sufficient disk space for backup files (typically same size as vault file)
+- Users have sufficient disk space for backup files (typically same size as vault file, multiple manual backups retained)
 - File system supports atomic rename operations for backup safety
 - Users understand that backups are point-in-time snapshots (not live mirrors)
 - Backup files use the same encryption as vault files (no separate backup password)
 - Users will not manually edit backup files (they are binary encrypted data)
-- One backup file per vault is sufficient (N-1 strategy, not full backup history)
+- Automatic backups use N-1 strategy (single `.backup` file), manual backups retain history with timestamped filenames
+- Users are responsible for managing disk space consumed by multiple manual backups
 - Backup restoration is an intentional recovery action (requires confirmation, not automatic)
 - Users are responsible for external backups (cloud, external drives) - this feature handles local backup only
