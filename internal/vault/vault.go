@@ -171,6 +171,12 @@ func New(vaultPath string) (*VaultService, error) {
 	return v, nil
 }
 
+// GetStorageService returns the underlying storage service.
+// Used by CLI commands that need direct access to storage operations.
+func (v *VaultService) GetStorageService() *storage.StorageService {
+	return v.storageService
+}
+
 // T066: EnableAudit enables audit logging for this vault
 // vaultID should be a unique identifier for the vault (e.g., filepath or UUID)
 // DISC-013 fix: Now persists audit config to vault data
