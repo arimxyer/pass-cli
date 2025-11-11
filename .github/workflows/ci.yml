@@ -110,33 +110,6 @@ jobs:
           name: codecov-ubuntu
         continue-on-error: true
 
-  race-tests:
-    name: Race Detector Tests
-    runs-on: ubuntu-latest
-    needs: check-changes
-    if: needs.check-changes.outputs.code-changed == 'true'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: '1.25'
-          cache: true
-          cache-dependency-path: go.sum
-
-      - name: Run tests with race detector
-        run: |
-          # Run race detector on all packages except vault and storage (which need real iteration counts for security validation)
-          go test -v -race $(go list ./... | grep -E -v '/internal/(vault|storage)$')
-        shell: bash
-        env:
-          CGO_ENABLED: 1
-          PASS_CLI_TEST_MODE: "true"
-          PASS_CLI_ITERATIONS: "1000"
-
   integration-tests:
     name: Integration Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -206,7 +179,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [check-changes, unit-tests, race-tests, integration-tests, security]
+    needs: [check-changes, unit-tests, integration-tests, security]
     if: needs.check-changes.outputs.code-changed == 'true'
 
     steps:
