@@ -83,7 +83,7 @@ type LayoutManager struct {
 func NewLayoutManager(app *tview.Application, appState *models.AppState, cfg *config.Config) *LayoutManager {
 	// Use defaults if config is nil (for testing)
 	detailPosition := "auto"
-	detailAutoThreshold := 140
+	detailAutoThreshold := 120
 	if cfg != nil {
 		detailPosition = cfg.Terminal.DetailPosition
 		detailAutoThreshold = cfg.Terminal.DetailAutoThreshold
@@ -114,6 +114,29 @@ func (lm *LayoutManager) determineDetailPosition() string {
 		return "bottom"
 	}
 	return "right"
+}
+
+// shouldShowDetailInMode determines if detail panel should be shown in the given mode.
+// With auto or bottom positioning, detail shows in Medium mode (80+).
+// With right positioning, detail only shows in Large mode (120+).
+func (lm *LayoutManager) shouldShowDetailInMode(mode LayoutMode) bool {
+	// Check for manual override
+	if lm.detailPanelOverride != nil {
+		return *lm.detailPanelOverride
+	}
+
+	// Detail never shows in Small mode
+	if mode == LayoutSmall {
+		return false
+	}
+
+	// In Medium mode, show detail only if position is auto or bottom
+	if mode == LayoutMedium {
+		return lm.detailPosition == "auto" || lm.detailPosition == "bottom"
+	}
+
+	// In Large mode, always show detail (default responsive behavior)
+	return true
 }
 
 // CreateMainLayout builds the complete layout structure.
@@ -240,14 +263,36 @@ func (lm *LayoutManager) RebuildLayout() {
 		}
 
 	case LayoutMedium:
-		if showSidebar {
-			// Sidebar + Table
-			lm.contentRow.
-				AddItem(lm.sidebar, 20, 0, false).
-				AddItem(tableArea, 0, 1, true)
+		// Check if detail should be shown in medium mode (for auto/bottom positioning)
+		showDetail := lm.shouldShowDetailInMode(LayoutMedium)
+
+		if showDetail {
+			// Show detail on bottom in medium mode
+			rightArea := tview.NewFlex().
+				SetDirection(tview.FlexRow).
+				AddItem(tableArea, 0, 2, true).     // Table gets 2/3 height
+				AddItem(lm.detailView, 0, 1, false) // Detail gets 1/3 height
+
+			if showSidebar {
+				// Sidebar + (Table above Detail)
+				lm.contentRow.
+					AddItem(lm.sidebar, 20, 0, false).
+					AddItem(rightArea, 0, 1, true)
+			} else {
+				// (Table above Detail) - sidebar hidden by override
+				lm.contentRow.AddItem(rightArea, 0, 1, true)
+			}
 		} else {
-			// Table only (sidebar hidden by override)
-			lm.contentRow.AddItem(tableArea, 0, 1, true)
+			// Original medium mode behavior: no detail
+			if showSidebar {
+				// Sidebar + Table
+				lm.contentRow.
+					AddItem(lm.sidebar, 20, 0, false).
+					AddItem(tableArea, 0, 1, true)
+			} else {
+				// Table only (sidebar hidden by override)
+				lm.contentRow.AddItem(tableArea, 0, 1, true)
+			}
 		}
 
 	case LayoutLarge:

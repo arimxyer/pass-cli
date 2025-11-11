@@ -61,7 +61,7 @@ func GetDefaults() *Config {
 			MinWidth:            60,
 			MinHeight:           30,
 			DetailPosition:      "auto",
-			DetailAutoThreshold: 140,
+			DetailAutoThreshold: 120,
 		},
 		Keybindings: map[string]string{
 			"quit":              "q",
@@ -478,7 +478,7 @@ func (c *Config) validateTerminal(result *ValidationResult) *ValidationResult {
 
 	// Validate detail_auto_threshold range (80-500)
 	if c.Terminal.DetailAutoThreshold == 0 {
-		c.Terminal.DetailAutoThreshold = 140 // Default to 140 if not set
+		c.Terminal.DetailAutoThreshold = 120 // Default to 120 if not set
 	}
 	if c.Terminal.DetailAutoThreshold < 80 || c.Terminal.DetailAutoThreshold > 500 {
 		result.Errors = append(result.Errors, ValidationError{
