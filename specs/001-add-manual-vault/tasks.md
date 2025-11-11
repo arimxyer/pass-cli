@@ -39,7 +39,7 @@
 - [ ] T004 Add `BackupInfo` struct to `internal/storage/backup.go` with fields: Path, ModTime, Size, Type, IsCorrupted
 - [ ] T005 Add `BackupTypeAutomatic` and `BackupTypeManual` constants to `internal/storage/backup.go`
 - [ ] T006 Implement `generateManualBackupPath()` function in `internal/storage/backup.go` - returns `vault.enc.[timestamp].manual.backup` format
-- [ ] T007 Implement `CreateManualBackup() (string, error)` method in `internal/storage/storage.go` - uses atomic file copy
+- [ ] T007 Implement `CreateManualBackup() (string, error)` method in `internal/storage/storage.go` - uses atomic file copy, creates backup directory if missing (FR-018)
 - [ ] T008 [P] Implement `ListBackups() ([]BackupInfo, error)` method in `internal/storage/storage.go` - glob pattern discovery
 - [ ] T009 [P] Implement `FindNewestBackup() (*BackupInfo, error)` method in `internal/storage/storage.go` - sorts by ModTime
 - [ ] T010 Modify `RestoreFromBackup(backupPath string) error` in `internal/storage/storage.go` - accept optional path parameter (empty string = auto-select newest)
@@ -79,6 +79,7 @@
 - [ ] T026 [US1] Implement confirmation prompt in `runVaultBackupRestore()` - warn about overwrite, get user consent
 - [ ] T027 [US1] Implement --force flag behavior in `runVaultBackupRestore()` - skip confirmation
 - [ ] T028 [US1] Add restore execution logic in `runVaultBackupRestore()` - calls `RestoreFromBackup()`
+- [ ] T028a [US1] Verify and set vault file permissions after restore in `runVaultBackupRestore()` - ensure 0600 (Unix) or equivalent ACLs (Windows) per FR-014
 - [ ] T029 [US1] Add success/error messages to `runVaultBackupRestore()` - user-friendly output
 - [ ] T030 [US1] Add audit logging for restore operations in `runVaultBackupRestore()` - log to `~/.pass-cli/audit.log`
 - [ ] T031 [US1] Add verbose output mode to `runVaultBackupRestore()` - detailed progress messages
@@ -99,6 +100,7 @@
 - [ ] T033 [P] [US2] Integration test for successful backup creation in `test/vault_backup_integration_test.go` - verify file created with correct timestamp format
 - [ ] T034 [P] [US2] Integration test for backup with vault not found in `test/vault_backup_integration_test.go` - verify error message
 - [ ] T035 [P] [US2] Integration test for backup with disk full in `test/vault_backup_integration_test.go` - simulate disk space error
+- [ ] T035a [P] [US2] Integration test for backup with missing directory in `test/vault_backup_integration_test.go` - verify directory creation (FR-018)
 - [ ] T036 [P] [US2] Integration test for backup with permission denied in `test/vault_backup_integration_test.go` - test directory permission error
 - [ ] T037 [P] [US2] Integration test for multiple manual backups in `test/vault_backup_integration_test.go` - verify history retention (no overwrite)
 - [ ] T038 [P] [US2] Unit test for timestamp generation in `internal/storage/backup_test.go` - verify format `YYYYMMDD-HHMMSS`
@@ -180,8 +182,8 @@
 - [ ] T086 Performance test: Verify backup creation meets <5 second target for 100 credentials
 - [ ] T087 Performance test: Verify restore operation meets <30 second target
 - [ ] T088 Performance test: Verify info command meets <1 second target
-- [ ] T089 [P] Documentation: Update `README.md` with backup command examples
-- [ ] T090 [P] Documentation: Update user documentation with backup/restore workflows
+- [ ] T089 [P] Documentation: Update `README.md` with backup command examples in "Usage" section
+- [ ] T090 [P] Documentation: Create `docs/guides/backup-restore-guide.md` with backup/restore workflows and troubleshooting
 - [ ] T091 Run `golangci-lint run` on all new code - fix any issues
 - [ ] T092 Run `gosec ./...` security scan - address any findings
 - [ ] T093 Run full test suite with coverage - verify >80% coverage per constitution
@@ -332,14 +334,14 @@ With 3 developers after foundational phase completes:
 
 ## Task Count Summary
 
-- **Total Tasks**: 94
+- **Total Tasks**: 96
 - **Setup**: 3 tasks
 - **Foundational**: 9 tasks (BLOCKING)
-- **User Story 1**: 20 tasks (7 tests + 13 implementation)
-- **User Story 2**: 18 tasks (7 tests + 11 implementation)
+- **User Story 1**: 21 tasks (7 tests + 14 implementation)
+- **User Story 2**: 19 tasks (8 tests + 11 implementation)
 - **User Story 3**: 27 tasks (9 tests + 18 implementation)
 - **Polish**: 17 tasks
-- **Parallel Opportunities**: 42 tasks marked [P]
+- **Parallel Opportunities**: 43 tasks marked [P]
 
 ## Ready to Start
 

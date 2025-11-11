@@ -130,6 +130,11 @@ pass-cli/
 └── test/
     ├── vault_backup_integration_test.go  # NEW: Integration tests
     └── vault_backup_info_test.go         # NEW: Info command tests
+
+docs/                                      # Project documentation
+├── README.md                              # Main project documentation (existing)
+└── guides/
+    └── backup-restore-guide.md            # NEW: User guide for backup/restore workflows
 ```
 
 **Structure Decision**: Using existing single-project structure (cmd/ + internal/ + test/). New CLI commands follow established pattern (vault.go parent + vault_backup_*.go subcommands). Library changes minimal (add manual backup naming to internal/storage/backup.go).

@@ -24,7 +24,7 @@ A user's vault file becomes corrupted or deleted. They run the restore command, 
 **Acceptance Scenarios**:
 
 1. **Given** vault file is corrupted and backup exists, **When** user runs restore command, **Then** system copies backup to vault location and confirms restoration success
-2. **Given** vault file is deleted and backup exists, **When** user runs restore command, **Then** system recreates vault from primary location
+2. **Given** vault file is deleted and backup exists, **When** user runs restore command, **Then** system recreates vault from backup file
 3. **Given** backup does not exist, **When** user runs restore command, **Then** system displays error message indicating no backup available
 4. **Given** vault is successfully restored, **When** user attempts to unlock vault, **Then** vault unlocks with original master password
 5. **Given** backup file is also corrupted, **When** system attempts restore, **Then** system displays error and does not overwrite existing vault (if any)
@@ -84,7 +84,7 @@ A user wants to verify their backup safety net exists. They run the backup info 
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide a command to manually create a backup of the current vault file
+- **FR-001**: System MUST provide a command to manually create a backup file of the current vault
 - **FR-002**: System MUST provide a command to restore vault from the most recent backup file (automatic or manual, determined by file timestamp)
 - **FR-003**: System MUST provide a command to view backup status and information
 - **FR-004**: Manual backup command MUST work regardless of vault lock state (locked or unlocked)
@@ -120,7 +120,7 @@ A user wants to verify their backup safety net exists. They run the backup info 
 ### Measurable Outcomes
 
 - **SC-001**: Users can successfully restore a corrupted vault from backup in under 30 seconds (single command execution)
-- **SC-002**: Manual backup creation completes in under 5 seconds for typical vault sizes (up to 100 credentials)
+- **SC-002**: Manual backup creation completes in under 5 seconds for typical vault sizes (100 credentials, ~50KB file)
 - **SC-003**: Backup info command displays status in under 1 second
 - **SC-004**: 100% of valid backup files can be successfully restored (verified through testing)
 - **SC-005**: Zero data loss when restoring from verified backups (all credentials intact and accessible)
@@ -134,6 +134,7 @@ A user wants to verify their backup safety net exists. They run the backup info 
 
 - Vault file and backup file are stored in the same directory (standard pass-cli configuration)
 - Users have sufficient disk space for backup files (typically same size as vault file, multiple manual backups retained)
+- For performance testing purposes, "typical vault size" is defined as 100 credentials with average 500 bytes per credential (username + password + notes), resulting in ~50KB vault file
 - File system supports atomic rename operations for backup safety
 - Users understand that backups are point-in-time snapshots (not live mirrors)
 - Backup files use the same encryption as vault files (no separate backup password)
@@ -141,4 +142,5 @@ A user wants to verify their backup safety net exists. They run the backup info 
 - Automatic backups use N-1 strategy (single `.backup` file), manual backups retain history with timestamped filenames
 - Users are responsible for managing disk space consumed by multiple manual backups
 - Backup restoration is an intentional recovery action (requires confirmation, not automatic)
+- Age warnings (>30 days) are displayed only in info command, not during restore (design decision: restore prioritizes newest backup regardless of age, users should check info before restore if age matters)
 - Users are responsible for external backups (cloud, external drives) - this feature handles local backup only
