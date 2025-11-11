@@ -60,30 +60,30 @@
 
 **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T013 [P] [US1] Integration test for basic restore in `test/vault_backup_integration_test.go` - setup vault, backup, corrupt, restore, verify
-- [ ] T014 [P] [US1] Integration test for restore with no backups in `test/vault_backup_integration_test.go` - verify error message
+- [x] T013 [P] [US1] Integration test for basic restore in `test/vault_backup_integration_test.go` - setup vault, backup, corrupt, restore, verify
+- [x] T014 [P] [US1] Integration test for restore with no backups in `test/vault_backup_integration_test.go` - verify error message
 - [ ] T015 [P] [US1] Integration test for restore with corrupted backup in `test/vault_backup_integration_test.go` - verify falls back to next valid backup
-- [ ] T016 [P] [US1] Integration test for restore confirmation prompt in `test/vault_backup_integration_test.go` - verify user can cancel
-- [ ] T017 [P] [US1] Integration test for restore with --force flag in `test/vault_backup_integration_test.go` - verify skips confirmation
-- [ ] T018 [P] [US1] Integration test for restore with --dry-run flag in `test/vault_backup_integration_test.go` - verify no changes made
-- [ ] T019 [P] [US1] Unit test for backup verification logic in `internal/storage/backup_test.go` - test header validation
+- [x] T016 [P] [US1] Integration test for restore confirmation prompt in `test/vault_backup_integration_test.go` - verify user can cancel
+- [x] T017 [P] [US1] Integration test for restore with --force flag in `test/vault_backup_integration_test.go` - verify skips confirmation
+- [x] T018 [P] [US1] Integration test for restore with --dry-run flag in `test/vault_backup_integration_test.go` - verify no changes made
+- [x] T019 [P] [US1] Unit test for backup verification logic in `internal/storage/backup_test.go` - test header validation
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Create `cmd/vault_backup_restore.go` file
-- [ ] T021 [US1] Implement restore command cobra structure in `cmd/vault_backup_restore.go` - add flags: --force, --verbose, --dry-run
-- [ ] T022 [US1] Implement `runVaultBackupRestore()` function in `cmd/vault_backup_restore.go` - discovery logic
-- [ ] T023 [US1] Add backup discovery and selection logic to `runVaultBackupRestore()` - calls `FindNewestBackup()`
-- [ ] T024 [US1] Add integrity verification before restore in `runVaultBackupRestore()` - calls `VerifyBackupIntegrity()`
-- [ ] T025 [US1] Implement --dry-run behavior in `runVaultBackupRestore()` - display selection without restoring
-- [ ] T026 [US1] Implement confirmation prompt in `runVaultBackupRestore()` - warn about overwrite, get user consent
-- [ ] T027 [US1] Implement --force flag behavior in `runVaultBackupRestore()` - skip confirmation
-- [ ] T028 [US1] Add restore execution logic in `runVaultBackupRestore()` - calls `RestoreFromBackup()`
-- [ ] T028a [US1] Verify and set vault file permissions after restore in `runVaultBackupRestore()` - ensure 0600 (Unix) or equivalent ACLs (Windows) per FR-014
-- [ ] T029 [US1] Add success/error messages to `runVaultBackupRestore()` - user-friendly output
-- [ ] T030 [US1] Add audit logging for restore operations in `runVaultBackupRestore()` - log to `~/.pass-cli/audit.log`
-- [ ] T031 [US1] Add verbose output mode to `runVaultBackupRestore()` - detailed progress messages
-- [ ] T032 [US1] Register restore command with parent in `cmd/vault_backup.go` - `vaultBackupCmd.AddCommand(vaultBackupRestoreCmd)`
+- [x] T020 [US1] Create `cmd/vault_backup_restore.go` file
+- [x] T021 [US1] Implement restore command cobra structure in `cmd/vault_backup_restore.go` - add flags: --force, --verbose, --dry-run
+- [x] T022 [US1] Implement `runVaultBackupRestore()` function in `cmd/vault_backup_restore.go` - discovery logic
+- [x] T023 [US1] Add backup discovery and selection logic to `runVaultBackupRestore()` - calls `FindNewestBackup()`
+- [x] T024 [US1] Add integrity verification before restore in `runVaultBackupRestore()` - calls `VerifyBackupIntegrity()`
+- [x] T025 [US1] Implement --dry-run behavior in `runVaultBackupRestore()` - display selection without restoring
+- [x] T026 [US1] Implement confirmation prompt in `runVaultBackupRestore()` - warn about overwrite, get user consent
+- [x] T027 [US1] Implement --force flag behavior in `runVaultBackupRestore()` - skip confirmation
+- [x] T028 [US1] Add restore execution logic in `runVaultBackupRestore()` - calls `RestoreFromBackup()`
+- [x] T028a [US1] Verify and set vault file permissions after restore in `runVaultBackupRestore()` - ensure 0600 (Unix) or equivalent ACLs (Windows) per FR-014
+- [x] T029 [US1] Add success/error messages to `runVaultBackupRestore()` - user-friendly output
+- [x] T030 [US1] Add audit logging for restore operations in `runVaultBackupRestore()` - log to `~/.pass-cli/audit.log`
+- [x] T031 [US1] Add verbose output mode to `runVaultBackupRestore()` - detailed progress messages
+- [x] T032 [US1] Register restore command with parent in `cmd/vault_backup.go` - `vaultBackupCmd.AddCommand(vaultBackupRestoreCmd)`
 
 **Checkpoint**: User Story 1 complete - Users can restore corrupted vaults from backups
 
