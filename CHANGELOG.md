@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.5] - 2025-11-11
+
+### Added
+- **TUI Password Generator**: In-form password generation with Ctrl+G shortcut for Add forms
+- **CLI Password Generation**: `--generate` flag for `add` and `update` commands with configurable length
+- **Clipboard Support**: Copy username (u), URL (l), notes (n), and password (c) from TUI detail view
+- **Command Grouping**: CLI commands organized into logical groups (vault, credentials, security, utilities)
+- **Multiple Color Themes**: Dracula (default), Nord, Gruvbox, and Monokai themes for TUI
+- **Responsive Layout**: Configurable detail panel positioning (right/bottom/auto) with auto-threshold
+- **Theme Configuration**: Terminal settings for theme, detail position, and auto-threshold in config.yaml
+
+### Changed
+- CLI help output now displays commands in organized groups for better discoverability
+- TUI detail panel now uses dynamic color helpers for consistent theming
+- Medium layout mode now supports detail panel in bottom position
+- Detail panel auto-switches to bottom when terminal width < 120 columns
+
+### Performance
+- CI workflow optimized: reduced from 9+ minutes to ~4.5 minutes (50% improvement)
+- Removed race detector tests due to fundamental conflict with security validation requirements
+- Parallel job execution for lint, unit-tests, integration-tests, and security scans
+
+### Dependencies
+- Bumped github.com/fatih/color from 1.15.0 to 1.18.0
+- Bumped github.com/olekukonko/tablewriter from 1.1.0 to 1.1.1
+- Bumped golangci/golangci-lint-action from 8 to 9
+
 ## [0.9.0] - 2025-11-10
 
 ### Added
