@@ -16,6 +16,12 @@ import (
 // ManualBackupSuffix is the file extension for manual backups
 const ManualBackupSuffix = ".manual.backup"
 
+// Backup type constants
+const (
+	BackupTypeAutomatic = "automatic"
+	BackupTypeManual    = "manual"
+)
+
 // BackupInfo represents metadata about a single backup file (automatic or manual).
 // Purpose: Provide structured information about backup files for listing, sorting,
 // and restore priority determination.
@@ -77,7 +83,7 @@ func (s *StorageService) ListBackups() ([]BackupInfo, error) {
 			Path:        automaticPath,
 			ModTime:     info.ModTime(),
 			Size:        info.Size(),
-			Type:        "automatic",
+			Type:        BackupTypeAutomatic,
 			IsCorrupted: s.verifyBackupIntegrity(automaticPath) != nil,
 		})
 	}
@@ -99,7 +105,7 @@ func (s *StorageService) ListBackups() ([]BackupInfo, error) {
 			Path:        match,
 			ModTime:     info.ModTime(),
 			Size:        info.Size(),
-			Type:        "manual",
+			Type:        BackupTypeManual,
 			IsCorrupted: s.verifyBackupIntegrity(match) != nil,
 		})
 	}

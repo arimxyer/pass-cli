@@ -24,9 +24,9 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 [P] Create `internal/storage/backup.go` file for manual backup logic
-- [ ] T002 [P] Create `cmd/vault_backup.go` parent command file
-- [ ] T003 [P] Verify Go dependencies are current (`go mod tidy`)
+- [x] T001 [P] Create `internal/storage/backup.go` file for manual backup logic
+- [x] T002 [P] Create `cmd/vault_backup.go` parent command file
+- [x] T003 [P] Verify Go dependencies are current (`go mod tidy`)
 
 ---
 
@@ -36,15 +36,15 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Add `BackupInfo` struct to `internal/storage/backup.go` with fields: Path, ModTime, Size, Type, IsCorrupted
-- [ ] T005 Add `BackupTypeAutomatic` and `BackupTypeManual` constants to `internal/storage/backup.go`
-- [ ] T006 Implement `generateManualBackupPath()` function in `internal/storage/backup.go` - returns `vault.enc.[timestamp].manual.backup` format
-- [ ] T007 Implement `CreateManualBackup() (string, error)` method in `internal/storage/storage.go` - uses atomic file copy, creates backup directory if missing (FR-018)
-- [ ] T008 [P] Implement `ListBackups() ([]BackupInfo, error)` method in `internal/storage/storage.go` - glob pattern discovery
-- [ ] T009 [P] Implement `FindNewestBackup() (*BackupInfo, error)` method in `internal/storage/storage.go` - sorts by ModTime
+- [x] T004 Add `BackupInfo` struct to `internal/storage/backup.go` with fields: Path, ModTime, Size, Type, IsCorrupted
+- [x] T005 Add `BackupTypeAutomatic` and `BackupTypeManual` constants to `internal/storage/backup.go`
+- [x] T006 Implement `generateManualBackupPath()` function in `internal/storage/backup.go` - returns `vault.enc.[timestamp].manual.backup` format
+- [x] T007 Implement `CreateManualBackup() (string, error)` method in `internal/storage/storage.go` - uses atomic file copy, creates backup directory if missing (FR-018)
+- [x] T008 [P] Implement `ListBackups() ([]BackupInfo, error)` method in `internal/storage/storage.go` - glob pattern discovery
+- [x] T009 [P] Implement `FindNewestBackup() (*BackupInfo, error)` method in `internal/storage/storage.go` - sorts by ModTime
 - [ ] T010 Modify `RestoreFromBackup(backupPath string) error` in `internal/storage/storage.go` - accept optional path parameter (empty string = auto-select newest)
-- [ ] T011 [P] Implement `VerifyBackupIntegrity(path string) error` helper in `internal/storage/backup.go` - header validation
-- [ ] T012 Implement `vault backup` parent command in `cmd/vault_backup.go` - cobra subcommand structure
+- [x] T011 [P] Implement `VerifyBackupIntegrity(path string) error` helper in `internal/storage/backup.go` - header validation
+- [x] T012 Implement `vault backup` parent command in `cmd/vault_backup.go` - cobra subcommand structure
 
 **Checkpoint**: Foundation ready - CLI commands can now be implemented in parallel
 
