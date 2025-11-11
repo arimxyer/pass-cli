@@ -42,7 +42,7 @@
 - [x] T007 Implement `CreateManualBackup() (string, error)` method in `internal/storage/storage.go` - uses atomic file copy, creates backup directory if missing (FR-018)
 - [x] T008 [P] Implement `ListBackups() ([]BackupInfo, error)` method in `internal/storage/storage.go` - glob pattern discovery
 - [x] T009 [P] Implement `FindNewestBackup() (*BackupInfo, error)` method in `internal/storage/storage.go` - sorts by ModTime
-- [ ] T010 Modify `RestoreFromBackup(backupPath string) error` in `internal/storage/storage.go` - accept optional path parameter (empty string = auto-select newest)
+- [x] T010 Modify `RestoreFromBackup(backupPath string) error` in `internal/storage/storage.go` - accept optional path parameter (empty string = auto-select newest)
 - [x] T011 [P] Implement `VerifyBackupIntegrity(path string) error` helper in `internal/storage/backup.go` - header validation
 - [x] T012 Implement `vault backup` parent command in `cmd/vault_backup.go` - cobra subcommand structure
 
