@@ -62,7 +62,7 @@
 
 - [x] T013 [P] [US1] Integration test for basic restore in `test/vault_backup_integration_test.go` - setup vault, backup, corrupt, restore, verify
 - [x] T014 [P] [US1] Integration test for restore with no backups in `test/vault_backup_integration_test.go` - verify error message
-- [ ] T015 [P] [US1] Integration test for restore with corrupted backup in `test/vault_backup_integration_test.go` - verify falls back to next valid backup
+- [x] T015 [P] [US1] Integration test for restore with corrupted backup in `test/vault_backup_integration_test.go` - verify falls back to next valid backup
 - [x] T016 [P] [US1] Integration test for restore confirmation prompt in `test/vault_backup_integration_test.go` - verify user can cancel
 - [x] T017 [P] [US1] Integration test for restore with --force flag in `test/vault_backup_integration_test.go` - verify skips confirmation
 - [x] T018 [P] [US1] Integration test for restore with --dry-run flag in `test/vault_backup_integration_test.go` - verify no changes made

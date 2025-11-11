@@ -88,6 +88,68 @@ func TestIntegration_BackupRestore_NoBackups(t *testing.T) {
 	}
 }
 
+// TestIntegration_BackupRestore_CorruptedFallback tests fallback to next valid backup
+// T015: Integration test for restore with corrupted backup
+func TestIntegration_BackupRestore_CorruptedFallback(t *testing.T) {
+	setupTestEnvironment(t)
+
+	vaultPath := filepath.Join(testDir, "vault-corrupted-fallback", "vault.enc")
+	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
+	// Initialize vault
+	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\n", "--config", configPath, "init")
+	if err != nil {
+		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
+	}
+
+	// Add initial credential (state A)
+	_, stderr, err = runCommandWithInput(t, "TestPassword123!\nolduser\noldpass123\n\n\n", "--config", configPath, "add", "test-service")
+	if err != nil {
+		t.Fatalf("add failed: %v\nstderr: %s", err, stderr)
+	}
+
+	// Create manual backup (captures state A with olduser)
+	_, stderr, err = runCommand(t, "--config", configPath, "vault", "backup", "create")
+	if err != nil {
+		t.Fatalf("backup create failed: %v\nstderr: %s", err, stderr)
+	}
+
+	// Update credential to different value (state B)
+	_, stderr, err = runCommandWithInput(t, "TestPassword123!\nnewuser\nnewpass123\n\n\n", "--config", configPath, "update", "test-service")
+	if err != nil {
+		t.Fatalf("update failed: %v\nstderr: %s", err, stderr)
+	}
+
+	// Verify automatic backup was created (captures state B with newuser)
+	automaticBackupPath := vaultPath + ".backup"
+	if _, err := os.Stat(automaticBackupPath); os.IsNotExist(err) {
+		t.Fatalf("automatic backup was not created at %s", automaticBackupPath)
+	}
+
+	// Corrupt the automatic backup (most recent)
+	if err := os.WriteFile(automaticBackupPath, []byte("corrupted data"), 0600); err != nil {
+		t.Fatalf("failed to corrupt automatic backup: %v", err)
+	}
+
+	// Restore from backup with --force (should fallback to manual backup)
+	stdout, stderr, err := runCommand(t, "--config", configPath, "vault", "backup", "restore", "--force")
+	if err != nil {
+		t.Fatalf("backup restore failed: %v\nstderr: %s\nstdout: %s", err, stderr, stdout)
+	}
+
+	// Verify vault was restored to state A (olduser), not state B (newuser)
+	// This proves it fell back to the manual backup after detecting corruption
+	stdout, stderr, err = runCommandWithInput(t, "TestPassword123!\n", "--config", configPath, "get", "test-service", "--field", "username")
+	if err != nil {
+		t.Fatalf("get after restore failed: %v\nstderr: %s", err, stderr)
+	}
+
+	if stdout != "olduser\n" {
+		t.Errorf("Expected username 'olduser' (from manual backup fallback), got %q", stdout)
+	}
+}
+
 // TestIntegration_BackupRestore_ConfirmationPrompt tests the confirmation workflow
 // T016: Integration test for restore confirmation prompt
 func TestIntegration_BackupRestore_ConfirmationPrompt(t *testing.T) {
