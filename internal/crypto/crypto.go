@@ -167,8 +167,23 @@ func ClearBytes(data []byte) {
 // GetIterations returns the PBKDF2 iteration count to use for new vaults.
 // Supports PASS_CLI_ITERATIONS environment variable override (T034).
 // Returns DefaultIterations if env var is not set or invalid.
-// Minimum value enforced is MinIterations (600,000).
+// Minimum value enforced is MinIterations (600,000) in production mode.
+//
+// Test Mode: When PASS_CLI_TEST_MODE=true, allows iterations below minimum
+// for faster CI test execution (e.g., race detector performance).
+// This is safe because tests validate logic, not cryptographic security.
 func GetIterations() int {
+	// Test mode: allow low iterations for fast race detector testing
+	if os.Getenv("PASS_CLI_TEST_MODE") == "true" {
+		if envVal := os.Getenv("PASS_CLI_ITERATIONS"); envVal != "" {
+			iterations, err := strconv.Atoi(envVal)
+			if err == nil && iterations > 0 {
+				return iterations // No minimum in test mode
+			}
+		}
+	}
+
+	// Production mode: enforce security minimums
 	envVal := os.Getenv("PASS_CLI_ITERATIONS")
 	if envVal == "" {
 		return DefaultIterations
