@@ -129,12 +129,12 @@ func TestAuditCallback_AllEventsLogged(t *testing.T) {
 
 	// FR-015: Verify ALL required events are logged
 	requiredEvents := []string{
-		"vault save operation initiated",        // atomic_save_started
-		"temporary file created",                 // temp_file_created
-		"vault verification started",             // verification_started
-		"vault verification passed",              // verification_passed
-		"atomic rename",                          // atomic_rename_started (x2)
-		"vault save completed successfully",      // atomic_save_completed
+		"vault save operation initiated",    // atomic_save_started
+		"temporary file created",            // temp_file_created
+		"vault verification started",        // verification_started
+		"vault verification passed",         // verification_passed
+		"atomic rename",                     // atomic_rename_started (x2)
+		"vault save completed successfully", // atomic_save_completed
 	}
 
 	for _, event := range requiredEvents {

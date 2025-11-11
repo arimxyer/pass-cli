@@ -11,8 +11,9 @@ import (
 )
 
 var changePasswordCmd = &cobra.Command{
-	Use:   "change-password",
-	Short: "Change the master password for your vault",
+	Use:     "change-password",
+	GroupID: "vault",
+	Short:   "Change the master password for your vault",
 	Long: `Change the master password used to encrypt and decrypt your vault.
 
 You must enter your current master password to authorize the change.

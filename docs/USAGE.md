@@ -151,6 +151,8 @@ pass-cli add <service> [flags]
 |------|-------|------|-------------|
 | `--username` | `-u` | string | Username for the credential |
 | `--password` | `-p` | string | Password (not recommended, use prompt) |
+| `--generate` | `-g` | bool | Generate a random secure password |
+| `--gen-length` | | int | Length of generated password (default: 16) |
 | `--category` | `-c` | string | Category for organizing credentials (e.g., 'Cloud', 'Databases') |
 | `--url` | | string | Service URL |
 | `--notes` | | string | Additional notes |
@@ -172,6 +174,20 @@ pass-cli add github \
 
 # With category
 pass-cli add github -u user@example.com -c "Version Control"
+
+# Generate random password (16 characters)
+pass-cli add github -u user@example.com --generate
+
+# Generate random password with custom length
+pass-cli add github -u user@example.com --generate --gen-length 24
+
+# Generate password with other metadata
+pass-cli add github \
+  -u user@example.com \
+  --generate \
+  --gen-length 20 \
+  --url https://github.com \
+  --notes "Work account"
 
 # All flags (not recommended for password)
 pass-cli add github \
@@ -379,6 +395,8 @@ pass-cli update <service> [flags]
 |------|-------|------|-------------|
 | `--username` | `-u` | string | New username |
 | `--password` | `-p` | string | New password (not recommended) |
+| `--generate` | `-g` | bool | Generate a random secure password |
+| `--gen-length` | | int | Length of generated password (default: 16) |
 | `--category` | | string | New category |
 | `--url` | | string | New URL |
 | `--notes` | | string | New notes |
@@ -404,6 +422,18 @@ pass-cli update github --notes "Updated account info"
 
 # Update category
 pass-cli update github --category "Work"
+
+# Generate new random password (16 characters)
+pass-cli update github --generate
+
+# Generate new password with custom length
+pass-cli update github --generate --gen-length 32
+
+# Generate password and update other fields
+pass-cli update github \
+  --generate \
+  --gen-length 24 \
+  --notes "Password rotated on 2025-11-11"
 
 # Clear category field
 pass-cli update github --clear-category
@@ -1075,12 +1105,19 @@ pass-cli config reset
 # Custom vault location (optional)
 vault_path: /custom/path/vault.enc  # Supports env vars ($HOME), tilde (~), relative, absolute paths
 
+# TUI theme (optional)
+theme: "dracula"  # Valid values: dracula, nord, gruvbox, monokai (default: dracula)
+
 # Terminal display thresholds (TUI mode)
 terminal:
   # Enable terminal size warnings (default: true)
   warning_enabled: true
   min_width: 60   # Minimum columns (default: 60)
   min_height: 30  # Minimum rows (default: 30)
+  # Detail panel positioning (default: auto)
+  detail_position: "auto"  # Valid values: auto, right, bottom
+  # Width threshold for auto positioning (default: 120)
+  detail_auto_threshold: 120  # Range: 80-500
 
 # Custom keyboard shortcuts (TUI mode)
 keybindings:
@@ -1221,6 +1258,9 @@ Both modes access the same encrypted vault file (`~/.pass-cli/vault.enc`).
 | `d` | Delete selected credential | Main view (credential selected) |
 | `p` | Toggle password visibility | Detail panel |
 | `c` | Copy password to clipboard | Detail panel |
+| `u` | Copy username to clipboard | Detail panel |
+| `l` | Copy URL to clipboard | Detail panel |
+| `n` | Copy notes to clipboard | Detail panel |
 
 #### View Controls
 
@@ -1236,6 +1276,7 @@ Both modes access the same encrypted vault file (`~/.pass-cli/vault.enc`).
 |----------|--------|---------|
 | `Ctrl+S` | Save form | Add/edit forms |
 | `Ctrl+P` | Toggle password visibility | Add/edit forms |
+| `Ctrl+G` | Generate random password | Add/edit forms (password field) |
 | `Tab` | Next field | Forms |
 | `Shift+Tab` | Previous field | Forms |
 | `Esc` | Cancel / Close form | Forms |
@@ -1399,6 +1440,111 @@ Usage Locations:
 Press `q` or `Ctrl+C` at any time to quit the TUI and return to shell.
 
 **Note**: If a modal is open (add form, edit form, help), pressing `q` or `Esc` closes the modal instead of quitting. Press `q` again from main view to quit application.
+
+## TUI Configuration
+
+The TUI appearance and behavior can be customized via `~/.pass-cli/config.yml`.
+
+### Theme Configuration
+
+Pass-CLI TUI supports multiple color themes. Available themes:
+
+#### Dracula (Default)
+Dark theme with vibrant purples, pinks, and cyans. Perfect for low-light environments.
+- **Background**: Deep dark purple (#282a36)
+- **Accents**: Cyan, pink, purple
+- **Status**: Green (success), red (error), yellow (warning)
+
+#### Nord
+Cool, bluish theme inspired by arctic ice and polar nights.
+- **Background**: Dark blue-gray (#2e3440)
+- **Accents**: Frost blues and teals
+- **Status**: Muted greens, reds, and yellows
+
+#### Gruvbox
+Warm, retro theme with earthy tones and high contrast.
+- **Background**: Dark gray-brown (#282828)
+- **Accents**: Warm aqua, yellow, orange
+- **Status**: Vibrant greens, reds, yellows
+
+#### Monokai
+Vibrant, colorful theme popular in code editors.
+- **Background**: Very dark gray (#272822)
+- **Accents**: Bright cyan, purple, yellow
+- **Status**: Neon greens, hot pinks, bright yellows
+
+**Configuration:**
+```yaml
+# Valid themes: dracula, nord, gruvbox, monokai
+theme: "nord"
+```
+
+**Changing Themes:**
+1. Edit config file:
+   ```bash
+   # macOS/Linux
+   nano ~/.pass-cli/config.yml
+
+   # Windows (PowerShell)
+   notepad $env:USERPROFILE\.pass-cli\config.yml
+   ```
+
+2. Set theme:
+   ```yaml
+   theme: "nord"  # or dracula, gruvbox, monokai
+   ```
+
+3. Restart TUI:
+   ```bash
+   pass-cli
+   ```
+
+**Validation**: If you specify an invalid theme name, Pass-CLI will show a warning, fall back to Dracula, and continue running normally.
+
+### Detail Panel Configuration
+
+The detail panel position can adapt to terminal width for optimal viewing experience.
+
+**Configuration Options:**
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `detail_position` | string | `"auto"` | Detail panel positioning: `auto`, `right`, or `bottom` |
+| `detail_auto_threshold` | int | `120` | Width threshold (columns) for auto-positioning (80-500) |
+
+**Position Modes:**
+
+**Auto Mode** (`detail_position: "auto"`)
+- Terminal ≥ threshold: Detail panel on right (traditional horizontal layout)
+- Terminal 80-119: Detail panel on bottom (vertical layout)
+- Terminal < 80: Detail panel hidden
+
+**Right Mode** (`detail_position: "right"`)
+- Terminal ≥ 120: Detail panel on right
+- Terminal < 120: Detail panel hidden
+- Best for wide terminals, traditional layout
+
+**Bottom Mode** (`detail_position: "bottom"`)
+- Terminal ≥ 80: Detail panel always on bottom
+- Terminal < 80: Detail panel hidden
+- Best for narrow terminals, maximizes horizontal space
+
+**Configuration Example:**
+```yaml
+terminal:
+  warning_enabled: true
+  min_width: 60
+  min_height: 30
+  detail_position: "auto"          # or "right", "bottom"
+  detail_auto_threshold: 120       # Width threshold for auto mode
+```
+
+**Use Cases:**
+- **Auto mode**: Best for users who frequently resize terminal or use different displays
+- **Right mode**: Best for users with consistently wide terminals (≥120 columns)
+- **Bottom mode**: Best for users who prefer vertical layouts or narrow terminals
+
+**Threshold Tuning**: Adjust `detail_auto_threshold` based on your display preferences. Lower values (80-100) switch to vertical layout sooner, higher values (120-150) prefer horizontal layout longer.
 
 ## TUI Best Practices
 

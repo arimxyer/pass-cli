@@ -18,8 +18,9 @@ import (
 )
 
 var tuiCmd = &cobra.Command{
-	Use:   "tui",
-	Short: "Launch interactive TUI dashboard",
+	Use:     "tui",
+	GroupID: "utilities",
+	Short:   "Launch interactive TUI dashboard",
 	Long: `Launch an interactive terminal user interface (TUI) for managing credentials.
 
 The TUI provides a visual interface with keyboard shortcuts for:

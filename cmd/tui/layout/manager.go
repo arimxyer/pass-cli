@@ -71,20 +71,72 @@ type LayoutManager struct {
 
 	// User configuration (T022)
 	config *config.Config
+
+	// Detail panel positioning
+	detailPosition      string // "auto", "right", "bottom"
+	detailAutoThreshold int    // Width threshold for auto positioning
 }
 
 // NewLayoutManager creates a new layout manager with default breakpoints.
 // Components are not retrieved until CreateMainLayout is called.
 // T022: Now accepts config parameter for terminal size configuration.
 func NewLayoutManager(app *tview.Application, appState *models.AppState, cfg *config.Config) *LayoutManager {
-	return &LayoutManager{
-		app:              app,
-		appState:         appState,
-		mediumBreakpoint: 80,
-		largeBreakpoint:  120,
-		currentMode:      LayoutSmall, // Start with small, will adjust on first draw
-		config:           cfg,
+	// Use defaults if config is nil (for testing)
+	detailPosition := "auto"
+	detailAutoThreshold := 120
+	if cfg != nil {
+		detailPosition = cfg.Terminal.DetailPosition
+		detailAutoThreshold = cfg.Terminal.DetailAutoThreshold
 	}
+
+	return &LayoutManager{
+		app:                 app,
+		appState:            appState,
+		mediumBreakpoint:    80,
+		largeBreakpoint:     120,
+		currentMode:         LayoutSmall, // Start with small, will adjust on first draw
+		config:              cfg,
+		detailPosition:      detailPosition,
+		detailAutoThreshold: detailAutoThreshold,
+	}
+}
+
+// determineDetailPosition decides where to position the detail panel based on config and window width.
+// Returns "right" for horizontal layout or "bottom" for vertical layout.
+func (lm *LayoutManager) determineDetailPosition() string {
+	// If manual override (not "auto"), use it directly
+	if lm.detailPosition != "auto" {
+		return lm.detailPosition
+	}
+
+	// Auto logic: use bottom if width < threshold, otherwise right
+	if lm.width < lm.detailAutoThreshold {
+		return "bottom"
+	}
+	return "right"
+}
+
+// shouldShowDetailInMode determines if detail panel should be shown in the given mode.
+// With auto or bottom positioning, detail shows in Medium mode (80+).
+// With right positioning, detail only shows in Large mode (120+).
+func (lm *LayoutManager) shouldShowDetailInMode(mode LayoutMode) bool {
+	// Check for manual override
+	if lm.detailPanelOverride != nil {
+		return *lm.detailPanelOverride
+	}
+
+	// Detail never shows in Small mode
+	if mode == LayoutSmall {
+		return false
+	}
+
+	// In Medium mode, show detail only if position is auto or bottom
+	if mode == LayoutMedium {
+		return lm.detailPosition == "auto" || lm.detailPosition == "bottom"
+	}
+
+	// In Large mode, always show detail (default responsive behavior)
+	return true
 }
 
 // CreateMainLayout builds the complete layout structure.
@@ -163,7 +215,9 @@ func (lm *LayoutManager) HandleResize(width, height int) {
 // It clears the content row and adds components according to breakpoint rules:
 //   - Small: Table only (full width)
 //   - Medium: Sidebar (20 cols) + Table (flex)
-//   - Large: Sidebar (20 cols) + Table (flex) + Detail (40 cols)
+//   - Large: Sidebar + Table + Detail (position determined by determineDetailPosition)
+//     - Horizontal (detail on right): Sidebar (20 cols) + Table (flex) + Detail (40 cols)
+//     - Vertical (detail on bottom): Sidebar (20 cols) + (Table above Detail stacked vertically)
 //
 // Manual overrides (detailPanelOverride) take precedence over responsive breakpoints.
 func (lm *LayoutManager) RebuildLayout() {
@@ -209,28 +263,73 @@ func (lm *LayoutManager) RebuildLayout() {
 		}
 
 	case LayoutMedium:
-		if showSidebar {
-			// Sidebar + Table
-			lm.contentRow.
-				AddItem(lm.sidebar, 20, 0, false).
-				AddItem(tableArea, 0, 1, true)
+		// Check if detail should be shown in medium mode (for auto/bottom positioning)
+		showDetail := lm.shouldShowDetailInMode(LayoutMedium)
+
+		if showDetail {
+			// Show detail on bottom in medium mode
+			rightArea := tview.NewFlex().
+				SetDirection(tview.FlexRow).
+				AddItem(tableArea, 0, 2, true).     // Table gets 2/3 height
+				AddItem(lm.detailView, 0, 1, false) // Detail gets 1/3 height
+
+			if showSidebar {
+				// Sidebar + (Table above Detail)
+				lm.contentRow.
+					AddItem(lm.sidebar, 20, 0, false).
+					AddItem(rightArea, 0, 1, true)
+			} else {
+				// (Table above Detail) - sidebar hidden by override
+				lm.contentRow.AddItem(rightArea, 0, 1, true)
+			}
 		} else {
-			// Table only (sidebar hidden by override)
-			lm.contentRow.AddItem(tableArea, 0, 1, true)
+			// Original medium mode behavior: no detail
+			if showSidebar {
+				// Sidebar + Table
+				lm.contentRow.
+					AddItem(lm.sidebar, 20, 0, false).
+					AddItem(tableArea, 0, 1, true)
+			} else {
+				// Table only (sidebar hidden by override)
+				lm.contentRow.AddItem(tableArea, 0, 1, true)
+			}
 		}
 
 	case LayoutLarge:
-		if showSidebar {
-			// Sidebar + Table + Detail
-			lm.contentRow.
-				AddItem(lm.sidebar, 20, 0, false).
-				AddItem(tableArea, 0, 1, true).
-				AddItem(lm.detailView, 40, 0, false)
+		// Determine detail panel position
+		detailPos := lm.determineDetailPosition()
+
+		if detailPos == "bottom" {
+			// Vertical layout: detail on bottom
+			// Create right area with table and detail stacked vertically
+			rightArea := tview.NewFlex().
+				SetDirection(tview.FlexRow).
+				AddItem(tableArea, 0, 2, true).      // Table gets 2/3 height
+				AddItem(lm.detailView, 0, 1, false)  // Detail gets 1/3 height
+
+			if showSidebar {
+				// Sidebar + (Table above Detail)
+				lm.contentRow.
+					AddItem(lm.sidebar, 20, 0, false).
+					AddItem(rightArea, 0, 1, true)
+			} else {
+				// (Table above Detail) - sidebar hidden by override
+				lm.contentRow.AddItem(rightArea, 0, 1, true)
+			}
 		} else {
-			// Table + Detail (sidebar hidden by override)
-			lm.contentRow.
-				AddItem(tableArea, 0, 1, true).
-				AddItem(lm.detailView, 40, 0, false)
+			// Horizontal layout: detail on right (default/original behavior)
+			if showSidebar {
+				// Sidebar + Table + Detail
+				lm.contentRow.
+					AddItem(lm.sidebar, 20, 0, false).
+					AddItem(tableArea, 0, 1, true).
+					AddItem(lm.detailView, 40, 0, false)
+			} else {
+				// Table + Detail (sidebar hidden by override)
+				lm.contentRow.
+					AddItem(tableArea, 0, 1, true).
+					AddItem(lm.detailView, 40, 0, false)
+			}
 		}
 	}
 }

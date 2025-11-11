@@ -13,11 +13,11 @@ type spyFileSystem struct {
 
 	// Rename failure configuration
 	renameCallCount   int
-	failRenameAt      int              // Fail rename on Nth call (0 = don't fail)
-	failRenameAtSet   map[int]bool     // Fail rename on multiple specific calls
-	failRenameWithErr error            // Custom error to return on rename failure
-	failAllRenames    bool             // Fail all rename calls (alias for compatibility)
-	failRename        bool             // Alias for failAllRenames
+	failRenameAt      int          // Fail rename on Nth call (0 = don't fail)
+	failRenameAtSet   map[int]bool // Fail rename on multiple specific calls
+	failRenameWithErr error        // Custom error to return on rename failure
+	failAllRenames    bool         // Fail all rename calls (alias for compatibility)
+	failRename        bool         // Alias for failAllRenames
 
 	// ReadFile failure configuration
 	readFileCallCount  int

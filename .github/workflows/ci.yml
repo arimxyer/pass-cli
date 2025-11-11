@@ -65,6 +65,15 @@ jobs:
         with:
           go-version: '1.25'
           cache: true
+          cache-dependency-path: go.sum
+
+      - name: Cache golangci-lint
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/golangci-lint
+          key: ${{ runner.os }}-golangci-lint-${{ hashFiles('.golangci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-golangci-lint-
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v9
@@ -75,7 +84,7 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    needs: [check-changes, lint]
+    needs: check-changes
     if: needs.check-changes.outputs.code-changed == 'true'
 
     steps:
@@ -87,10 +96,23 @@ jobs:
         with:
           go-version: '1.25'
           cache: true
+          cache-dependency-path: go.sum
 
-      - name: Run unit tests
+      - name: Cache Go build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-build-
+
+      - name: Run unit tests with race detector
         run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
         shell: bash
+        env:
+          CGO_ENABLED: 1
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -103,10 +125,10 @@ jobs:
   integration-tests:
     name: Integration Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    needs: [check-changes, lint]
+    needs: check-changes
     if: needs.check-changes.outputs.code-changed == 'true'
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
@@ -119,6 +141,17 @@ jobs:
         with:
           go-version: '1.25'
           cache: true
+          cache-dependency-path: go.sum
+
+      - name: Cache Go build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-build-
 
       - name: Run integration tests
         run: go test -v -tags=integration -timeout 2m ./test
@@ -135,7 +168,7 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
-    needs: [check-changes, lint]
+    needs: check-changes
     if: needs.check-changes.outputs.code-changed == 'true'
 
     steps:
@@ -147,6 +180,7 @@ jobs:
         with:
           go-version: '1.25'
           cache: true
+          cache-dependency-path: go.sum
 
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
@@ -181,6 +215,17 @@ jobs:
         with:
           go-version: '1.25'
           cache: true
+          cache-dependency-path: go.sum
+
+      - name: Cache Go build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-build-
 
       - name: Run GoReleaser (snapshot)
         uses: goreleaser/goreleaser-action@v6

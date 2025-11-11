@@ -25,8 +25,9 @@ var (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all credentials in the vault",
+	Use:     "list",
+	GroupID: "credentials",
+	Short:   "List all credentials in the vault",
 	Long: `List displays all stored credentials with metadata.
 
 Output formats:

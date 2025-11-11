@@ -15,6 +15,7 @@ type Config struct {
 	Terminal    TerminalConfig    `mapstructure:"terminal"`
 	Keybindings map[string]string `mapstructure:"keybindings"`
 	VaultPath   string            `mapstructure:"vault_path"`
+	Theme       string            `mapstructure:"theme"`
 
 	// LoadErrors populated during config loading (not in YAML)
 	LoadErrors []string `mapstructure:"-"`
@@ -25,9 +26,11 @@ type Config struct {
 
 // TerminalConfig represents terminal size warning configuration
 type TerminalConfig struct {
-	WarningEnabled bool `mapstructure:"warning_enabled"`
-	MinWidth       int  `mapstructure:"min_width"`
-	MinHeight      int  `mapstructure:"min_height"`
+	WarningEnabled       bool   `mapstructure:"warning_enabled"`
+	MinWidth             int    `mapstructure:"min_width"`
+	MinHeight            int    `mapstructure:"min_height"`
+	DetailPosition       string `mapstructure:"detail_position"`
+	DetailAutoThreshold  int    `mapstructure:"detail_auto_threshold"`
 }
 
 // ValidationResult represents the outcome of checking configuration correctness
@@ -54,9 +57,11 @@ type ValidationWarning struct {
 func GetDefaults() *Config {
 	cfg := &Config{
 		Terminal: TerminalConfig{
-			WarningEnabled: true,
-			MinWidth:       60,
-			MinHeight:      30,
+			WarningEnabled:      true,
+			MinWidth:            60,
+			MinHeight:           30,
+			DetailPosition:      "auto",
+			DetailAutoThreshold: 120,
 		},
 		Keybindings: map[string]string{
 			"quit":              "q",
@@ -70,6 +75,7 @@ func GetDefaults() *Config {
 			"confirm":           "enter",
 			"cancel":            "esc",
 		},
+		Theme:      "dracula",
 		LoadErrors: []string{},
 	}
 
@@ -146,9 +152,13 @@ func OpenEditor(filePath string) error {
 // GetDefaultConfigTemplate returns the default config file content with comments.
 func GetDefaultConfigTemplate() string {
 	return `# Pass-CLI Configuration File
-# 
-# This file allows you to customize terminal size warnings and keyboard shortcuts.
+#
+# This file allows you to customize terminal size warnings, keyboard shortcuts, and theme.
 # All settings are optional - missing values will use defaults.
+
+# TUI Theme (valid: dracula, nord, gruvbox, monokai)
+# Default: dracula
+theme: "dracula"
 
 # Terminal size warning configuration
 terminal:
@@ -233,6 +243,8 @@ func detectUnknownFields(v *viper.Viper) []ValidationWarning {
 		"keybindings.search":            true,
 		"keybindings.confirm":           true,
 		"keybindings.cancel":            true,
+		"theme":                         true,
+		"vault_path":                    true,
 	}
 
 	// Check for unknown fields
@@ -315,6 +327,7 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 		v.SetDefault(fmt.Sprintf("keybindings.%s", action), key)
 	}
 	v.SetDefault("vault_path", "")
+	v.SetDefault("theme", defaults.Theme)
 
 	// Read and parse YAML
 	if err := v.ReadInConfig(); err != nil {
@@ -406,6 +419,9 @@ func (c *Config) Validate() *ValidationResult {
 	// Validate vault_path
 	result = c.validateVaultPath(result)
 
+	// Validate theme
+	result = c.validateTheme(result)
+
 	// Set Valid flag based on error count
 	if len(result.Errors) > 0 {
 		result.Valid = false
@@ -445,6 +461,29 @@ func (c *Config) validateTerminal(result *ValidationResult) *ValidationResult {
 		result.Warnings = append(result.Warnings, ValidationWarning{
 			Field:   "terminal.min_height",
 			Message: fmt.Sprintf("unusually large value (%d) - most terminals are <100 rows", c.Terminal.MinHeight),
+		})
+	}
+
+	// Validate detail_position value
+	if c.Terminal.DetailPosition == "" {
+		c.Terminal.DetailPosition = "auto" // Default to auto if empty
+	}
+	validPositions := map[string]bool{"auto": true, "right": true, "bottom": true}
+	if !validPositions[c.Terminal.DetailPosition] {
+		result.Errors = append(result.Errors, ValidationError{
+			Field:   "terminal.detail_position",
+			Message: fmt.Sprintf("must be 'auto', 'right', or 'bottom' (got: %s)", c.Terminal.DetailPosition),
+		})
+	}
+
+	// Validate detail_auto_threshold range (80-500)
+	if c.Terminal.DetailAutoThreshold == 0 {
+		c.Terminal.DetailAutoThreshold = 120 // Default to 120 if not set
+	}
+	if c.Terminal.DetailAutoThreshold < 80 || c.Terminal.DetailAutoThreshold > 500 {
+		result.Errors = append(result.Errors, ValidationError{
+			Field:   "terminal.detail_auto_threshold",
+			Message: fmt.Sprintf("must be between 80 and 500 (got: %d)", c.Terminal.DetailAutoThreshold),
 		})
 	}
 
@@ -580,4 +619,30 @@ func (c *Config) GetParsedKeybindings() map[string]*Keybinding {
 		return make(map[string]*Keybinding)
 	}
 	return c.ParsedKeybindings
+}
+
+// validateTheme validates the theme configuration
+func (c *Config) validateTheme(result *ValidationResult) *ValidationResult {
+	// Empty theme means use default
+	if c.Theme == "" {
+		c.Theme = "dracula"
+		return result
+	}
+
+	// Check if theme is valid
+	validThemes := map[string]bool{
+		"dracula": true,
+		"nord":    true,
+		"gruvbox": true,
+		"monokai": true,
+	}
+
+	if !validThemes[c.Theme] {
+		result.Errors = append(result.Errors, ValidationError{
+			Field:   "theme",
+			Message: fmt.Sprintf("unknown theme '%s' (valid themes: dracula, nord, gruvbox, monokai)", c.Theme),
+		})
+	}
+
+	return result
 }

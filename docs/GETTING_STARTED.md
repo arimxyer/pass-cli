@@ -248,6 +248,9 @@ Prompts for confirmation before deletion.
 
 ### Generate a Strong Password
 
+Pass-CLI can generate strong, random passwords in multiple ways:
+
+**Standalone Generation:**
 ```bash
 $ pass-cli generate
 
@@ -259,10 +262,34 @@ $ pass-cli generate --length 24
 
 # Copy to clipboard (macOS)
 $ pass-cli generate | pbcopy
-
-# Use with 'add' command
-$ pass-cli add myservice --password "$(pass-cli generate)"
 ```
+
+**Generate During Add:**
+```bash
+# Generate password while adding credential (16 characters)
+$ pass-cli add github -u myuser --generate
+
+# Generate with custom length
+$ pass-cli add github -u myuser --generate --gen-length 32
+
+✓ Generated 32-character password
+✓ Credential 'github' added successfully
+```
+
+**Generate During Update (Password Rotation):**
+```bash
+# Generate new password while updating (16 characters)
+$ pass-cli update github --generate
+
+# Generate with custom length
+$ pass-cli update github --generate --gen-length 24
+
+✓ Generated 24-character password
+✓ Credential 'github' updated successfully
+```
+
+**TUI Generation:**
+When adding or editing credentials in the TUI, press `Ctrl+G` in the password field to generate a random password instantly.
 
 ## Keychain Integration
 

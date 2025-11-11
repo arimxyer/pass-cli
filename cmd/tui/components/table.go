@@ -206,8 +206,11 @@ func (ct *CredentialTable) filterBySearch(creds []vault.CredentialMetadata, sear
 // applyStyles applies borders, colors, and title to the table.
 // Uses rounded borders with cyan accent color and dark background.
 func (ct *CredentialTable) applyStyles() {
+	theme := styles.GetCurrentTheme()
 	styles.ApplyBorderedStyle(ct.Table, "Credentials", true)
 	styles.ApplyTableStyle(ct.Table)
+	// Explicitly set background to ensure it applies to table area
+	ct.SetBackgroundColor(theme.Background)
 }
 
 // formatRelativeTime formats a timestamp as a relative time string.

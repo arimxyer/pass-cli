@@ -17,7 +17,7 @@ import (
 
 const (
 	// UI separator for detail panel sections
-	detailSeparator = "[yellow]═══════════════════════════════════[-]\n"
+	detailSeparator = "═══════════════════════════════════\n"
 
 	// Maximum path length before truncation in usage locations
 	maxPathDisplayLength = 60
@@ -86,27 +86,27 @@ func (dv *DetailView) Refresh() {
 }
 
 // formatCredential creates formatted text display for a credential.
-// Uses tview color tags for styling and box drawing characters for sections.
+// Uses color tags with explicit backgrounds to support themes while using SetDynamicColors(true).
 func (dv *DetailView) formatCredential(cred *vault.CredentialMetadata) string {
 	var b strings.Builder
 
 	// Header with service name
-	b.WriteString(detailSeparator)
-	b.WriteString(fmt.Sprintf("[gray]Service (UID):[yellow]%s[-]\n", cred.Service))
-	b.WriteString(detailSeparator)
-	b.WriteString("\n")
+	b.WriteString(separator())
+	b.WriteString(fmt.Sprintf("%sService (UID):%s %s\n", colorWithBg("gray"), colorWithBg("yellow"), cred.Service))
+	b.WriteString(separator())
+	b.WriteString(textColor() + "\n")
 
 	// Main credential fields
-	b.WriteString(fmt.Sprintf("[gray]Username:[-]   [white]%s[-]\n", cred.Username))
+	b.WriteString(fmt.Sprintf("%sUsername:%s   %s\n", colorWithBg("gray"), textColor(), cred.Username))
 
 	// Category (if present)
 	if cred.Category != "" {
-		b.WriteString(fmt.Sprintf("[gray]Category:[-]   [white]%s[-]\n", cred.Category))
+		b.WriteString(fmt.Sprintf("%sCategory:%s   %s\n", colorWithBg("gray"), textColor(), cred.Category))
 	}
 
 	// URL (if present)
 	if cred.URL != "" {
-		b.WriteString(fmt.Sprintf("[gray]URL:[-]        [white]%s[-]\n", cred.URL))
+		b.WriteString(fmt.Sprintf("%sURL:%s        %s\n", colorWithBg("gray"), textColor(), cred.URL))
 	}
 
 	// Password field with masking
@@ -114,21 +114,21 @@ func (dv *DetailView) formatCredential(cred *vault.CredentialMetadata) string {
 
 	// Notes (if present)
 	if cred.Notes != "" {
-		b.WriteString("\n[gray]Notes:[-]\n")
+		b.WriteString(fmt.Sprintf("\n%sNotes:%s\n", colorWithBg("gray"), textColor()))
 		// Indent multi-line notes
 		indentedNotes := strings.ReplaceAll(cred.Notes, "\n", "\n  ")
-		b.WriteString(fmt.Sprintf("[white]  %s[-]\n", indentedNotes))
+		b.WriteString(fmt.Sprintf("  %s\n", indentedNotes))
 	}
 
 	// Metadata section
-	b.WriteString("\n")
-	b.WriteString(detailSeparator)
-	b.WriteString("            [yellow]Metadata[-]\n")
-	b.WriteString(detailSeparator)
-	b.WriteString("\n")
+	b.WriteString(textColor() + "\n")
+	b.WriteString(separator())
+	b.WriteString(fmt.Sprintf("            %sMetadata%s\n", colorWithBg("yellow"), textColor()))
+	b.WriteString(separator())
+	b.WriteString(textColor() + "\n")
 
-	b.WriteString(fmt.Sprintf("[gray]Created:[-]     [white]%s[-]\n", cred.CreatedAt.Format("2006-01-02 03:04 PM")))
-	b.WriteString(fmt.Sprintf("[gray]Modified:[-]    [white]%s[-]\n", cred.UpdatedAt.Format("2006-01-02 03:04 PM")))
+	b.WriteString(fmt.Sprintf("%sCreated:%s     %s\n", colorWithBg("gray"), textColor(), cred.CreatedAt.Format("2006-01-02 03:04 PM")))
+	b.WriteString(fmt.Sprintf("%sModified:%s    %s\n", colorWithBg("gray"), textColor(), cred.UpdatedAt.Format("2006-01-02 03:04 PM")))
 
 	// Display modification count
 	if cred.ModifiedCount > 0 {
@@ -136,21 +136,21 @@ func (dv *DetailView) formatCredential(cred *vault.CredentialMetadata) string {
 		if cred.ModifiedCount > 1 {
 			timesText = "times"
 		}
-		b.WriteString(fmt.Sprintf("[gray]# Modified:[-]  [white]%d %s[-]\n", cred.ModifiedCount, timesText))
+		b.WriteString(fmt.Sprintf("%s# Modified:%s  %d %s\n", colorWithBg("gray"), textColor(), cred.ModifiedCount, timesText))
 	}
 
 	if !cred.LastAccessed.IsZero() {
 		relativeTime := formatRelativeTime(cred.LastAccessed)
-		b.WriteString(fmt.Sprintf("[gray]Last Used:[-]   [white]%s[-]\n", relativeTime))
+		b.WriteString(fmt.Sprintf("%sLast Used:%s   %s\n", colorWithBg("gray"), textColor(), relativeTime))
 	}
 
 	if cred.UsageCount > 0 {
-		b.WriteString(fmt.Sprintf("[gray]Usage Count:[-] [white]%d times[-]\n", cred.UsageCount))
+		b.WriteString(fmt.Sprintf("%sUsage Count:%s %d times\n", colorWithBg("gray"), textColor(), cred.UsageCount))
 	}
 
 	// Locations (if any)
 	if len(cred.Locations) > 0 {
-		b.WriteString(fmt.Sprintf("[gray]Locations:[-]  [white]%d unique locations[-]\n", len(cred.Locations)))
+		b.WriteString(fmt.Sprintf("%sLocations:%s  %d unique locations\n", colorWithBg("gray"), textColor(), len(cred.Locations)))
 	}
 
 	// T047: Integrate usage locations display into detail panel
@@ -169,7 +169,7 @@ func (dv *DetailView) formatCredential(cred *vault.CredentialMetadata) string {
 // Fetches full credential to display password when visible.
 func (dv *DetailView) formatPasswordField(b *strings.Builder, cred *vault.CredentialMetadata) {
 	password := "********" // Default masked display
-	hint := "  [gray](Press 'p' to reveal)[-]"
+	hint := fmt.Sprintf("  %s(Press 'p' to reveal)%s", colorWithBg("gray"), textColor())
 
 	if dv.passwordVisible {
 		// Fetch full credential to get password
@@ -177,28 +177,27 @@ func (dv *DetailView) formatPasswordField(b *strings.Builder, cred *vault.Creden
 		if err == nil && fullCred != nil {
 			// T020d: Convert []byte to string for display
 			password = string(fullCred.Password)
-			hint = "  [gray](Press 'p' to hide)[-]"
+			hint = fmt.Sprintf("  %s(Press 'p' to hide)%s", colorWithBg("gray"), textColor())
 		} else {
-			password = "[red]Error loading password[-]" // #nosec G101 -- UI error message, not actual credentials
+			password = fmt.Sprintf("%sError loading password%s", colorWithBg("red"), textColor()) // #nosec G101 -- UI error message, not actual credentials
 			hint = ""
 		}
 	}
 
-	fmt.Fprintf(b, "[gray]Password:[-]   [white]%s[-]%s\n", password, hint)
+	fmt.Fprintf(b, "%sPassword:%s   %s%s\n", colorWithBg("gray"), textColor(), password, hint)
 }
 
 // showEmptyState displays a message when no credential is selected.
 func (dv *DetailView) showEmptyState() {
-	content := `
-[cyan]═══════════════════════════════════[-]
-
-        [gray]No Credential Selected[-]
+	content := fmt.Sprintf(`%s
+%s
+        %sNo Credential Selected%s
 
     Select a credential from the list
     to view its details.
 
-[cyan]═══════════════════════════════════[-]
-`
+%s
+`, textColor(), separator(), colorWithBg("gray"), textColor(), separator())
 	dv.SetText(content)
 }
 
@@ -251,10 +250,100 @@ func (dv *DetailView) CopyPasswordToClipboard() error {
 	return nil
 }
 
+// CopyFieldToClipboard copies a specified field to clipboard.
+// Supported fields: "username", "password", "url", "notes", "service", "category"
+// Returns error if no credential selected, invalid field, or clipboard operation fails.
+func (dv *DetailView) CopyFieldToClipboard(field string) error {
+	cred := dv.appState.GetSelectedCredential()
+	if cred == nil {
+		return fmt.Errorf("no credential selected")
+	}
+
+	var value string
+	needsFullCred := field == "password" // Only password requires full credential fetch
+
+	if needsFullCred {
+		// Fetch full credential for password
+		fullCred, err := dv.appState.GetFullCredential(cred.Service)
+		if err != nil {
+			return fmt.Errorf("failed to get credential: %w", err)
+		}
+		value = string(fullCred.Password)
+
+		// Zero password bytes after use
+		defer func() {
+			for i := range fullCred.Password {
+				fullCred.Password[i] = 0
+			}
+		}()
+	} else {
+		// Get value from credential summary
+		switch field {
+		case "username":
+			value = cred.Username
+		case "url":
+			value = cred.URL
+		case "notes":
+			value = cred.Notes
+		case "service":
+			value = cred.Service
+		case "category":
+			value = cred.Category
+		default:
+			return fmt.Errorf("invalid field: %s", field)
+		}
+	}
+
+	// Check if field is empty
+	if value == "" {
+		return fmt.Errorf("%s is empty", field)
+	}
+
+	// Copy to clipboard
+	err := clipboard.WriteAll(value)
+	if err != nil {
+		return fmt.Errorf("failed to copy to clipboard: %w", err)
+	}
+
+	// Track field access
+	if err := dv.appState.RecordFieldAccess(cred.Service, field); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to track %s access: %v\n", field, err)
+	}
+
+	return nil
+}
+
 // applyStyles applies theme colors and borders to the detail view.
 // Uses theme system for consistent styling.
 func (dv *DetailView) applyStyles() {
+	theme := styles.GetCurrentTheme()
 	styles.ApplyBorderedStyle(dv.TextView, "Details", true)
+	// Explicitly set background again after border styling to ensure it applies to text area
+	dv.SetBackgroundColor(theme.Background)
+}
+
+// colorWithBg returns a color tag with theme background to prevent terminal transparency.
+// When SetDynamicColors is true, color tags need explicit backgrounds or they show terminal default.
+func colorWithBg(colorName string) string {
+	theme := styles.GetCurrentTheme()
+	r, g, b := theme.Background.RGB()
+	bgHex := fmt.Sprintf("#%02x%02x%02x", r, g, b)
+	return fmt.Sprintf("[%s:%s]", colorName, bgHex)
+}
+
+// textColor returns the theme's primary text color tag with background.
+func textColor() string {
+	theme := styles.GetCurrentTheme()
+	r, g, b := theme.TextPrimary.RGB()
+	fgHex := fmt.Sprintf("#%02x%02x%02x", r, g, b)
+	rBg, gBg, bBg := theme.Background.RGB()
+	bgHex := fmt.Sprintf("#%02x%02x%02x", rBg, gBg, bBg)
+	return fmt.Sprintf("[%s:%s]", fgHex, bgHex)
+}
+
+// separator returns a styled separator line using theme accent color.
+func separator() string {
+	return colorWithBg("yellow") + detailSeparator + textColor()
 }
 
 // ========================================
@@ -330,15 +419,15 @@ func FormatUsageLocations(cred *vault.Credential) string {
 	var b strings.Builder
 
 	// Usage Locations section header (T048)
-	b.WriteString("\n")
-	b.WriteString(detailSeparator)
-	b.WriteString("        [yellow]Usage Locations[-]\n")
-	b.WriteString(detailSeparator)
-	b.WriteString("\n")
+	b.WriteString(textColor() + "\n")
+	b.WriteString(separator())
+	b.WriteString(fmt.Sprintf("        %sUsage Locations%s\n", colorWithBg("yellow"), textColor()))
+	b.WriteString(separator())
+	b.WriteString(textColor() + "\n")
 
 	// Handle empty state (T049)
 	if len(cred.UsageRecord) == 0 {
-		b.WriteString("[gray]No usage recorded[-]\n")
+		b.WriteString(fmt.Sprintf("%sNo usage recorded%s\n", colorWithBg("gray"), textColor()))
 		return b.String()
 	}
 
@@ -364,26 +453,26 @@ func FormatUsageLocations(cred *vault.Credential) string {
 		timestamp := FormatTimestamp(record.Timestamp)
 
 		// Build location line
-		b.WriteString(fmt.Sprintf("  [white]%s[-]", path))
+		b.WriteString(fmt.Sprintf("  %s%s%s", textColor(), path, textColor()))
 
 		// Add git repo if available (T050)
 		if record.GitRepo != "" {
-			b.WriteString(fmt.Sprintf(" [gray](%s)[-]", record.GitRepo))
+			b.WriteString(fmt.Sprintf(" %s(%s)%s", colorWithBg("gray"), record.GitRepo, textColor()))
 		}
 
 		// Add timestamp and access count
-		b.WriteString(fmt.Sprintf(" [gray]-[-] [white]%s[-]", timestamp))
+		b.WriteString(fmt.Sprintf(" %s-%s %s", colorWithBg("gray"), textColor(), timestamp))
 
 		// Format total access count
 		countText := "1 time"
 		if record.Count > 1 {
 			countText = fmt.Sprintf("%d times", record.Count)
 		}
-		b.WriteString(fmt.Sprintf(" [gray]- accessed[-] [white]%s[-]", countText))
+		b.WriteString(fmt.Sprintf(" %s- accessed%s %s", colorWithBg("gray"), textColor(), countText))
 
 		// Show field-level breakdown if available
 		if len(record.FieldAccess) > 0 {
-			b.WriteString(" [gray](")
+			b.WriteString(fmt.Sprintf(" %s(", colorWithBg("gray")))
 			fieldParts := []string{}
 			for field, count := range record.FieldAccess {
 				fieldParts = append(fieldParts, fmt.Sprintf("%s:%d", field, count))
@@ -391,7 +480,7 @@ func FormatUsageLocations(cred *vault.Credential) string {
 			// Sort field names for consistent display
 			sort.Strings(fieldParts)
 			b.WriteString(strings.Join(fieldParts, ", "))
-			b.WriteString(")[-]")
+			b.WriteString(fmt.Sprintf(")%s", textColor()))
 		}
 
 		b.WriteString("\n")

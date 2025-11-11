@@ -12,8 +12,9 @@ import (
 )
 
 var verifyAuditCmd = &cobra.Command{
-	Use:   "verify-audit [audit-log-path]",
-	Short: "Verify integrity of audit log",
+	Use:     "verify-audit [audit-log-path]",
+	GroupID: "security",
+	Short:   "Verify integrity of audit log",
 	Long: `Verify the integrity of an audit log by checking HMAC signatures on all entries.
 
 This command reads an audit log and verifies that all entries have valid HMAC

@@ -3,9 +3,12 @@
 package components
 
 import (
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"pass-cli/cmd/tui/models"
@@ -139,6 +142,7 @@ func (af *AddForm) buildFormFields() {
 	af.form.AddTextArea("Notes", "", 0, 5, 0, nil)
 
 	// Action buttons
+	af.form.AddButton("Generate Password", af.onGeneratePassword)
 	af.form.AddButton("Add", af.onAddPressed)
 	af.form.AddButton("Cancel", af.onCancelPressed)
 }
@@ -202,6 +206,27 @@ func (af *AddForm) onCancelPressed() {
 			af.onCancel()
 		}
 	}
+}
+
+// onGeneratePassword generates a secure password and fills the password field.
+func (af *AddForm) onGeneratePassword() {
+	// Generate a 20-character password
+	password, err := generateSecurePassword(20)
+	if err != nil {
+		// Error - could show in status bar but form doesn't have direct access
+		// Just silently fail for now
+		return
+	}
+
+	// Set the generated password in the password field
+	passwordField := af.form.GetFormItem(2).(*tview.InputField)
+	passwordField.SetText(password)
+
+	// Update the password strength indicator
+	af.updatePasswordLabel(passwordField, []byte(password))
+
+	// Copy to clipboard
+	_ = clipboard.WriteAll(password) // Ignore errors silently
 }
 
 // hasUnsavedData checks if any form fields contain data.
@@ -282,7 +307,7 @@ func (af *AddForm) wrapInFrame() {
 
 	// Create hints footer as a TextView with wrapping enabled
 	// Match statusbar style: [yellow] for keys, [white] for separators
-	hintsText := "[yellow]Tab[white]/[yellow]Shift+Tab[-]:Navigate  [yellow]Ctrl+S[-]:Add  [yellow]Ctrl+P[-]:Toggle password  [yellow]Esc[-]:Cancel"
+	hintsText := "[yellow]Tab[white]/[yellow]Shift+Tab[-]:Navigate  [yellow]Ctrl+S[-]:Add  [yellow]Ctrl+G[-]:Generate password  [yellow]Ctrl+P[-]:Toggle password  [yellow]Esc[-]:Cancel"
 	hints := tview.NewTextView().
 		SetText(hintsText).
 		SetTextAlign(tview.AlignCenter).
@@ -314,6 +339,11 @@ func (af *AddForm) setupKeyboardShortcuts() {
 		case tcell.KeyCtrlS:
 			// Ctrl+S for quick-save
 			af.onAddPressed()
+			return nil
+
+		case tcell.KeyCtrlG:
+			// Ctrl+G for password generation
+			af.onGeneratePassword()
 			return nil
 
 		case tcell.KeyCtrlP:
@@ -843,4 +873,63 @@ func (ef *EditForm) GetFormItem(index int) tview.FormItem {
 // GetInputCapture delegates to the internal form for test access.
 func (ef *EditForm) GetInputCapture() func(event *tcell.EventKey) *tcell.EventKey {
 	return ef.form.GetInputCapture()
+}
+
+// generateSecurePassword generates a cryptographically secure password.
+// Reuses the same logic as the CLI generate command.
+func generateSecurePassword(length int) (string, error) {
+	// Validate length
+	if length < 8 {
+		return "", fmt.Errorf("password length must be at least 8 characters")
+	}
+	if length > 128 {
+		return "", fmt.Errorf("password length cannot exceed 128 characters")
+	}
+
+	// Build character set (always include all types for security)
+	const (
+		lowerChars  = "abcdefghijklmnopqrstuvwxyz"
+		upperChars  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		digitChars  = "0123456789"
+		symbolChars = "!@#$%^&*()_+-=[]{}|;:,.<>?"
+	)
+
+	charset := lowerChars + upperChars + digitChars + symbolChars
+	password := make([]byte, length)
+
+	// Ensure at least one character from each required set
+	requiredSets := []string{lowerChars, upperChars, digitChars, symbolChars}
+	for i, reqSet := range requiredSets {
+		if i >= length {
+			break
+		}
+		setLen := big.NewInt(int64(len(reqSet)))
+		randomIndex, err := rand.Int(rand.Reader, setLen)
+		if err != nil {
+			return "", fmt.Errorf("failed to generate random number: %w", err)
+		}
+		password[i] = reqSet[randomIndex.Int64()]
+	}
+
+	// Fill remaining positions with random chars from full charset
+	charsetLen := big.NewInt(int64(len(charset)))
+	for i := len(requiredSets); i < length; i++ {
+		randomIndex, err := rand.Int(rand.Reader, charsetLen)
+		if err != nil {
+			return "", fmt.Errorf("failed to generate random number: %w", err)
+		}
+		password[i] = charset[randomIndex.Int64()]
+	}
+
+	// Shuffle password to avoid predictable positions
+	for i := length - 1; i > 0; i-- {
+		randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
+		if err != nil {
+			return "", fmt.Errorf("failed to generate random number: %w", err)
+		}
+		j := randomIndex.Int64()
+		password[i], password[j] = password[j], password[i]
+	}
+
+	return string(password), nil
 }

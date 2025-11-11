@@ -1,8 +1,12 @@
 # Full valid config with all settings specified
+theme: "dracula"
+
 terminal:
   warning_enabled: true
   min_width: 80
   min_height: 40
+  detail_position: "auto"
+  detail_auto_threshold: 120
 
 keybindings:
   quit: "q"
