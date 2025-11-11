@@ -129,8 +129,8 @@ jobs:
 
       - name: Run tests with race detector
         run: |
-          # Run race detector on all packages except vault (which needs real iteration counts for migration tests)
-          go test -v -race $(go list ./... | grep -v '/internal/vault$')
+          # Run race detector on all packages except vault and storage (which need real iteration counts for security validation)
+          go test -v -race $(go list ./... | grep -E -v '/internal/(vault|storage)$')
         shell: bash
         env:
           CGO_ENABLED: 1
