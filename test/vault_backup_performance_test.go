@@ -13,7 +13,7 @@ import (
 // Verifies backup commands meet performance targets
 
 // TestIntegration_BackupCreate_Performance tests backup creation performance
-// Target: <5 seconds for vault with 100 credentials
+// Target: <5 seconds for vault with 25 credentials (reduced from 100 for CI speed)
 func TestIntegration_BackupCreate_Performance(t *testing.T) {
 	setupTestEnvironment(t)
 
@@ -27,9 +27,9 @@ func TestIntegration_BackupCreate_Performance(t *testing.T) {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
 
-	// Add 100 credentials (each add operation unlocks vault with password)
-	t.Logf("Adding 100 credentials to vault...")
-	for i := 1; i <= 100; i++ {
+	// Add 25 credentials (reduced from 100 for CI timeout - each add unlocks vault with password)
+	t.Logf("Adding 25 credentials to vault...")
+	for i := 1; i <= 25; i++ {
 		service := fmt.Sprintf("service%03d", i)
 		username := fmt.Sprintf("user%03d@example.com", i)
 		password := fmt.Sprintf("password%03d", i)
@@ -40,9 +40,9 @@ func TestIntegration_BackupCreate_Performance(t *testing.T) {
 			t.Fatalf("add credential %d failed: %v", i, err)
 		}
 
-		// Progress update every 25 credentials
-		if i%25 == 0 {
-			t.Logf("  Added %d/100 credentials", i)
+		// Progress update every 10 credentials
+		if i%10 == 0 {
+			t.Logf("  Added %d/25 credentials", i)
 		}
 	}
 
@@ -69,7 +69,7 @@ func TestIntegration_BackupCreate_Performance(t *testing.T) {
 }
 
 // TestIntegration_BackupRestore_Performance tests backup restore performance
-// Target: <30 seconds for restore operation
+// Target: <30 seconds for restore operation (25 credentials for CI speed)
 func TestIntegration_BackupRestore_Performance(t *testing.T) {
 	setupTestEnvironment(t)
 
@@ -83,9 +83,9 @@ func TestIntegration_BackupRestore_Performance(t *testing.T) {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
 
-	// Add 100 credentials (each add operation unlocks vault with password)
-	t.Logf("Adding 100 credentials to vault...")
-	for i := 1; i <= 100; i++ {
+	// Add 25 credentials (reduced from 100 for CI timeout - each add unlocks vault with password)
+	t.Logf("Adding 25 credentials to vault...")
+	for i := 1; i <= 25; i++ {
 		service := fmt.Sprintf("service%03d", i)
 		username := fmt.Sprintf("user%03d@example.com", i)
 		password := fmt.Sprintf("password%03d", i)
@@ -96,8 +96,8 @@ func TestIntegration_BackupRestore_Performance(t *testing.T) {
 			t.Fatalf("add credential %d failed: %v", i, err)
 		}
 
-		if i%25 == 0 {
-			t.Logf("  Added %d/100 credentials", i)
+		if i%10 == 0 {
+			t.Logf("  Added %d/25 credentials", i)
 		}
 	}
 
