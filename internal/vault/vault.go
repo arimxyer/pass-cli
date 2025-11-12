@@ -151,9 +151,12 @@ func New(vaultPath string) (*VaultService, error) {
 
 	// Initialize audit from metadata
 	if meta != nil && meta.AuditEnabled {
-		// Note: Audit path/ID not stored in new metadata schema
-		// Audit will be initialized via vault data or explicit enable
-		_ = meta // Use meta to avoid unused variable
+		// Audit is enabled in metadata - initialize it now
+		auditLogPath := filepath.Join(filepath.Dir(vaultPath), "audit.log")
+		if err := v.EnableAudit(auditLogPath, vaultPath); err != nil {
+			// Non-fatal - continue without audit (graceful degradation)
+			fmt.Fprintf(os.Stderr, "Warning: Failed to enable audit from metadata: %v\n", err)
+		}
 	}
 
 	// T011: Fallback self-discovery if metadata missing/failed OR audit not enabled but log exists
