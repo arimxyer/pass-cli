@@ -1,0 +1,71 @@
+baseURL = "https://ari1110.github.io/pass-cli/"
+languageCode = "en-us"
+title = "pass-cli Documentation"
+theme = "book"
+
+# Point to existing /docs folder (no duplication)
+contentDir = "../docs"
+
+# Ignore README.md (it's a symlink to _index.md)
+ignoreFiles = ["README\\.md$"]
+
+# Menu configuration
+[menu]
+  [[menu.main]]
+    name = "Getting Started"
+    url = "/GETTING_STARTED/"
+    weight = 1
+
+  [[menu.main]]
+    name = "Installation"
+    url = "/INSTALLATION/"
+    weight = 2
+
+  [[menu.main]]
+    name = "Usage"
+    url = "/USAGE/"
+    weight = 3
+
+  [[menu.main]]
+    name = "Guides"
+    url = "/guides/"
+    weight = 4
+
+  [[menu.main]]
+    name = "Security"
+    url = "/SECURITY/"
+    weight = 5
+
+  [[menu.main]]
+    name = "Troubleshooting"
+    url = "/TROUBLESHOOTING/"
+    weight = 6
+
+# Theme configuration for Hugo Book theme
+[params]
+  BookRepo = "https://github.com/ari1110/pass-cli"
+  BookEditPath = "edit/main/docs"
+  BookSearch = true
+  BookToC = true
+  BookMenuBundle = false
+  BookSection = "*"
+  BookComments = false
+
+# Markdown configuration
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true  # Allow HTML in markdown
+  [markup.highlight]
+    style = "monokai"
+    lineNos = true
+    lineNumbersInTable = true
+  [markup.tableOfContents]
+    endLevel = 3
+    ordered = false
+    startLevel = 2
+
+# Output formats
+[outputs]
+  home = ["HTML", "RSS"]
+  page = ["HTML"]

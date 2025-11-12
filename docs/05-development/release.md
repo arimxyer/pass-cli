@@ -1,3 +1,9 @@
+---
+title: "Release Process"
+weight: 4
+bookToc: true
+---
+
 # Release Process
 This document describes the release process for Pass-CLI using GoReleaser.
 

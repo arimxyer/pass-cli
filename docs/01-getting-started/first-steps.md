@@ -1,3 +1,9 @@
+---
+title: "First Steps"
+weight: 2
+bookToc: true
+---
+
 # Getting Started with pass-cli
 This guide will walk you through your first steps with pass-cli, from installation to managing your first credentials.
 

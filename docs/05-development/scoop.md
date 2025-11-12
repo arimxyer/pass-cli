@@ -1,3 +1,9 @@
+---
+title: "Scoop Manifest"
+weight: 6
+bookToc: true
+---
+
 # Scoop Manifest for Pass-CLI
 This document explains how to use, test, and submit the Scoop manifest for Pass-CLI on Windows.
 

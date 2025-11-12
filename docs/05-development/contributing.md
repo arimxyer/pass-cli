@@ -1,3 +1,9 @@
+---
+title: "Contributing"
+weight: 1
+bookToc: true
+---
+
 # Development Guide
 This guide covers the development workflow for Pass-CLI contributors.
 

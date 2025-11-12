@@ -59,3 +59,9 @@ next-ideas-&-features.md
 
 # Test debugging
 test-debug/
+
+# Hugo documentation site
+docsite/public/
+docsite/resources/
+docsite/themes/
+docsite/.hugo_build.lock

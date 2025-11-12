@@ -1,3 +1,9 @@
+---
+title: "Homebrew Formula"
+weight: 5
+bookToc: true
+---
+
 # Homebrew Formula for Pass-CLI
 This document explains how to use, test, and submit the Homebrew formula for Pass-CLI.
 
