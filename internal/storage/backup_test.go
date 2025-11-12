@@ -397,6 +397,109 @@ func TestCreateManualBackup_DiskFull(t *testing.T) {
 	}
 }
 
+// TestListBackups tests backup discovery and sorting
+// T059: Unit test for backup listing and sorting
+func TestListBackups(t *testing.T) {
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	// Initialize vault
+	password := "test-password"
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	// Create automatic backup (SaveVault creates this)
+	automaticBackupPath := vaultPath + BackupSuffix
+	vaultContent, err := os.ReadFile(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to read vault: %v", err)
+	}
+	if err := os.WriteFile(automaticBackupPath, vaultContent, VaultPermissions); err != nil {
+		t.Fatalf("Failed to create automatic backup: %v", err)
+	}
+
+	// Create multiple manual backups with different timestamps
+	manual1, err := storage.CreateManualBackup()
+	if err != nil {
+		t.Fatalf("CreateManualBackup 1 failed: %v", err)
+	}
+
+	time.Sleep(1 * time.Second) // Ensure different timestamps
+
+	manual2, err := storage.CreateManualBackup()
+	if err != nil {
+		t.Fatalf("CreateManualBackup 2 failed: %v", err)
+	}
+
+	// List all backups
+	backups, err := storage.ListBackups()
+	if err != nil {
+		t.Fatalf("ListBackups failed: %v", err)
+	}
+
+	// Verify we have all backups (1 automatic + 2 manual = 3 total, but may be 2 if timestamps collide)
+	if len(backups) < 2 {
+		t.Errorf("Expected at least 2 backups, got %d", len(backups))
+	}
+
+	// Verify backups are sorted by ModTime descending (newest first)
+	for i := 0; i < len(backups)-1; i++ {
+		if backups[i].ModTime.Before(backups[i+1].ModTime) {
+			t.Errorf("Backups not sorted correctly: backup[%d] (%v) is older than backup[%d] (%v)",
+				i, backups[i].ModTime, i+1, backups[i+1].ModTime)
+		}
+	}
+
+	// Verify backup types are identified correctly
+	foundAutomatic := false
+	foundManual := false
+	for _, backup := range backups {
+		if backup.Type == BackupTypeAutomatic {
+			foundAutomatic = true
+			if backup.Path != automaticBackupPath {
+				t.Errorf("Automatic backup path mismatch: got %s, want %s", backup.Path, automaticBackupPath)
+			}
+		}
+		if backup.Type == BackupTypeManual {
+			foundManual = true
+			if backup.Path != manual1 && backup.Path != manual2 {
+				t.Errorf("Unknown manual backup path: %s", backup.Path)
+			}
+		}
+	}
+
+	if !foundAutomatic {
+		t.Error("Automatic backup not found in list")
+	}
+	if !foundManual {
+		t.Error("Manual backup not found in list")
+	}
+
+	// Verify all backups have valid metadata
+	for i, backup := range backups {
+		if backup.Path == "" {
+			t.Errorf("Backup[%d] has empty path", i)
+		}
+		if backup.Size == 0 {
+			t.Errorf("Backup[%d] has zero size", i)
+		}
+		if backup.ModTime.IsZero() {
+			t.Errorf("Backup[%d] has zero ModTime", i)
+		}
+		// IsCorrupted should be false for valid backups
+		if backup.IsCorrupted {
+			t.Errorf("Backup[%d] marked as corrupted but should be valid", i)
+		}
+	}
+}
+
 // Helper function to check if string contains substring
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) &&
