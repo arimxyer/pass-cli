@@ -2,7 +2,6 @@ package storage
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -11,6 +10,30 @@ import (
 
 	"pass-cli/internal/crypto"
 )
+
+// mockFileSystem is a test double for FileSystem that allows error injection
+type mockFileSystem struct {
+	osFileSystem // Embed real implementation
+
+	// Optional override functions for error injection
+	openFileFunc func(name string, flag int, perm os.FileMode) (*os.File, error)
+}
+
+// newMockFileSystem creates a mock that delegates to real filesystem by default
+func newMockFileSystem() *mockFileSystem {
+	return &mockFileSystem{
+		osFileSystem: osFileSystem{},
+	}
+}
+
+// OpenFile delegates to override function if set, otherwise uses real implementation
+func (m *mockFileSystem) OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
+	if m.openFileFunc != nil {
+		return m.openFileFunc(name, flag, perm)
+	}
+	return m.osFileSystem.OpenFile(name, flag, perm)
+}
+
 
 func TestGenerateManualBackupPath(t *testing.T) {
 	cryptoService := crypto.NewCryptoService()
@@ -271,28 +294,27 @@ func TestCreateManualBackup_PermissionDenied(t *testing.T) {
 	tempDir := t.TempDir()
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 
-	storage, err := NewStorageService(cryptoService, vaultPath)
+	// Create mock filesystem that injects permission errors
+	mockFS := newMockFileSystem()
+	storage, err := NewStorageServiceWithFS(cryptoService, vaultPath, mockFS)
 	if err != nil {
-		t.Fatalf("NewStorageService failed: %v", err)
+		t.Fatalf("NewStorageServiceWithFS failed: %v", err)
 	}
 
-	// Initialize vault
+	// Initialize vault using real filesystem
 	password := "test-password"
 	if err := storage.InitializeVault(password); err != nil {
 		t.Fatalf("InitializeVault failed: %v", err)
 	}
 
-	// Save original function
-	originalOsOpenFile := osOpenFile
-	defer func() { osOpenFile = originalOsOpenFile }()
-
 	// Inject permission denied error when trying to create backup file
-	osOpenFile = func(name string, flag int, perm os.FileMode) (*os.File, error) {
-		// Only fail for backup file creation, not vault file
-		if filepath.Base(name) != "vault.enc" {
+	mockFS.openFileFunc = func(name string, flag int, perm os.FileMode) (*os.File, error) {
+		// Allow reading source vault file, but fail on creating destination backup
+		if flag&os.O_WRONLY != 0 && filepath.Base(name) != "vault.enc" {
 			return nil, os.ErrPermission
 		}
-		return originalOsOpenFile(name, flag, perm)
+		// Use real filesystem for everything else
+		return mockFS.osFileSystem.OpenFile(name, flag, perm)
 	}
 
 	// Try to create backup - should fail with permission error
@@ -320,26 +342,36 @@ func TestCreateManualBackup_DiskFull(t *testing.T) {
 	tempDir := t.TempDir()
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 
-	storage, err := NewStorageService(cryptoService, vaultPath)
+	// Create mock filesystem that injects disk space errors
+	mockFS := newMockFileSystem()
+	storage, err := NewStorageServiceWithFS(cryptoService, vaultPath, mockFS)
 	if err != nil {
-		t.Fatalf("NewStorageService failed: %v", err)
+		t.Fatalf("NewStorageServiceWithFS failed: %v", err)
 	}
 
-	// Initialize vault
+	// Initialize vault using real filesystem
 	password := "test-password"
 	if err := storage.InitializeVault(password); err != nil {
 		t.Fatalf("InitializeVault failed: %v", err)
 	}
 
-	// Save original function
-	originalIoCopy := ioCopy
-	defer func() { ioCopy = originalIoCopy }()
+	// Track number of OpenFile calls to allow source file read but fail on destination
+	callCount := 0
 
-	// Inject disk space error during copy
-	ioCopy = func(dst io.Writer, src io.Reader) (int64, error) {
-		// Simulate "no space left on device" error
-		// This is the actual error returned by io.Copy when disk is full
-		return 0, fmt.Errorf("write /path/to/file: no space left on device")
+	// Inject disk space error when trying to create backup file
+	mockFS.openFileFunc = func(name string, flag int, perm os.FileMode) (*os.File, error) {
+		// Allow reading source vault file (first write call)
+		// Fail on creating destination backup file (second write call)
+		if flag&os.O_WRONLY != 0 && filepath.Base(name) != "vault.enc" {
+			callCount++
+			if callCount > 0 {
+				// Simulate disk full error on destination file creation
+				return nil, fmt.Errorf("write %s: no space left on device", name)
+			}
+		}
+
+		// Use real filesystem for everything else
+		return mockFS.osFileSystem.OpenFile(name, flag, perm)
 	}
 
 	// Try to create backup - should fail with disk space error
@@ -353,8 +385,8 @@ func TestCreateManualBackup_DiskFull(t *testing.T) {
 		t.Error("Expected error message, got empty string")
 	}
 
-	// Verify error is wrapped correctly
-	expectedSubstring := "failed to copy data"
+	// Verify error is wrapped correctly - error happens at OpenFile stage
+	expectedSubstring := "failed to create destination file"
 	if !contains(err.Error(), expectedSubstring) {
 		t.Errorf("Expected error to contain %q, got: %s", expectedSubstring, err.Error())
 	}

@@ -185,19 +185,11 @@ func (s *StorageService) verifyBackupIntegrity(backupPath string) error {
 	return nil
 }
 
-// Filesystem operation seams for testing
-// These variables can be overridden in tests to inject errors
-var (
-	osOpen     = os.Open
-	osOpenFile = os.OpenFile
-	ioCopy     = io.Copy
-)
-
 // copyFile copies a file from src to dst with proper permissions.
-// Uses atomic operations (write to temp, then rename).
+// Uses the FileSystem abstraction for testability.
 func (s *StorageService) copyFile(src, dst string) error {
-	// Open source file
-	srcFile, err := osOpen(src)
+	// Open source file (read-only)
+	srcFile, err := s.fs.OpenFile(src, os.O_RDONLY, 0)
 	if err != nil {
 		return fmt.Errorf("failed to open source file: %w", err)
 	}
@@ -205,14 +197,14 @@ func (s *StorageService) copyFile(src, dst string) error {
 
 	// Create destination file with vault permissions
 	// #nosec G304 -- Backup path is user-controlled by design for CLI tool
-	dstFile, err := osOpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, VaultPermissions)
+	dstFile, err := s.fs.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, VaultPermissions)
 	if err != nil {
 		return fmt.Errorf("failed to create destination file: %w", err)
 	}
 	defer func() { _ = dstFile.Close() }()
 
 	// Copy data
-	if _, err := ioCopy(dstFile, srcFile); err != nil {
+	if _, err := io.Copy(dstFile, srcFile); err != nil {
 		return fmt.Errorf("failed to copy data: %w", err)
 	}
 
