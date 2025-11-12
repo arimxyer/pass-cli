@@ -1,4 +1,4 @@
-﻿### 1. Communication Standards
+### 1. Communication Standards
 
 **Be concise and direct**:
 - Avoid preamble like "Great!", "Sure!", "Let me help"
@@ -163,6 +163,8 @@ Auto-generated from all feature plans. Last updated: 2025-10-30
 - Go 1.21+ + Go standard library (os, io, crypto/aes, crypto/rand, filepath), existing internal packages (crypto, storage, vault) (003-implement-atomic-save)
 - File-based encrypted vault storage (`vault.enc`), backup files (`vault.enc.backup`), temporary files (`vault.enc.tmp.TIMESTAMP.RANDOM`) (003-implement-atomic-save)
 - File-based encrypted vault storage (`vault.enc`), automatic backups (`.backup` suffix), manual backups (`.[timestamp].manual.backup` suffix) (001-add-manual-vault)
+- Markdown (GitHub Flavored), Hugo v0.134.3 Extended + Hugo Book theme (alex-shpak/hugo-book), Hugo static site generator (002-comprehensive-documentation-restructuring)
+- File-based (markdown files in docs/ directory, Hugo site in docsite/) (002-comprehensive-documentation-restructuring)
 
 ## Project Structure
 
@@ -305,6 +307,7 @@ gosec ./...
 - Footer: `Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>`
 
 ## Recent Changes
+- 002-comprehensive-documentation-restructuring: Added Markdown (GitHub Flavored), Hugo v0.134.3 Extended + Hugo Book theme (alex-shpak/hugo-book), Hugo static site generator
 - 001-add-manual-vault: Added Go 1.21+
 - 003-implement-atomic-save: Implemented atomic save pattern for crash-safe vault operations
   - Added `internal/storage/atomic_save.go` with temp file generation, verification, and cleanup functions
@@ -315,7 +318,6 @@ gosec ./...
   - Added custom error types: ErrVerificationFailed, ErrDiskSpaceExhausted, ErrPermissionDenied, ErrFilesystemNotAtomic
   - Temp files use crypto/rand for unique names: `vault.enc.tmp.YYYYMMDD-HHMMSS.XXXXXX`
   - All tests passing, 60.1% coverage on storage package
-- 002-fix-untested-features: Added Go 1.21+
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
