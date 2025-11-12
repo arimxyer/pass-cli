@@ -17,6 +17,22 @@
 - Hugo configuration in `docsite/`
 - All file operations use `git mv` to preserve history
 
+### File Split Methodology
+All file splits preserve git history using this workflow:
+1. `git mv source.md target.md`
+2. Edit `target.md` to keep only migrated content (remove unwanted sections)
+3. If `source.md` still needed: Edit original path to remove migrated content
+4. If `source.md` obsolete: Leave deleted (git mv already handled)
+
+**Never** create new files from scratch - always start with `git mv` to preserve history.
+
+### Consolidation Methodology
+When merging content from multiple sources into single canonical doc:
+1. Choose the largest/most complete source as base (specified per task)
+2. `git mv base-source.md canonical-target.md`
+3. Edit `canonical-target.md` to merge content from other sources
+4. Remove consolidated content from other source files
+
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
@@ -81,7 +97,7 @@
 - [ ] T021 [P] [US2] Split cli-reference.md → command-reference.md: Extract command syntax only (lines 1-800, 1900-2040) to `docs/03-reference/command-reference.md`
 - [ ] T022 [P] [US2] Split cli-reference.md → tui-guide.md: Extract TUI documentation (lines 1206-1580) to `docs/02-guides/tui-guide.md`
 - [ ] T023 [P] [US2] Split cli-reference.md → scripting-guide.md: Extract automation/quiet/JSON examples (lines 1722-1800 + scattered) to `docs/02-guides/scripting-guide.md`
-- [ ] T024 [P] [US2] Split cli-reference.md + first-steps.md → configuration.md: Consolidate config sections from both files to `docs/03-reference/configuration.md`
+- [ ] T024 [P] [US2] Consolidate configuration.md: Use `git mv docs/02-usage-temp/cli-reference.md docs/03-reference/configuration.md` as base, edit to keep config section (lines 1089-1205), then merge config content from first-steps.md (lines 300-400)
 - [ ] T025 [P] [US2] Split cli-reference.md → usage-tracking.md: Extract usage tracking section (lines 1581-1721) to `docs/02-guides/usage-tracking.md`
 - [ ] T026 [US2] Add front matter to command-reference.md (title: "Command Reference", weight: 1)
 - [ ] T027 [US2] Add front matter to tui-guide.md (title: "TUI Guide", weight: 5)
@@ -110,7 +126,7 @@
 - [ ] T037 [P] [US3] Split troubleshooting.md → vault.md: Extract vault access/corruption/recovery (lines 743-1240) to `docs/04-troubleshooting/vault.md`
 - [ ] T038 [P] [US3] Split troubleshooting.md → keychain.md: Extract keychain platform issues (lines 485-742) to `docs/04-troubleshooting/keychain.md`
 - [ ] T039 [P] [US3] Split troubleshooting.md → tui.md: Extract TUI rendering/interaction issues (TUI sections) to `docs/04-troubleshooting/tui.md`
-- [ ] T040 [P] [US3] Consolidate FAQ: Merge FAQ sections from first-steps.md, cli-reference.md, troubleshooting.md, migration.md to `docs/04-troubleshooting/faq.md`
+- [ ] T040 [P] [US3] Consolidate FAQ: Use `git mv docs/04-reference/troubleshooting.md docs/04-troubleshooting/faq.md` as base, edit to keep only FAQ section (lines 1242-1368), then merge FAQ content from first-steps.md (lines 443-492, 550+), cli-reference.md (lines 1802-2032), and migration.md (lines 388-434)
 - [ ] T041 [US3] Add front matter to all troubleshooting docs (titles, weights 1-5)
 - [ ] T042 [US3] Create 04-troubleshooting/_index.md with category descriptions
 - [ ] T043 [US3] Remove FAQ sections from original source files (first-steps.md, cli-reference.md remnants, migration.md)
@@ -130,7 +146,7 @@
 ### Implementation for User Story 4
 
 - [ ] T046 [P] [US4] Split first-steps.md → basic-workflows.md: Extract list/update/delete/generate workflows (lines 201-450) to `docs/02-guides/basic-workflows.md`
-- [ ] T047 [P] [US4] Consolidate keychain content: Merge keychain setup from first-steps.md + cli-reference.md + troubleshooting.md to `docs/02-guides/keychain-setup.md`
+- [ ] T047 [P] [US4] Consolidate keychain-setup.md: Use `git mv docs/01-getting-started/first-steps.md docs/02-guides/keychain-setup.md` as base, edit to keep only keychain section (lines 200-250), then merge keychain content from cli-reference.md (lines 800-900) and troubleshooting.md (lines 485-550)
 - [ ] T048 [US4] Add front matter to basic-workflows.md (title: "Basic Workflows", weight: 1)
 - [ ] T049 [US4] Add front matter to keychain-setup.md (title: "Keychain Setup", weight: 2)
 - [ ] T050 [US4] Remove keychain content from original source files (first-steps.md remnants, portions from cli-reference/troubleshooting splits)

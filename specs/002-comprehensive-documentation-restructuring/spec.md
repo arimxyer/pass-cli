@@ -99,13 +99,13 @@ A security engineer needs to review pass-cli's security architecture and inciden
 ### Functional Requirements
 
 - **FR-001**: Documentation MUST be reorganized into 6 top-level sections: Getting Started, Guides, Reference, Troubleshooting, Operations, Development
-- **FR-002**: cli-reference.md (2,040 lines) MUST be split into 5 separate documents: command-reference.md (600 lines), tui-guide.md (400 lines), scripting-guide.md (300 lines), configuration.md (250 lines), usage-tracking.md (200 lines)
-- **FR-003**: troubleshooting.md (1,404 lines) MUST be split into 5 separate documents: troubleshooting-installation.md (300 lines), troubleshooting-vault.md (350 lines), troubleshooting-keychain.md (250 lines), troubleshooting-tui.md (300 lines), faq.md (200 lines)
+- **FR-002**: cli-reference.md (2,040 lines) MUST be split into 5 separate documents: command-reference.md (600 lines), tui-guide.md (400 lines), scripting-guide.md (300 lines), usage-tracking.md (200 lines), and configuration content migrated per FR-007
+- **FR-003**: troubleshooting.md (1,404 lines) MUST be split into 5 separate documents in 04-troubleshooting/ section: installation.md (300 lines), vault.md (350 lines), keychain.md (250 lines), tui.md (300 lines), faq.md (200 lines)
 - **FR-004**: installation.md (708 lines) MUST be split into 3 documents: quick-install.md (100 lines), manual-install.md (400 lines), uninstall.md (100 lines)
 - **FR-005**: first-steps.md (649 lines) MUST be split into 3 documents: quick-start.md (200 lines), basic-workflows.md (250 lines), keychain-setup.md (150 lines)
 - **FR-006**: security.md (750 lines) MUST be split into 2 documents: security-architecture.md (500 lines), security-operations.md (250 lines)
-- **FR-007**: Duplicate content (keychain across 3 docs, FAQ across 4 docs, configuration across 2 docs) MUST be consolidated into single-source-of-truth documents
-- **FR-008**: All documentation files MUST use git mv during reorganization to preserve file history
+- **FR-007**: Duplicate content MUST be consolidated into single-source-of-truth documents: keychain content (from first-steps.md, cli-reference.md, troubleshooting.md) to keychain-setup.md in Guides; FAQ content (from first-steps.md, cli-reference.md, troubleshooting.md, migration.md) to faq.md in Troubleshooting; configuration content (from first-steps.md, cli-reference.md) to configuration.md (250 lines) in Reference
+- **FR-008**: All documentation files MUST use git mv during reorganization to preserve file history. Git mv operations MUST be preceded by documentation snapshot for rollback capability.
 - **FR-009**: All internal documentation links MUST be updated to Hugo relref shortcode format pointing to new locations
 - **FR-010**: Hugo site homepage (docs/README.md and docs/_index.md) MUST be updated with new quick links to reorganized structure
 - **FR-011**: Root README.md MUST be updated with documentation links pointing to new file paths
