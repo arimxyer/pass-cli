@@ -20,6 +20,8 @@
 
 Pass-CLI is a fast, secure password and API key manager that stores credentials locally with AES-256-GCM encryption. Built for developers who need quick, script-friendly access to credentials without cloud dependencies.
 
+📚 **[View Full Documentation](https://ari1110.github.io/pass-cli/)** | [Getting Started](docs/GETTING_STARTED.md) | [Installation](docs/INSTALLATION.md) | [Usage Guide](docs/USAGE.md)
+
 ## Key Features
 
 - **Military-Grade Encryption**: AES-256-GCM with hardened PBKDF2 key derivation (600,000 iterations)
