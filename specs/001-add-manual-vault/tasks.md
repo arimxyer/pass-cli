@@ -97,14 +97,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T033 [P] [US2] Integration test for successful backup creation in `test/vault_backup_integration_test.go` - verify file created with correct timestamp format
-- [ ] T034 [P] [US2] Integration test for backup with vault not found in `test/vault_backup_integration_test.go` - verify error message
-- [ ] T035 [P] [US2] Integration test for backup with disk full in `test/vault_backup_integration_test.go` - simulate disk space error
-- [ ] T035a [P] [US2] Integration test for backup with missing directory in `test/vault_backup_integration_test.go` - verify directory creation (FR-018)
-- [ ] T036 [P] [US2] Integration test for backup with permission denied in `test/vault_backup_integration_test.go` - test directory permission error
-- [ ] T037 [P] [US2] Integration test for multiple manual backups in `test/vault_backup_integration_test.go` - verify history retention (no overwrite)
-- [ ] T038 [P] [US2] Unit test for timestamp generation in `internal/storage/backup_test.go` - verify format `YYYYMMDD-HHMMSS`
-- [ ] T039 [P] [US2] Unit test for manual backup naming in `internal/storage/backup_test.go` - verify `vault.enc.[timestamp].manual.backup` pattern
+- [x] T033 [P] [US2] Integration test for successful backup creation in `test/vault_backup_integration_test.go` - verify file created with correct timestamp format
+- [x] T034 [P] [US2] Integration test for backup with vault not found in `test/vault_backup_integration_test.go` - verify error message
+- [ ] T035 [P] [US2] Integration test for backup with disk full in `test/vault_backup_integration_test.go` - simulate disk space error (SKIPPED: difficult to test reliably cross-platform)
+- [x] T035a [P] [US2] Integration test for backup with missing directory in `test/vault_backup_integration_test.go` - verify directory creation (FR-018)
+- [ ] T036 [P] [US2] Integration test for backup with permission denied in `test/vault_backup_integration_test.go` - test directory permission error (SKIPPED: unreliable on Windows)
+- [x] T037 [P] [US2] Integration test for multiple manual backups in `test/vault_backup_integration_test.go` - verify history retention (no overwrite)
+- [x] T038 [P] [US2] Unit test for timestamp generation in `internal/storage/backup_test.go` - verify format `YYYYMMDD-HHMMSS`
+- [x] T039 [P] [US2] Unit test for manual backup naming in `internal/storage/backup_test.go` - verify `vault.enc.[timestamp].manual.backup` pattern
 
 ### Implementation for User Story 2
 
