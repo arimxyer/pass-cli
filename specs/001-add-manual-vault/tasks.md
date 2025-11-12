@@ -108,17 +108,17 @@
 
 ### Implementation for User Story 2
 
-- [ ] T040 [US2] Create `cmd/vault_backup_create.go` file
-- [ ] T041 [US2] Implement create command cobra structure in `cmd/vault_backup_create.go` - add flag: --verbose
-- [ ] T042 [US2] Implement `runVaultBackupCreate()` function in `cmd/vault_backup_create.go`
-- [ ] T043 [US2] Add vault path validation in `runVaultBackupCreate()` - check vault exists
-- [ ] T044 [US2] Add backup creation logic in `runVaultBackupCreate()` - calls `CreateManualBackup()`
-- [ ] T045 [US2] Add disk space check before backup in `runVaultBackupCreate()` - prevent disk full failures
-- [ ] T046 [US2] Add success message with backup path in `runVaultBackupCreate()` - show file location, size, timestamp
-- [ ] T047 [US2] Add error handling for common failures in `runVaultBackupCreate()` - vault not found, permission denied, disk full
-- [ ] T048 [US2] Add audit logging for backup creation in `runVaultBackupCreate()` - log to `~/.pass-cli/audit.log`
-- [ ] T049 [US2] Add verbose output mode to `runVaultBackupCreate()` - show detailed progress
-- [ ] T050 [US2] Register create command with parent in `cmd/vault_backup.go` - `vaultBackupCmd.AddCommand(vaultBackupCreateCmd)`
+- [x] T040 [US2] Create `cmd/vault_backup_create.go` file
+- [x] T041 [US2] Implement create command cobra structure in `cmd/vault_backup_create.go` - add flag: --verbose
+- [x] T042 [US2] Implement `runVaultBackupCreate()` function in `cmd/vault_backup_create.go`
+- [x] T043 [US2] Add vault path validation in `runVaultBackupCreate()` - check vault exists
+- [x] T044 [US2] Add backup creation logic in `runVaultBackupCreate()` - calls `CreateManualBackup()`
+- [x] T045 [US2] Add disk space check before backup in `runVaultBackupCreate()` - prevent disk full failures
+- [x] T046 [US2] Add success message with backup path in `runVaultBackupCreate()` - show file location, size, timestamp
+- [x] T047 [US2] Add error handling for common failures in `runVaultBackupCreate()` - vault not found, permission denied, disk full
+- [x] T048 [US2] Add audit logging for backup creation in `runVaultBackupCreate()` - log to `~/.pass-cli/audit.log`
+- [x] T049 [US2] Add verbose output mode to `runVaultBackupCreate()` - show detailed progress
+- [x] T050 [US2] Register create command with parent in `cmd/vault_backup.go` - `vaultBackupCmd.AddCommand(vaultBackupCreateCmd)`
 
 **Checkpoint**: User Story 2 complete - Users can manually create timestamped backups
 
