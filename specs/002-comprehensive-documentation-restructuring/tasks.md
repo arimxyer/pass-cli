@@ -39,9 +39,9 @@ When merging content from multiple sources into single canonical doc:
 
 **Purpose**: Create new section structure and prepare workspace
 
-- [ ] T001 Create new section directories: `docs/02-guides/`, `docs/04-troubleshooting/`, `docs/05-operations/`
-- [ ] T002 [P] Backup current docs structure for reference (snapshot current state)
-- [ ] T003 [P] Document current file-to-line mappings for audit trail
+- [x] T001 Create new section directories: `docs/02-guides/`, `docs/04-troubleshooting/`, `docs/05-operations/`
+- [x] T002 [P] Backup current docs structure for reference (snapshot current state)
+- [x] T003 [P] Document current file-to-line mappings for audit trail
 
 ---
 
@@ -51,12 +51,12 @@ When merging content from multiple sources into single canonical doc:
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Renumber section 02-usage → 02-usage-temp (prepare for reorganization)
-- [ ] T005 Renumber section 03-guides → 03-guides-temp (prepare for reorganization)
-- [ ] T006 Renumber section 04-reference → 03-reference (final position)
-- [ ] T007 Renumber section 05-development → 06-development (final position)
-- [ ] T008 Move backup-restore.md from 03-guides-temp to 02-guides/ using `git mv docs/03-guides-temp/backup-restore.md docs/02-guides/backup-restore.md`
-- [ ] T009 Update backup-restore.md front matter (section weight, title verification)
+- [x] T004 Renumber section 02-usage → 02-usage-temp (prepare for reorganization)
+- [x] T005 Renumber section 03-guides → 03-guides-temp (prepare for reorganization)
+- [x] T006 Renumber section 04-reference → 03-reference (final position)
+- [x] T007 Renumber section 05-development → 06-development (final position)
+- [x] T008 Move backup-restore.md from 03-guides-temp to 02-guides/ using `git mv docs/03-guides-temp/backup-restore.md docs/02-guides/backup-restore.md`
+- [x] T009 Update backup-restore.md front matter (section weight, title verification)
 
 **Checkpoint**: Section structure ready - user story documentation work can now begin
 
