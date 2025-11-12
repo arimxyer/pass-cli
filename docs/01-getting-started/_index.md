@@ -5,8 +5,11 @@ bookCollapseSection: false
 bookFlatSection: false
 ---
 
-# Getting Started
+# Getting Started with pass-cli
 
-New to pass-cli? Start here to get up and running quickly.
+Choose your installation method and complete the quick-start guide to add your first credential.
 
-This section covers installation, initial setup, and your first steps with pass-cli.
+- **[Quick Install](quick-install.md)**: Install via package manager (macOS/Linux/Windows)
+- **[Manual Install](manual-install.md)**: Download binaries or build from source
+- **[Quick Start](quick-start.md)**: Initialize vault and store your first credential (5 minutes)
+- **[Uninstall](uninstall.md)**: Remove pass-cli from your system

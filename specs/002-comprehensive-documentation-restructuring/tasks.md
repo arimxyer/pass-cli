@@ -70,17 +70,17 @@ When merging content from multiple sources into single canonical doc:
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Split installation.md → quick-install.md: Extract package manager instructions (lines 1-150) to `docs/01-getting-started/quick-install.md`
-- [ ] T011 [P] [US1] Split installation.md → manual-install.md: Extract binary/source installation (lines 151-550, 600-708) to `docs/01-getting-started/manual-install.md`
-- [ ] T012 [P] [US1] Split installation.md → uninstall.md: Extract uninstall instructions (lines 550-600) to `docs/01-getting-started/uninstall.md`
-- [ ] T013 [P] [US1] Split first-steps.md → quick-start.md: Extract quick-start guide (lines 1-200) to `docs/01-getting-started/quick-start.md`
-- [ ] T014 [US1] Add front matter to quick-install.md (title: "Quick Install", weight: 1, bookToc: true)
-- [ ] T015 [US1] Add front matter to manual-install.md (title: "Manual Installation", weight: 2, bookToc: true)
-- [ ] T016 [US1] Add front matter to quick-start.md (title: "Quick Start Guide", weight: 3, bookToc: true)
-- [ ] T017 [US1] Add front matter to uninstall.md (title: "Uninstall", weight: 4, bookToc: true)
-- [ ] T018 [US1] Remove original installation.md and first-steps.md sections related to US1 content
-- [ ] T019 [US1] Update 01-getting-started/_index.md with new file descriptions and links
-- [ ] T020 [US1] Convert internal links in getting-started docs to Hugo relref format
+- [x] T010 [P] [US1] Split installation.md → quick-install.md: Extract package manager instructions (lines 1-150) to `docs/01-getting-started/quick-install.md`
+- [x] T011 [P] [US1] Split installation.md → manual-install.md: Extract binary/source installation (lines 151-550, 600-708) to `docs/01-getting-started/manual-install.md`
+- [x] T012 [P] [US1] Split installation.md → uninstall.md: Extract uninstall instructions (lines 550-600) to `docs/01-getting-started/uninstall.md`
+- [x] T013 [P] [US1] Split first-steps.md → quick-start.md: Extract quick-start guide (lines 1-200) to `docs/01-getting-started/quick-start.md`
+- [x] T014 [US1] Add front matter to quick-install.md (title: "Quick Install", weight: 1, bookToc: true)
+- [x] T015 [US1] Add front matter to manual-install.md (title: "Manual Installation", weight: 2, bookToc: true)
+- [x] T016 [US1] Add front matter to quick-start.md (title: "Quick Start Guide", weight: 3, bookToc: true)
+- [x] T017 [US1] Add front matter to uninstall.md (title: "Uninstall", weight: 4, bookToc: true)
+- [x] T018 [US1] Remove original installation.md and first-steps.md sections related to US1 content
+- [x] T019 [US1] Update 01-getting-started/_index.md with new file descriptions and links
+- [x] T020 [US1] Convert internal links in getting-started docs to Hugo relref format
 
 **Checkpoint**: New users can now complete installation and quick-start independently (MVP complete!)
 
