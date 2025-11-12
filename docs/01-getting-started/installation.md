@@ -1,3 +1,9 @@
+---
+title: "Installation"
+weight: 1
+bookToc: true
+---
+
 # Installation Guide
 Complete installation instructions for Pass-CLI across all supported platforms.
 

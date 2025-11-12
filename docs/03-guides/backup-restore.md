@@ -1,3 +1,9 @@
+---
+title: "Backup & Restore"
+weight: 1
+bookToc: true
+---
+
 # Vault Backup & Restore Guide
 
 Complete guide to backing up and restoring your pass-cli vault, including automatic backups, manual backups, and disaster recovery procedures.

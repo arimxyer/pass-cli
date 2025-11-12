@@ -1,3 +1,9 @@
+---
+title: "CLI Reference"
+weight: 1
+bookToc: true
+---
+
 # Usage Guide
 Complete reference for all Pass-CLI commands, flags, and features.
 

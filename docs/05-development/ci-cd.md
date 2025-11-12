@@ -1,3 +1,9 @@
+---
+title: "CI/CD Pipeline"
+weight: 3
+bookToc: true
+---
+
 # CI/CD Pipeline
 This document describes the automated CI/CD pipeline for Pass-CLI.
 

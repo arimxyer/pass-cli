@@ -1,3 +1,9 @@
+---
+title: "Migration"
+weight: 4
+bookToc: true
+---
+
 # Migration Guide
 Guide for upgrading Pass-CLI vaults and adapting to security hardening changes (January 2025 release).
 

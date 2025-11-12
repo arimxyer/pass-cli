@@ -1,3 +1,9 @@
+---
+title: "Known Limitations"
+weight: 3
+bookToc: true
+---
+
 # Known Limitations
 Documentation of known technical limitations in Pass-CLI and their security implications.
 

@@ -1,3 +1,9 @@
+---
+title: "Branch Workflow"
+weight: 2
+bookToc: true
+---
+
 # Branch Workflow
 This document describes the branching strategy and workflow for pass-cli development.
 

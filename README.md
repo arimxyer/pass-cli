@@ -20,7 +20,7 @@
 
 Pass-CLI is a fast, secure password and API key manager that stores credentials locally with AES-256-GCM encryption. Built for developers who need quick, script-friendly access to credentials without cloud dependencies.
 
-📚 **[View Full Documentation](https://ari1110.github.io/pass-cli/)** | [Getting Started](docs/GETTING_STARTED.md) | [Installation](docs/INSTALLATION.md) | [Usage Guide](docs/USAGE.md)
+📚 **[View Full Documentation](https://ari1110.github.io/pass-cli/)** | [Getting Started](docs/01-getting-started/first-steps.md) | [Installation](docs/01-getting-started/installation.md) | [Usage Guide](docs/02-usage/cli-reference.md)
 
 ## Key Features
 
@@ -52,7 +52,7 @@ scoop bucket add pass-cli https://github.com/ari1110/scoop-bucket
 scoop install pass-cli
 ```
 
-For manual installation and other methods, see [docs/INSTALLATION.md](docs/INSTALLATION.md).
+For manual installation and other methods, see [docs/01-getting-started/installation.md](docs/01-getting-started/installation.md).
 
 ### Getting Started
 
@@ -74,7 +74,7 @@ pass-cli list
 export API_KEY=$(pass-cli get myservice --quiet --field password)
 ```
 
-For detailed usage and examples, see [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
+For detailed usage and examples, see [docs/01-getting-started/first-steps.md](docs/01-getting-started/first-steps.md).
 
 ## Interactive TUI Mode
 
@@ -96,7 +96,7 @@ pass-cli list
 - Customizable keyboard shortcuts
 - Responsive layout (requires 60x30 minimum terminal size)
 
-Press `?` in TUI mode to see all keyboard shortcuts. For complete TUI documentation and configuration, see [docs/USAGE.md](docs/USAGE.md).
+Press `?` in TUI mode to see all keyboard shortcuts. For complete TUI documentation and configuration, see [docs/02-usage/cli-reference.md](docs/02-usage/cli-reference.md).
 
 ## Core Commands
 
@@ -141,7 +141,7 @@ pass-cli vault backup info
 pass-cli doctor
 ```
 
-For complete command reference, flags, and examples, see [docs/USAGE.md](docs/USAGE.md).
+For complete command reference, flags, and examples, see [docs/02-usage/cli-reference.md](docs/02-usage/cli-reference.md).
 
 ## Security
 
@@ -169,21 +169,21 @@ For complete command reference, flags, and examples, see [docs/USAGE.md](docs/US
 - Windows: `%USERPROFILE%\.pass-cli\vault.enc`
 - macOS/Linux: `~/.pass-cli/vault.enc`
 
-For complete security details, best practices, and migration guides, see [docs/SECURITY.md](docs/SECURITY.md).
+For complete security details, best practices, and migration guides, see [docs/04-reference/security.md](docs/04-reference/security.md).
 
 ## Documentation
 
 **Essential Guides**:
-- [Getting Started](docs/GETTING_STARTED.md) - First-time setup and basic workflows
-- [Usage Guide](docs/USAGE.md) - Complete command reference, TUI shortcuts, configuration
-- [Installation](docs/INSTALLATION.md) - All installation methods and package managers
-- [Security](docs/SECURITY.md) - Encryption details, best practices, migration guides
-- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [Getting Started](docs/01-getting-started/first-steps.md) - First-time setup and basic workflows
+- [Usage Guide](docs/02-usage/cli-reference.md) - Complete command reference, TUI shortcuts, configuration
+- [Installation](docs/01-getting-started/installation.md) - All installation methods and package managers
+- [Security](docs/04-reference/security.md) - Encryption details, best practices, migration guides
+- [Troubleshooting](docs/04-reference/troubleshooting.md) - Common issues and solutions
 
 **Additional Resources**:
-- [Doctor Command](docs/DOCTOR_COMMAND.md) - Health check diagnostics
-- [CI/CD Integration](docs/CI-CD.md) - GitHub Actions and pipeline examples
-- [Branch Workflow](docs/BRANCH_WORKFLOW.md) - Git workflow for contributors
+- [Doctor Command](docs/05-development/doctor-command.md) - Health check diagnostics
+- [CI/CD Integration](docs/05-development/ci-cd.md) - GitHub Actions and pipeline examples
+- [Branch Workflow](docs/05-development/branch-workflow.md) - Git workflow for contributors
 
 ## Building from Source
 
@@ -199,7 +199,7 @@ go build -o pass-cli .
 go test ./...
 ```
 
-For testing guidelines, see [test/README.md](test/README.md). For Git workflow, see [docs/BRANCH_WORKFLOW.md](docs/BRANCH_WORKFLOW.md).
+For testing guidelines, see [test/README.md](test/README.md). For Git workflow, see [docs/05-development/branch-workflow.md](docs/05-development/branch-workflow.md).
 
 ## FAQ
 
@@ -222,11 +222,11 @@ cp ~/.pass-cli/vault.enc ~/backup/vault-$(date +%Y%m%d).enc
 
 Unfortunately, there's no way to recover your vault without the master password. The encryption is designed to be unbreakable. Keep your master password safe.
 
-For more questions and troubleshooting, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+For more questions and troubleshooting, see [docs/04-reference/troubleshooting.md](docs/04-reference/troubleshooting.md).
 
 ## Contributing
 
-Contributions are welcome! See [docs/BRANCH_WORKFLOW.md](docs/BRANCH_WORKFLOW.md) for Git workflow and contribution guidelines.
+Contributions are welcome! See [docs/05-development/branch-workflow.md](docs/05-development/branch-workflow.md) for Git workflow and contribution guidelines.
 
 ## License
 

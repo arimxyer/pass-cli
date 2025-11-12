@@ -1,3 +1,9 @@
+---
+title: "Doctor Command"
+weight: 7
+bookToc: true
+---
+
 # Doctor Command User Guide
 The `pass-cli doctor` command provides comprehensive health checks for your pass-cli installation. Use it to diagnose issues, verify your setup, and ensure everything is working correctly
 

@@ -1,3 +1,9 @@
+---
+title: "Security"
+weight: 1
+bookToc: true
+---
+
 # Security Documentation
 Comprehensive security architecture, cryptographic implementation, and best practices for Pass-CLI.
 

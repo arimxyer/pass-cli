@@ -1,3 +1,9 @@
+---
+title: "Troubleshooting"
+weight: 2
+bookToc: true
+---
+
 # Troubleshooting Guide
 Solutions to common issues and frequently asked questions for Pass-CLI.
 
