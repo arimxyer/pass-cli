@@ -25,6 +25,7 @@ Pass-CLI is a fast, secure password and API key manager that stores credentials 
 - **Military-Grade Encryption**: AES-256-GCM with hardened PBKDF2 key derivation (600,000 iterations)
 - **System Keychain Integration**: Windows Credential Manager, macOS Keychain, Linux Secret Service
 - **Password Policy Enforcement**: Complexity requirements for vault and credential passwords
+- **Vault Backup & Restore**: Manual backups with integrity verification and automatic backup during vault operations
 - **Tamper-Evident Audit Logging**: Optional HMAC-signed audit trail for vault operations
 - **Health Checks**: Built-in `doctor` command for vault verification and troubleshooting
 - **Cross-Platform**: Single binary for Windows, macOS (Intel/ARM), and Linux (amd64/arm64)
@@ -124,6 +125,15 @@ pass-cli generate --length 32
 
 # Remove vault
 pass-cli vault remove
+
+# Create manual vault backup
+pass-cli vault backup create
+
+# Restore vault from backup
+pass-cli vault backup restore
+
+# View backup status
+pass-cli vault backup info
 
 # Health check
 pass-cli doctor

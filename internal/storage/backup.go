@@ -197,12 +197,12 @@ func validateVaultStructure(data []byte) error {
 	}
 
 	// Verify required top-level fields exist
-	if vault.Data == nil || len(vault.Data) == 0 {
+	if len(vault.Data) == 0 {
 		return fmt.Errorf("missing or empty encrypted data")
 	}
 
 	// Verify metadata structure
-	if vault.Metadata.Salt == nil || len(vault.Metadata.Salt) == 0 {
+	if len(vault.Metadata.Salt) == 0 {
 		return fmt.Errorf("missing salt in metadata")
 	}
 

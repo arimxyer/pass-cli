@@ -179,15 +179,15 @@
 - [x] T083 [P] Security review: Verify no credential logging in backup operations
 - [x] T084 [P] Security review: Verify audit log entries contain only safe metadata
 - [x] T085 [P] Security review: Verify backup file permissions are secure (0600 on Unix)
-- [ ] T086 Performance test: Verify backup creation meets <5 second target for 100 credentials
-- [ ] T087 Performance test: Verify restore operation meets <30 second target
-- [ ] T088 Performance test: Verify info command meets <1 second target
-- [ ] T089 [P] Documentation: Update `README.md` with backup command examples in "Usage" section
-- [ ] T090 [P] Documentation: Create `docs/guides/backup-restore-guide.md` with backup/restore workflows and troubleshooting
-- [ ] T091 Run `golangci-lint run` on all new code - fix any issues
-- [ ] T092 Run `gosec ./...` security scan - address any findings
-- [ ] T093 Run full test suite with coverage - verify >80% coverage per constitution
-- [ ] T094 Validate against `quickstart.md` - ensure all setup steps work
+- [x] T086 Performance test: Verify backup creation meets <5 second target for 100 credentials
+- [x] T087 Performance test: Verify restore operation meets <30 second target
+- [x] T088 Performance test: Verify info command meets <1 second target
+- [x] T089 [P] Documentation: Update `README.md` with backup command examples in "Usage" section
+- [x] T090 [P] Documentation: Create `docs/guides/backup-restore-guide.md` with backup/restore workflows and troubleshooting
+- [x] T091 Run `golangci-lint run` on all new code - fix any issues
+- [x] T092 Run `gosec ./...` security scan - address any findings
+- [x] T093 Run full test suite with coverage - verify >80% coverage per constitution
+- [x] T094 Validate against `quickstart.md` - ensure all setup steps work
 
 ---
 

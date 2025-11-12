@@ -57,19 +57,21 @@ go build -o pass-cli .
 go test ./...
 ```
 
-### 3. Verify Existing Backup Methods
+### 3. Verify Backup Implementation
 
-The storage service already has backup methods we'll expose:
+The storage service has backup methods implemented:
 
 ```bash
-# Check existing backup API
-grep -n "func.*Backup" internal/storage/storage.go
+# Check backup API in dedicated file
+grep -n "^func.*Backup" internal/storage/backup.go
+
+# Check automatic backup methods in storage service
+grep -n "^func.*Backup" internal/storage/storage.go
 ```
 
-Expected output shows:
-- `CreateBackup() error`
-- `RestoreFromBackup() error`
-- `RemoveBackup() error`
+Expected methods:
+- Manual: `CreateManualBackup()`, `ListBackups()`, `FindNewestBackup()`
+- Automatic: `CreateBackup()`, `RestoreFromBackup()`, `RemoveBackup()`
 
 ## Project Structure
 
@@ -100,7 +102,8 @@ Before implementing, familiarize yourself with:
    - `cmd/vault_remove.go` - Subcommand example
 
 2. **Storage Service** (API to call):
-   - `internal/storage/storage.go:425-633` - Existing backup methods
+   - `internal/storage/backup.go` - Manual backup implementation
+   - `internal/storage/storage.go:427-657` - Automatic backup methods
 
 3. **Test Examples**:
    - `test/vault_remove_test.go` - Integration test pattern
@@ -220,7 +223,7 @@ go build -o pass-cli .
 ./pass-cli vault backup info
 
 # Simulate vault corruption (CAREFUL: only in test environment)
-echo "corrupted" > ~/.pass/vault.enc
+echo "corrupted" > ~/.pass-cli/vault.enc
 
 # Restore from backup
 ./pass-cli vault backup restore
@@ -236,7 +239,7 @@ echo "corrupted" > ~/.pass/vault.enc
 ./pass-cli vault remove --force
 
 # Or manually
-rm -rf ~/.pass/
+rm -rf ~/.pass-cli/
 ```
 
 ## Code Quality Checks
@@ -295,13 +298,13 @@ tail -f ~/.pass-cli/audit.log
 
 ```bash
 # List all backups
-ls -lh ~/.pass/*.backup*
+ls -lh ~/.pass-cli/*.backup*
 
 # Check file sizes
-du -h ~/.pass/*.backup*
+du -h ~/.pass-cli/*.backup*
 
 # Verify file permissions
-stat ~/.pass/vault.enc.backup
+stat ~/.pass-cli/vault.enc.backup
 ```
 
 ## Common Issues
@@ -324,8 +327,8 @@ go test ./test/
 
 ```bash
 # Fix permissions (Unix)
-chmod 700 ~/.pass
-chmod 600 ~/.pass/vault.enc*
+chmod 700 ~/.pass-cli
+chmod 600 ~/.pass-cli/vault.enc*
 ```
 
 ### Issue: Tests Fail with "vault locked"
