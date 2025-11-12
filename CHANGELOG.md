@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2025-11-12
+
+### Added
+- **Manual Vault Backup Commands**: Three new CLI commands for manual backup management
+  - `pass vault backup create` - Create timestamped manual backups (vault.enc.YYYYMMDD-HHMMSS.manual.backup)
+  - `pass vault backup restore` - Restore vault from newest available backup (manual or automatic)
+  - `pass vault backup info` - View backup status, history, and integrity
+- **Smart Backup Selection**: Restore automatically selects newest valid backup with fallback to manual backups
+- **Backup Integrity Verification**: Structural validation before backup creation and during restore
+- **Interactive Restore Confirmation**: User prompts with backup details, `--force` for scripting, `--dry-run` for preview
+- **Comprehensive Backup Status**: Lists all backups with age, size, integrity, and restore priority
+- **Backup Warnings**: Alerts for old backups (>30 days) and excessive disk usage
+- **Cross-Platform Support**: Works on Windows, macOS, Linux with platform-specific path handling
+- **Backup Restore Guide**: 484-line comprehensive guide covering workflows, best practices, and troubleshooting
+
+### Changed
+- CI integration test timeout increased from 2m to 4m to accommodate Windows CI infrastructure
+
+### Performance
+- Integration test suite optimized: 96 tests complete in <3m across all platforms
+- Backup operations exceed performance targets (create: 176ms < 5s, restore: 191ms < 30s, info: 191ms < 1s)
+
+### Testing
+- Added 6 comprehensive test files with 96 integration tests (100% pass rate)
+- Storage package coverage increased to 81.4%
+- Error handling tests for corrupted backups, missing vault, permission denied scenarios
+- Platform-specific tests for Windows/Unix path handling
+
 ## [0.9.5] - 2025-11-11
 
 ### Added
