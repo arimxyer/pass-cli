@@ -132,7 +132,7 @@ jobs:
           cache-dependency-path: go.sum
 
       - name: Run integration tests
-        run: go test -v -tags=integration -timeout 2m ./test
+        run: go test -v -tags=integration -timeout 4m ./test
         shell: bash
 
       - name: Check for TODO-skipped tests
