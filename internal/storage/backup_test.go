@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -260,4 +262,121 @@ func TestVerifyBackupIntegrity(t *testing.T) {
 	_ = storage.verifyBackupIntegrity(unreadablePath)
 	// Cleanup: restore permissions for removal
 	_ = os.Chmod(unreadablePath, 0600)
+}
+
+// TestCreateManualBackup_PermissionDenied tests permission denied error during backup
+// T036: Unit test for permission denied error handling
+func TestCreateManualBackup_PermissionDenied(t *testing.T) {
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	// Initialize vault
+	password := "test-password"
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	// Save original function
+	originalOsOpenFile := osOpenFile
+	defer func() { osOpenFile = originalOsOpenFile }()
+
+	// Inject permission denied error when trying to create backup file
+	osOpenFile = func(name string, flag int, perm os.FileMode) (*os.File, error) {
+		// Only fail for backup file creation, not vault file
+		if filepath.Base(name) != "vault.enc" {
+			return nil, os.ErrPermission
+		}
+		return originalOsOpenFile(name, flag, perm)
+	}
+
+	// Try to create backup - should fail with permission error
+	_, err = storage.CreateManualBackup()
+	if err == nil {
+		t.Fatal("Expected permission error, got nil")
+	}
+
+	// Verify error contains context
+	if err.Error() == "" {
+		t.Error("Expected error message, got empty string")
+	}
+
+	// Verify error is wrapped correctly
+	expectedSubstring := "failed to create destination file"
+	if !contains(err.Error(), expectedSubstring) {
+		t.Errorf("Expected error to contain %q, got: %s", expectedSubstring, err.Error())
+	}
+}
+
+// TestCreateManualBackup_DiskFull tests disk full error during backup
+// T035: Unit test for disk full error handling
+func TestCreateManualBackup_DiskFull(t *testing.T) {
+	cryptoService := crypto.NewCryptoService()
+	tempDir := t.TempDir()
+	vaultPath := filepath.Join(tempDir, "vault.enc")
+
+	storage, err := NewStorageService(cryptoService, vaultPath)
+	if err != nil {
+		t.Fatalf("NewStorageService failed: %v", err)
+	}
+
+	// Initialize vault
+	password := "test-password"
+	if err := storage.InitializeVault(password); err != nil {
+		t.Fatalf("InitializeVault failed: %v", err)
+	}
+
+	// Save original function
+	originalIoCopy := ioCopy
+	defer func() { ioCopy = originalIoCopy }()
+
+	// Inject disk space error during copy
+	ioCopy = func(dst io.Writer, src io.Reader) (int64, error) {
+		// Simulate "no space left on device" error
+		// This is the actual error returned by io.Copy when disk is full
+		return 0, fmt.Errorf("write /path/to/file: no space left on device")
+	}
+
+	// Try to create backup - should fail with disk space error
+	_, err = storage.CreateManualBackup()
+	if err == nil {
+		t.Fatal("Expected disk space error, got nil")
+	}
+
+	// Verify error contains context
+	if err.Error() == "" {
+		t.Error("Expected error message, got empty string")
+	}
+
+	// Verify error is wrapped correctly
+	expectedSubstring := "failed to copy data"
+	if !contains(err.Error(), expectedSubstring) {
+		t.Errorf("Expected error to contain %q, got: %s", expectedSubstring, err.Error())
+	}
+
+	// Verify the underlying error is preserved
+	if !contains(err.Error(), "no space left on device") {
+		t.Errorf("Expected error to contain 'no space left on device', got: %s", err.Error())
+	}
+}
+
+// Helper function to check if string contains substring
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) &&
+		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr ||
+		len(s) > len(substr)+1 && findSubstring(s, substr)))
+}
+
+func findSubstring(s, substr string) bool {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
 }

@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -78,11 +80,16 @@ func runVaultBackupCreate(cmd *cobra.Command, args []string) error {
 	backupPath, err := storageService.CreateManualBackup()
 	if err != nil {
 		// T047: Error handling for common failures
-		if os.IsPermission(err) {
+		// Use errors.Is() to check wrapped errors correctly
+		if errors.Is(err, os.ErrPermission) {
 			return fmt.Errorf("permission denied creating backup\n\nCheck directory permissions for: %s", vaultPath)
 		}
 		// Check for disk space errors (best effort detection)
-		if err.Error() == "no space left on device" || err.Error() == "insufficient disk space" {
+		// Check both the error string and common patterns
+		errStr := err.Error()
+		if strings.Contains(errStr, "no space left on device") ||
+		   strings.Contains(errStr, "insufficient disk space") ||
+		   strings.Contains(errStr, "disk full") {
 			return fmt.Errorf("insufficient disk space for backup\n\nFree up disk space and try again")
 		}
 		return fmt.Errorf("failed to create backup: %w", err)
