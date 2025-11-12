@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -139,9 +140,9 @@ func (s *StorageService) FindNewestBackup() (*BackupInfo, error) {
 	return nil, nil
 }
 
-// verifyBackupIntegrity performs lightweight integrity check on backup file.
-// Checks file existence, non-zero size, and readable header.
-// Does not decrypt entire file (performance optimization).
+// verifyBackupIntegrity performs structural integrity check on backup file.
+// Checks file existence, non-zero size, and validates encrypted JSON structure.
+// Does not decrypt data (no password required), but verifies expected fields exist.
 func (s *StorageService) verifyBackupIntegrity(backupPath string) error {
 	// Check file existence
 	info, err := os.Stat(backupPath)
@@ -164,24 +165,34 @@ func (s *StorageService) verifyBackupIntegrity(backupPath string) error {
 		return fmt.Errorf("backup file too small (%d bytes)", info.Size())
 	}
 
-	// Try to read first few bytes to verify it's readable
-	file, err := os.Open(backupPath)
+	// Read entire file for structural validation
+	data, err := s.fs.ReadFile(backupPath)
 	if err != nil {
-		return fmt.Errorf("cannot open backup file: %w", err)
-	}
-	defer func() { _ = file.Close() }()
-
-	// Read first 32 bytes (enough to check if file is readable)
-	header := make([]byte, 32)
-	n, err := file.Read(header)
-	if err != nil && err != io.EOF {
-		return fmt.Errorf("cannot read backup file header: %w", err)
-	}
-	if n == 0 {
-		return fmt.Errorf("backup file header is unreadable")
+		return fmt.Errorf("cannot read backup file: %w", err)
 	}
 
-	// File appears to be valid (exists, non-empty, readable)
+	// Parse as JSON to verify structure
+	// Expected format: {"metadata": {...}, "data": "..."}
+	var vault EncryptedVault
+	if err := json.Unmarshal(data, &vault); err != nil {
+		return fmt.Errorf("backup file is not valid vault JSON: %w", err)
+	}
+
+	// Verify required top-level fields exist
+	if vault.Data == nil || len(vault.Data) == 0 {
+		return fmt.Errorf("backup file missing or empty encrypted data")
+	}
+
+	// Verify metadata structure
+	if vault.Metadata.Salt == nil || len(vault.Metadata.Salt) == 0 {
+		return fmt.Errorf("backup file missing salt in metadata")
+	}
+
+	if vault.Metadata.Version == 0 {
+		return fmt.Errorf("backup file has invalid version in metadata")
+	}
+
+	// File appears to be a valid encrypted vault structure
 	return nil
 }
 

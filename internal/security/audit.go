@@ -42,6 +42,10 @@ const (
 	EventKeychainEnable = "keychain_enable" // FR-015
 	EventKeychainStatus = "keychain_status" // FR-015
 	EventVaultRemove    = "vault_remove"    // FR-015
+
+	// Backup operations (001-add-manual-vault)
+	EventBackupCreate  = "backup_create"  // FR-017: Manual backup creation
+	EventBackupRestore = "backup_restore" // FR-017: Vault restoration from backup
 )
 
 // Outcome constants

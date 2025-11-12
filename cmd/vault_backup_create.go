@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"pass-cli/internal/security"
 	"pass-cli/internal/vault"
 )
 
@@ -79,6 +80,9 @@ func runVaultBackupCreate(cmd *cobra.Command, args []string) error {
 	// T044: Backup creation logic - calls CreateManualBackup()
 	backupPath, err := storageService.CreateManualBackup()
 	if err != nil {
+		// T048: Audit logging for backup failure (FR-017)
+		vaultService.LogAudit(security.EventBackupCreate, security.OutcomeFailure, "")
+
 		// T047: Error handling for common failures
 		// Use errors.Is() to check wrapped errors correctly
 		if errors.Is(err, os.ErrPermission) {
@@ -94,6 +98,9 @@ func runVaultBackupCreate(cmd *cobra.Command, args []string) error {
 		}
 		return fmt.Errorf("failed to create backup: %w", err)
 	}
+
+	// T048: Audit logging for backup success (FR-017)
+	vaultService.LogAudit(security.EventBackupCreate, security.OutcomeSuccess, backupPath)
 
 	if createVerbose {
 		fmt.Fprintf(os.Stderr, "[VERBOSE] Backup created at: %s\n", backupPath)
@@ -119,8 +126,6 @@ func runVaultBackupCreate(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Created: %s\n", backupInfo.ModTime().Format("2006-01-02 15:04:05"))
 	fmt.Printf("\nYou can restore from this backup with: pass-cli vault backup restore\n")
 
-	// T048: Audit logging (T030 note: vault service handles internal audit logging)
-	// Verbose mode shows operation completion
 	if createVerbose {
 		fmt.Fprintf(os.Stderr, "[VERBOSE] Backup creation completed\n")
 	}

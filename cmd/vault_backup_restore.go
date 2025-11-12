@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"pass-cli/internal/security"
 	"pass-cli/internal/storage"
 	"pass-cli/internal/vault"
 )
@@ -125,8 +126,13 @@ func runVaultBackupRestore(cmd *cobra.Command, args []string) error {
 
 	// Perform restore
 	if err := storageService.RestoreFromBackup(newestBackup.Path); err != nil {
+		// T030: Audit logging for restore failure (FR-017)
+		vaultService.LogAudit(security.EventBackupRestore, security.OutcomeFailure, newestBackup.Path)
 		return fmt.Errorf("failed to restore from backup: %w", err)
 	}
+
+	// T030: Audit logging for restore success (FR-017)
+	vaultService.LogAudit(security.EventBackupRestore, security.OutcomeSuccess, newestBackup.Path)
 
 	if restoreVerbose {
 		fmt.Fprintf(os.Stderr, "[VERBOSE] Backup copied to vault location\n")
@@ -148,9 +154,6 @@ func runVaultBackupRestore(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Backup type: %s\n", newestBackup.Type)
 	fmt.Printf("\nYou can now unlock your vault with your master password.\n")
 
-	// Audit logging (T030)
-	// Note: The vault package handles audit logging internally when operations occur
-	// For now, we output to stderr in verbose mode
 	if restoreVerbose {
 		fmt.Fprintf(os.Stderr, "[VERBOSE] Restore operation completed\n")
 	}
