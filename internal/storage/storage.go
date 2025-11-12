@@ -293,8 +293,9 @@ func (s *StorageService) SaveVaultWithIterations(data []byte, password string, i
 
 	// Save encrypted vault
 	if err := s.saveEncryptedVault(data, encryptedVault.Metadata, password); err != nil {
-		// Restore from backup on failure
-		if restoreErr := s.restoreFromBackup(); restoreErr != nil {
+		// Restore from backup on failure (use automatic backup)
+		automaticBackup := s.vaultPath + BackupSuffix
+		if restoreErr := s.restoreFromBackup(automaticBackup); restoreErr != nil {
 			return fmt.Errorf("save failed and backup restore failed: %v (original error: %w)", restoreErr, err)
 		}
 		return fmt.Errorf("failed to save vault: %w", err)
@@ -324,8 +325,9 @@ func (s *StorageService) SaveVaultWithIterationsUnsafe(data []byte, password str
 
 	// Save encrypted vault
 	if err := s.saveEncryptedVault(data, encryptedVault.Metadata, password); err != nil {
-		// Restore from backup on failure
-		if restoreErr := s.restoreFromBackup(); restoreErr != nil {
+		// Restore from backup on failure (use automatic backup)
+		automaticBackup := s.vaultPath + BackupSuffix
+		if restoreErr := s.restoreFromBackup(automaticBackup); restoreErr != nil {
 			return fmt.Errorf("save failed and backup restore failed: %v (original error: %w)", restoreErr, err)
 		}
 		return fmt.Errorf("failed to save vault: %w", err)
@@ -426,8 +428,30 @@ func (s *StorageService) CreateBackup() error {
 	return s.createBackup()
 }
 
-func (s *StorageService) RestoreFromBackup() error {
-	return s.restoreFromBackup()
+// RestoreFromBackup restores the vault from a backup file.
+// If backupPath is empty, automatically selects the newest valid backup.
+// If backupPath is provided, uses that specific backup file.
+func (s *StorageService) RestoreFromBackup(backupPath string) error {
+	// If no path provided, auto-select newest backup
+	if backupPath == "" {
+		// Try to find automatic backup first (legacy behavior)
+		automaticBackup := s.vaultPath + BackupSuffix
+		if _, err := s.fs.Stat(automaticBackup); err == nil {
+			backupPath = automaticBackup
+		} else {
+			// Fall back to FindNewestBackup for manual backups
+			newest, err := s.FindNewestBackup()
+			if err != nil {
+				return fmt.Errorf("failed to find backup: %w", err)
+			}
+			if newest == nil {
+				return ErrBackupFailed // No backup found
+			}
+			backupPath = newest.Path
+		}
+	}
+
+	return s.restoreFromBackup(backupPath)
 }
 
 func (s *StorageService) RemoveBackup() error {
@@ -629,9 +653,7 @@ func (s *StorageService) createBackup() error {
 	return nil
 }
 
-func (s *StorageService) restoreFromBackup() error {
-	backupPath := s.vaultPath + BackupSuffix
-
+func (s *StorageService) restoreFromBackup(backupPath string) error {
 	if _, err := s.fs.Stat(backupPath); os.IsNotExist(err) {
 		return ErrBackupFailed
 	}

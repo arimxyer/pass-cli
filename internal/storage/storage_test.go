@@ -329,7 +329,7 @@ func TestStorageService_BackupRestore(t *testing.T) {
 	}
 
 	// Restore from backup
-	if err := storage.RestoreFromBackup(); err != nil {
+	if err := storage.RestoreFromBackup(""); err != nil {
 		t.Fatalf("RestoreFromBackup failed: %v", err)
 	}
 
@@ -719,7 +719,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 		_ = storage.RemoveBackup()
 
 		// Restore should fail
-		if err := storage.RestoreFromBackup(); err != ErrBackupFailed {
+		if err := storage.RestoreFromBackup(""); err != ErrBackupFailed {
 			t.Errorf("Expected ErrBackupFailed, got %v", err)
 		}
 	})
@@ -753,7 +753,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 		}
 
 		// Restore should bring back data2 (from manual backup)
-		if err := storage.RestoreFromBackup(); err != nil {
+		if err := storage.RestoreFromBackup(""); err != nil {
 			t.Fatalf("RestoreFromBackup failed: %v", err)
 		}
 
@@ -819,7 +819,7 @@ func TestStorageService_BackupRestoreComprehensive(t *testing.T) {
 		}
 
 		// Restore from backup
-		if err := storage.RestoreFromBackup(); err != nil {
+		if err := storage.RestoreFromBackup(""); err != nil {
 			t.Fatalf("RestoreFromBackup failed: %v", err)
 		}
 
@@ -961,7 +961,7 @@ func TestStorageService_BackupErrorPaths(t *testing.T) {
 
 		// Restore should succeed (it just copies the file)
 		// The corruption will be detected when trying to load/validate
-		if err := storage.RestoreFromBackup(); err != nil {
+		if err := storage.RestoreFromBackup(""); err != nil {
 			t.Fatalf("RestoreFromBackup failed: %v", err)
 		}
 

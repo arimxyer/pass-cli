@@ -250,6 +250,82 @@ func formatUsageTable(records []vault.UsageRecord) string {
 	return builder.String()
 }
 
+// initVaultAndStorage initializes vault service and returns both vault and storage services
+// This pattern is common across backup commands to avoid code duplication
+func initVaultAndStorage(vaultPath string) (*vault.VaultService, error) {
+	vaultService, err := vault.New(vaultPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize vault service: %w", err)
+	}
+	return vaultService, nil
+}
+
+// logVerbose logs a message to stderr if verbose mode is enabled
+// Standardizes verbose logging format across all commands
+func logVerbose(verbose bool, format string, args ...interface{}) {
+	if verbose {
+		msg := fmt.Sprintf(format, args...)
+		fmt.Fprintf(os.Stderr, "[VERBOSE] %s\n", msg)
+	}
+}
+
+// formatAge formats a duration as human-readable age (without "ago" suffix)
+// Used for backup age display where context makes "ago" redundant
+// This is a variant of formatRelativeTime for backup-specific display
+func formatAge(d time.Duration) string {
+	if d < time.Minute {
+		return "just now"
+	}
+	if d < time.Hour {
+		minutes := int(d.Minutes())
+		if minutes == 1 {
+			return "1 minute"
+		}
+		return fmt.Sprintf("%d minutes", minutes)
+	}
+	if d < 24*time.Hour {
+		hours := int(d.Hours())
+		if hours == 1 {
+			return "1 hour"
+		}
+		return fmt.Sprintf("%d hours", hours)
+	}
+	days := int(d.Hours() / 24)
+	if days == 1 {
+		return "1 day"
+	}
+	if days < 7 {
+		return fmt.Sprintf("%d days", days)
+	}
+	weeks := days / 7
+	if weeks == 1 {
+		return "1 week"
+	}
+	if weeks < 4 {
+		return fmt.Sprintf("%d weeks", weeks)
+	}
+	months := days / 30
+	if months == 1 {
+		return "1 month"
+	}
+	return fmt.Sprintf("%d months", months)
+}
+
+// formatSize formats bytes as human-readable size (B, KB, MB, GB, etc.)
+// Used for backup file size display across backup commands
+func formatSize(bytes int64) string {
+	const unit = 1024
+	if bytes < unit {
+		return fmt.Sprintf("%d B", bytes)
+	}
+	div, exp := int64(unit), 0
+	for n := bytes / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
+}
+
 // unlockVault attempts to unlock the vault with keychain or prompts for password
 func unlockVault(vaultService *vault.VaultService) error {
 	// Try to unlock with keychain (if enabled and available)

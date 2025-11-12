@@ -285,7 +285,7 @@ func TestRestoreFromBackup_NoBackup(t *testing.T) {
 	}
 
 	// Try to restore from non-existent backup
-	err = s.RestoreFromBackup()
+	err = s.RestoreFromBackup("")
 	if err == nil {
 		t.Error("RestoreFromBackup should fail when backup doesn't exist")
 	}
@@ -336,7 +336,7 @@ func TestRestoreFromBackup_Success(t *testing.T) {
 	}
 
 	// Restore from backup
-	if err := s.RestoreFromBackup(); err != nil {
+	if err := s.RestoreFromBackup(""); err != nil {
 		t.Fatalf("RestoreFromBackup failed: %v", err)
 	}
 
