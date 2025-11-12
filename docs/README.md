@@ -4,16 +4,18 @@ title: "pass-cli Documentation"
 
 # pass-cli Documentation
 
+![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
+
 Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform CLI password and API key manager designed for developers.
 
 ## Quick Links
 
-- [Getting Started](01-getting-started/first-steps.md) - First-time setup and initialization
-- [Installation](01-getting-started/installation.md) - Installation instructions for all platforms
-- [Usage Guide](02-usage/cli-reference.md) - Complete command reference
-- [Backup & Restore Guide](03-guides/backup-restore.md) - Manual vault backup management
-- [Security](04-reference/security.md) - Security features and best practices
-- [Troubleshooting](04-reference/troubleshooting.md) - Common issues and solutions
+- [Getting Started]({{< relref "01-getting-started/first-steps" >}}) - First-time setup and initialization
+- [Installation]({{< relref "01-getting-started/installation" >}}) - Installation instructions for all platforms
+- [Usage Guide]({{< relref "02-usage/cli-reference" >}}) - Complete command reference
+- [Backup & Restore Guide]({{< relref "03-guides/backup-restore" >}}) - Manual vault backup management
+- [Security]({{< relref "04-reference/security" >}}) - Security features and best practices
+- [Troubleshooting]({{< relref "04-reference/troubleshooting" >}}) - Common issues and solutions
 
 ## Features
 
@@ -34,4 +36,4 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 
 ## Contributing
 
-See [Contributing Guide](05-development/contributing.md) for developer documentation and contribution guidelines.
+See [Contributing Guide]({{< relref "05-development/contributing" >}}) for developer documentation and contribution guidelines.
