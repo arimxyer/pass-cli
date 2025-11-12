@@ -2,13 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	"pass-cli/internal/storage"
-	"pass-cli/internal/vault"
 )
 
 var (
@@ -47,16 +45,13 @@ func init() {
 
 func runVaultBackupInfo(cmd *cobra.Command, args []string) error {
 	vaultPath := GetVaultPath()
-
-	if infoVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Vault path: %s\n", vaultPath)
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Searching for backups...\n")
-	}
+	logVerbose(infoVerbose, "Vault path: %s", vaultPath)
+	logVerbose(infoVerbose, "Searching for backups...")
 
 	// Initialize vault service to access storage
-	vaultService, err := vault.New(vaultPath)
+	vaultService, err := initVaultAndStorage(vaultPath)
 	if err != nil {
-		return fmt.Errorf("failed to initialize vault service: %w", err)
+		return err
 	}
 
 	storageService := vaultService.GetStorageService()
@@ -155,58 +150,4 @@ func displayBackup(b *storage.BackupInfo, verbose bool) {
 		fmt.Printf("\n   Path: %s", b.Path)
 		fmt.Printf("\n   Modified: %s", b.ModTime.Format("2006-01-02 15:04:05"))
 	}
-}
-
-// T068: Format age as human-readable duration
-func formatAge(d time.Duration) string {
-	if d < time.Minute {
-		return "just now"
-	}
-	if d < time.Hour {
-		minutes := int(d.Minutes())
-		if minutes == 1 {
-			return "1 minute"
-		}
-		return fmt.Sprintf("%d minutes", minutes)
-	}
-	if d < 24*time.Hour {
-		hours := int(d.Hours())
-		if hours == 1 {
-			return "1 hour"
-		}
-		return fmt.Sprintf("%d hours", hours)
-	}
-	days := int(d.Hours() / 24)
-	if days == 1 {
-		return "1 day"
-	}
-	if days < 7 {
-		return fmt.Sprintf("%d days", days)
-	}
-	weeks := days / 7
-	if weeks == 1 {
-		return "1 week"
-	}
-	if weeks < 4 {
-		return fmt.Sprintf("%d weeks", weeks)
-	}
-	months := days / 30
-	if months == 1 {
-		return "1 month"
-	}
-	return fmt.Sprintf("%d months", months)
-}
-
-// T069: Format size as human-readable bytes
-func formatSize(bytes int64) string {
-	const unit = 1024
-	if bytes < unit {
-		return fmt.Sprintf("%d B", bytes)
-	}
-	div, exp := int64(unit), 0
-	for n := bytes / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
 }

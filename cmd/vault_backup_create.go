@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"pass-cli/internal/security"
-	"pass-cli/internal/vault"
 )
 
 var (
@@ -45,10 +44,7 @@ func init() {
 
 func runVaultBackupCreate(cmd *cobra.Command, args []string) error {
 	vaultPath := GetVaultPath()
-
-	if createVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Vault path: %s\n", vaultPath)
-	}
+	logVerbose(createVerbose, "Vault path: %s", vaultPath)
 
 	// T043: Vault path validation - check vault exists
 	if _, err := os.Stat(vaultPath); os.IsNotExist(err) {
@@ -56,9 +52,9 @@ func runVaultBackupCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Initialize vault service to access storage
-	vaultService, err := vault.New(vaultPath)
+	vaultService, err := initVaultAndStorage(vaultPath)
 	if err != nil {
-		return fmt.Errorf("failed to initialize vault service: %w", err)
+		return err
 	}
 
 	storageService := vaultService.GetStorageService()
@@ -68,14 +64,12 @@ func runVaultBackupCreate(cmd *cobra.Command, args []string) error {
 		vaultInfo, err := os.Stat(vaultPath)
 		if err == nil {
 			requiredSpace := vaultInfo.Size()
-			fmt.Fprintf(os.Stderr, "[VERBOSE] Vault size: %.2f MB\n", float64(requiredSpace)/1024/1024)
-			fmt.Fprintf(os.Stderr, "[VERBOSE] Creating backup (requires ~%.2f MB free space)...\n", float64(requiredSpace)/1024/1024)
+			logVerbose(createVerbose, "Vault size: %.2f MB", float64(requiredSpace)/1024/1024)
+			logVerbose(createVerbose, "Creating backup (requires ~%.2f MB free space)...", float64(requiredSpace)/1024/1024)
 		}
 	}
 
-	if createVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Generating timestamped backup filename...\n")
-	}
+	logVerbose(createVerbose, "Generating timestamped backup filename...")
 
 	// T044: Backup creation logic - calls CreateManualBackup()
 	backupPath, err := storageService.CreateManualBackup()
@@ -102,10 +96,8 @@ func runVaultBackupCreate(cmd *cobra.Command, args []string) error {
 	// T048: Audit logging for backup success (FR-017)
 	vaultService.LogAudit(security.EventBackupCreate, security.OutcomeSuccess, backupPath)
 
-	if createVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Backup created at: %s\n", backupPath)
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Verifying backup integrity...\n")
-	}
+	logVerbose(createVerbose, "Backup created at: %s", backupPath)
+	logVerbose(createVerbose, "Verifying backup integrity...")
 
 	// Get backup file info for success message
 	backupInfo, err := os.Stat(backupPath)
@@ -115,20 +107,16 @@ func runVaultBackupCreate(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	if createVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Backup verified successfully\n")
-	}
+	logVerbose(createVerbose, "Backup verified successfully")
 
 	// T046: Success message with backup path, size, timestamp
 	fmt.Printf("✅ Backup created successfully\n\n")
 	fmt.Printf("Backup: %s\n", backupPath)
-	fmt.Printf("Size: %.2f MB\n", float64(backupInfo.Size())/1024/1024)
+	fmt.Printf("Size: %s\n", formatSize(backupInfo.Size()))
 	fmt.Printf("Created: %s\n", backupInfo.ModTime().Format("2006-01-02 15:04:05"))
 	fmt.Printf("\nYou can restore from this backup with: pass-cli vault backup restore\n")
 
-	if createVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Backup creation completed\n")
-	}
+	logVerbose(createVerbose, "Backup creation completed")
 
 	return nil
 }

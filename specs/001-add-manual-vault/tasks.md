@@ -171,14 +171,14 @@
 
 **Purpose**: Improvements that affect multiple user stories or project quality
 
-- [ ] T078 [P] Add comprehensive error handling test suite in `test/vault_backup_error_test.go` - test all error paths across commands
-- [ ] T079 [P] Add CLI output formatting consistency check in `test/vault_backup_output_test.go` - verify consistent message formats
-- [ ] T080 [P] Add cross-platform path handling tests in `test/vault_backup_platform_test.go` - verify Windows/macOS/Linux compatibility
-- [ ] T081 Code cleanup: Review and refactor `cmd/vault_backup_*.go` for DRY principles
-- [ ] T082 Code cleanup: Review and refactor `internal/storage/backup.go` for clarity
-- [ ] T083 [P] Security review: Verify no credential logging in backup operations
-- [ ] T084 [P] Security review: Verify audit log entries contain only safe metadata
-- [ ] T085 [P] Security review: Verify backup file permissions are secure (0600 on Unix)
+- [x] T078 [P] Add comprehensive error handling test suite in `test/vault_backup_error_test.go` - test all error paths across commands
+- [x] T079 [P] Add CLI output formatting consistency check in `test/vault_backup_output_test.go` - verify consistent message formats
+- [x] T080 [P] Add cross-platform path handling tests in `test/vault_backup_platform_test.go` - verify Windows/macOS/Linux compatibility
+- [x] T081 Code cleanup: Review and refactor `cmd/vault_backup_*.go` for DRY principles
+- [x] T082 Code cleanup: Review and refactor `internal/storage/backup.go` for clarity
+- [x] T083 [P] Security review: Verify no credential logging in backup operations
+- [x] T084 [P] Security review: Verify audit log entries contain only safe metadata
+- [x] T085 [P] Security review: Verify backup file permissions are secure (0600 on Unix)
 - [ ] T086 Performance test: Verify backup creation meets <5 second target for 100 credentials
 - [ ] T087 Performance test: Verify restore operation meets <30 second target
 - [ ] T088 Performance test: Verify info command meets <1 second target

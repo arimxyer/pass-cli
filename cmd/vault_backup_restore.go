@@ -10,7 +10,6 @@ import (
 
 	"pass-cli/internal/security"
 	"pass-cli/internal/storage"
-	"pass-cli/internal/vault"
 )
 
 var (
@@ -54,16 +53,13 @@ func init() {
 
 func runVaultBackupRestore(cmd *cobra.Command, args []string) error {
 	vaultPath := GetVaultPath()
-
-	if restoreVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Vault path: %s\n", vaultPath)
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Searching for backups...\n")
-	}
+	logVerbose(restoreVerbose, "Vault path: %s", vaultPath)
+	logVerbose(restoreVerbose, "Searching for backups...")
 
 	// Initialize storage service to access backup methods
-	vaultService, err := vault.New(vaultPath)
+	vaultService, err := initVaultAndStorage(vaultPath)
 	if err != nil {
-		return fmt.Errorf("failed to initialize vault service: %w", err)
+		return err
 	}
 
 	storageService := vaultService.GetStorageService()
@@ -78,12 +74,10 @@ func runVaultBackupRestore(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("no backup available\n\nNo backup files found. Create a backup with: pass-cli vault backup create")
 	}
 
-	if restoreVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Found backup: %s\n", newestBackup.Path)
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Backup type: %s\n", newestBackup.Type)
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Backup size: %d bytes\n", newestBackup.Size)
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Backup modified: %s\n", newestBackup.ModTime.Format("2006-01-02 15:04:05"))
-	}
+	logVerbose(restoreVerbose, "Found backup: %s", newestBackup.Path)
+	logVerbose(restoreVerbose, "Backup type: %s", newestBackup.Type)
+	logVerbose(restoreVerbose, "Backup size: %s", formatSize(newestBackup.Size))
+	logVerbose(restoreVerbose, "Backup modified: %s", newestBackup.ModTime.Format("2006-01-02 15:04:05"))
 
 	// Dry-run mode: show what would be restored
 	if restoreDryRun {
@@ -91,7 +85,7 @@ func runVaultBackupRestore(cmd *cobra.Command, args []string) error {
 		fmt.Printf("Would restore from:\n")
 		fmt.Printf("  Backup: %s\n", newestBackup.Path)
 		fmt.Printf("  Type: %s\n", newestBackup.Type)
-		fmt.Printf("  Size: %.2f MB\n", float64(newestBackup.Size)/1024/1024)
+		fmt.Printf("  Size: %s\n", formatSize(newestBackup.Size))
 		fmt.Printf("  Modified: %s\n", newestBackup.ModTime.Format("2006-01-02 15:04:05"))
 		fmt.Printf("\nTo actually restore, run without --dry-run flag.\n")
 		return nil
@@ -120,9 +114,7 @@ func runVaultBackupRestore(cmd *cobra.Command, args []string) error {
 		fmt.Println()
 	}
 
-	if restoreVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Starting restore operation...\n")
-	}
+	logVerbose(restoreVerbose, "Starting restore operation...")
 
 	// Perform restore
 	if err := storageService.RestoreFromBackup(newestBackup.Path); err != nil {
@@ -134,19 +126,15 @@ func runVaultBackupRestore(cmd *cobra.Command, args []string) error {
 	// T030: Audit logging for restore success (FR-017)
 	vaultService.LogAudit(security.EventBackupRestore, security.OutcomeSuccess, newestBackup.Path)
 
-	if restoreVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Backup copied to vault location\n")
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Verifying vault file permissions...\n")
-	}
+	logVerbose(restoreVerbose, "Backup copied to vault location")
+	logVerbose(restoreVerbose, "Verifying vault file permissions...")
 
 	// Verify and set vault file permissions after restore (T028a, FR-014)
 	if err := os.Chmod(vaultPath, storage.VaultPermissions); err != nil {
 		return fmt.Errorf("failed to set vault permissions: %w", err)
 	}
 
-	if restoreVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Vault permissions set to %o\n", storage.VaultPermissions)
-	}
+	logVerbose(restoreVerbose, "Vault permissions set to %o", storage.VaultPermissions)
 
 	// Success message
 	fmt.Printf("✅ Vault restored successfully from backup\n\n")
@@ -154,9 +142,7 @@ func runVaultBackupRestore(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Backup type: %s\n", newestBackup.Type)
 	fmt.Printf("\nYou can now unlock your vault with your master password.\n")
 
-	if restoreVerbose {
-		fmt.Fprintf(os.Stderr, "[VERBOSE] Restore operation completed\n")
-	}
+	logVerbose(restoreVerbose, "Restore operation completed")
 
 	return nil
 }

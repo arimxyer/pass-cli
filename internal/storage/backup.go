@@ -23,6 +23,15 @@ const (
 	BackupTypeManual    = "manual"
 )
 
+// minValidVaultSize is the minimum size in bytes for a valid encrypted vault file.
+// A valid vault must contain at minimum:
+//   - Salt: 32 bytes (for key derivation)
+//   - Nonce: 12 bytes (for AES-GCM)
+//   - Auth tag: 16 bytes (for AES-GCM authentication)
+//   - Encrypted data: minimal JSON structure
+// Total: ~100 bytes minimum for a structurally valid (but potentially empty) vault
+const minValidVaultSize = 100
+
 // BackupInfo represents metadata about a single backup file (automatic or manual).
 // Purpose: Provide structured information about backup files for listing, sorting,
 // and restore priority determination.
@@ -159,10 +168,8 @@ func (s *StorageService) verifyBackupIntegrity(backupPath string) error {
 	}
 
 	// Check minimum size for valid encrypted vault
-	// A valid vault should have at least metadata (salt, nonce, etc.) + some encrypted data
-	const minVaultSize = 100 // bytes - roughly: salt(32) + nonce(12) + tag(16) + minimal JSON
-	if info.Size() < minVaultSize {
-		return fmt.Errorf("backup file too small (%d bytes)", info.Size())
+	if info.Size() < minValidVaultSize {
+		return fmt.Errorf("backup file too small (%d bytes, minimum %d bytes required)", info.Size(), minValidVaultSize)
 	}
 
 	// Read entire file for structural validation
@@ -171,28 +178,38 @@ func (s *StorageService) verifyBackupIntegrity(backupPath string) error {
 		return fmt.Errorf("cannot read backup file: %w", err)
 	}
 
+	// Validate vault JSON structure
+	if err := validateVaultStructure(data); err != nil {
+		return fmt.Errorf("backup file validation failed: %w", err)
+	}
+
+	return nil
+}
+
+// validateVaultStructure validates that data contains a properly structured encrypted vault.
+// Checks JSON format and required fields without decrypting the vault.
+func validateVaultStructure(data []byte) error {
 	// Parse as JSON to verify structure
 	// Expected format: {"metadata": {...}, "data": "..."}
 	var vault EncryptedVault
 	if err := json.Unmarshal(data, &vault); err != nil {
-		return fmt.Errorf("backup file is not valid vault JSON: %w", err)
+		return fmt.Errorf("not valid vault JSON: %w", err)
 	}
 
 	// Verify required top-level fields exist
 	if vault.Data == nil || len(vault.Data) == 0 {
-		return fmt.Errorf("backup file missing or empty encrypted data")
+		return fmt.Errorf("missing or empty encrypted data")
 	}
 
 	// Verify metadata structure
 	if vault.Metadata.Salt == nil || len(vault.Metadata.Salt) == 0 {
-		return fmt.Errorf("backup file missing salt in metadata")
+		return fmt.Errorf("missing salt in metadata")
 	}
 
 	if vault.Metadata.Version == 0 {
-		return fmt.Errorf("backup file has invalid version in metadata")
+		return fmt.Errorf("invalid version in metadata")
 	}
 
-	// File appears to be a valid encrypted vault structure
 	return nil
 }
 
