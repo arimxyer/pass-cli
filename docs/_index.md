@@ -8,12 +8,12 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 
 ## Quick Links
 
-- [Getting Started](GETTING_STARTED.md) - First-time setup and initialization
-- [Installation](INSTALLATION.md) - Installation instructions for all platforms
-- [Usage Guide](USAGE.md) - Complete command reference
-- [Backup & Restore Guide](guides/backup-restore-guide.md) - Manual vault backup management
-- [Security](SECURITY.md) - Security features and best practices
-- [Troubleshooting](TROUBLESHOOTING.md) - Common issues and solutions
+- [Getting Started](01-getting-started/first-steps.md) - First-time setup and initialization
+- [Installation](01-getting-started/installation.md) - Installation instructions for all platforms
+- [Usage Guide](02-usage/cli-reference.md) - Complete command reference
+- [Backup & Restore Guide](03-guides/backup-restore.md) - Manual vault backup management
+- [Security](04-reference/security.md) - Security features and best practices
+- [Troubleshooting](04-reference/troubleshooting.md) - Common issues and solutions
 
 ## Features
 
@@ -34,4 +34,4 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 
 ## Contributing
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for developer documentation and contribution guidelines.
+See [Contributing Guide](05-development/contributing.md) for developer documentation and contribution guidelines.
