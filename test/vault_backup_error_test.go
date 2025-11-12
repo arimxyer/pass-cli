@@ -51,7 +51,7 @@ func TestIntegration_BackupCreate_Errors(t *testing.T) {
 			t.Fatalf("failed to stat vault directory: %v", err)
 		}
 		originalPerm := originalInfo.Mode().Perm()
-		defer os.Chmod(vaultDir, originalPerm)
+		defer func() { _ = os.Chmod(vaultDir, originalPerm) }()
 
 		if err := os.Chmod(vaultDir, 0555); err != nil {
 			t.Fatalf("failed to make directory read-only: %v", err)
@@ -61,7 +61,7 @@ func TestIntegration_BackupCreate_Errors(t *testing.T) {
 		_, stderr, err = runCommand(t, "--config", configPath, "vault", "backup", "create")
 
 		// Restore permissions for cleanup
-		os.Chmod(vaultDir, originalPerm)
+		_ = os.Chmod(vaultDir, originalPerm)
 
 		// On Windows, permissions work differently - test may not fail as expected
 		if err == nil {

@@ -24,7 +24,7 @@ func TestIntegration_BackupRestore_Basic(t *testing.T) {
 	}
 
 	// Add test credential
-	_, stderr, err = runCommandWithInput(t, "TestPassword123!\ntestuser\ntestpass123\n\n\n", "--config", configPath, "add", "test-service")
+	_, stderr, err = runCommandWithInput(t, "TestPassword123!\n", "--config", configPath, "add", "test-service", "--username", "testuser", "--password", "testpass123")
 	if err != nil {
 		t.Fatalf("add failed: %v\nstderr: %s", err, stderr)
 	}
@@ -47,7 +47,7 @@ func TestIntegration_BackupRestore_Basic(t *testing.T) {
 	}
 
 	// Verify vault can be unlocked and credential retrieved
-	stdout, stderr, err = runCommandWithInput(t, "TestPassword123!\n", "--config", configPath, "get", "test-service", "--field", "username")
+	stdout, stderr, err = runCommandWithInput(t, "TestPassword123!\n", "--config", configPath, "get", "test-service", "--field", "username", "--quiet", "--no-clipboard")
 	if err != nil {
 		t.Fatalf("get after restore failed: %v\nstderr: %s", err, stderr)
 	}
@@ -104,7 +104,7 @@ func TestIntegration_BackupRestore_CorruptedFallback(t *testing.T) {
 	}
 
 	// Add initial credential (state A)
-	_, stderr, err = runCommandWithInput(t, "TestPassword123!\nolduser\noldpass123\n\n\n", "--config", configPath, "add", "test-service")
+	_, stderr, err = runCommandWithInput(t, "TestPassword123!\n", "--config", configPath, "add", "test-service", "--username", "olduser", "--password", "oldpass123")
 	if err != nil {
 		t.Fatalf("add failed: %v\nstderr: %s", err, stderr)
 	}
@@ -116,7 +116,7 @@ func TestIntegration_BackupRestore_CorruptedFallback(t *testing.T) {
 	}
 
 	// Update credential to different value (state B)
-	_, stderr, err = runCommandWithInput(t, "TestPassword123!\nnewuser\nnewpass123\n\n\n", "--config", configPath, "update", "test-service")
+	_, stderr, err = runCommandWithInput(t, "TestPassword123!\n", "--config", configPath, "update", "test-service", "--username", "newuser", "--password", "newpass123", "--force")
 	if err != nil {
 		t.Fatalf("update failed: %v\nstderr: %s", err, stderr)
 	}
@@ -140,7 +140,7 @@ func TestIntegration_BackupRestore_CorruptedFallback(t *testing.T) {
 
 	// Verify vault was restored to state A (olduser), not state B (newuser)
 	// This proves it fell back to the manual backup after detecting corruption
-	stdout, stderr, err = runCommandWithInput(t, "TestPassword123!\n", "--config", configPath, "get", "test-service", "--field", "username")
+	stdout, stderr, err = runCommandWithInput(t, "TestPassword123!\n", "--config", configPath, "get", "test-service", "--field", "username", "--quiet", "--no-clipboard")
 	if err != nil {
 		t.Fatalf("get after restore failed: %v\nstderr: %s", err, stderr)
 	}
@@ -485,7 +485,7 @@ func TestIntegration_BackupCreate_PermissionDenied(t *testing.T) {
 		t.Fatalf("failed to stat vault directory: %v", err)
 	}
 	originalPerm := originalInfo.Mode().Perm()
-	defer os.Chmod(vaultDir, originalPerm) // Restore permissions for cleanup
+	defer func() { _ = os.Chmod(vaultDir, originalPerm) }() // Restore permissions for cleanup
 
 	// Set directory to read-only (no write permission)
 	if err := os.Chmod(vaultDir, 0555); err != nil {
@@ -496,7 +496,7 @@ func TestIntegration_BackupCreate_PermissionDenied(t *testing.T) {
 	_, stderr, err = runCommand(t, "--config", configPath, "vault", "backup", "create")
 
 	// Restore permissions immediately for cleanup
-	os.Chmod(vaultDir, originalPerm)
+	_ = os.Chmod(vaultDir, originalPerm)
 
 	// On Windows, file permissions work differently and this test may not work as expected
 	// The test validates the behavior on Unix-like systems
