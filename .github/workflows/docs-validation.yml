@@ -1,0 +1,228 @@
+name: Docs Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'docsite/**'
+      - 'README.md'
+      - '.github/workflows/docs-validation.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate-hugo-build:
+    name: Validate Hugo Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: '0.134.3'
+          extended: true
+
+      - name: Install Hugo Book theme
+        run: |
+          mkdir -p docsite/themes
+          git clone https://github.com/alex-shpak/hugo-book docsite/themes/book
+
+      - name: Build Hugo site
+        id: hugo-build
+        run: |
+          echo "Building Hugo site..."
+          hugo --source docsite/ --minify --verbose 2>&1 | tee build.log
+
+          # Check for errors in build log
+          if grep -i "error" build.log; then
+            echo "❌ Hugo build failed with errors"
+            exit 1
+          fi
+
+          echo "✅ Hugo build successful"
+
+      - name: Check for broken relref links
+        run: |
+          echo "Checking for broken relref links..."
+          if grep -r "REF_NOT_FOUND" docsite/public/ 2>/dev/null; then
+            echo "❌ Broken relref links detected"
+            exit 1
+          fi
+          echo "✅ No broken relref links"
+
+      - name: Validate generated HTML
+        run: |
+          echo "Checking HTML generation..."
+          html_count=$(find docsite/public -name "*.html" | wc -l)
+          echo "Generated $html_count HTML files"
+
+          if [ "$html_count" -lt 30 ]; then
+            echo "❌ Expected at least 30 HTML files, got $html_count"
+            exit 1
+          fi
+
+          echo "✅ HTML generation validated"
+
+      - name: Check for duplicate page titles
+        run: |
+          echo "Checking for duplicate page titles..."
+          # Extract titles from markdown files
+          grep -r "^title:" docs/ | sort | uniq -d > duplicates.txt || true
+
+          if [ -s duplicates.txt ]; then
+            echo "⚠️ Warning: Duplicate page titles found:"
+            cat duplicates.txt
+            # Don't fail, just warn
+          else
+            echo "✅ No duplicate titles"
+          fi
+
+      - name: Upload build artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hugo-build-log
+          path: build.log
+          retention-days: 7
+
+  validate-markdown:
+    name: Validate Markdown
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v5
+
+      - name: Check markdown syntax
+        uses: DavidAnson/markdownlint-action@v1
+        with:
+          files: 'docs/**/*.md'
+          config: '.markdownlint.json'
+        continue-on-error: true
+
+      - name: Check for broken markdown links
+        run: |
+          echo "Checking for common markdown link issues..."
+
+          # Check for links with spaces (should use %20)
+          if grep -r "\](.*\s.*)" docs/ --include="*.md"; then
+            echo "⚠️ Warning: Found links with unencoded spaces"
+          fi
+
+          # Check for absolute GitHub links to own repo (should be relative)
+          if grep -r "https://github.com/ari1110/pass-cli/blob/main/docs" docs/ --include="*.md"; then
+            echo "⚠️ Warning: Found absolute GitHub links (use relative paths instead)"
+          fi
+
+          echo "✅ Markdown link check complete"
+
+      - name: Validate front matter
+        run: |
+          echo "Validating Hugo front matter..."
+
+          # Check all markdown files have front matter
+          for file in $(find docs -name "*.md" -not -name "README.md"); do
+            if ! grep -q "^---" "$file"; then
+              echo "❌ Missing front matter: $file"
+              exit 1
+            fi
+          done
+
+          echo "✅ Front matter validation passed"
+
+  check-documentation-coverage:
+    name: Check Documentation Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Extract documented commands
+        run: |
+          echo "Extracting commands from docs..."
+          grep -h "^### \|^## " docs/03-reference/command-reference.md | \
+            grep -v "Table of Contents\|Global Options\|Output Modes\|Script Integration\|Environment Variables\|Configuration\|Usage Tracking\|Best Practices\|Getting Help" | \
+            sed 's/^### //' | sed 's/^## //' | sed 's/ -.*//' | sort -u > documented-commands.txt
+
+          echo "Documented commands:"
+          cat documented-commands.txt
+
+      - name: Extract implemented commands
+        run: |
+          echo "Extracting commands from code..."
+          # Find all cobra command definitions
+          grep -r "Use:" cmd/ --include="*.go" | \
+            grep -v "// " | \
+            sed 's/.*Use:.*"\(.*\)".*/\1/' | \
+            sed 's/[<\[].*$//' | \
+            sed 's/ *$//' | \
+            sort -u > implemented-commands.txt
+
+          echo "Implemented commands:"
+          cat implemented-commands.txt
+
+      - name: Compare commands
+        run: |
+          echo "Comparing documented vs implemented commands..."
+
+          # Find commands in code but not in docs
+          comm -13 documented-commands.txt implemented-commands.txt > missing-docs.txt
+
+          # Find commands in docs but not in code
+          comm -23 documented-commands.txt implemented-commands.txt > extra-docs.txt
+
+          if [ -s missing-docs.txt ]; then
+            echo "⚠️ Commands implemented but not documented:"
+            cat missing-docs.txt
+            echo ""
+          fi
+
+          if [ -s extra-docs.txt ]; then
+            echo "⚠️ Commands documented but not implemented:"
+            cat extra-docs.txt
+            echo ""
+          fi
+
+          if [ ! -s missing-docs.txt ] && [ ! -s extra-docs.txt ]; then
+            echo "✅ All commands properly documented"
+          else
+            echo "⚠️ Documentation coverage incomplete (non-blocking)"
+          fi
+
+  summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [validate-hugo-build, validate-markdown, check-documentation-coverage]
+    if: always()
+
+    steps:
+      - name: Check validation results
+        run: |
+          echo "Documentation Validation Summary"
+          echo "================================="
+          echo ""
+          echo "Hugo Build: ${{ needs.validate-hugo-build.result }}"
+          echo "Markdown Validation: ${{ needs.validate-markdown.result }}"
+          echo "Coverage Check: ${{ needs.check-documentation-coverage.result }}"
+          echo ""
+
+          if [ "${{ needs.validate-hugo-build.result }}" != "success" ]; then
+            echo "❌ Hugo build failed - check build logs"
+            exit 1
+          fi
+
+          echo "✅ Documentation validation complete"
