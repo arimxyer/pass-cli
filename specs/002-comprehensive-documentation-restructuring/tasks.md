@@ -145,14 +145,14 @@ When merging content from multiple sources into single canonical doc:
 
 ### Implementation for User Story 4
 
-- [ ] T046 [P] [US4] Split first-steps.md → basic-workflows.md: Extract list/update/delete/generate workflows (lines 201-450) to `docs/02-guides/basic-workflows.md`
-- [ ] T047 [P] [US4] Consolidate keychain-setup.md: Use `git mv docs/01-getting-started/first-steps.md docs/02-guides/keychain-setup.md` as base, edit to keep only keychain section (lines 200-250), then merge keychain content from cli-reference.md (lines 800-900) and troubleshooting.md (lines 485-550)
-- [ ] T048 [US4] Add front matter to basic-workflows.md (title: "Basic Workflows", weight: 1)
-- [ ] T049 [US4] Add front matter to keychain-setup.md (title: "Keychain Setup", weight: 2)
-- [ ] T050 [US4] Remove keychain content from original source files (first-steps.md remnants, portions from cli-reference/troubleshooting splits)
-- [ ] T051 [US4] Remove first-steps.md after verifying all content migrated to quick-start, basic-workflows, keychain-setup
-- [ ] T052 [US4] Update 02-guides/_index.md with advanced feature descriptions
-- [ ] T053 [US4] Convert internal links in advanced guides to Hugo relref format
+- [x] T046 [P] [US4] Split first-steps.md → basic-workflows.md: Extract list/update/delete/generate workflows (lines 201-450) to `docs/02-guides/basic-workflows.md`
+- [x] T047 [P] [US4] Consolidate keychain-setup.md: Use `git mv docs/01-getting-started/first-steps.md docs/02-guides/keychain-setup.md` as base, edit to keep only keychain section (lines 200-250), then merge keychain content from cli-reference.md (lines 800-900) and troubleshooting.md (lines 485-550)
+- [x] T048 [US4] Add front matter to basic-workflows.md (title: "Basic Workflows", weight: 1)
+- [x] T049 [US4] Add front matter to keychain-setup.md (title: "Keychain Setup", weight: 2)
+- [x] T050 [US4] Remove keychain content from original source files (first-steps.md remnants, portions from cli-reference/troubleshooting splits)
+- [x] T051 [US4] Remove first-steps.md after verifying all content migrated to quick-start, basic-workflows, keychain-setup
+- [x] T052 [US4] Update 02-guides/_index.md with advanced feature descriptions
+- [x] T053 [US4] Convert internal links in advanced guides to Hugo relref format
 
 **Checkpoint**: Power users can now discover and use advanced features from dedicated guides independently
 
