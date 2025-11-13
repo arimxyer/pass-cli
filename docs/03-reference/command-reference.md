@@ -691,6 +691,284 @@ pass-cli version X.Y.Z
   go:     go1.25.1
 ```
 
+---
+
+### usage - View Credential Usage History
+
+Display detailed usage history showing where and when a credential was accessed.
+
+#### Synopsis
+
+```bash
+pass-cli usage <service> [flags]
+```
+
+#### Description
+
+Shows credential access patterns across different working directories, including:
+- Location paths (working directories where credential was used)
+- Git repository context (if location is within a git repo)
+- Last access timestamps
+- Access counts per location
+- Field-level usage breakdown (username, password, url, notes)
+
+Useful for tracking where credentials are used across projects and identifying stale usage locations.
+
+#### Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<service>` | Yes | Service name to view usage history for |
+
+#### Flags
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--format` | string | `table` | Output format: `table`, `json`, `simple` |
+| `--limit` | int | `20` | Max locations to display (0 = unlimited) |
+
+#### Examples
+
+```bash
+# View usage history (table format, 20 most recent locations)
+pass-cli usage github
+
+# View all locations (no limit)
+pass-cli usage aws --limit 0
+
+# View only 5 most recent locations
+pass-cli usage postgres --limit 5
+
+# JSON output for scripting
+pass-cli usage heroku --format json
+
+# Simple format (location paths only)
+pass-cli usage redis --format simple
+```
+
+#### Output (Table Format)
+
+```
+Usage History for 'github':
+
+Location                                    Git Repo             Last Access          Count  Fields
+──────────────────────────────────────────────────────────────────────────────────────────────────
+/home/user/projects/webapp                  ✓ webapp             2025-11-12 14:30     12     password(8), username(4)
+/home/user/projects/api-service             ✓ api-service        2025-11-10 09:15     5      password(5)
+/home/user/scripts                          ✗ (not a git repo)   2025-11-08 16:45     3      password(2), url(1)
+
+Total locations: 3
+Total accesses: 20
+```
+
+#### Output (JSON Format)
+
+```json
+{
+  "service": "github",
+  "locations": [
+    {
+      "location": "/home/user/projects/webapp",
+      "git_repository": "webapp",
+      "path_exists": true,
+      "last_access": "2025-11-12T14:30:22Z",
+      "access_count": 12,
+      "field_counts": {
+        "password": 8,
+        "username": 4
+      }
+    }
+  ],
+  "total_locations": 3,
+  "total_accesses": 20
+}
+```
+
+#### Output (Simple Format)
+
+```
+/home/user/projects/webapp
+/home/user/projects/api-service
+/home/user/scripts
+```
+
+#### Notes
+
+- **Path Validation**: Shows ✓ if location path still exists, ✗ if deleted
+- **Git Integration**: Detects git repositories and shows repo name
+- **Field Tracking**: Counts which credential fields were accessed
+- **Automatic**: Usage tracked automatically on every `get` command
+- **Location Limit**: Default 20 locations prevents overwhelming output for heavily-used credentials
+
+#### See Also
+
+- {{< relref "../02-guides/usage-tracking" >}} - Comprehensive usage tracking guide
+
+---
+
+### config - Manage Configuration
+
+Manage Pass-CLI configuration settings for terminal warnings and keyboard shortcuts.
+
+#### Synopsis
+
+```bash
+pass-cli config <subcommand>
+```
+
+#### Description
+
+Configuration file location: `~/.pass-cli/config.yml`
+
+Manages settings for:
+- Terminal size warnings and minimum dimensions
+- TUI keyboard shortcuts and keybindings
+- Vault path location
+- Other application preferences
+
+#### Subcommands
+
+##### config init
+
+Create configuration file with commented examples.
+
+**Synopsis:**
+```bash
+pass-cli config init
+```
+
+**Description:**
+Creates a new config file at `~/.pass-cli/config.yml` with default settings and examples. Fails if file already exists (use `config reset` to overwrite).
+
+**Examples:**
+```bash
+# Create default config file
+pass-cli config init
+```
+
+**Output:**
+```
+✅ Configuration file created: /home/user/.pass-cli/config.yml
+
+Edit the file to customize your settings:
+- Terminal warnings
+- Keyboard shortcuts
+- Vault location
+```
+
+##### config edit
+
+Open configuration file in your default editor.
+
+**Synopsis:**
+```bash
+pass-cli config edit
+```
+
+**Description:**
+Opens config file in editor determined by:
+1. `EDITOR` environment variable
+2. Platform defaults (notepad on Windows, nano/vim on Linux/macOS)
+
+Creates config file with defaults if it doesn't exist.
+
+**Examples:**
+```bash
+# Edit config file
+pass-cli config edit
+
+# Use specific editor
+EDITOR=vim pass-cli config edit
+```
+
+##### config validate
+
+Validate configuration file syntax and settings.
+
+**Synopsis:**
+```bash
+pass-cli config validate
+```
+
+**Description:**
+Checks configuration for errors:
+- Terminal size ranges (1-10000 width, 1-1000 height)
+- Keybinding conflicts (no duplicate key assignments)
+- Unknown actions (all keybindings must map to known actions)
+- Key format validation
+
+**Exit codes:**
+- `0` = Configuration valid
+- `1` = Configuration has errors
+- `2` = File system error
+
+**Examples:**
+```bash
+# Validate config
+pass-cli config validate
+```
+
+**Output (Valid):**
+```
+✅ Configuration is valid
+
+Settings:
+  Vault path: ~/.pass-cli/vault.enc
+  Terminal warnings: enabled
+  Keybindings: 15 custom shortcuts defined
+```
+
+**Output (Invalid):**
+```
+❌ Configuration has errors:
+
+Line 12: Invalid terminal width: 0 (must be between 1-10000)
+Line 25: Duplicate keybinding: Ctrl+S assigned to both 'save' and 'search'
+Line 34: Unknown action: 'invalid_action'
+
+Fix these errors and run 'config validate' again.
+```
+
+##### config reset
+
+Reset configuration to default values.
+
+**Synopsis:**
+```bash
+pass-cli config reset [flags]
+```
+
+**Flags:**
+| Flag | Type | Description |
+|------|------|-------------|
+| `--force`, `-f` | bool | Skip confirmation prompt |
+
+**Description:**
+Overwrites existing config file with defaults. Requires confirmation unless `--force` flag is used.
+
+**Examples:**
+```bash
+# Reset with confirmation
+pass-cli config reset
+
+# Reset without confirmation
+pass-cli config reset --force
+```
+
+**Output:**
+```
+⚠️  This will overwrite your current configuration.
+Are you sure you want to reset to defaults? (y/n): y
+
+✅ Configuration reset to defaults: /home/user/.pass-cli/config.yml
+```
+
+#### See Also
+
+- {{< relref "configuration" >}} - Configuration file reference
+
+---
+
 ### keychain - Manage Keychain Integration
 
 Manage system keychain integration for storing vault master passwords.
