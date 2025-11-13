@@ -1,12 +1,17 @@
 ---
 title: "Reference"
-weight: 4
+weight: 3
 bookCollapseSection: false
 bookFlatSection: false
 ---
 
 # Reference
 
-Technical reference documentation for security, troubleshooting, and limitations.
+Technical reference documentation for commands, configuration, security, troubleshooting, and limitations.
 
-This section covers security features, common issues, known limitations, and migration guides.
+- **[Command Reference](command-reference.md)**: Complete CLI command syntax and options
+- **[Configuration](configuration.md)**: Configuration file options and settings
+- **[Security](security.md)**: Security architecture and threat model
+- **[Troubleshooting](troubleshooting.md)**: Common issues and solutions
+- **[Known Limitations](known-limitations.md)**: Current limitations and workarounds
+- **[Migration](migration.md)**: Migration guides from other password managers

@@ -94,15 +94,15 @@ When merging content from multiple sources into single canonical doc:
 
 ### Implementation for User Story 2
 
-- [ ] T021 [P] [US2] Split cli-reference.md → command-reference.md: Extract command syntax only (lines 1-800, 1900-2040) to `docs/03-reference/command-reference.md`
-- [ ] T022 [P] [US2] Split cli-reference.md → tui-guide.md: Extract TUI documentation (lines 1206-1580) to `docs/02-guides/tui-guide.md`
-- [ ] T023 [P] [US2] Split cli-reference.md → scripting-guide.md: Extract automation/quiet/JSON examples (lines 1722-1800 + scattered) to `docs/02-guides/scripting-guide.md`
-- [ ] T024 [P] [US2] Consolidate configuration.md: Use `git mv docs/02-usage-temp/cli-reference.md docs/03-reference/configuration.md` as base, edit to keep config section (lines 1089-1205), then merge config content from first-steps.md (lines 300-400)
-- [ ] T025 [P] [US2] Split cli-reference.md → usage-tracking.md: Extract usage tracking section (lines 1581-1721) to `docs/02-guides/usage-tracking.md`
-- [ ] T026 [US2] Add front matter to command-reference.md (title: "Command Reference", weight: 1)
-- [ ] T027 [US2] Add front matter to tui-guide.md (title: "TUI Guide", weight: 5)
-- [ ] T028 [US2] Add front matter to scripting-guide.md (title: "Scripting Guide", weight: 6)
-- [ ] T029 [US2] Add front matter to configuration.md (title: "Configuration", weight: 2)
+- [x] T021 [P] [US2] Split cli-reference.md → command-reference.md: Extract command syntax only (lines 1-800, 1900-2040) to `docs/03-reference/command-reference.md`
+- [x] T022 [P] [US2] Split cli-reference.md → tui-guide.md: Extract TUI documentation (lines 1206-1580) to `docs/02-guides/tui-guide.md`
+- [x] T023 [P] [US2] Split cli-reference.md → scripting-guide.md: Extract automation/quiet/JSON examples (lines 1722-1800 + scattered) to `docs/02-guides/scripting-guide.md`
+- [x] T024 [P] [US2] Consolidate configuration.md: Use `git mv docs/02-usage-temp/cli-reference.md docs/03-reference/configuration.md` as base, edit to keep config section (lines 1089-1205), then merge config content from first-steps.md (lines 300-400)
+- [x] T025 [P] [US2] Split cli-reference.md → usage-tracking.md: Extract usage tracking section (lines 1581-1721) to `docs/02-guides/usage-tracking.md`
+- [x] T026 [US2] Add front matter to command-reference.md (title: "Command Reference", weight: 1)
+- [x] T027 [US2] Add front matter to tui-guide.md (title: "TUI Guide", weight: 5)
+- [x] T028 [US2] Add front matter to scripting-guide.md (title: "Scripting Guide", weight: 6)
+- [x] T029 [US2] Add front matter to configuration.md (title: "Configuration", weight: 2)
 - [ ] T030 [US2] Add front matter to usage-tracking.md (title: "Usage Tracking", weight: 3)
 - [ ] T031 [US2] Create/update 02-guides/_index.md with guide descriptions
 - [ ] T032 [US2] Create/update 03-reference/_index.md with reference descriptions
