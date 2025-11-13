@@ -13,18 +13,11 @@ We release security updates for the following versions:
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-Instead, please report security vulnerabilities using one of the following methods:
+Instead, please report security vulnerabilities through GitHub's private vulnerability reporting:
 
-### Preferred: GitHub Private Vulnerability Reporting
-
-Use GitHub's private vulnerability reporting feature:
 1. Go to the [Security tab](https://github.com/ari1110/pass-cli/security)
 2. Click "Report a vulnerability"
-3. Fill out the advisory form with details
-
-### Alternative: GitHub Contact
-
-Contact the maintainer via GitHub: **@ari1110** (if GitHub reporting unavailable)
+3. Fill out the advisory form with the details below
 
 ### What to Include
 
