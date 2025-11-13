@@ -1,7 +1,7 @@
 ---
 title: "Troubleshooting"
 weight: 4
-bookCollapseSection: false
+bookCollapseSection: true
 bookFlatSection: false
 ---
 

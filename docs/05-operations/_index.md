@@ -1,7 +1,7 @@
 ---
 title: "Operations"
 weight: 5
-bookCollapseSection: false
+bookCollapseSection: true
 bookFlatSection: false
 ---
 
