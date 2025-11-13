@@ -43,7 +43,7 @@ markup:
     renderer:
       unsafe: true
   highlight:
-    lineNos: true
+    noClasses: false
   tableOfContents:
     endLevel: 3
     ordered: false
