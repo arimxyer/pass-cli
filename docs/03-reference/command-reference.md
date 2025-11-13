@@ -158,7 +158,7 @@ pass-cli add <service> [flags]
 | `--username` | `-u` | string | Username for the credential |
 | `--password` | `-p` | string | Password (not recommended, use prompt) |
 | `--generate` | `-g` | bool | Generate a random secure password |
-| `--gen-length` | | int | Length of generated password (default: 16) |
+| `--gen-length` | | int | Length of generated password (default: 20) |
 | `--category` | `-c` | string | Category for organizing credentials (e.g., 'Cloud', 'Databases') |
 | `--url` | | string | Service URL |
 | `--notes` | | string | Additional notes |
@@ -402,7 +402,7 @@ pass-cli update <service> [flags]
 | `--username` | `-u` | string | New username |
 | `--password` | `-p` | string | New password (not recommended) |
 | `--generate` | `-g` | bool | Generate a random secure password |
-| `--gen-length` | | int | Length of generated password (default: 16) |
+| `--gen-length` | | int | Length of generated password (default: 20) |
 | `--category` | | string | New category |
 | `--url` | | string | New URL |
 | `--notes` | | string | New notes |
@@ -795,6 +795,155 @@ Are you sure you want to remove /home/user/.pass-cli/vault.enc? (y/n): y
    • Keychain entry removed
    • Orphaned entries cleaned up
 ```
+
+##### vault backup
+
+Manage vault backups for disaster recovery.
+
+**Synopsis:**
+```bash
+pass-cli vault backup <subcommand>
+```
+
+###### vault backup create
+
+Create a timestamped manual backup of the vault.
+
+**Synopsis:**
+```bash
+pass-cli vault backup create [flags]
+```
+
+**Description:**
+Creates a manual backup with naming pattern `vault.enc.YYYYMMDD-HHMMSS.manual.backup`. Works without requiring the master password (no vault unlock needed).
+
+**Flags:**
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `-v`, `--verbose` | bool | Show detailed operation progress |
+
+**Examples:**
+```bash
+# Create manual backup
+pass-cli vault backup create
+
+# Create backup with verbose output
+pass-cli vault backup create --verbose
+```
+
+**Output:**
+```
+✅ Manual backup created successfully:
+   /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
+   Size: 2.45 MB
+```
+
+###### vault backup restore
+
+Restore vault from the most recent backup.
+
+**Synopsis:**
+```bash
+pass-cli vault backup restore [flags]
+```
+
+**Description:**
+Automatically selects the newest valid backup (automatic or manual) and restores it. Considers both `vault.enc.backup` (automatic) and `vault.enc.*.manual.backup` files.
+
+**⚠️ WARNING:** This command overwrites your current vault file with the backup.
+
+**Flags:**
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `-f`, `--force` | bool | Skip confirmation prompt |
+| `-v`, `--verbose` | bool | Show detailed operation progress |
+| `--dry-run` | bool | Preview which backup would be restored (no changes) |
+
+**Examples:**
+```bash
+# Restore from newest backup (with confirmation)
+pass-cli vault backup restore
+
+# Restore without confirmation
+pass-cli vault backup restore --force
+
+# Preview which backup would be restored
+pass-cli vault backup restore --dry-run
+
+# Restore with detailed progress
+pass-cli vault backup restore --verbose
+```
+
+**Output:**
+```
+Found backup: /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
+Backup age: 2 hours ago
+Size: 2.45 MB
+
+⚠️  This will overwrite your current vault file.
+Are you sure you want to restore from this backup? (y/n): y
+
+✅ Vault restored successfully from backup
+```
+
+###### vault backup info
+
+View backup status and information.
+
+**Synopsis:**
+```bash
+pass-cli vault backup info [flags]
+```
+
+**Description:**
+Displays all available backups with metadata:
+- Backup type (automatic or manual)
+- File size and creation time
+- Age with warnings for backups >30 days old
+- Which backup would be used for restore
+- Disk space usage alerts (>5 manual backups)
+
+**Flags:**
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `-v`, `--verbose` | bool | Show detailed backup information |
+
+**Examples:**
+```bash
+# View all backups
+pass-cli vault backup info
+
+# View with detailed information
+pass-cli vault backup info --verbose
+```
+
+**Output:**
+```
+📦 Backup Status for: /home/user/.pass-cli/vault.enc
+
+Automatic Backup:
+  ✅ vault.enc.backup
+     Size: 2.45 MB
+     Created: 1 day ago (2025-11-11 14:30:22)
+
+Manual Backups:
+  ✅ vault.enc.20251112-143022.manual.backup ← Would be used for restore
+     Size: 2.45 MB
+     Created: 2 hours ago (2025-11-12 14:30:22)
+
+  ✅ vault.enc.20251110-091545.manual.backup
+     Size: 2.40 MB
+     Created: 2 days ago (2025-11-10 09:15:45)
+
+Total backups: 3
+Total disk space: 7.30 MB
+```
+
+**See Also:**
+- {{< relref "../02-guides/backup-restore" >}} - Comprehensive backup guide
 
 **Use Cases:**
 - Decommissioning a vault that's no longer needed

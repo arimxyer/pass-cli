@@ -161,13 +161,15 @@ Suggestion: Enable keychain integration with 'pass-cli keychain enable'
 
 ### Disable Keychain Integration
 
-To remove your master password from the keychain:
+To remove your master password from the keychain, use your operating system's credential manager:
 
-```bash
-pass-cli keychain disable
-```
+**Windows**: `cmdkey /delete:pass-cli` (or use Credential Manager GUI)
+**macOS**: `security delete-generic-password -s "pass-cli" -a "$USER"` (or use Keychain Access app)
+**Linux**: `secret-tool clear service pass-cli` (or use your DE's credential manager)
 
-After disabling, you'll need to enter your master password for each operation.
+After removing the keychain entry, you'll need to enter your master password for each operation.
+
+See {{< relref "keychain-setup" >}} for detailed platform-specific instructions.
 
 ### Platform-Specific Backends
 

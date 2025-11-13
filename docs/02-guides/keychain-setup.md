@@ -60,13 +60,30 @@ Suggestion: Enable keychain integration with 'pass-cli keychain enable'
 
 ### Disable Keychain Integration
 
-To remove your master password from the keychain:
+To remove your master password from the keychain, use your operating system's credential manager:
 
-```bash
-pass-cli keychain disable
+**Windows**:
+```powershell
+# Open Credential Manager → Windows Credentials
+# Find and delete entry named "pass-cli"
+cmdkey /delete:pass-cli
 ```
 
-After disabling, you'll need to enter your master password for each operation.
+**macOS**:
+```bash
+# Open Keychain Access app, search for "pass-cli", delete the entry
+# Or use command line:
+security delete-generic-password -s "pass-cli" -a "$USER"
+```
+
+**Linux**:
+```bash
+# Use your desktop environment's credential manager
+# Or use secret-tool:
+secret-tool clear service pass-cli
+```
+
+After removing the keychain entry, you'll need to enter your master password for each operation.
 
 ### Platform-Specific Backends
 
@@ -101,33 +118,6 @@ export DB_USER=$(pass-cli get database --quiet --field username)
 #!/bin/bash
 API_KEY=$(pass-cli get api-service --quiet --field password)
 curl -H "Authorization: Bearer $API_KEY" https://api.example.com/data
-```
-
-### JSON Output
-
-```bash
-$ pass-cli get github --json
-
-{
-  "key": "github",
-  "username": "your-github-username",
-  "password": "your-github-password",
-  "metadata": {
-    "last_accessed": "2025-10-21T14:23:45Z",
-    "access_count": 1
-  }
-}
-```
-
-Process with `jq`:
-
-```bash
-# Extract specific field
-pass-cli get github --json | jq -r '.username'
-
-# Use in scripts
-username=$(pass-cli get github --json | jq -r '.username')
-password=$(pass-cli get github --json | jq -r '.password')
 ```
 
 ## Health Checks
