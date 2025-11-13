@@ -22,9 +22,9 @@ Use GitHub's private vulnerability reporting feature:
 2. Click "Report a vulnerability"
 3. Fill out the advisory form with details
 
-### Alternative: Email
+### Alternative: GitHub Contact
 
-Email security reports to: **security@ari1110.dev** (if GitHub reporting unavailable)
+Contact the maintainer via GitHub: **@ari1110** (if GitHub reporting unavailable)
 
 ### What to Include
 
