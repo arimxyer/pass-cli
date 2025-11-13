@@ -484,7 +484,7 @@ Monitor backup health with cron:
 
 ## See Also
 
-- {{< relref "../03-reference/security" >}} - Encryption details and security best practices
-- {{< relref "../03-reference/troubleshooting" >}} - General troubleshooting for pass-cli
+- {{< relref "../03-reference/security-architecture" >}} - Encryption details and security best practices
+- {{< relref "../04-troubleshooting/_index" >}} - General troubleshooting for pass-cli
 - {{< relref "../05-operations/health-checks" >}} - Vault health checks and diagnostics
 - {{< relref "../01-getting-started/quick-start" >}} - First-time setup and basic workflows

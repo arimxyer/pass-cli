@@ -9,8 +9,8 @@ bookFlatSection: false
 
 Solutions for common issues organized by category.
 
-- **[Installation Issues](installation.md)**: Installation and initialization problems
-- **[Vault Issues](vault.md)**: Vault access, corruption, and recovery
-- **[Keychain Issues](keychain.md)**: OS keychain integration and master password storage
-- **[TUI Issues](tui.md)**: Terminal UI rendering and interaction problems
-- **[FAQ](faq.md)**: Frequently asked questions about pass-cli
+- **[Installation Issues]({{< relref "installation" >}})**: Installation and initialization problems
+- **[Vault Issues]({{< relref "vault" >}})**: Vault access, corruption, and recovery
+- **[Keychain Issues]({{< relref "keychain" >}})**: OS keychain integration and master password storage
+- **[TUI Issues]({{< relref "tui" >}})**: Terminal UI rendering and interaction problems
+- **[FAQ]({{< relref "faq" >}})**: Frequently asked questions about pass-cli

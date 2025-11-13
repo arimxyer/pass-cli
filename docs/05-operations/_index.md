@@ -9,5 +9,5 @@ bookFlatSection: false
 
 Operational guides for maintaining, monitoring, and securing pass-cli in production.
 
-- **[Health Checks](health-checks.md)**: System diagnostics and vault health monitoring
-- **[Security Operations](security-operations.md)**: Best practices, checklists, and incident response
+- **[Health Checks]({{< relref "health-checks" >}})**: System diagnostics and vault health monitoring
+- **[Security Operations]({{< relref "security-operations" >}})**: Best practices, checklists, and incident response

@@ -9,7 +9,7 @@ bookFlatSection: false
 
 Choose your installation method and complete the quick-start guide to add your first credential.
 
-- **[Quick Install](quick-install.md)**: Install via package manager (macOS/Linux/Windows)
-- **[Manual Install](manual-install.md)**: Download binaries or build from source
-- **[Quick Start](quick-start.md)**: Initialize vault and store your first credential (5 minutes)
-- **[Uninstall](uninstall.md)**: Remove pass-cli from your system
+- **[Quick Install]({{< relref "quick-install" >}})**: Install via package manager (macOS/Linux/Windows)
+- **[Manual Install]({{< relref "manual-install" >}})**: Download binaries or build from source
+- **[Quick Start]({{< relref "quick-start" >}})**: Initialize vault and store your first credential (5 minutes)
+- **[Uninstall]({{< relref "uninstall" >}})**: Remove pass-cli from your system

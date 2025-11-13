@@ -103,11 +103,11 @@ When merging content from multiple sources into single canonical doc:
 - [x] T027 [US2] Add front matter to tui-guide.md (title: "TUI Guide", weight: 5)
 - [x] T028 [US2] Add front matter to scripting-guide.md (title: "Scripting Guide", weight: 6)
 - [x] T029 [US2] Add front matter to configuration.md (title: "Configuration", weight: 2)
-- [ ] T030 [US2] Add front matter to usage-tracking.md (title: "Usage Tracking", weight: 3)
-- [ ] T031 [US2] Create/update 02-guides/_index.md with guide descriptions
-- [ ] T032 [US2] Create/update 03-reference/_index.md with reference descriptions
-- [ ] T033 [US2] Remove original cli-reference.md after verifying all content migrated
-- [ ] T034 [US2] Convert internal links in guides and reference docs to Hugo relref format
+- [x] T030 [US2] Add front matter to usage-tracking.md (title: "Usage Tracking", weight: 3)
+- [x] T031 [US2] Create/update 02-guides/_index.md with guide descriptions
+- [x] T032 [US2] Create/update 03-reference/_index.md with reference descriptions
+- [x] T033 [US2] Remove original cli-reference.md after verifying all content migrated
+- [x] T034 [US2] Convert internal links in guides and reference docs to Hugo relref format
 
 **Checkpoint**: Daily users can now quickly lookup command syntax independently
 
@@ -192,12 +192,12 @@ When merging content from multiple sources into single canonical doc:
 - [x] T068 [P] Update root README.md documentation links to new structure
 - [x] T069 [P] Update all section _index.md files with accurate weights (01-06)
 - [x] T070 [P] Verify all moved files have correct front matter (title, weight, bookToc)
-- [ ] T071 Move known-limitations.md from old 04-reference to 03-reference using `git mv`
-- [ ] T072 Move migration.md from old 04-reference to 03-reference using `git mv`
-- [ ] T073 Update known-limitations.md and migration.md front matter (weights 4-5)
-- [ ] T074 Search all docs for remaining markdown links `[text](*.md)` and convert to relref format
-- [ ] T075 Verify no duplicate content remains (grep for sample paragraphs from keychain, FAQ, config)
-- [ ] T076 Clean up temporary section directories (02-usage-temp, 03-guides-temp)
+- [x] T071 Move known-limitations.md from old 04-reference to 03-reference using `git mv`
+- [x] T072 Move migration.md from old 04-reference to 03-reference using `git mv`
+- [x] T073 Update known-limitations.md and migration.md front matter (weights 4-5)
+- [x] T074 Search all docs for remaining markdown links `[text](*.md)` and convert to relref format
+- [x] T075 Verify no duplicate content remains (grep for sample paragraphs from keychain, FAQ, config)
+- [x] T076 Clean up temporary section directories (02-usage-temp, 03-guides-temp)
 
 ---
 
@@ -205,16 +205,16 @@ When merging content from multiple sources into single canonical doc:
 
 **Purpose**: Verify all success criteria from spec.md are met
 
-- [ ] T077 **Validation**: Run line count check - `wc -l docs/**/*.md | awk '{sum+=$1; count++} END {print sum/count}'` → must be ≤300 average
-- [ ] T078 **Validation**: Find longest doc - `find docs -name '*.md' -exec wc -l {} + | sort -rn | head -1` → must be <700 lines
-- [ ] T079 **Validation**: Count total files - `find docs -name '*.md' -not -name '_index.md' -not -name 'README.md' | wc -l` → must equal 29
-- [ ] T080 **Validation**: Hugo build test - `cd docsite && hugo --buildDrafts` → must complete without errors
-- [ ] T081 **Validation**: Link validation - Hugo build output must show zero broken relref links
-- [ ] T082 **Validation**: Git history check - `git log --follow docs/02-guides/keychain-setup.md` → must show history from original sources
-- [ ] T083 **Validation**: Git history check - `git log --follow docs/04-troubleshooting/faq.md` → must show consolidated history
-- [ ] T084 **Validation**: Render test - Visit http://localhost:1313/pass-cli/ → all 29 docs must load without 404s
-- [ ] T085 **Validation**: Navigation test - Homepage → any common task (install, add credential, troubleshoot) in ≤3 clicks
-- [ ] T086 **Final Review**: Compare word counts - `wc -w docs/**/*.md` → should show ~27,000 words (down from ~33,000)
+- [x] T077 **Validation**: Run line count check - `wc -l docs/**/*.md | awk '{sum+=$1; count++} END {print sum/count}'` → must be ≤300 average
+- [x] T078 **Validation**: Find longest doc - `find docs -name '*.md' -exec wc -l {} + | sort -rn | head -1` → must be <700 lines
+- [x] T079 **Validation**: Count total files - `find docs -name '*.md' -not -name '_index.md' -not -name 'README.md' | wc -l` → must equal 29
+- [x] T080 **Validation**: Hugo build test - `cd docsite && hugo --buildDrafts` → must complete without errors
+- [x] T081 **Validation**: Link validation - Hugo build output must show zero broken relref links
+- [x] T082 **Validation**: Git history check - `git log --follow docs/02-guides/keychain-setup.md` → must show history from original sources
+- [x] T083 **Validation**: Git history check - `git log --follow docs/04-troubleshooting/faq.md` → must show consolidated history
+- [x] T084 **Validation**: Render test - Visit http://localhost:1313/pass-cli/ → all 29 docs must load without 404s
+- [x] T085 **Validation**: Navigation test - Homepage → any common task (install, add credential, troubleshoot) in ≤3 clicks
+- [x] T086 **Final Review**: Compare word counts - `wc -w docs/**/*.md` → should show ~27,000 words (down from ~33,000)
 
 ---
 

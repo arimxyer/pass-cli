@@ -935,6 +935,6 @@ See {{< relref "../01-getting-started/quick-start" >}} for complete first-run do
 
 - Run any command with `--help` flag
 - See [pass-cli Documentation](https://ari1110.github.io/pass-cli/) for overview
-- Check {{< relref "troubleshooting" >}} for common issues
+- Check {{< relref "../04-troubleshooting/_index" >}} for common issues
 - Visit [GitHub Issues](https://github.com/ari1110/pass-cli/issues)
 
