@@ -1,11 +1,11 @@
 ---
-title: "Doctor Command"
-weight: 7
+title: "Health Checks"
+weight: 1
 bookToc: true
 ---
 
-# Doctor Command User Guide
-The `pass-cli doctor` command provides comprehensive health checks for your pass-cli installation. Use it to diagnose issues, verify your setup, and ensure everything is working correctly
+# Health Checks (Doctor Command)
+The `pass-cli doctor` command provides comprehensive health checks for your pass-cli installation. Use it to diagnose issues, verify your setup, and ensure everything is working correctly.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
 .
@@ -400,8 +400,8 @@ This is expected. Run `pass-cli init` to create your vault, then `doctor` will s
 
 ## See Also
 
-- [Getting Started Guide](GETTING_STARTED.md) - First-time setup and initialization
-- [Troubleshooting](TROUBLESHOOTING.md) - Common issues and solutions
-- [Security Guide](SECURITY.md) - Security best practices
-- [Usage Guide](USAGE.md) - Complete command reference
+- {{< relref "../01-getting-started/quick-start" >}} - First-time setup and initialization
+- {{< relref "../04-troubleshooting/_index" >}} - Common issues and solutions
+- {{< relref "security-operations" >}} - Security best practices
+- {{< relref "../03-reference/command-reference" >}} - Complete command reference
 

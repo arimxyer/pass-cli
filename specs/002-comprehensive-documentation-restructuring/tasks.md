@@ -166,18 +166,18 @@ When merging content from multiple sources into single canonical doc:
 
 ### Implementation for User Story 5
 
-- [ ] T054 [P] [US5] Create 05-operations/ section directory
-- [ ] T055 [P] [US5] Split security.md → security-architecture.md: Extract crypto/threat model (lines 1-500) to `docs/03-reference/security-architecture.md`
-- [ ] T056 [P] [US5] Split security.md → security-operations.md: Extract best practices/incident response (lines 501-750) to `docs/05-operations/security-operations.md`
-- [ ] T057 [P] [US5] Move doctor-command.md: Relocate from 06-development/ to 05-operations/health-checks.md using `git mv docs/06-development/doctor-command.md docs/05-operations/health-checks.md`
-- [ ] T058 [US5] Add front matter to security-architecture.md (title: "Security Architecture", weight: 3)
-- [ ] T059 [US5] Add front matter to security-operations.md (title: "Security Operations", weight: 2)
-- [ ] T060 [US5] Add front matter to health-checks.md (title: "Health Checks", weight: 1)
-- [ ] T061 [US5] Create 05-operations/_index.md with operations section description
-- [ ] T062 [US5] Update 03-reference/_index.md to include security-architecture.md
-- [ ] T063 [US5] Update 06-development/_index.md (remove doctor-command reference)
-- [ ] T064 [US5] Remove original security.md after verifying all content migrated
-- [ ] T065 [US5] Convert internal links in security and operations docs to Hugo relref format
+- [x] T054 [P] [US5] Create 05-operations/ section directory
+- [x] T055 [P] [US5] Split security.md → security-architecture.md: Extract crypto/threat model (lines 1-500) to `docs/03-reference/security-architecture.md`
+- [x] T056 [P] [US5] Split security.md → security-operations.md: Extract best practices/incident response (lines 501-750) to `docs/05-operations/security-operations.md`
+- [x] T057 [P] [US5] Move doctor-command.md: Relocate from 06-development/ to 05-operations/health-checks.md using `git mv docs/06-development/doctor-command.md docs/05-operations/health-checks.md`
+- [x] T058 [US5] Add front matter to security-architecture.md (title: "Security Architecture", weight: 3)
+- [x] T059 [US5] Add front matter to security-operations.md (title: "Security Operations", weight: 2)
+- [x] T060 [US5] Add front matter to health-checks.md (title: "Health Checks", weight: 1)
+- [x] T061 [US5] Create 05-operations/_index.md with operations section description
+- [x] T062 [US5] Update 03-reference/_index.md to include security-architecture.md
+- [x] T063 [US5] Update 06-development/_index.md (remove doctor-command reference)
+- [x] T064 [US5] Remove original security.md after verifying all content migrated
+- [x] T065 [US5] Convert internal links in security and operations docs to Hugo relref format
 
 **Checkpoint**: Security and operations teams can now review documentation independently
 
