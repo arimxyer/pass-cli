@@ -31,10 +31,12 @@ func NewOSFileSystem() FileSystem {
 }
 
 func (f *osFileSystem) OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
+	// #nosec G304 -- filesystem abstraction layer, file paths are validated by callers (vault, config, etc.)
 	return os.OpenFile(name, flag, perm)
 }
 
 func (f *osFileSystem) ReadFile(name string) ([]byte, error) {
+	// #nosec G304 -- filesystem abstraction layer, file paths are validated by callers (vault, config, etc.)
 	return os.ReadFile(name)
 }
 
