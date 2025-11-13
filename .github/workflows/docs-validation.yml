@@ -27,7 +27,7 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: '0.134.3'
+          hugo-version: 'latest'
           extended: true
 
       - name: Install Hugo Book theme
