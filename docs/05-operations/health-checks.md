@@ -400,8 +400,8 @@ This is expected. Run `pass-cli init` to create your vault, then `doctor` will s
 
 ## See Also
 
-- {{< relref "../01-getting-started/quick-start" >}} - First-time setup and initialization
-- {{< relref "../04-troubleshooting/_index" >}} - Common issues and solutions
-- {{< relref "security-operations" >}} - Security best practices
-- {{< relref "../03-reference/command-reference" >}} - Complete command reference
+- [Quick Start Guide]({{< relref "../01-getting-started/quick-start" >}}) - First-time setup and initialization
+- [Troubleshooting]({{< relref "../04-troubleshooting/_index" >}}) - Common issues and solutions
+- [Security Operations]({{< relref "security-operations" >}}) - Security best practices
+- [Command Reference]({{< relref "../03-reference/command-reference" >}}) - Complete command reference
 

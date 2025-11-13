@@ -580,8 +580,8 @@ If keychain integration is enabled, the new password is automatically stored in 
 
 #### See Also
 
-- {{< relref "security-architecture#password-policy" >}} - Password policy details
-- {{< relref "../02-guides/keychain-setup" >}} - Keychain integration
+- [Password Policy]({{< relref "security-architecture#password-policy" >}}) - Password policy details
+- [Keychain Setup]({{< relref "../02-guides/keychain-setup" >}}) - Keychain integration
 
 ---
 
@@ -802,7 +802,7 @@ Total accesses: 20
 
 #### See Also
 
-- {{< relref "../02-guides/usage-tracking" >}} - Comprehensive usage tracking guide
+- [Usage Tracking Guide]({{< relref "../02-guides/usage-tracking" >}}) - Comprehensive usage tracking guide
 
 ---
 
@@ -965,7 +965,7 @@ Are you sure you want to reset to defaults? (y/n): y
 
 #### See Also
 
-- {{< relref "configuration" >}} - Configuration file reference
+- [Configuration Reference]({{< relref "configuration" >}}) - Configuration file reference
 
 ---
 
@@ -1294,7 +1294,7 @@ Total disk space: 7.30 MB
 ```
 
 **See Also:**
-- {{< relref "../02-guides/backup-restore" >}} - Comprehensive backup guide
+- [Backup & Restore Guide]({{< relref "../02-guides/backup-restore" >}}) - Comprehensive backup guide
 
 ---
 
@@ -1417,8 +1417,8 @@ Review the log file and investigate the flagged entries.
 
 #### See Also
 
-- {{< relref "security-architecture#audit-logging" >}} - Audit logging architecture
-- {{< relref "../05-operations/security-operations" >}} - Security best practices
+- [Audit Logging]({{< relref "security-architecture#audit-logging" >}}) - Audit logging architecture
+- [Security Operations]({{< relref "../05-operations/security-operations" >}}) - Security best practices
 
 ---
 
@@ -1447,7 +1447,7 @@ Health Check Results
 Overall Status: HEALTHY
 ```
 
-See {{< relref "../05-operations/health-checks" >}} for detailed documentation and troubleshooting.
+See [Health Checks]({{< relref "../05-operations/health-checks" >}}) for detailed documentation and troubleshooting.
 
 #### Why does doctor report orphaned keychain entries?
 
@@ -1555,12 +1555,12 @@ tty  # Should show /dev/pts/X or similar, not "not a tty"
 pass-cli init
 ```
 
-See {{< relref "../01-getting-started/quick-start" >}} for complete first-run documentation.
+See [Quick Start Guide]({{< relref "../01-getting-started/quick-start" >}}) for complete first-run documentation.
 
 ## Getting Help
 
 - Run any command with `--help` flag
 - See [pass-cli Documentation](https://ari1110.github.io/pass-cli/) for overview
-- Check {{< relref "../04-troubleshooting/_index" >}} for common issues
+- Check [Troubleshooting]({{< relref "../04-troubleshooting/_index" >}}) for common issues
 - Visit [GitHub Issues](https://github.com/ari1110/pass-cli/issues)
 

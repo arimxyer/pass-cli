@@ -21,7 +21,7 @@ This 5-minute guide will walk you through initializing your vault and storing yo
 
 ## Installation
 
-See {{< relref "quick-install" >}} for platform-specific installation instructions (Homebrew, Scoop) or {{< relref "manual-install" >}} for binary download.
+See [Quick Install]({{< relref "quick-install" >}}) for platform-specific installation instructions (Homebrew, Scoop) or [Manual Installation]({{< relref "manual-install" >}}) for binary download.
 
 After installation, verify pass-cli is available:
 
@@ -43,7 +43,7 @@ When you run any vault-requiring command (`add`, `get`, `list`, `update`, `delet
 $ pass-cli list
 
 ╔════════════════════════════════════════════════════════════╗
-║                  Welcome to pass-cli!                       ║
+║                  Welcome to pass-cli!                      ║
 ╚════════════════════════════════════════════════════════════╝
 
 This appears to be your first time using pass-cli.
