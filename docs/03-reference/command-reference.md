@@ -512,6 +512,79 @@ Credential 'github' deleted successfully!
 
 ---
 
+### change-password - Change Master Password
+
+Change the master password used to encrypt and decrypt your vault.
+
+#### Synopsis
+
+```bash
+pass-cli change-password
+```
+
+#### Description
+
+Re-encrypts your entire vault with a new master password. You must provide your current password to authorize the change. The new password must meet the password policy requirements.
+
+**Password Policy Requirements:**
+- Minimum 12 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one digit
+- At least one special symbol (!@#$%^&*()-_=+[]{}|;:,.<>?)
+
+#### Flags
+
+None.
+
+#### Examples
+
+```bash
+# Change master password
+pass-cli change-password
+```
+
+#### Interactive Flow
+
+```
+🔐 Change Master Password
+📁 Vault location: /home/user/.pass-cli/vault.enc
+
+Enter current master password: ********
+
+Enter new master password (min 12 characters with uppercase, lowercase, digit, symbol): ********
+
+Password strength: Strong ✅
+- Length: 16 characters ✅
+- Uppercase: Yes ✅
+- Lowercase: Yes ✅
+- Digits: Yes ✅
+- Symbols: Yes ✅
+
+Confirm new master password: ********
+
+✅ Master password changed successfully!
+```
+
+#### Keychain Integration
+
+If keychain integration is enabled, the new password is automatically stored in your OS keychain, replacing the old one.
+
+#### Security Notes
+
+- **Current Password Required**: You must authenticate with your current password
+- **Policy Enforcement**: New password must meet all security requirements
+- **Re-encryption**: All credentials are re-encrypted with the new password
+- **Atomic Operation**: Vault is not modified if re-encryption fails
+- **Audit Logging**: Password changes are logged (if audit logging enabled)
+
+#### See Also
+
+- {{< relref "security-architecture#password-policy" >}} - Password policy details
+- {{< relref "../02-guides/keychain-setup" >}} - Keychain integration
+
+---
+
 ### generate - Generate Password
 
 Generate a cryptographically secure password.
@@ -944,6 +1017,132 @@ Total disk space: 7.30 MB
 
 **See Also:**
 - {{< relref "../02-guides/backup-restore" >}} - Comprehensive backup guide
+
+---
+
+### verify-audit - Verify Audit Log Integrity
+
+Verify the integrity of audit log entries by checking HMAC signatures.
+
+#### Synopsis
+
+```bash
+pass-cli verify-audit [audit-log-path]
+```
+
+#### Description
+
+Verifies that audit log entries have not been tampered with by validating HMAC-SHA256 signatures on each entry. The audit key is retrieved from the OS keychain for verification.
+
+**What It Checks:**
+- HMAC signature validity for each log entry
+- JSON structure integrity
+- Chronological consistency
+- Presence of required fields (timestamp, event, outcome)
+
+#### Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `audit-log-path` | No | Path to audit log file (defaults to `<vault-dir>/audit.log`) |
+
+#### Flags
+
+None.
+
+#### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `PASS_AUDIT_LOG` | Custom audit log path (overridden by command argument) |
+
+#### Examples
+
+```bash
+# Verify default audit log
+pass-cli verify-audit
+
+# Verify specific audit log
+pass-cli verify-audit /path/to/audit.log
+
+# Verify with environment variable
+PASS_AUDIT_LOG=/custom/audit.log pass-cli verify-audit
+```
+
+#### Output (All Valid)
+
+```
+🔍 Verifying audit log: /home/user/.pass-cli/audit.log
+
+✅ Audit log verification complete:
+   Total entries: 127
+   Valid entries: 127
+   Invalid entries: 0
+   Tampered entries: 0
+
+Audit log integrity: VERIFIED ✅
+```
+
+#### Output (Tampered Detected)
+
+```
+🔍 Verifying audit log: /home/user/.pass-cli/audit.log
+
+⚠️  Audit log verification failed:
+   Total entries: 127
+   Valid entries: 123
+   Invalid entries: 4
+   Tampered entries: 4
+
+Invalid entries detected:
+  Line 45: HMAC verification failed (possible tampering)
+  Line 67: HMAC verification failed (possible tampering)
+  Line 89: Invalid JSON structure
+  Line 102: Missing required fields
+
+Audit log integrity: FAILED ❌
+
+CRITICAL: Audit log may have been tampered with or corrupted.
+Review the log file and investigate the flagged entries.
+```
+
+#### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | All entries valid, log integrity verified |
+| 1 | Tampered or invalid entries detected |
+| 2 | Audit log not found or inaccessible |
+| 3 | Audit key not found in keychain |
+
+#### Security Notes
+
+- **HMAC Key Required**: Audit key must exist in OS keychain
+- **Tamper Evidence**: Failed verification indicates log modification
+- **Read-Only**: Verification does not modify the audit log
+- **Automatic Rotation**: Verifies all rotated log files if present
+
+#### Troubleshooting
+
+**Problem**: "audit log not found"
+**Solution**: Ensure vault was initialized with `--enable-audit` flag
+
+**Problem**: "failed to retrieve audit key from keychain"
+**Solution**: Audit key may have been deleted. Re-initialize audit logging with `pass-cli init --enable-audit`
+
+**Problem**: "HMAC verification failed"
+**Causes**:
+- Audit log manually edited (tampering)
+- Log file corrupted
+- Audit key changed or regenerated
+- File system corruption
+
+#### See Also
+
+- {{< relref "security-architecture#audit-logging" >}} - Audit logging architecture
+- {{< relref "../05-operations/security-operations" >}} - Security best practices
+
+---
 
 **Use Cases:**
 - Decommissioning a vault that's no longer needed
