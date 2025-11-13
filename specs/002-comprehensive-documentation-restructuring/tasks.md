@@ -187,11 +187,11 @@ When merging content from multiple sources into single canonical doc:
 
 **Purpose**: Finalize documentation structure, update all cross-references, validate
 
-- [ ] T066 [P] Update docs/README.md quick links to point to new file paths (all 6 new sections)
-- [ ] T067 [P] Copy docs/README.md to docs/_index.md (Hugo homepage)
-- [ ] T068 [P] Update root README.md documentation links to new structure
-- [ ] T069 [P] Update all section _index.md files with accurate weights (01-06)
-- [ ] T070 [P] Verify all moved files have correct front matter (title, weight, bookToc)
+- [x] T066 [P] Update docs/README.md quick links to point to new file paths (all 6 new sections)
+- [x] T067 [P] Copy docs/README.md to docs/_index.md (Hugo homepage)
+- [x] T068 [P] Update root README.md documentation links to new structure
+- [x] T069 [P] Update all section _index.md files with accurate weights (01-06)
+- [x] T070 [P] Verify all moved files have correct front matter (title, weight, bookToc)
 - [ ] T071 Move known-limitations.md from old 04-reference to 03-reference using `git mv`
 - [ ] T072 Move migration.md from old 04-reference to 03-reference using `git mv`
 - [ ] T073 Update known-limitations.md and migration.md front matter (weights 4-5)

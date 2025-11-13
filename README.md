@@ -20,7 +20,7 @@
 
 Pass-CLI is a fast, secure password and API key manager that stores credentials locally with AES-256-GCM encryption. Built for developers who need quick, script-friendly access to credentials without cloud dependencies.
 
-📚 **[View Full Documentation](https://ari1110.github.io/pass-cli/)** | [Getting Started](docs/01-getting-started/first-steps.md) | [Installation](docs/01-getting-started/installation.md) | [Usage Guide](docs/02-usage/cli-reference.md)
+📚 **[View Full Documentation](https://ari1110.github.io/pass-cli/)** | [Getting Started](docs/01-getting-started/quick-start.md) | [Installation](docs/01-getting-started/quick-install.md) | [Usage Guide](docs/03-reference/command-reference.md)
 
 ## Key Features
 
@@ -52,7 +52,7 @@ scoop bucket add pass-cli https://github.com/ari1110/scoop-bucket
 scoop install pass-cli
 ```
 
-For manual installation and other methods, see [docs/01-getting-started/installation.md](docs/01-getting-started/installation.md).
+For manual installation and other methods, see [docs/01-getting-started/manual-install.md](docs/01-getting-started/manual-install.md).
 
 ### Getting Started
 
@@ -74,7 +74,7 @@ pass-cli list
 export API_KEY=$(pass-cli get myservice --quiet --field password)
 ```
 
-For detailed usage and examples, see [docs/01-getting-started/first-steps.md](docs/01-getting-started/first-steps.md).
+For detailed usage and examples, see [docs/01-getting-started/quick-start.md](docs/01-getting-started/quick-start.md).
 
 ## Interactive TUI Mode
 
@@ -96,7 +96,7 @@ pass-cli list
 - Customizable keyboard shortcuts
 - Responsive layout (requires 60x30 minimum terminal size)
 
-Press `?` in TUI mode to see all keyboard shortcuts. For complete TUI documentation and configuration, see [docs/02-usage/cli-reference.md](docs/02-usage/cli-reference.md).
+Press `?` in TUI mode to see all keyboard shortcuts. For complete TUI documentation and configuration, see [docs/03-reference/command-reference.md](docs/03-reference/command-reference.md).
 
 ## Core Commands
 
@@ -141,7 +141,7 @@ pass-cli vault backup info
 pass-cli doctor
 ```
 
-For complete command reference, flags, and examples, see [docs/02-usage/cli-reference.md](docs/02-usage/cli-reference.md).
+For complete command reference, flags, and examples, see [docs/03-reference/command-reference.md](docs/03-reference/command-reference.md).
 
 ## Security
 
@@ -169,15 +169,15 @@ For complete command reference, flags, and examples, see [docs/02-usage/cli-refe
 - Windows: `%USERPROFILE%\.pass-cli\vault.enc`
 - macOS/Linux: `~/.pass-cli/vault.enc`
 
-For complete security details, best practices, and migration guides, see [docs/04-reference/security.md](docs/04-reference/security.md).
+For complete security details, best practices, and migration guides, see [docs/03-reference/security-architecture.md](docs/03-reference/security-architecture.md).
 
 ## Documentation
 
 **Essential Guides**:
-- [Getting Started](docs/01-getting-started/first-steps.md) - First-time setup and basic workflows
-- [Usage Guide](docs/02-usage/cli-reference.md) - Complete command reference, TUI shortcuts, configuration
-- [Installation](docs/01-getting-started/installation.md) - All installation methods and package managers
-- [Security](docs/04-reference/security.md) - Encryption details, best practices, migration guides
+- [Getting Started](docs/01-getting-started/quick-start.md) - First-time setup and basic workflows
+- [Usage Guide](docs/03-reference/command-reference.md) - Complete command reference, TUI shortcuts, configuration
+- [Installation](docs/01-getting-started/quick-install.md) - All installation methods and package managers
+- [Security](docs/03-reference/security-architecture.md) - Encryption details, best practices, migration guides
 - [Troubleshooting](docs/04-reference/troubleshooting.md) - Common issues and solutions
 
 **Additional Resources**:
