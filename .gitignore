@@ -65,3 +65,7 @@ docsite/public/
 docsite/resources/
 docsite/themes/
 docsite/.hugo_build.lock
+
+# Temporary documentation files
+docs-backup-*.zip
+docs-file-mappings*.txt
