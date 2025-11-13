@@ -529,6 +529,7 @@ func (ef *EditForm) buildFormFieldsWithValues() {
 	ef.form.AddTextArea("Notes", ef.credential.Notes, 0, 5, 0, nil)
 
 	// Action buttons
+	ef.form.AddButton("Generate Password", ef.onGeneratePassword)
 	ef.form.AddButton("Save", ef.onSavePressed)
 	ef.form.AddButton("Cancel", ef.onCancelPressed)
 }
@@ -668,6 +669,27 @@ func (ef *EditForm) onCancelPressed() {
 	}
 }
 
+// onGeneratePassword generates a secure password and fills the password field.
+func (ef *EditForm) onGeneratePassword() {
+	// Generate a 20-character password
+	password, err := generateSecurePassword(20)
+	if err != nil {
+		// Error - could show in status bar but form doesn't have direct access
+		// Just silently fail for now
+		return
+	}
+
+	// Set the generated password in the password field
+	passwordField := ef.form.GetFormItem(2).(*tview.InputField)
+	passwordField.SetText(password)
+
+	// Update the password strength indicator
+	ef.updatePasswordLabel(passwordField, []byte(password))
+
+	// Copy to clipboard
+	_ = clipboard.WriteAll(password) // Ignore errors silently
+}
+
 // hasUnsavedChanges checks if any form fields have been modified from original values.
 func (ef *EditForm) hasUnsavedChanges() bool {
 	username := ef.form.GetFormItem(1).(*tview.InputField).GetText()
@@ -723,7 +745,7 @@ func (ef *EditForm) wrapInFrame() {
 
 	// Create hints footer as a TextView with wrapping enabled
 	// Match statusbar style: [yellow] for keys, [white] for separators
-	hintsText := "[yellow]Tab[white]/[yellow]Shift+Tab[-]:Navigate  [yellow]Ctrl+S[-]:Save  [yellow]Ctrl+P[-]:Toggle password  [yellow]Esc[-]:Cancel"
+	hintsText := "[yellow]Tab[white]/[yellow]Shift+Tab[-]:Navigate  [yellow]Ctrl+S[-]:Save  [yellow]Ctrl+G[-]:Generate password  [yellow]Ctrl+P[-]:Toggle password  [yellow]Esc[-]:Cancel"
 	hints := tview.NewTextView().
 		SetText(hintsText).
 		SetTextAlign(tview.AlignCenter).
@@ -755,6 +777,11 @@ func (ef *EditForm) setupKeyboardShortcuts() {
 		case tcell.KeyCtrlS:
 			// Ctrl+S for quick-save
 			ef.onSavePressed()
+			return nil
+
+		case tcell.KeyCtrlG:
+			// Ctrl+G for password generation
+			ef.onGeneratePassword()
 			return nil
 
 		case tcell.KeyCtrlP:
