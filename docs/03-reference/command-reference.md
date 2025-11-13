@@ -7,24 +7,6 @@ Complete reference for all pass-cli commands and their options.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
 
-  - [init](#init---initialize-vault)
-  - [add](#add---add-credential)
-  - [get](#get---retrieve-credential)
-  - [list](#list---list-credentials)
-  - [update](#update---update-credential)
-  - [delete](#delete---delete-credential)
-  - [generate](#generate---generate-password)
-  - [keychain](#keychain---manage-keychain-integration)
-  - [vault](#vault---manage-vault-files)
-  - [usage](#usage---view-credential-usage-history)
-  - [version](#version---show-version)
-- [Output Modes](#output-modes)
-- [Script Integration](#script-integration)
-- [Environment Variables](#environment-variables)
-- [Configuration](#configuration)
-- [Usage Tracking](#usage-tracking)
-- [Best Practices](#best-practices)
-
 ## Global Options
 
 Available for all commands:
