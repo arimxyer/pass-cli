@@ -1,23 +1,12 @@
 ---
 title: "Quick Start Guide"
 weight: 3
-bookToc: true
+toc: true
 ---
 
-# Quick Start with pass-cli
 This 5-minute guide will walk you through initializing your vault and storing your first credential.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
-
-## Table of Contents
-
-- [Installation](#installation)
-- [First-Run Guided Initialization](#first-run-guided-initialization)
-- [Manual Initialization](#manual-initialization)
-- [Your First Credential](#your-first-credential)
-- [Basic Operations](#basic-operations)
-- [Health Checks](#health-checks)
-- [Next Steps](#next-steps)
 
 ## Installation
 

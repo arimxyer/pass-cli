@@ -1,8 +1,8 @@
 ---
 title: "pass-cli Documentation"
+cascade:
+  type: docs
 ---
-
-# pass-cli Documentation
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
 

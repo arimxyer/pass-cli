@@ -1,0 +1,59 @@
+baseURL: https://ari1110.github.io/pass-cli/
+languageCode: en-us
+title: pass-cli Documentation
+
+# Point to existing /docs folder
+contentDir: ../docs
+
+# Ignore README.md (it's a symlink to _index.md)
+ignoreFiles:
+  - README\.md$
+
+# Theme via Hugo Modules
+module:
+  imports:
+    - path: github.com/imfing/hextra
+
+# Hextra theme parameters
+params:
+  description: Secure, cross-platform CLI password and API key manager
+
+  navbar:
+    displayTitle: true
+
+  footer:
+    displayCopyright: true
+
+# Main navigation menu
+menu:
+  main:
+    - name: Search
+      weight: 1
+      params:
+        type: search
+    - name: GitHub
+      url: https://github.com/ari1110/pass-cli
+      weight: 1
+      params:
+        icon: github
+
+# Markdown configuration
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    lineNos: true
+  tableOfContents:
+    endLevel: 3
+    ordered: false
+    startLevel: 2
+
+# Output formats
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+  page:
+    - HTML

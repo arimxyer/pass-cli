@@ -1,10 +1,8 @@
 ---
 title: "Scoop Manifest"
 weight: 6
-bookToc: true
+toc: true
 ---
-
-# Scoop Manifest for Pass-CLI
 This document explains how to use, test, and submit the Scoop manifest for Pass-CLI on Windows.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)

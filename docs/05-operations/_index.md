@@ -1,13 +1,11 @@
 ---
 title: "Operations"
 weight: 5
-bookCollapseSection: true
-bookFlatSection: false
 ---
-
-# Operations
 
 Operational guides for maintaining, monitoring, and securing pass-cli in production.
 
-- **[Health Checks]({{< relref "health-checks" >}})**: System diagnostics and vault health monitoring
-- **[Security Operations]({{< relref "security-operations" >}})**: Best practices, checklists, and incident response
+{{< cards >}}
+  {{< card link="health-checks" title="Health Checks" icon="heart" subtitle="System diagnostics and vault health monitoring" >}}
+  {{< card link="security-operations" title="Security Operations" icon="shield-exclamation" subtitle="Best practices, checklists, and incident response" >}}
+{{< /cards >}}

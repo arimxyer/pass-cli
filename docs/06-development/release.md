@@ -1,10 +1,8 @@
 ---
 title: "Release Process"
 weight: 4
-bookToc: true
+toc: true
 ---
-
-# Release Process
 This document describes the release process for Pass-CLI using GoReleaser.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)

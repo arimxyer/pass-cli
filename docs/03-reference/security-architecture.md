@@ -1,27 +1,11 @@
 ---
 title: "Security Architecture"
 weight: 3
-bookToc: true
+toc: true
 ---
-
-# Security Architecture
 Comprehensive security architecture, cryptographic implementation, threat model, and security guarantees for Pass-CLI.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
-
-## Table of Contents
-
-- [Security Overview](#security-overview)
-- [Cryptographic Implementation](#cryptographic-implementation)
-- [Master Password Management](#master-password-management)
-- [Data Storage Security](#data-storage-security)
-- [Threat Model](#threat-model)
-- [Security Guarantees](#security-guarantees)
-- [Limitations](#limitations)
-- [Best Practices](#best-practices)
-- [Security Checklist](#security-checklist)
-- [Incident Response](#incident-response)
-- [Security Audits](#security-audits)
 
 ## Security Overview
 

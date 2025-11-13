@@ -1,25 +1,11 @@
 ---
 title: "Installation Issues"
 weight: 1
-bookToc: true
+toc: true
 ---
-
-# Installation & Initialization Troubleshooting
 Solutions for installation and initialization problems.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
-
-## Table of Contents
-
-- [Installation Issues](#installation-issues)
-- [Initialization Issues](#initialization-issues)
-- [Keychain Access Issues](#keychain-access-issues)
-- [Vault Access Issues](#vault-access-issues)
-- [Command Issues](#command-issues)
-- [Platform-Specific Issues](#platform-specific-issues)
-- [Performance Issues](#performance-issues)
-- [Vault Recovery](#vault-recovery)
-- [Frequently Asked Questions](#frequently-asked-questions)
 
 ## Installation Issues
 

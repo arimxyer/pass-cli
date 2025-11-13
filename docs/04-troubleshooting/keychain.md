@@ -1,10 +1,8 @@
 ---
 title: "Keychain Issues"
 weight: 3
-bookToc: true
+toc: true
 ---
-
-# Keychain Troubleshooting
 
 Solutions for OS keychain integration and master password storage issues.
 

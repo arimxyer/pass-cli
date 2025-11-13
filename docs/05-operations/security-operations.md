@@ -1,10 +1,8 @@
 ---
 title: "Security Operations"
 weight: 2
-bookToc: true
+toc: true
 ---
-
-# Security Operations
 
 Best practices, security checklist, incident response procedures, and security audits for Pass-CLI.
 

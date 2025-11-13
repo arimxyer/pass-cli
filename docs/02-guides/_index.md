@@ -1,17 +1,15 @@
 ---
 title: "Guides"
 weight: 2
-bookCollapseSection: true
-bookFlatSection: false
 ---
-
-# Guides
 
 Task-oriented guides for common pass-cli workflows and features.
 
-- **[Basic Workflows]({{< relref "basic-workflows" >}})**: Daily operations - list, update, delete, generate credentials
-- **[Keychain Setup]({{< relref "keychain-setup" >}})**: Configure OS keychain integration for password storage
-- **[Usage Tracking]({{< relref "usage-tracking" >}})**: Automatic credential usage tracking by working directory
-- **[Backup & Restore]({{< relref "backup-restore" >}})**: Vault backup and disaster recovery procedures
-- **[TUI Guide]({{< relref "tui-guide" >}})**: Interactive terminal user interface guide
-- **[Scripting Guide]({{< relref "scripting-guide" >}})**: Automate pass-cli with scripts and CI/CD integration
+{{< cards >}}
+  {{< card link="basic-workflows" title="Basic Workflows" icon="cursor-click" subtitle="Daily operations - list, update, delete, generate credentials" >}}
+  {{< card link="keychain-setup" title="Keychain Setup" icon="key" subtitle="Configure OS keychain integration for password storage" >}}
+  {{< card link="usage-tracking" title="Usage Tracking" icon="chart-bar" subtitle="Automatic credential usage tracking by working directory" >}}
+  {{< card link="backup-restore" title="Backup & Restore" icon="document-duplicate" subtitle="Vault backup and disaster recovery procedures" >}}
+  {{< card link="tui-guide" title="TUI Guide" icon="terminal" subtitle="Interactive terminal user interface guide" >}}
+  {{< card link="scripting-guide" title="Scripting Guide" icon="code" subtitle="Automate pass-cli with scripts and CI/CD integration" >}}
+{{< /cards >}}

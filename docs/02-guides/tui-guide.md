@@ -1,10 +1,8 @@
 ---
 title: "TUI Guide"
 weight: 5
-bookToc: true
+toc: true
 ---
-
-# TUI Guide
 
 Pass-CLI includes an interactive Terminal User Interface (TUI) for visual credential management. The TUI provides an alternative to CLI commands with visual navigation, real-time search, and keyboard-driven workflows.
 

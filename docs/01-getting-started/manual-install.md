@@ -1,10 +1,8 @@
 ---
 title: "Manual Installation"
 weight: 2
-bookToc: true
+toc: true
 ---
-
-# Manual Installation Guide
 
 Manual installation gives you direct control over the binary location and version.
 

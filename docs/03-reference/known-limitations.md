@@ -1,20 +1,12 @@
 ---
 title: "Known Limitations"
 weight: 4
-bookToc: true
+toc: true
 ---
-
-# Known Limitations
 Documentation of known technical limitations in Pass-CLI and their security implications.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
 
-
-## Table of Contents
-
-- [TUI Password Input Memory Handling](#tui-password-input-memory-handling)
-- [Memory Clearing and Go GC](#memory-clearing-and-go-gc)
-- [Performance on Older Hardware](#performance-on-older-hardware)
 
 ## TUI Password Input Memory Handling
 

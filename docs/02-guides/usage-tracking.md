@@ -1,10 +1,8 @@
 ---
 title: "Usage Tracking"
 weight: 3
-bookToc: true
+toc: true
 ---
-
-# Usage Tracking Guide
 
 Pass-CLI automatically tracks where and when credentials are accessed, enabling powerful organization and discovery features.
 

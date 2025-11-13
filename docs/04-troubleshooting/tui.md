@@ -1,10 +1,8 @@
 ---
 title: "TUI Issues"
 weight: 4
-bookToc: true
+toc: true
 ---
-
-# TUI Troubleshooting
 
 Solutions for Terminal User Interface rendering and interaction problems.
 

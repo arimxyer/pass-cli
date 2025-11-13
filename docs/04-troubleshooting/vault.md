@@ -1,10 +1,8 @@
 ---
 title: "Vault Issues"
 weight: 2
-bookToc: true
+toc: true
 ---
-
-# Vault Troubleshooting
 
 Solutions for vault access, corruption, and recovery issues.
 

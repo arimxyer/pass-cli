@@ -1,10 +1,8 @@
 ---
 title: "Configuration"
 weight: 2
-bookToc: true
+toc: true
 ---
-
-# Configuration Reference
 
 Complete configuration options for pass-cli including vault location, clipboard settings, TUI theme, and keyboard shortcuts.
 

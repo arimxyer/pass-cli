@@ -1,24 +1,12 @@
 ---
 title: "Migration"
 weight: 5
-bookToc: true
+toc: true
 ---
-
-# Migration Guide
 Guide for upgrading Pass-CLI vaults and adapting to security hardening changes (January 2025 release).
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
 
-
-## Table of Contents
-
-- [Overview](#overview)
-- [What Changed](#what-changed)
-- [Migration Scenarios](#migration-scenarios)
-- [Step-by-Step Migration](#step-by-step-migration)
-- [Backward Compatibility](#backward-compatibility)
-- [Troubleshooting](#troubleshooting)
-- [FAQ](#faq)
 
 ## Overview
 

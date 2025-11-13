@@ -1,10 +1,8 @@
 ---
 title: "Basic Workflows"
 weight: 1
-bookToc: true
+toc: true
 ---
-
-# Basic Workflows
 
 Common daily operations with pass-cli: listing, updating, deleting, and generating credentials.
 

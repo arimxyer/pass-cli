@@ -2,8 +2,6 @@
 title: "pass-cli Documentation"
 ---
 
-# pass-cli Documentation
-
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
 
 Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform CLI password and API key manager designed for developers.

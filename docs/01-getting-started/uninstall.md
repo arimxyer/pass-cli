@@ -1,10 +1,8 @@
 ---
 title: "Uninstall"
 weight: 4
-bookToc: true
+toc: true
 ---
-
-# Uninstallation Guide
 
 Complete instructions for removing pass-cli from your system.
 

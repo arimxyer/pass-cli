@@ -1,10 +1,8 @@
 ---
 title: "Keychain Setup"
 weight: 2
-bookToc: true
+toc: true
 ---
-
-# Keychain Setup Guide
 
 Configure OS keychain integration to store your master password securely and eliminate repeated password prompts.
 

@@ -1,10 +1,8 @@
 ---
 title: "FAQ"
 weight: 5
-bookToc: true
+toc: true
 ---
-
-# Frequently Asked Questions
 
 Common questions about pass-cli features, usage, and troubleshooting.
 

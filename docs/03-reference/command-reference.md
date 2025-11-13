@@ -1,18 +1,12 @@
 ---
 title: "Command Reference"
 weight: 1
-bookToc: true
+toc: true
 ---
-
-# Command Reference
 Complete reference for all pass-cli commands and their options.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
 
-## Table of Contents
-
-- [Global Options](#global-options)
-- [Commands](#commands)
   - [init](#init---initialize-vault)
   - [add](#add---add-credential)
   - [get](#get---retrieve-credential)

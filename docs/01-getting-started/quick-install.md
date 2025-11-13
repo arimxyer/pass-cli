@@ -1,31 +1,11 @@
 ---
 title: "Quick Install"
 weight: 1
-bookToc: true
+toc: true
 ---
-
-# Quick Install Guide
 Fast installation using package managers for Pass-CLI across all supported platforms.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
-
-## Table of Contents
-
-- [Quick Install](#quick-install)
-- [Package Managers](#package-managers)
-  - [Homebrew (macOS/Linux)](#homebrew-macoslinux)
-  - [Scoop (Windows)](#scoop-windows)
-- [Manual Installation](#manual-installation)
-  - [Download Pre-built Binaries](#download-pre-built-binaries)
-  - [Verify Checksums](#verify-checksums)
-  - [Install Binary](#install-binary)
-- [Building from Source](#building-from-source)
-  - [Prerequisites](#prerequisites)
-  - [Build Steps](#build-steps)
-  - [Build Options](#build-options)
-- [Post-Installation](#post-installation)
-- [Troubleshooting](#troubleshooting)
-- [Uninstallation](#uninstallation)
 
 ## Quick Install
 

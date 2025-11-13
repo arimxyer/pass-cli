@@ -1,10 +1,8 @@
 ---
 title: "Scripting Guide"
 weight: 6
-bookToc: true
+toc: true
 ---
-
-# Scripting Guide
 
 Automate pass-cli with scripts using quiet mode, JSON output, and environment variable integration.
 

@@ -1,10 +1,8 @@
 ---
 title: "Documentation Lifecycle"
 weight: 8
-bookToc: true
+toc: true
 ---
-
-# Documentation Lifecycle Policy
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
 
