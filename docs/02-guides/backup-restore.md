@@ -1,6 +1,6 @@
 ---
 title: "Backup & Restore"
-weight: 1
+weight: 4
 bookToc: true
 ---
 
@@ -484,7 +484,7 @@ Monitor backup health with cron:
 
 ## See Also
 
-- [Security Documentation](../SECURITY.md) - Encryption details and security best practices
-- [Troubleshooting Guide](../TROUBLESHOOTING.md) - General troubleshooting for pass-cli
-- [Doctor Command](../DOCTOR_COMMAND.md) - Vault health checks and diagnostics
-- [Getting Started](../GETTING_STARTED.md) - First-time setup and basic workflows
+- {{< relref "../03-reference/security-architecture" >}} - Encryption details and security best practices
+- {{< relref "../04-troubleshooting/_index" >}} - General troubleshooting for pass-cli
+- {{< relref "../05-operations/health-checks" >}} - Vault health checks and diagnostics
+- {{< relref "../01-getting-started/quick-start" >}} - First-time setup and basic workflows

@@ -1,6 +1,6 @@
 ---
 title: "Migration"
-weight: 4
+weight: 5
 bookToc: true
 ---
 
@@ -457,6 +457,6 @@ Time includes manual re-entry of credentials. Future in-place migration will be 
 
 ## Support
 
-- **Documentation**: [docs/SECURITY.md](SECURITY.md), [docs/USAGE.md](USAGE.md)
+- **Documentation**: [Security Architecture]({{< relref "security-architecture" >}}), [Command Reference]({{< relref "command-reference" >}})
 - **Issues**: [GitHub Issues](https://github.com/ari1110/pass-cli/issues)
 

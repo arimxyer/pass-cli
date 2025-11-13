@@ -10,12 +10,12 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 
 ## Quick Links
 
-- [Getting Started]({{< relref "01-getting-started/first-steps" >}}) - First-time setup and initialization
-- [Installation]({{< relref "01-getting-started/installation" >}}) - Installation instructions for all platforms
-- [Usage Guide]({{< relref "02-usage/cli-reference" >}}) - Complete command reference
-- [Backup & Restore Guide]({{< relref "03-guides/backup-restore" >}}) - Manual vault backup management
-- [Security]({{< relref "04-reference/security" >}}) - Security features and best practices
-- [Troubleshooting]({{< relref "04-reference/troubleshooting" >}}) - Common issues and solutions
+- [Quick Start]({{< relref "01-getting-started/quick-start" >}}) - First-time setup and initialization (5 minutes)
+- [Quick Install]({{< relref "01-getting-started/quick-install" >}}) - Installation instructions for all platforms
+- [Command Reference]({{< relref "03-reference/command-reference" >}}) - Complete command reference
+- [Backup & Restore Guide]({{< relref "02-guides/backup-restore" >}}) - Manual vault backup management
+- [Security Architecture]({{< relref "03-reference/security-architecture" >}}) - Security features and cryptography
+- [Troubleshooting]({{< relref "04-troubleshooting/_index" >}}) - Common issues and solutions by category
 
 ## Features
 
@@ -36,4 +36,4 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 
 ## Contributing
 
-See [Contributing Guide]({{< relref "05-development/contributing" >}}) for developer documentation and contribution guidelines.
+See [Contributing Guide]({{< relref "06-development/contributing" >}}) for developer documentation and contribution guidelines.
