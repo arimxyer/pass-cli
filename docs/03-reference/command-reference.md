@@ -158,7 +158,7 @@ pass-cli add <service> [flags]
 | `--username` | `-u` | string | Username for the credential |
 | `--password` | `-p` | string | Password (not recommended, use prompt) |
 | `--generate` | `-g` | bool | Generate a random secure password |
-| `--gen-length` | | int | Length of generated password (default: 16) |
+| `--gen-length` | | int | Length of generated password (default: 20) |
 | `--category` | `-c` | string | Category for organizing credentials (e.g., 'Cloud', 'Databases') |
 | `--url` | | string | Service URL |
 | `--notes` | | string | Additional notes |
@@ -402,7 +402,7 @@ pass-cli update <service> [flags]
 | `--username` | `-u` | string | New username |
 | `--password` | `-p` | string | New password (not recommended) |
 | `--generate` | `-g` | bool | Generate a random secure password |
-| `--gen-length` | | int | Length of generated password (default: 16) |
+| `--gen-length` | | int | Length of generated password (default: 20) |
 | `--category` | | string | New category |
 | `--url` | | string | New URL |
 | `--notes` | | string | New notes |
@@ -512,6 +512,79 @@ Credential 'github' deleted successfully!
 
 ---
 
+### change-password - Change Master Password
+
+Change the master password used to encrypt and decrypt your vault.
+
+#### Synopsis
+
+```bash
+pass-cli change-password
+```
+
+#### Description
+
+Re-encrypts your entire vault with a new master password. You must provide your current password to authorize the change. The new password must meet the password policy requirements.
+
+**Password Policy Requirements:**
+- Minimum 12 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one digit
+- At least one special symbol (!@#$%^&*()-_=+[]{}|;:,.<>?)
+
+#### Flags
+
+None.
+
+#### Examples
+
+```bash
+# Change master password
+pass-cli change-password
+```
+
+#### Interactive Flow
+
+```
+🔐 Change Master Password
+📁 Vault location: /home/user/.pass-cli/vault.enc
+
+Enter current master password: ********
+
+Enter new master password (min 12 characters with uppercase, lowercase, digit, symbol): ********
+
+Password strength: Strong ✅
+- Length: 16 characters ✅
+- Uppercase: Yes ✅
+- Lowercase: Yes ✅
+- Digits: Yes ✅
+- Symbols: Yes ✅
+
+Confirm new master password: ********
+
+✅ Master password changed successfully!
+```
+
+#### Keychain Integration
+
+If keychain integration is enabled, the new password is automatically stored in your OS keychain, replacing the old one.
+
+#### Security Notes
+
+- **Current Password Required**: You must authenticate with your current password
+- **Policy Enforcement**: New password must meet all security requirements
+- **Re-encryption**: All credentials are re-encrypted with the new password
+- **Atomic Operation**: Vault is not modified if re-encryption fails
+- **Audit Logging**: Password changes are logged (if audit logging enabled)
+
+#### See Also
+
+- {{< relref "security-architecture#password-policy" >}} - Password policy details
+- {{< relref "../02-guides/keychain-setup" >}} - Keychain integration
+
+---
+
 ### generate - Generate Password
 
 Generate a cryptographically secure password.
@@ -617,6 +690,284 @@ pass-cli version X.Y.Z
   built:  2025-01-20T10:30:00Z
   go:     go1.25.1
 ```
+
+---
+
+### usage - View Credential Usage History
+
+Display detailed usage history showing where and when a credential was accessed.
+
+#### Synopsis
+
+```bash
+pass-cli usage <service> [flags]
+```
+
+#### Description
+
+Shows credential access patterns across different working directories, including:
+- Location paths (working directories where credential was used)
+- Git repository context (if location is within a git repo)
+- Last access timestamps
+- Access counts per location
+- Field-level usage breakdown (username, password, url, notes)
+
+Useful for tracking where credentials are used across projects and identifying stale usage locations.
+
+#### Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<service>` | Yes | Service name to view usage history for |
+
+#### Flags
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--format` | string | `table` | Output format: `table`, `json`, `simple` |
+| `--limit` | int | `20` | Max locations to display (0 = unlimited) |
+
+#### Examples
+
+```bash
+# View usage history (table format, 20 most recent locations)
+pass-cli usage github
+
+# View all locations (no limit)
+pass-cli usage aws --limit 0
+
+# View only 5 most recent locations
+pass-cli usage postgres --limit 5
+
+# JSON output for scripting
+pass-cli usage heroku --format json
+
+# Simple format (location paths only)
+pass-cli usage redis --format simple
+```
+
+#### Output (Table Format)
+
+```
+Usage History for 'github':
+
+Location                                    Git Repo             Last Access          Count  Fields
+──────────────────────────────────────────────────────────────────────────────────────────────────
+/home/user/projects/webapp                  ✓ webapp             2025-11-12 14:30     12     password(8), username(4)
+/home/user/projects/api-service             ✓ api-service        2025-11-10 09:15     5      password(5)
+/home/user/scripts                          ✗ (not a git repo)   2025-11-08 16:45     3      password(2), url(1)
+
+Total locations: 3
+Total accesses: 20
+```
+
+#### Output (JSON Format)
+
+```json
+{
+  "service": "github",
+  "locations": [
+    {
+      "location": "/home/user/projects/webapp",
+      "git_repository": "webapp",
+      "path_exists": true,
+      "last_access": "2025-11-12T14:30:22Z",
+      "access_count": 12,
+      "field_counts": {
+        "password": 8,
+        "username": 4
+      }
+    }
+  ],
+  "total_locations": 3,
+  "total_accesses": 20
+}
+```
+
+#### Output (Simple Format)
+
+```
+/home/user/projects/webapp
+/home/user/projects/api-service
+/home/user/scripts
+```
+
+#### Notes
+
+- **Path Validation**: Shows ✓ if location path still exists, ✗ if deleted
+- **Git Integration**: Detects git repositories and shows repo name
+- **Field Tracking**: Counts which credential fields were accessed
+- **Automatic**: Usage tracked automatically on every `get` command
+- **Location Limit**: Default 20 locations prevents overwhelming output for heavily-used credentials
+
+#### See Also
+
+- {{< relref "../02-guides/usage-tracking" >}} - Comprehensive usage tracking guide
+
+---
+
+### config - Manage Configuration
+
+Manage Pass-CLI configuration settings for terminal warnings and keyboard shortcuts.
+
+#### Synopsis
+
+```bash
+pass-cli config <subcommand>
+```
+
+#### Description
+
+Configuration file location: `~/.pass-cli/config.yml`
+
+Manages settings for:
+- Terminal size warnings and minimum dimensions
+- TUI keyboard shortcuts and keybindings
+- Vault path location
+- Other application preferences
+
+#### Subcommands
+
+##### config init
+
+Create configuration file with commented examples.
+
+**Synopsis:**
+```bash
+pass-cli config init
+```
+
+**Description:**
+Creates a new config file at `~/.pass-cli/config.yml` with default settings and examples. Fails if file already exists (use `config reset` to overwrite).
+
+**Examples:**
+```bash
+# Create default config file
+pass-cli config init
+```
+
+**Output:**
+```
+✅ Configuration file created: /home/user/.pass-cli/config.yml
+
+Edit the file to customize your settings:
+- Terminal warnings
+- Keyboard shortcuts
+- Vault location
+```
+
+##### config edit
+
+Open configuration file in your default editor.
+
+**Synopsis:**
+```bash
+pass-cli config edit
+```
+
+**Description:**
+Opens config file in editor determined by:
+1. `EDITOR` environment variable
+2. Platform defaults (notepad on Windows, nano/vim on Linux/macOS)
+
+Creates config file with defaults if it doesn't exist.
+
+**Examples:**
+```bash
+# Edit config file
+pass-cli config edit
+
+# Use specific editor
+EDITOR=vim pass-cli config edit
+```
+
+##### config validate
+
+Validate configuration file syntax and settings.
+
+**Synopsis:**
+```bash
+pass-cli config validate
+```
+
+**Description:**
+Checks configuration for errors:
+- Terminal size ranges (1-10000 width, 1-1000 height)
+- Keybinding conflicts (no duplicate key assignments)
+- Unknown actions (all keybindings must map to known actions)
+- Key format validation
+
+**Exit codes:**
+- `0` = Configuration valid
+- `1` = Configuration has errors
+- `2` = File system error
+
+**Examples:**
+```bash
+# Validate config
+pass-cli config validate
+```
+
+**Output (Valid):**
+```
+✅ Configuration is valid
+
+Settings:
+  Vault path: ~/.pass-cli/vault.enc
+  Terminal warnings: enabled
+  Keybindings: 15 custom shortcuts defined
+```
+
+**Output (Invalid):**
+```
+❌ Configuration has errors:
+
+Line 12: Invalid terminal width: 0 (must be between 1-10000)
+Line 25: Duplicate keybinding: Ctrl+S assigned to both 'save' and 'search'
+Line 34: Unknown action: 'invalid_action'
+
+Fix these errors and run 'config validate' again.
+```
+
+##### config reset
+
+Reset configuration to default values.
+
+**Synopsis:**
+```bash
+pass-cli config reset [flags]
+```
+
+**Flags:**
+| Flag | Type | Description |
+|------|------|-------------|
+| `--force`, `-f` | bool | Skip confirmation prompt |
+
+**Description:**
+Overwrites existing config file with defaults. Requires confirmation unless `--force` flag is used.
+
+**Examples:**
+```bash
+# Reset with confirmation
+pass-cli config reset
+
+# Reset without confirmation
+pass-cli config reset --force
+```
+
+**Output:**
+```
+⚠️  This will overwrite your current configuration.
+Are you sure you want to reset to defaults? (y/n): y
+
+✅ Configuration reset to defaults: /home/user/.pass-cli/config.yml
+```
+
+#### See Also
+
+- {{< relref "configuration" >}} - Configuration file reference
+
+---
 
 ### keychain - Manage Keychain Integration
 
@@ -795,6 +1146,281 @@ Are you sure you want to remove /home/user/.pass-cli/vault.enc? (y/n): y
    • Keychain entry removed
    • Orphaned entries cleaned up
 ```
+
+##### vault backup
+
+Manage vault backups for disaster recovery.
+
+**Synopsis:**
+```bash
+pass-cli vault backup <subcommand>
+```
+
+###### vault backup create
+
+Create a timestamped manual backup of the vault.
+
+**Synopsis:**
+```bash
+pass-cli vault backup create [flags]
+```
+
+**Description:**
+Creates a manual backup with naming pattern `vault.enc.YYYYMMDD-HHMMSS.manual.backup`. Works without requiring the master password (no vault unlock needed).
+
+**Flags:**
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `-v`, `--verbose` | bool | Show detailed operation progress |
+
+**Examples:**
+```bash
+# Create manual backup
+pass-cli vault backup create
+
+# Create backup with verbose output
+pass-cli vault backup create --verbose
+```
+
+**Output:**
+```
+✅ Manual backup created successfully:
+   /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
+   Size: 2.45 MB
+```
+
+###### vault backup restore
+
+Restore vault from the most recent backup.
+
+**Synopsis:**
+```bash
+pass-cli vault backup restore [flags]
+```
+
+**Description:**
+Automatically selects the newest valid backup (automatic or manual) and restores it. Considers both `vault.enc.backup` (automatic) and `vault.enc.*.manual.backup` files.
+
+**⚠️ WARNING:** This command overwrites your current vault file with the backup.
+
+**Flags:**
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `-f`, `--force` | bool | Skip confirmation prompt |
+| `-v`, `--verbose` | bool | Show detailed operation progress |
+| `--dry-run` | bool | Preview which backup would be restored (no changes) |
+
+**Examples:**
+```bash
+# Restore from newest backup (with confirmation)
+pass-cli vault backup restore
+
+# Restore without confirmation
+pass-cli vault backup restore --force
+
+# Preview which backup would be restored
+pass-cli vault backup restore --dry-run
+
+# Restore with detailed progress
+pass-cli vault backup restore --verbose
+```
+
+**Output:**
+```
+Found backup: /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
+Backup age: 2 hours ago
+Size: 2.45 MB
+
+⚠️  This will overwrite your current vault file.
+Are you sure you want to restore from this backup? (y/n): y
+
+✅ Vault restored successfully from backup
+```
+
+###### vault backup info
+
+View backup status and information.
+
+**Synopsis:**
+```bash
+pass-cli vault backup info [flags]
+```
+
+**Description:**
+Displays all available backups with metadata:
+- Backup type (automatic or manual)
+- File size and creation time
+- Age with warnings for backups >30 days old
+- Which backup would be used for restore
+- Disk space usage alerts (>5 manual backups)
+
+**Flags:**
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `-v`, `--verbose` | bool | Show detailed backup information |
+
+**Examples:**
+```bash
+# View all backups
+pass-cli vault backup info
+
+# View with detailed information
+pass-cli vault backup info --verbose
+```
+
+**Output:**
+```
+📦 Backup Status for: /home/user/.pass-cli/vault.enc
+
+Automatic Backup:
+  ✅ vault.enc.backup
+     Size: 2.45 MB
+     Created: 1 day ago (2025-11-11 14:30:22)
+
+Manual Backups:
+  ✅ vault.enc.20251112-143022.manual.backup ← Would be used for restore
+     Size: 2.45 MB
+     Created: 2 hours ago (2025-11-12 14:30:22)
+
+  ✅ vault.enc.20251110-091545.manual.backup
+     Size: 2.40 MB
+     Created: 2 days ago (2025-11-10 09:15:45)
+
+Total backups: 3
+Total disk space: 7.30 MB
+```
+
+**See Also:**
+- {{< relref "../02-guides/backup-restore" >}} - Comprehensive backup guide
+
+---
+
+### verify-audit - Verify Audit Log Integrity
+
+Verify the integrity of audit log entries by checking HMAC signatures.
+
+#### Synopsis
+
+```bash
+pass-cli verify-audit [audit-log-path]
+```
+
+#### Description
+
+Verifies that audit log entries have not been tampered with by validating HMAC-SHA256 signatures on each entry. The audit key is retrieved from the OS keychain for verification.
+
+**What It Checks:**
+- HMAC signature validity for each log entry
+- JSON structure integrity
+- Chronological consistency
+- Presence of required fields (timestamp, event, outcome)
+
+#### Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `audit-log-path` | No | Path to audit log file (defaults to `<vault-dir>/audit.log`) |
+
+#### Flags
+
+None.
+
+#### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `PASS_AUDIT_LOG` | Custom audit log path (overridden by command argument) |
+
+#### Examples
+
+```bash
+# Verify default audit log
+pass-cli verify-audit
+
+# Verify specific audit log
+pass-cli verify-audit /path/to/audit.log
+
+# Verify with environment variable
+PASS_AUDIT_LOG=/custom/audit.log pass-cli verify-audit
+```
+
+#### Output (All Valid)
+
+```
+🔍 Verifying audit log: /home/user/.pass-cli/audit.log
+
+✅ Audit log verification complete:
+   Total entries: 127
+   Valid entries: 127
+   Invalid entries: 0
+   Tampered entries: 0
+
+Audit log integrity: VERIFIED ✅
+```
+
+#### Output (Tampered Detected)
+
+```
+🔍 Verifying audit log: /home/user/.pass-cli/audit.log
+
+⚠️  Audit log verification failed:
+   Total entries: 127
+   Valid entries: 123
+   Invalid entries: 4
+   Tampered entries: 4
+
+Invalid entries detected:
+  Line 45: HMAC verification failed (possible tampering)
+  Line 67: HMAC verification failed (possible tampering)
+  Line 89: Invalid JSON structure
+  Line 102: Missing required fields
+
+Audit log integrity: FAILED ❌
+
+CRITICAL: Audit log may have been tampered with or corrupted.
+Review the log file and investigate the flagged entries.
+```
+
+#### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | All entries valid, log integrity verified |
+| 1 | Tampered or invalid entries detected |
+| 2 | Audit log not found or inaccessible |
+| 3 | Audit key not found in keychain |
+
+#### Security Notes
+
+- **HMAC Key Required**: Audit key must exist in OS keychain
+- **Tamper Evidence**: Failed verification indicates log modification
+- **Read-Only**: Verification does not modify the audit log
+- **Automatic Rotation**: Verifies all rotated log files if present
+
+#### Troubleshooting
+
+**Problem**: "audit log not found"
+**Solution**: Ensure vault was initialized with `--enable-audit` flag
+
+**Problem**: "failed to retrieve audit key from keychain"
+**Solution**: Audit key may have been deleted. Re-initialize audit logging with `pass-cli init --enable-audit`
+
+**Problem**: "HMAC verification failed"
+**Causes**:
+- Audit log manually edited (tampering)
+- Log file corrupted
+- Audit key changed or regenerated
+- File system corruption
+
+#### See Also
+
+- {{< relref "security-architecture#audit-logging" >}} - Audit logging architecture
+- {{< relref "../05-operations/security-operations" >}} - Security best practices
+
+---
 
 **Use Cases:**
 - Decommissioning a vault that's no longer needed

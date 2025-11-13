@@ -157,8 +157,9 @@ For complete command reference, flags, and examples, see [docs/03-reference/comm
 **Keychain Integration**:
 - Master password stored in OS keychain (Windows Credential Manager, macOS Keychain, Linux Secret Service)
 - Automatic unlock when needed
-- Enable/disable anytime: `pass-cli keychain enable` / `pass-cli keychain disable`
+- Enable: `pass-cli keychain enable`
 - Check status: `pass-cli keychain status`
+- Disable: Use OS credential manager (see [Keychain Setup](docs/02-guides/keychain-setup.md#disable-keychain-integration))
 - TUI auto-unlocks when keychain is enabled
 
 **Audit Logging** (Optional):
