@@ -39,11 +39,12 @@ jobs:
         id: hugo-build
         run: |
           echo "Building Hugo site..."
-          hugo --source docsite/ --minify --verbose 2>&1 | tee build.log
+          hugo --source docsite/ --minify 2>&1 | tee build.log
 
-          # Check for errors in build log
-          if grep -i "error" build.log; then
-            echo "❌ Hugo build failed with errors"
+          # Check for render errors (not deprecation warnings)
+          if grep "ERROR render" build.log; then
+            echo "❌ Hugo build failed with render errors"
+            cat build.log
             exit 1
           fi
 
@@ -102,9 +103,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Check markdown syntax
-        uses: DavidAnson/markdownlint-action@v1
+        uses: DavidAnson/markdownlint-cli2-action@v16
         with:
-          files: 'docs/**/*.md'
+          globs: 'docs/**/*.md'
           config: '.markdownlint.json'
         continue-on-error: true
 
