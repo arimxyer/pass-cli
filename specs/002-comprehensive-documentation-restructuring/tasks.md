@@ -121,17 +121,17 @@ When merging content from multiple sources into single canonical doc:
 
 ### Implementation for User Story 3
 
-- [ ] T035 [P] [US3] Create 04-troubleshooting/ section directory
-- [ ] T036 [P] [US3] Split troubleshooting.md → installation.md: Extract install/init issues (lines 1-300) + installation.md troubleshooting to `docs/04-troubleshooting/installation.md`
-- [ ] T037 [P] [US3] Split troubleshooting.md → vault.md: Extract vault access/corruption/recovery (lines 743-1240) to `docs/04-troubleshooting/vault.md`
-- [ ] T038 [P] [US3] Split troubleshooting.md → keychain.md: Extract keychain platform issues (lines 485-742) to `docs/04-troubleshooting/keychain.md`
-- [ ] T039 [P] [US3] Split troubleshooting.md → tui.md: Extract TUI rendering/interaction issues (TUI sections) to `docs/04-troubleshooting/tui.md`
-- [ ] T040 [P] [US3] Consolidate FAQ: Use `git mv docs/04-reference/troubleshooting.md docs/04-troubleshooting/faq.md` as base, edit to keep only FAQ section (lines 1242-1368), then merge FAQ content from first-steps.md (lines 443-492, 550+), cli-reference.md (lines 1802-2032), and migration.md (lines 388-434)
-- [ ] T041 [US3] Add front matter to all troubleshooting docs (titles, weights 1-5)
-- [ ] T042 [US3] Create 04-troubleshooting/_index.md with category descriptions
-- [ ] T043 [US3] Remove FAQ sections from original source files (first-steps.md, cli-reference.md remnants, migration.md)
-- [ ] T044 [US3] Remove original troubleshooting.md after verifying all content migrated
-- [ ] T045 [US3] Convert internal links in troubleshooting docs to Hugo relref format
+- [x] T035 [P] [US3] Create 04-troubleshooting/ section directory
+- [x] T036 [P] [US3] Split troubleshooting.md → installation.md: Extract install/init issues (lines 1-300) + installation.md troubleshooting to `docs/04-troubleshooting/installation.md`
+- [x] T037 [P] [US3] Split troubleshooting.md → vault.md: Extract vault access/corruption/recovery (lines 743-1240) to `docs/04-troubleshooting/vault.md`
+- [x] T038 [P] [US3] Split troubleshooting.md → keychain.md: Extract keychain platform issues (lines 485-742) to `docs/04-troubleshooting/keychain.md`
+- [x] T039 [P] [US3] Split troubleshooting.md → tui.md: Extract TUI rendering/interaction issues (TUI sections) to `docs/04-troubleshooting/tui.md`
+- [x] T040 [P] [US3] Consolidate FAQ: Use `git mv docs/04-reference/troubleshooting.md docs/04-troubleshooting/faq.md` as base, edit to keep only FAQ section (lines 1242-1368), then merge FAQ content from first-steps.md (lines 443-492, 550+), cli-reference.md (lines 1802-2032), and migration.md (lines 388-434)
+- [x] T041 [US3] Add front matter to all troubleshooting docs (titles, weights 1-5)
+- [x] T042 [US3] Create 04-troubleshooting/_index.md with category descriptions
+- [x] T043 [US3] Remove FAQ sections from original source files (first-steps.md, cli-reference.md remnants, migration.md)
+- [x] T044 [US3] Remove original troubleshooting.md after verifying all content migrated
+- [x] T045 [US3] Convert internal links in troubleshooting docs to Hugo relref format
 
 **Checkpoint**: Users experiencing problems can now find category-specific solutions independently
 
