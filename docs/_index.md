@@ -13,6 +13,7 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 - [Quick Start]({{< relref "01-getting-started/quick-start" >}}) - First-time setup and initialization (5 minutes)
 - [Quick Install]({{< relref "01-getting-started/quick-install" >}}) - Installation instructions for all platforms
 - [Command Reference]({{< relref "03-reference/command-reference" >}}) - Complete command reference
+- [Recovery Phrase]({{< relref "02-guides/recovery-phrase" >}}) - BIP39 recovery phrase setup and usage
 - [Backup & Restore Guide]({{< relref "02-guides/backup-restore" >}}) - Manual vault backup management
 - [Security Architecture]({{< relref "03-reference/security-architecture" >}}) - Security features and cryptography
 - [Troubleshooting]({{< relref "04-troubleshooting/_index" >}}) - Common issues and solutions by category
@@ -20,6 +21,7 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 ## Features
 
 - **Strong Encryption**: AES-256-GCM with PBKDF2 key derivation (600,000 iterations)
+- **BIP39 Recovery**: 24-word mnemonic for vault password recovery
 - **Cross-Platform**: Works on Windows, macOS, and Linux
 - **Keychain Integration**: Optional OS keychain support for automatic unlocking
 - **Interactive TUI**: Beautiful terminal UI built with tview

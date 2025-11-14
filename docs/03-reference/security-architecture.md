@@ -15,6 +15,7 @@ Pass-CLI is designed with security as the primary concern. All credentials are e
 
 - **AES-256-GCM Encryption**: Military-grade authenticated encryption
 - **PBKDF2 Key Derivation**: 600,000 iterations with SHA-256 (hardened, January 2025)
+- **BIP39 Recovery Phrase**: 24-word mnemonic for vault password recovery (industry-standard)
 - **System Keychain Integration**: Secure master password storage
 - **Offline-First Design**: No network calls, no cloud dependencies
 - **Secure Memory Handling**: Byte-based password handling with immediate zeroing
@@ -209,8 +210,68 @@ Pass-CLI integrates with your operating system's secure credential storage to sa
 - ✅ Use a unique master password (not reused elsewhere)
 - ✅ Make it strong (20+ characters or passphrase)
 - ✅ Store backup securely (password manager, safe place)
+- ✅ Save your BIP39 recovery phrase offline (paper, safe)
 - ❌ Don't share your master password
 - ❌ Don't write it in plaintext files
+
+### BIP39 Recovery Phrase
+
+Pass-CLI supports optional BIP39 recovery phrases to recover vault access if you forget your master password. This feature uses the industry-standard BIP39 mnemonic specification (same as hardware wallets).
+
+#### How It Works
+
+**During Initialization:**
+1. Generate 24-word BIP39 mnemonic phrase
+2. Derive recovery key from mnemonic using PBKDF2
+3. Encrypt recovery key with master password
+4. Store encrypted recovery key in vault metadata
+
+**During Recovery:**
+1. User provides 6 random words from their 24-word phrase (challenge)
+2. System verifies the words match the stored mnemonic
+3. Derive recovery key from complete mnemonic
+4. Decrypt vault metadata to verify recovery key
+5. Allow user to set new master password
+
+#### Security Properties
+
+- **Challenge-Response**: 6 random words = 2^66 possible combinations (~73.8 quintillion)
+- **Offline Storage**: Recovery phrase should be written on paper, not stored digitally
+- **Optional Feature**: Can be skipped during initialization with `--no-recovery` flag
+- **Passphrase Protection**: Optional 25th word for additional security
+- **No Backdoor**: Recovery phrase is user-generated and user-stored only
+
+#### Commands
+
+```bash
+# Initialize vault with recovery phrase (default)
+pass-cli init
+
+# Initialize vault without recovery phrase
+pass-cli init --no-recovery
+
+# Recover access if password forgotten
+pass-cli change-password --recover
+```
+
+#### Storage Recommendations
+
+**Secure Storage** (Recommended):
+- ✅ Write on paper and store in physical safe
+- ✅ Safety deposit box
+- ✅ Fireproof/waterproof document safe
+- ✅ Split across multiple secure locations (advanced)
+
+**Insecure Storage** (Avoid):
+- ❌ Digital notes apps
+- ❌ Cloud storage (Dropbox, Google Drive)
+- ❌ Email or messaging apps
+- ❌ Screenshots or photos
+- ❌ Password managers (defeats the purpose)
+
+**Important**: Anyone with your 24-word phrase can access your vault. Protect it as carefully as your master password.
+
+For detailed recovery procedures, see [Recovery Guide](../../specs/003-bip39-mnemonic-based/quickstart.md).
 
 ## Data Storage Security
 
@@ -393,19 +454,19 @@ pass-cli verify-audit
 
 ### What We Cannot Guarantee
 
-1. **Availability**: Forgot password = lost vault
-2. **Recovery**: No backdoor or recovery mechanism
-3. **Zero-Knowledge**: Master password accessible via keychain
-4. **Perfect Security**: Subject to implementation bugs
+1. **Availability**: Forgot password without recovery phrase = lost vault
+2. **Zero-Knowledge**: Master password accessible via keychain
+3. **Perfect Security**: Subject to implementation bugs
 
 ## Limitations
 
 ### Known Limitations
 
-1. **Master Password Recovery**: None available
-   - If you forget master password, vault is unrecoverable
-   - No "forgot password" mechanism
-   - No backdoor or master key
+1. **Master Password Recovery**: Optional BIP39 recovery phrase
+   - If recovery phrase was enabled during init, you can recover access with `pass-cli change-password --recover`
+   - If recovery phrase was skipped (`--no-recovery`), vault is unrecoverable without the master password
+   - If you lose both master password AND recovery phrase, vault is unrecoverable
+   - No backdoor or master key exists
 
 2. **Keychain Dependency**
    - Master password security depends on OS keychain

@@ -69,6 +69,7 @@ pass-cli init
 |------|------|-------------|
 | `--enable-audit` | bool | Enable tamper-evident audit logging |
 | `--use-keychain` | bool | Store master password in OS keychain |
+| `--no-recovery` | bool | Skip BIP39 recovery phrase generation |
 
 #### Password Policy (January 2025)
 
@@ -107,11 +108,47 @@ pass-cli init --enable-audit
 pass-cli verify-audit
 ```
 
+#### BIP39 Recovery Phrase (Enabled by Default)
+
+Pass-CLI generates a 24-word BIP39 recovery phrase during initialization. This allows you to recover vault access if you forget your master password.
+
+**Default behavior (recovery enabled):**
+```bash
+pass-cli init
+
+# You'll be prompted to:
+# 1. Create master password
+# 2. Write down 24-word recovery phrase
+# 3. Verify recovery phrase (3 random words)
+```
+
+**Skip recovery phrase:**
+```bash
+# If you prefer keychain-only approach
+pass-cli init --no-recovery
+```
+
+**Recovery phrase features**:
+- **Industry Standard**: Uses BIP39 (same as hardware wallets)
+- **Secure**: 6-word challenge = 2^66 combinations (~73.8 quintillion)
+- **Offline Storage**: Write on paper, store in safe
+- **Optional Passphrase**: Add 25th word for additional protection
+- **Recovery Command**: `pass-cli change-password --recover`
+
+**When to skip recovery phrase:**
+- You use keychain integration and trust OS keychain
+- You keep master password in another password manager
+- You prefer single point of failure (master password only)
+
+For detailed recovery procedures, see [BIP39 Recovery Guide](../../../specs/003-bip39-mnemonic-based/quickstart.md) and [Security Architecture](security-architecture.md#bip39-recovery-phrase).
+
 #### Notes
 
 - Master password must meet complexity requirements (12+ chars, uppercase, lowercase, digit, symbol)
 - Strong passwords (20+ characters) recommended for master password
-- Master password is stored in OS keychain for convenience
+- Master password is stored in OS keychain for convenience (unless disabled)
+- Recovery phrase is enabled by default (use `--no-recovery` to skip)
+- Write recovery phrase on paper and store securely (safe, safety deposit box)
 - Vault file is created with restricted permissions (0600)
 - Audit logging is opt-in (disabled by default)
 
@@ -495,12 +532,14 @@ Change the master password used to encrypt and decrypt your vault.
 #### Synopsis
 
 ```bash
-pass-cli change-password
+pass-cli change-password [flags]
 ```
 
 #### Description
 
 Re-encrypts your entire vault with a new master password. You must provide your current password to authorize the change. The new password must meet the password policy requirements.
+
+If you forgot your master password, you can use the `--recover` flag to recover access using your BIP39 recovery phrase (if enabled during vault initialization).
 
 **Password Policy Requirements:**
 - Minimum 12 characters
@@ -511,17 +550,23 @@ Re-encrypts your entire vault with a new master password. You must provide your 
 
 #### Flags
 
-None.
+| Flag | Type | Description |
+|------|------|-------------|
+| `--recover` | bool | Use BIP39 recovery phrase instead of current password |
 
 #### Examples
 
 ```bash
-# Change master password
+# Change master password (normal flow)
 pass-cli change-password
+
+# Recover access with BIP39 recovery phrase (if password forgotten)
+pass-cli change-password --recover
 ```
 
 #### Interactive Flow
 
+**Normal password change:**
 ```
 🔐 Change Master Password
 📁 Vault location: /home/user/.pass-cli/vault.enc
@@ -542,21 +587,72 @@ Confirm new master password: ********
 ✅ Master password changed successfully!
 ```
 
+**Recovery flow with BIP39 phrase:**
+```
+🔐 Recover Vault Access
+📁 Vault location: /home/user/.pass-cli/vault.enc
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BIP39 Recovery Phrase Challenge
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You will be asked to provide 6 words from your 24-word recovery phrase.
+
+Enter word #7: device
+✓ (1/6)
+
+Enter word #12: diesel
+✓ (2/6)
+
+Enter word #18: identify
+✓ (3/6)
+
+Enter word #3: about
+✓ (4/6)
+
+Enter word #22: spin
+✓ (5/6)
+
+Enter word #15: hybrid
+✓ (6/6)
+
+✅ Recovery phrase verified successfully!
+
+Enter new master password: ********
+Confirm new master password: ********
+
+✅ Master password changed successfully!
+Your vault has been re-encrypted with the new password.
+```
+
 #### Keychain Integration
 
 If keychain integration is enabled, the new password is automatically stored in your OS keychain, replacing the old one.
 
 #### Security Notes
 
-- **Current Password Required**: You must authenticate with your current password
+- **Current Password Required**: You must authenticate with your current password (or use `--recover`)
+- **Recovery Phrase**: Use `--recover` flag if you forgot your master password (requires 24-word phrase)
+- **Recovery Requirements**: Recovery only works if BIP39 phrase was enabled during `pass-cli init`
 - **Policy Enforcement**: New password must meet all security requirements
 - **Re-encryption**: All credentials are re-encrypted with the new password
 - **Atomic Operation**: Vault is not modified if re-encryption fails
 - **Audit Logging**: Password changes are logged (if audit logging enabled)
 
+#### Recovery Prerequisites
+
+To use `--recover` flag, you must:
+1. Have enabled BIP39 recovery during `pass-cli init` (default behavior)
+2. Have your 24-word recovery phrase written down
+3. Be able to provide 6 random words from the phrase when challenged
+
+If you used `--no-recovery` during initialization, the `--recover` flag will not work.
+
 #### See Also
 
 - [Password Policy]({{< relref "security-architecture#password-policy" >}}) - Password policy details
+- [BIP39 Recovery]({{< relref "security-architecture#bip39-recovery-phrase" >}}) - Recovery phrase details
+- [Recovery Guide]({{< relref "../../../specs/003-bip39-mnemonic-based/quickstart" >}}) - Detailed recovery procedures
 - [Keychain Setup]({{< relref "../02-guides/keychain-setup" >}}) - Keychain integration
 
 ---

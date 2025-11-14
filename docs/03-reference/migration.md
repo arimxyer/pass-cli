@@ -401,7 +401,7 @@ Time includes manual re-entry of credentials. Future in-place migration will be 
 
 ### Q: What if I forget my master password after migration?
 
-**A**: Same as before: vault is unrecoverable. Keep master password backups secure. No backdoor or recovery mechanism.
+**A**: If you enabled BIP39 recovery during `pass-cli init`, you can recover using `pass-cli change-password --recover` and your 24-word recovery phrase. If you used `--no-recovery` or are on an older vault without recovery, the vault is unrecoverable. Keep master password and recovery phrase backups secure.
 
 ### Q: Are audit logs encrypted?
 
