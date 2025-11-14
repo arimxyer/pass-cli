@@ -318,9 +318,9 @@
   - Tests official BIP39 test vectors and cross-validates with go-bip39 library
 
 **Cross-Platform Testing**:
-- [ ] **T059** [P] Run integration tests on Windows (CI or manual)
-- [ ] **T060** [P] Run integration tests on macOS (CI or manual)
-- [ ] **T061** [P] Run integration tests on Linux (CI or manual)
+- [x] **T059** [P] Run integration tests on Windows (CI or manual) - ✓ All recovery tests pass
+- [ ] **T060** [P] Run integration tests on macOS (CI or manual) - Requires macOS environment
+- [ ] **T061** [P] Run integration tests on Linux (CI or manual) - Requires Linux environment
 
 **Code Quality**:
 - [x] **T062** Run `golangci-lint run` on `internal/recovery/` package - ✓ 0 issues
@@ -333,7 +333,7 @@
 - [ ] **T067** [P] Update SECURITY.md with recovery phrase security guidance
 
 **Final Validation**:
-- [ ] **T068** Run full integration test suite (`go test -v -tags=integration -timeout 5m ./test`)
+- [ ] **T068** Run full integration test suite (`go test -v -tags=integration -timeout 5m ./test`) - Partial: All recovery tests pass
 - [ ] **T069** Verify all 33 functional requirements from spec.md are satisfied
 - [ ] **T070** Verify all 10 success criteria from spec.md are met
 - [x] **T071** [P] Validate SC-007 metadata size constraint in `test/unit/recovery/metadata_size_test.go`:
