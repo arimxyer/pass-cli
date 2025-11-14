@@ -59,6 +59,25 @@ Pass-CLI is a security-focused tool with the following protections:
 - Master passwords stored in OS keychain (Windows Credential Manager, macOS Keychain, Linux Secret Service)
 - Password memory cleared after use
 
+**BIP39 Recovery Phrase**:
+- 24-word mnemonic phrase for vault recovery (industry-standard BIP39)
+- 6-word challenge provides 2^66 security (73.8 quintillion combinations)
+- Encrypted storage of 18 words using AES-256-GCM
+- Optional passphrase protection (25th word) for additional security layer
+- Memory clearing for mnemonic, seeds, and keys using `crypto.ClearBytes()`
+- **CRITICAL**: Store recovery phrase offline (paper, not digital)
+- **WARNING**: Recovery phrase provides vault access - treat as master password equivalent
+
+**Recovery Phrase Security Best Practices**:
+- ✅ Write on archival-quality paper with permanent ink
+- ✅ Store in physical safe, lockbox, or safety deposit box
+- ✅ Keep separate from vault location and master password
+- ✅ Test recovery once after initialization to verify backup
+- ❌ Never store digitally (photos, screenshots, notes apps, cloud storage)
+- ❌ Never share with anyone (including support personnel)
+- ❌ Never type into untrusted devices or online tools
+- ❌ Never memorize only - always maintain physical backup
+
 **Audit Logging**:
 - Optional HMAC-SHA256 signed audit trail
 - Tamper-evident operation tracking
