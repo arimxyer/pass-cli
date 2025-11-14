@@ -324,6 +324,7 @@ pass-cli delete test --force  # Clean up test
 ```
 
 **TUI vs CLI Mode:**
+
 - **TUI Mode**: Run `pass-cli` with no arguments for interactive visual interface
   - Best for: Browsing credentials, interactive management
   - Features: Search, keyboard shortcuts, visual feedback
@@ -340,16 +341,19 @@ pass-cli delete test --force  # Clean up test
 **Solutions**:
 
 1. **Verify binary location**
+
    ```bash
    which pass-cli  # Should show path
    ```
 
 2. **Check PATH**
+
    ```bash
    echo $PATH  # Should include installation directory
    ```
 
 3. **Add to PATH** (if missing)
+
    ```bash
    # Add to ~/.bashrc or ~/.zshrc
    export PATH="$PATH:/path/to/pass-cli"
@@ -404,17 +408,20 @@ xattr -d com.apple.quarantine /path/to/pass-cli
 **Solutions**:
 
 1. **Update Go**
+
    ```bash
    go version  # Should be 1.25+
    ```
 
 2. **Clean module cache**
+
    ```bash
    go clean -modcache
    go mod download
    ```
 
 3. **Update dependencies**
+
    ```bash
    go mod tidy
    go mod verify
@@ -456,4 +463,3 @@ scoop install pass-cli
 # Check logs
 scoop cat pass-cli
 ```
-

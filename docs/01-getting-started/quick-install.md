@@ -113,4 +113,3 @@ scoop info pass-cli
 # Install specific version
 scoop install pass-cli@0.0.1
 ```
-

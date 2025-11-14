@@ -186,4 +186,3 @@ Confirm password: ••••••••••••
 
 ✓ Credential 'github' added successfully
 ```
-
