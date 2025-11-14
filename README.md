@@ -25,6 +25,7 @@ Pass-CLI is a fast, secure password and API key manager that stores credentials 
 ## Key Features
 
 - **Military-Grade Encryption**: AES-256-GCM with hardened PBKDF2 key derivation (600,000 iterations)
+- **BIP39 Recovery Phrase**: 24-word recovery phrase for vault password reset (industry-standard mnemonic)
 - **System Keychain Integration**: Windows Credential Manager, macOS Keychain, Linux Secret Service
 - **Password Policy Enforcement**: Complexity requirements for vault and credential passwords
 - **Vault Backup & Restore**: Manual backups with integrity verification and automatic backup during vault operations
@@ -161,6 +162,16 @@ For complete command reference, flags, and examples, see [docs/03-reference/comm
 - Check status: `pass-cli keychain status`
 - Disable: Use OS credential manager (see [Keychain Setup](docs/02-guides/keychain-setup.md#disable-keychain-integration))
 - TUI auto-unlocks when keychain is enabled
+
+**BIP39 Recovery Phrase**:
+- 24-word mnemonic phrase generated during vault initialization
+- Recover vault access if you forget your master password
+- Industry-standard BIP39 (same as hardware wallets)
+- 6-word challenge for recovery (2^66 combinations)
+- Optional passphrase protection (25th word)
+- Recover: `pass-cli change-password --recover`
+- Skip during init: `pass-cli init --no-recovery`
+- See [Recovery Guide](specs/003-bip39-mnemonic-based/quickstart.md) for details
 
 **Audit Logging** (Optional):
 - Tamper-evident HMAC-SHA256 signed audit trail

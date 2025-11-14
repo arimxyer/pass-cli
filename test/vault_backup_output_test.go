@@ -21,7 +21,7 @@ func TestIntegration_BackupOutput_SuccessMessages(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -139,7 +139,7 @@ func TestIntegration_BackupOutput_ErrorMessages(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -173,7 +173,7 @@ func TestIntegration_BackupOutput_VerboseMode(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -258,7 +258,7 @@ func TestIntegration_BackupOutput_WarningMessages(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -294,7 +294,7 @@ func TestIntegration_BackupOutput_StructureConsistency(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}

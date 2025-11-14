@@ -6,6 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"pass-cli/internal/crypto"
+	"pass-cli/internal/recovery"
 	"pass-cli/internal/security"
 	"pass-cli/internal/vault"
 )
@@ -13,6 +15,7 @@ import (
 var (
 	useKeychain bool
 	enableAudit bool // T073: Flag to enable audit logging (FR-025)
+	noRecovery  bool // T028: Flag to skip BIP39 recovery phrase generation
 )
 
 var initCmd = &cobra.Command{
@@ -45,6 +48,8 @@ func init() {
 	initCmd.Flags().BoolVar(&useKeychain, "use-keychain", false, "store master password in system keychain")
 	// T073: Add --enable-audit flag (FR-025: opt-in per FR-025)
 	initCmd.Flags().BoolVar(&enableAudit, "enable-audit", false, "enable tamper-evident audit logging for vault operations")
+	// T028: Add --no-recovery flag (opt-out of BIP39 recovery)
+	initCmd.Flags().BoolVar(&noRecovery, "no-recovery", false, "skip BIP39 recovery phrase generation")
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
@@ -97,6 +102,134 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("passwords do not match")
 	}
 
+	// T028-T030: Setup BIP39 recovery (unless --no-recovery flag set)
+	var recoveryResult *recovery.SetupResult
+	if !noRecovery {
+		// T048: Prompt for optional passphrase (25th word)
+		var passphrase []byte
+		usePassphrase, err := promptYesNo("Advanced: Add passphrase protection (25th word)?", false)
+		if err != nil {
+			return fmt.Errorf("failed to read passphrase option: %w", err)
+		}
+
+		if usePassphrase {
+			fmt.Println()
+			fmt.Println("⚠️  Passphrase Protection:")
+			fmt.Println("   • Adds an extra layer of security to your recovery phrase")
+			fmt.Println("   • You will need BOTH the 24 words AND the passphrase to recover")
+			fmt.Println("   • Store the passphrase separately from your 24-word phrase")
+			fmt.Println("   • If you lose the passphrase, recovery will be impossible")
+			fmt.Println()
+
+			fmt.Print("Enter recovery passphrase: ")
+			passphrase, err = readPassword()
+			if err != nil {
+				return fmt.Errorf("failed to read passphrase: %w", err)
+			}
+			fmt.Println() // newline after password input
+
+			// Confirm passphrase
+			fmt.Print("Confirm recovery passphrase: ")
+			confirmPassphrase, err := readPassword()
+			if err != nil {
+				crypto.ClearBytes(passphrase)
+				return fmt.Errorf("failed to read confirmation passphrase: %w", err)
+			}
+			defer crypto.ClearBytes(confirmPassphrase)
+			fmt.Println() // newline after password input
+
+			// Verify passphrases match
+			if string(passphrase) != string(confirmPassphrase) {
+				crypto.ClearBytes(passphrase)
+				return fmt.Errorf("passphrases do not match")
+			}
+		}
+		defer func() {
+			if passphrase != nil {
+				crypto.ClearBytes(passphrase)
+			}
+		}()
+
+		// Setup recovery phrase
+		setupConfig := &recovery.SetupConfig{
+			Passphrase: passphrase,
+			KDFParams:  nil, // Use defaults
+		}
+
+		result, err := recovery.SetupRecovery(setupConfig)
+		if err != nil {
+			return fmt.Errorf("failed to setup recovery: %w", err)
+		}
+		recoveryResult = result
+		defer crypto.ClearBytes(recoveryResult.VaultRecoveryKey) // Clear key from memory
+
+		// Display mnemonic to user
+		displayMnemonic(result.Mnemonic)
+
+		// T029: Prompt for backup verification
+		verify, err := promptYesNo("Verify your backup?", true)
+		if err != nil {
+			return fmt.Errorf("failed to read verification response: %w", err)
+		}
+
+		if verify {
+			// Select 3 random positions for verification
+			verifyPositions, err := recovery.SelectVerifyPositions(3)
+			if err != nil {
+				return fmt.Errorf("failed to select verify positions: %w", err)
+			}
+
+			// Allow up to 3 attempts
+			const maxAttempts = 3
+			verified := false
+
+			for attempt := 1; attempt <= maxAttempts; attempt++ {
+				fmt.Printf("\nVerification (attempt %d/%d):\n", attempt, maxAttempts)
+
+				// Prompt for words at verify positions
+				userWords := make([]string, len(verifyPositions))
+				for i, pos := range verifyPositions {
+					word, err := promptForWord(pos)
+					if err != nil {
+						return fmt.Errorf("failed to read word: %w", err)
+					}
+					userWords[i] = word
+				}
+
+				// Verify backup
+				verifyConfig := &recovery.VerifyConfig{
+					Mnemonic:        result.Mnemonic,
+					VerifyPositions: verifyPositions,
+					UserWords:       userWords,
+				}
+
+				if err := recovery.VerifyBackup(verifyConfig); err == nil {
+					fmt.Println("✓ Backup verified successfully!")
+					verified = true
+					break
+				}
+
+				// Verification failed
+				if attempt < maxAttempts {
+					fmt.Println("✗ Verification failed. Please try again.")
+				} else {
+					fmt.Println("✗ Verification failed after 3 attempts.")
+					fmt.Println("⚠  Please ensure you have written down all 24 words correctly.")
+					fmt.Println("   Continuing vault initialization...")
+				}
+			}
+
+			if !verified {
+				// User failed verification, but we still create the vault
+				// Recovery phrase is still valid, they just need to write it down correctly
+				fmt.Println()
+			}
+		} else {
+			// User declined verification
+			fmt.Println("⚠  Skipping verification. Please ensure you have written down all 24 words correctly!")
+		}
+	}
+
 	// Create vault service
 	vaultService, err := vault.New(vaultPath)
 	if err != nil {
@@ -115,13 +248,19 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to initialize vault at %s: %w", vaultPath, err)
 	}
 
-	// T009a: Save metadata when --use-keychain flag provided (FR-023)
-	if useKeychain || enableAudit {
+	// T009a/T030: Save metadata when --use-keychain, --enable-audit, or recovery enabled
+	if useKeychain || enableAudit || recoveryResult != nil {
 		metadata := &vault.Metadata{
 			Version:         "1.0",
 			KeychainEnabled: useKeychain,
 			AuditEnabled:    enableAudit,
 		}
+
+		// T030: Add recovery metadata if recovery was setup
+		if recoveryResult != nil {
+			metadata.Recovery = recoveryResult.Metadata
+		}
+
 		if err := vaultService.SaveMetadata(metadata); err != nil {
 			return fmt.Errorf("failed to save vault metadata: %w", err)
 		}

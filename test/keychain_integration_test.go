@@ -33,7 +33,7 @@ func TestIntegration_KeychainWorkflow(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault with --use-keychain flag
-		input := testPassword + "\n" + testPassword + "\n"
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 		cmd := exec.Command(binaryPath, "init", "--use-keychain")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)
@@ -245,7 +245,7 @@ func TestIntegration_KeychainFallback(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault WITH keychain
-	input := testPassword + "\n" + testPassword + "\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init", "--use-keychain")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
@@ -302,7 +302,7 @@ func TestIntegration_KeychainUnavailable(t *testing.T) {
 		defer cleanup()
 
 		// Try to initialize with --use-keychain when keychain unavailable
-		input := testPassword + "\n" + testPassword + "\n"
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 		cmd := exec.Command(binaryPath, "init", "--use-keychain")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)
@@ -354,7 +354,7 @@ func TestIntegration_MultipleVaultsKeychain(t *testing.T) {
 		testConfigPath1, cleanup := setupTestVaultConfig(t, vault1Path)
 		defer cleanup()
 
-		input := testPassword + "\n" + testPassword + "\n"
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 		cmd := exec.Command(binaryPath, "init", "--use-keychain")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath1)
 		cmd.Stdin = strings.NewReader(input)
@@ -371,7 +371,7 @@ func TestIntegration_MultipleVaultsKeychain(t *testing.T) {
 
 		// Initialize second vault with same password
 		// It will use the same keychain entry
-		input := testPassword + "\n" + testPassword + "\n"
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 		cmd := exec.Command(binaryPath, "init", "--use-keychain")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath2)
 		cmd.Stdin = strings.NewReader(input)
@@ -425,7 +425,7 @@ func TestIntegration_KeychainVerboseOutput(t *testing.T) {
 	defer cleanup()
 
 	// Initialize with keychain
-	input := testPassword + "\n" + testPassword + "\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init", "--use-keychain")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)

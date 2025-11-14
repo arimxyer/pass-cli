@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"pass-cli/internal/recovery"
 	"pass-cli/internal/vault"
 	"path/filepath"
 	"runtime"
@@ -350,4 +351,144 @@ func unlockVault(vaultService *vault.VaultService) error {
 	}
 
 	return nil
+}
+
+// T031: displayMnemonic formats 24-word mnemonic as 4x6 grid
+// Used during vault initialization to display recovery phrase
+func displayMnemonic(mnemonic string) {
+	words := strings.Fields(mnemonic)
+	if len(words) != 24 {
+		fmt.Printf("Invalid mnemonic: expected 24 words, got %d\n", len(words))
+		return
+	}
+
+	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+	fmt.Println("Recovery Phrase Setup")
+	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+	fmt.Println("Write down these 24 words in order:")
+	fmt.Println()
+
+	// Display in 4 columns x 6 rows
+	for row := 0; row < 6; row++ {
+		line := ""
+		for col := 0; col < 4; col++ {
+			idx := col*6 + row
+			if idx < len(words) {
+				line += fmt.Sprintf("%3d. %-12s ", idx+1, words[idx])
+			}
+		}
+		fmt.Println(line)
+	}
+
+	fmt.Println()
+	fmt.Println("⚠  WARNINGS:")
+	fmt.Println("   • Anyone with this phrase can access your vault")
+	fmt.Println("   • Store offline (write on paper, use a safe)")
+	fmt.Println("   • Recovery requires 6 random words from this list")
+	fmt.Println()
+}
+
+// T031: promptForWord prompts user to enter a word at a specific position
+// Used during backup verification to test user wrote down mnemonic correctly
+// Returns word entered by user (trimmed, lowercase), error
+func promptForWord(position int) (string, error) {
+	fmt.Printf("Enter word #%d: ", position+1)
+
+	// Use readLine in test mode, otherwise read normally
+	var word string
+	if os.Getenv("PASS_CLI_TEST") == "1" {
+		line, err := readLine()
+		if err != nil {
+			return "", err
+		}
+		word = line
+	} else {
+		reader := bufio.NewReader(os.Stdin)
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			return "", fmt.Errorf("failed to read word: %w", err)
+		}
+		word = line
+	}
+
+	// Trim whitespace and convert to lowercase
+	word = strings.ToLower(strings.TrimSpace(word))
+
+	return word, nil
+}
+
+// T031: promptYesNo prompts user for yes/no confirmation
+// Returns true for yes (Y/y), false for no (N/n)
+// Uses defaultValue if user presses enter without typing
+func promptYesNo(prompt string, defaultYes bool) (bool, error) {
+	// Add default indicator to prompt
+	if defaultYes {
+		fmt.Printf("%s (Y/n): ", prompt)
+	} else {
+		fmt.Printf("%s (y/N): ", prompt)
+	}
+
+	// Read response
+	var response string
+	if os.Getenv("PASS_CLI_TEST") == "1" {
+		line, err := readLine()
+		if err != nil {
+			return false, err
+		}
+		response = line
+	} else {
+		reader := bufio.NewReader(os.Stdin)
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			return false, fmt.Errorf("failed to read response: %w", err)
+		}
+		response = line
+	}
+
+	response = strings.TrimSpace(strings.ToLower(response))
+
+	// Handle empty response (use default)
+	if response == "" {
+		return defaultYes, nil
+	}
+
+	// Parse response
+	if response == "y" || response == "yes" {
+		return true, nil
+	}
+	if response == "n" || response == "no" {
+		return false, nil
+	}
+
+	// Invalid response, use default
+	return defaultYes, nil
+}
+
+// T042: promptForWordWithValidation prompts for a word with BIP39 wordlist validation
+// Allows retry on invalid word input
+// Returns validated word (lowercase, trimmed), error
+func promptForWordWithValidation(position int) (string, error) {
+	const maxAttempts = 3
+
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		// Prompt for word
+		word, err := promptForWord(position)
+		if err != nil {
+			return "", err
+		}
+
+		// Validate word is in BIP39 wordlist
+		if !recovery.ValidateWord(word) {
+			if attempt < maxAttempts {
+				fmt.Printf("✗ Invalid word. Not in BIP39 wordlist. Try again (%d/%d)\n", attempt, maxAttempts)
+				continue
+			}
+			return "", fmt.Errorf("invalid word after %d attempts", maxAttempts)
+		}
+
+		// Word is valid
+		return word, nil
+	}
+
+	return "", fmt.Errorf("failed to read valid word after %d attempts", maxAttempts)
 }

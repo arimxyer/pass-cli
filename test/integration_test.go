@@ -119,7 +119,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 	testPassword := "Test-Master-Pass@123"
 
 	t.Run("1_Init_Vault", func(t *testing.T) {
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" // password, confirm, skip keychain
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" // password, confirm, no passphrase, skip verification
 		stdout, stderr, err := runCommandWithInput(t, input, "init")
 
 		if err != nil {
@@ -287,7 +287,7 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -353,7 +353,7 @@ func TestIntegration_ScriptFriendly(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -437,7 +437,7 @@ func TestIntegration_Performance(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -499,7 +499,7 @@ func TestIntegration_StressTest(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -613,7 +613,7 @@ func TestDefaultVaultPath_Init(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	cmd.Stdin = strings.NewReader("TestPassword123!\nTestPassword123!\nn\n")
+	cmd.Stdin = strings.NewReader("TestPassword123!\nTestPassword123!\nn\nn\n")
 
 	// Run init command
 	err = cmd.Run()
@@ -663,7 +663,7 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 
 	// Step 1: Initialize vault
 	t.Log("Step 1: Initialize vault at default location")
-	initInput := fmt.Sprintf("%s\n%s\n", masterPassword, masterPassword)
+	initInput := fmt.Sprintf("%s\n%s\nn\nn\n", masterPassword, masterPassword)
 	stdout, stderr, err := runWithHome(initInput, "init")
 	if err != nil {
 		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
@@ -771,7 +771,7 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 
 	// Step 1: Initialize vault at custom location
 	t.Log("Step 1: Initialize vault at custom config location")
-	initInput := fmt.Sprintf("%s\n%s\n", masterPassword, masterPassword)
+	initInput := fmt.Sprintf("%s\n%s\nn\nn\n", masterPassword, masterPassword)
 	stdout, stderr, err := runWithConfig(initInput, "init")
 	if err != nil {
 		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
