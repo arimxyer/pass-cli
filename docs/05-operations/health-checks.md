@@ -208,7 +208,7 @@ On Windows, ensure only your user account has read/write access.
   Recommendation: Fix configuration syntax or delete to use defaults
 ```
 
-**Solution**: Edit `~/.pass-cli/config.yaml` to fix syntax errors, or delete the file to regenerate defaults.
+**Solution**: Edit `~/.pass-cli/config.yml` to fix syntax errors, or delete the file to regenerate defaults.
 
 #### Missing Configuration (Pass)
 
