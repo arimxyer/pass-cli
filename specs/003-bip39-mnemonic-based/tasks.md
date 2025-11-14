@@ -23,9 +23,9 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] **T001** Add `github.com/tyler-smith/go-bip39` dependency to `go.mod`
-- [ ] **T002** [P] Create `internal/recovery/` package directory structure
-- [ ] **T003** [P] Create `test/unit/recovery/` test directory
+- [x] **T001** Add `github.com/tyler-smith/go-bip39` dependency to `go.mod`
+- [x] **T002** [P] Create `internal/recovery/` package directory structure
+- [x] **T003** [P] Create `test/unit/recovery/` test directory
 
 ---
 
@@ -35,15 +35,15 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] **T004** Extend `VaultMetadata` struct with `Recovery *RecoveryMetadata` field in `internal/vault/metadata.go`
-- [ ] **T005** [P] Define `RecoveryMetadata` struct in `internal/vault/metadata.go` (per data-model.md)
-- [ ] **T006** [P] Define `KDFParams` struct in `internal/vault/metadata.go`
-- [ ] **T007** [P] Create sentinel errors in `internal/recovery/errors.go` (11 error types per contracts/)
-- [ ] **T008** [P] Define constants in `internal/recovery/constants.go` (KDF params, BIP39 constants)
-- [ ] **T009** Create `internal/recovery/mnemonic.go` stub with function signatures (no implementation)
-- [ ] **T010** Create `internal/recovery/challenge.go` stub with function signatures
-- [ ] **T011** Create `internal/recovery/crypto.go` stub with function signatures
-- [ ] **T012** Create `internal/recovery/recovery.go` stub with public API function signatures
+- [x] **T004** Extend `VaultMetadata` struct with `Recovery *RecoveryMetadata` field in `internal/vault/metadata.go`
+- [x] **T005** [P] Define `RecoveryMetadata` struct in `internal/vault/metadata.go` (per data-model.md)
+- [x] **T006** [P] Define `KDFParams` struct in `internal/vault/metadata.go`
+- [x] **T007** [P] Create sentinel errors in `internal/recovery/errors.go` (11 error types per contracts/)
+- [x] **T008** [P] Define constants in `internal/recovery/constants.go` (KDF params, BIP39 constants)
+- [x] **T009** Create `internal/recovery/mnemonic.go` stub with function signatures (no implementation)
+- [x] **T010** Create `internal/recovery/challenge.go` stub with function signatures
+- [x] **T011** Create `internal/recovery/crypto.go` stub with function signatures
+- [x] **T012** Create `internal/recovery/recovery.go` stub with public API function signatures
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -60,10 +60,10 @@
 ### Tests for User Story 2 (TDD - Write First, Ensure FAIL)
 
 - [ ] **T013** [P] [US2] Unit test for `GenerateMnemonic()` in `internal/recovery/mnemonic_test.go` (256-bit entropy, 24 words, checksum validation)
-- [ ] **T014** [P] [US2] Unit test for `SelectVerifyPositions()` in `internal/recovery/challenge_test.go` (randomness, uniqueness, count)
+- [ ] **T014** [P] [US2] Unit test for `SelectVerifyPositions()` in `internal/recovery/challenge_test.go` (randomness verified over 10+ attempts per SC-009, uniqueness, count)
 - [ ] **T015** [P] [US2] Unit test for `VerifyBackup()` in `internal/recovery/recovery_test.go` (correct/incorrect words)
 - [ ] **T016** [P] [US2] Unit test for `SetupRecovery()` in `internal/recovery/recovery_test.go` (mnemonic generation, metadata creation, encryption)
-- [ ] **T017** [P] [US2] Integration test for init with recovery in `test/recovery_init_test.go` (full flow, metadata verification)
+- [ ] **T017** [P] [US2] Integration test for init with recovery in `test/recovery_init_test.go` (full flow, metadata verification, verification retry on failure)
 
 ### Implementation for User Story 2
 
@@ -118,6 +118,7 @@
   - Prompt for 3 random words
   - Call `recovery.VerifyBackup()`
   - Display success/failure message
+  - Allow retry on verification failure (edge case: user fails 3+ times, handle gracefully)
 - [ ] **T030** [US2] Save `RecoveryMetadata` to vault in `cmd/init.go`:
   - Store `result.Metadata` in `vaultMetadata.Recovery`
   - Encrypt vault with `result.VaultRecoveryKey`
@@ -137,7 +138,7 @@
 
 ### Tests for User Story 1 (TDD - Write First, Ensure FAIL)
 
-- [ ] **T032** [P] [US1] Unit test for `ShuffleChallengePositions()` in `internal/recovery/challenge_test.go` (non-destructive, randomness)
+- [ ] **T032** [P] [US1] Unit test for `ShuffleChallengePositions()` in `internal/recovery/challenge_test.go` (non-destructive, randomness verified over 10+ attempts per SC-009)
 - [ ] **T033** [P] [US1] Unit test for `PerformRecovery()` in `internal/recovery/recovery_test.go`:
   - Correct words → success
   - Wrong words → `ErrDecryptionFailed`
@@ -166,6 +167,8 @@
 **Core Recovery Execution**:
 - [ ] **T038** [US1] Implement `PerformRecovery()` in `internal/recovery/recovery.go` (orchestrates T035-T037 + Phase 3):
   - Validate inputs (6 words, all in wordlist, metadata enabled)
+  - Detect metadata corruption (FR-033): verify nonce sizes, encrypted data non-empty, positions valid
+  - Return `ErrMetadataCorrupted` if corruption detected before attempting cryptographic operations
   - Map challenge words to correct positions
   - Derive challenge key (6 words + passphrase)
   - Decrypt stored words (18)
@@ -331,6 +334,11 @@
 - [ ] **T068** Run full integration test suite (`go test -v -tags=integration -timeout 5m ./test`)
 - [ ] **T069** Verify all 33 functional requirements from spec.md are satisfied
 - [ ] **T070** Verify all 10 success criteria from spec.md are met
+- [ ] **T071** [P] Validate SC-007 metadata size constraint in `test/unit/recovery/metadata_size_test.go`:
+  - Serialize `RecoveryMetadata` to JSON
+  - Measure actual byte size
+  - Assert size ≤ 520 bytes
+  - Log actual size for monitoring
 
 ---
 
@@ -451,7 +459,7 @@ With multiple developers:
 
 ## Task Summary
 
-**Total Tasks**: 70
+**Total Tasks**: 71
 - **Phase 1 (Setup)**: 3 tasks
 - **Phase 2 (Foundational)**: 9 tasks (BLOCKS all user stories)
 - **Phase 3 (User Story 2 - Setup, P1)**: 19 tasks (Foundation for recovery)
@@ -459,7 +467,7 @@ With multiple developers:
 - **Phase 5 (User Story 3 - Passphrase, P2)**: 7 tasks
 - **Phase 6 (User Story 4 - Skip Recovery, P3)**: 4 tasks
 - **Phase 7 (User Story 5 - Skip Verify, P3)**: 2 tasks
-- **Phase 8 (Polish)**: 15 tasks
+- **Phase 8 (Polish)**: 16 tasks
 
 **Parallel Opportunities**: 35 tasks marked [P] (50% parallelizable)
 

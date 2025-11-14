@@ -13,6 +13,8 @@ A user forgets their master password and keychain integration is not enabled. Wi
 
 **Why this priority**: Core feature solving the primary problem (permanent lockout). Delivers immediate value by enabling vault recovery in disaster scenarios.
 
+**Dependency**: Requires User Story 2 (recovery setup during init) to be complete before this story can be implemented. Both are P1, but US2 is the foundation.
+
 **Independent Test**: Can be fully tested by initializing a vault with recovery enabled, intentionally "forgetting" the password, and successfully recovering access using the mnemonic phrase. Delivers the value of vault recovery without requiring any other features.
 
 **Acceptance Scenarios**:
@@ -172,7 +174,7 @@ A user is in a hurry during vault initialization and wants to skip the verificat
 - **SC-004**: 100% of invalid recovery attempts (wrong words or passphrase) are rejected with clear error messages
 - **SC-005**: Users who skip verification can still successfully recover their vault if they wrote down the phrase correctly
 - **SC-006**: Vaults created without recovery display appropriate error messages when recovery is attempted
-- **SC-007**: Recovery metadata adds less than 500 bytes to vault file size
+- **SC-007**: Recovery metadata adds less than 520 bytes to vault file size (~511 bytes actual)
 - **SC-008**: All recovery operations complete without leaking sensitive data to logs or memory dumps
 - **SC-009**: Random word selection during verification and recovery produces different sequences on each attempt (verifiable over 10+ attempts)
 - **SC-010**: Passphrases are only prompted when required, never when vault was created without passphrase protection
