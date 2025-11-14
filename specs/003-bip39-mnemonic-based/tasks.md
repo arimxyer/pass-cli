@@ -138,13 +138,13 @@
 
 ### Tests for User Story 1 (TDD - Write First, Ensure FAIL)
 
-- [ ] **T032** [P] [US1] Unit test for `ShuffleChallengePositions()` in `internal/recovery/challenge_test.go` (non-destructive, randomness verified over 10+ attempts per SC-009)
-- [ ] **T033** [P] [US1] Unit test for `PerformRecovery()` in `internal/recovery/recovery_test.go`:
+- [x] **T032** [P] [US1] Unit test for `ShuffleChallengePositions()` in `internal/recovery/challenge_test.go` (non-destructive, randomness verified over 10+ attempts per SC-009)
+- [x] **T033** [P] [US1] Unit test for `PerformRecovery()` in `internal/recovery/recovery_test.go`:
   - Correct words → success
   - Wrong words → `ErrDecryptionFailed`
   - Invalid word → `ErrInvalidWord`
   - Recovery disabled → `ErrRecoveryDisabled`
-- [ ] **T034** [P] [US1] Integration test for recovery in `test/recovery_test.go`:
+- [x] **T034** [P] [US1] Integration test for recovery in `test/recovery_test.go`:
   - Init with known mnemonic
   - Recover with correct 6 words
   - Verify vault unlocks

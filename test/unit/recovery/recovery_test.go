@@ -319,3 +319,239 @@ func TestSetupRecovery(t *testing.T) {
 		}
 	})
 }
+
+// T033: Unit test for PerformRecovery()
+// Tests: correct/incorrect words, invalid words, recovery disabled
+
+func TestPerformRecovery(t *testing.T) {
+	// Setup: Create a recovery configuration with known mnemonic
+	setupHelper := func(t *testing.T, passphrase []byte) (*recovery.SetupResult, []string) {
+		t.Helper()
+
+		config := &recovery.SetupConfig{
+			Passphrase: passphrase,
+			KDFParams:  nil, // Use defaults
+		}
+
+		result, err := recovery.SetupRecovery(config)
+		if err != nil {
+			t.Fatalf("SetupRecovery() failed: %v", err)
+		}
+
+		// Extract challenge words from mnemonic using challenge positions
+		words := strings.Fields(result.Mnemonic)
+		challengeWords := make([]string, len(result.Metadata.ChallengePositions))
+		for i, pos := range result.Metadata.ChallengePositions {
+			challengeWords[i] = words[pos]
+		}
+
+		return result, challengeWords
+	}
+
+	t.Run("succeeds with correct words (no passphrase)", func(t *testing.T) {
+		setupResult, challengeWords := setupHelper(t, nil)
+
+		// Perform recovery with correct words
+		recoveryConfig := &recovery.RecoveryConfig{
+			ChallengeWords: challengeWords,
+			Passphrase:     nil,
+			Metadata:       setupResult.Metadata,
+		}
+
+		vaultKey, err := recovery.PerformRecovery(recoveryConfig)
+		if err != nil {
+			t.Fatalf("PerformRecovery() failed with correct words: %v", err)
+		}
+
+		// Verify vault key is returned
+		if len(vaultKey) != 32 {
+			t.Errorf("Expected 32-byte vault key, got %d bytes", len(vaultKey))
+		}
+
+		// Verify vault key matches original
+		if string(vaultKey) != string(setupResult.VaultRecoveryKey) {
+			t.Error("Recovered vault key does not match original")
+		}
+	})
+
+	t.Run("succeeds with correct words and passphrase", func(t *testing.T) {
+		passphrase := []byte("my-secret-passphrase")
+		setupResult, challengeWords := setupHelper(t, passphrase)
+
+		// Perform recovery with correct words and passphrase
+		recoveryConfig := &recovery.RecoveryConfig{
+			ChallengeWords: challengeWords,
+			Passphrase:     passphrase,
+			Metadata:       setupResult.Metadata,
+		}
+
+		vaultKey, err := recovery.PerformRecovery(recoveryConfig)
+		if err != nil {
+			t.Fatalf("PerformRecovery() failed with correct words and passphrase: %v", err)
+		}
+
+		// Verify vault key matches original
+		if string(vaultKey) != string(setupResult.VaultRecoveryKey) {
+			t.Error("Recovered vault key does not match original")
+		}
+	})
+
+	t.Run("fails with wrong words", func(t *testing.T) {
+		setupResult, _ := setupHelper(t, nil)
+
+		// Use wrong words (valid BIP39 words, but incorrect for this recovery)
+		wrongWords := []string{"abandon", "ability", "able", "about", "above", "absent"}
+
+		recoveryConfig := &recovery.RecoveryConfig{
+			ChallengeWords: wrongWords,
+			Passphrase:     nil,
+			Metadata:       setupResult.Metadata,
+		}
+
+		_, err := recovery.PerformRecovery(recoveryConfig)
+		if err == nil {
+			t.Error("PerformRecovery() should fail with wrong words")
+		}
+
+		// Should return ErrDecryptionFailed (wrong words = can't decrypt)
+		if err != recovery.ErrDecryptionFailed {
+			t.Errorf("Expected ErrDecryptionFailed, got: %v", err)
+		}
+	})
+
+	t.Run("fails with wrong passphrase", func(t *testing.T) {
+		correctPassphrase := []byte("correct-passphrase")
+		wrongPassphrase := []byte("wrong-passphrase")
+
+		setupResult, challengeWords := setupHelper(t, correctPassphrase)
+
+		recoveryConfig := &recovery.RecoveryConfig{
+			ChallengeWords: challengeWords,
+			Passphrase:     wrongPassphrase, // Wrong passphrase
+			Metadata:       setupResult.Metadata,
+		}
+
+		_, err := recovery.PerformRecovery(recoveryConfig)
+		if err == nil {
+			t.Error("PerformRecovery() should fail with wrong passphrase")
+		}
+
+		if err != recovery.ErrDecryptionFailed {
+			t.Errorf("Expected ErrDecryptionFailed, got: %v", err)
+		}
+	})
+
+	t.Run("fails with invalid word (not in BIP39 wordlist)", func(t *testing.T) {
+		setupResult, challengeWords := setupHelper(t, nil)
+
+		// Replace first word with invalid word
+		invalidWords := make([]string, len(challengeWords))
+		copy(invalidWords, challengeWords)
+		invalidWords[0] = "notavalidword"
+
+		recoveryConfig := &recovery.RecoveryConfig{
+			ChallengeWords: invalidWords,
+			Passphrase:     nil,
+			Metadata:       setupResult.Metadata,
+		}
+
+		_, err := recovery.PerformRecovery(recoveryConfig)
+		if err == nil {
+			t.Error("PerformRecovery() should fail with invalid word")
+		}
+
+		if err != recovery.ErrInvalidWord {
+			t.Errorf("Expected ErrInvalidWord, got: %v", err)
+		}
+	})
+
+	t.Run("fails when recovery disabled", func(t *testing.T) {
+		// Create metadata with recovery disabled
+		disabledMetadata := &vault.RecoveryMetadata{
+			Enabled: false,
+			Version: "1",
+		}
+
+		recoveryConfig := &recovery.RecoveryConfig{
+			ChallengeWords: []string{"word1", "word2", "word3", "word4", "word5", "word6"},
+			Passphrase:     nil,
+			Metadata:       disabledMetadata,
+		}
+
+		_, err := recovery.PerformRecovery(recoveryConfig)
+		if err == nil {
+			t.Error("PerformRecovery() should fail when recovery disabled")
+		}
+
+		if err != recovery.ErrRecoveryDisabled {
+			t.Errorf("Expected ErrRecoveryDisabled, got: %v", err)
+		}
+	})
+
+	t.Run("fails with wrong word count (too few)", func(t *testing.T) {
+		setupResult, _ := setupHelper(t, nil)
+
+		// Only provide 5 words instead of 6
+		tooFewWords := []string{"abandon", "ability", "able", "about", "above"}
+
+		recoveryConfig := &recovery.RecoveryConfig{
+			ChallengeWords: tooFewWords,
+			Passphrase:     nil,
+			Metadata:       setupResult.Metadata,
+		}
+
+		_, err := recovery.PerformRecovery(recoveryConfig)
+		if err == nil {
+			t.Error("PerformRecovery() should fail with too few words")
+		}
+
+		// Could be ErrInvalidCount or similar
+		if err == nil {
+			t.Error("Expected error for invalid word count")
+		}
+	})
+
+	t.Run("fails with wrong word count (too many)", func(t *testing.T) {
+		setupResult, _ := setupHelper(t, nil)
+
+		// Provide 7 words instead of 6
+		tooManyWords := []string{"abandon", "ability", "able", "about", "above", "absent", "absorb"}
+
+		recoveryConfig := &recovery.RecoveryConfig{
+			ChallengeWords: tooManyWords,
+			Passphrase:     nil,
+			Metadata:       setupResult.Metadata,
+		}
+
+		_, err := recovery.PerformRecovery(recoveryConfig)
+		if err == nil {
+			t.Error("PerformRecovery() should fail with too many words")
+		}
+	})
+
+	t.Run("case-insensitive word matching", func(t *testing.T) {
+		setupResult, challengeWords := setupHelper(t, nil)
+
+		// Convert challenge words to uppercase
+		upperWords := make([]string, len(challengeWords))
+		for i, word := range challengeWords {
+			upperWords[i] = strings.ToUpper(word)
+		}
+
+		recoveryConfig := &recovery.RecoveryConfig{
+			ChallengeWords: upperWords,
+			Passphrase:     nil,
+			Metadata:       setupResult.Metadata,
+		}
+
+		vaultKey, err := recovery.PerformRecovery(recoveryConfig)
+		if err != nil {
+			t.Errorf("PerformRecovery() should be case-insensitive, got error: %v", err)
+		}
+
+		// Verify vault key matches
+		if string(vaultKey) != string(setupResult.VaultRecoveryKey) {
+			t.Error("Recovered vault key does not match original (case-insensitive failed)")
+		}
+	})
+}
