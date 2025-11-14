@@ -209,35 +209,35 @@
 
 ### Tests for User Story 3 (TDD - Write First, Ensure FAIL)
 
-- [ ] **T043** [P] [US3] Unit test for `SetupRecovery()` with passphrase in `internal/recovery/recovery_test.go` (passphrase_required flag set)
-- [ ] **T044** [P] [US3] Unit test for `PerformRecovery()` with passphrase in `internal/recovery/recovery_test.go`:
+- [x] **T043** [P] [US3] Unit test for `SetupRecovery()` with passphrase in `internal/recovery/recovery_test.go` (passphrase_required flag set) - Already implemented in T016
+- [x] **T044** [P] [US3] Unit test for `PerformRecovery()` with passphrase in `internal/recovery/recovery_test.go`:
   - Correct words + correct passphrase → success
-  - Correct words + wrong passphrase → `ErrDecryptionFailed`
-- [ ] **T045** [P] [US3] Integration test for passphrase flow in `test/recovery_passphrase_test.go` (init with passphrase, recover with passphrase)
+  - Correct words + wrong passphrase → `ErrDecryptionFailed` - Already implemented in T033
+- [x] **T045** [P] [US3] Integration test for passphrase flow in `test/recovery_passphrase_test.go` (init with passphrase, recover with passphrase)
 
 ### Implementation for User Story 3
 
 **Passphrase Support in Core**:
-- [ ] **T046** [P] [US3] Update `SetupRecovery()` in `internal/recovery/recovery.go`:
+- [x] **T046** [P] [US3] Update `SetupRecovery()` in `internal/recovery/recovery.go`:
   - Accept `config.Passphrase` parameter
   - Set `metadata.PassphraseRequired = (len(passphrase) > 0)`
-  - Pass passphrase to `bip39.NewSeed()` for both challenge and recovery KDFs
-- [ ] **T047** [P] [US3] Update `PerformRecovery()` in `internal/recovery/recovery.go`:
+  - Pass passphrase to `bip39.NewSeed()` for both challenge and recovery KDFs - Already implemented
+- [x] **T047** [P] [US3] Update `PerformRecovery()` in `internal/recovery/recovery.go`:
   - Accept `config.Passphrase` parameter
-  - Pass passphrase to `bip39.NewSeed()` for both challenge and recovery KDFs
+  - Pass passphrase to `bip39.NewSeed()` for both challenge and recovery KDFs - Already implemented
 
 **CLI Integration - Init**:
-- [ ] **T048** [US3] Add passphrase prompt to `cmd/init.go`:
+- [x] **T048** [US3] Add passphrase prompt to `cmd/init.go`:
   - Prompt "Advanced: Add passphrase protection? (y/N)"
   - If yes: prompt for passphrase with confirmation
   - Display warning about storing passphrase separately
   - Pass to `recovery.SetupRecovery()`
 
 **CLI Integration - Recovery**:
-- [ ] **T049** [US3] Add passphrase detection to `cmd/change_password.go`:
+- [x] **T049** [US3] Add passphrase detection to `cmd/change_password.go`:
   - Check `metadata.Recovery.PassphraseRequired`
   - If true: prompt "Enter recovery passphrase: "
-  - Pass to `recovery.PerformRecovery()`
+  - Pass to `recovery.PerformRecovery()` - Already implemented in T040
 
 **Checkpoint**: Passphrase protection now works independently. Users can opt-in during init and recover with passphrase.
 
@@ -251,7 +251,7 @@
 
 ### Tests for User Story 4 (TDD - Write First, Ensure FAIL)
 
-- [ ] **T050** [P] [US4] Integration test for `--no-recovery` in `test/recovery_disabled_test.go`:
+- [x] **T050** [P] [US4] Integration test for `--no-recovery` in `test/recovery_disabled_test.go`:
   - Init with `--no-recovery`
   - Verify no recovery metadata
   - Attempt recovery → error "Recovery not enabled"
@@ -259,17 +259,17 @@
 ### Implementation for User Story 4
 
 **CLI Integration - Init**:
-- [ ] **T051** [US4] Add `--no-recovery` flag to `cmd/init.go`
-- [ ] **T052** [US4] Skip recovery setup when flag present in `cmd/init.go`:
+- [x] **T051** [US4] Add `--no-recovery` flag to `cmd/init.go` - Already implemented in T028
+- [x] **T052** [US4] Skip recovery setup when flag present in `cmd/init.go`:
   - Check flag before calling `recovery.SetupRecovery()`
   - Display warning: "Without recovery, if you forget your master password and keychain is not enabled, your vault will be unrecoverable."
-  - Leave `vaultMetadata.Recovery = nil`
+  - Leave `vaultMetadata.Recovery = nil` - Already implemented in T028
 
 **CLI Integration - Recovery**:
-- [ ] **T053** [US4] Add check for disabled recovery in `cmd/change_password.go`:
+- [x] **T053** [US4] Add check for disabled recovery in `cmd/change_password.go`:
   - If `metadata.Recovery == nil` or `metadata.Recovery.Enabled == false`
   - Display error: "Recovery not enabled for this vault"
-  - Exit with code 1
+  - Exit with code 1 - Already implemented in T040/T041
 
 **Checkpoint**: Users can now opt out of recovery. Error handling works when recovery disabled.
 

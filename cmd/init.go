@@ -105,9 +105,54 @@ func runInit(cmd *cobra.Command, args []string) error {
 	// T028-T030: Setup BIP39 recovery (unless --no-recovery flag set)
 	var recoveryResult *recovery.SetupResult
 	if !noRecovery {
+		// T048: Prompt for optional passphrase (25th word)
+		var passphrase []byte
+		usePassphrase, err := promptYesNo("Advanced: Add passphrase protection (25th word)?", false)
+		if err != nil {
+			return fmt.Errorf("failed to read passphrase option: %w", err)
+		}
+
+		if usePassphrase {
+			fmt.Println()
+			fmt.Println("⚠️  Passphrase Protection:")
+			fmt.Println("   • Adds an extra layer of security to your recovery phrase")
+			fmt.Println("   • You will need BOTH the 24 words AND the passphrase to recover")
+			fmt.Println("   • Store the passphrase separately from your 24-word phrase")
+			fmt.Println("   • If you lose the passphrase, recovery will be impossible")
+			fmt.Println()
+
+			fmt.Print("Enter recovery passphrase: ")
+			passphrase, err = readPassword()
+			if err != nil {
+				return fmt.Errorf("failed to read passphrase: %w", err)
+			}
+			fmt.Println() // newline after password input
+
+			// Confirm passphrase
+			fmt.Print("Confirm recovery passphrase: ")
+			confirmPassphrase, err := readPassword()
+			if err != nil {
+				crypto.ClearBytes(passphrase)
+				return fmt.Errorf("failed to read confirmation passphrase: %w", err)
+			}
+			defer crypto.ClearBytes(confirmPassphrase)
+			fmt.Println() // newline after password input
+
+			// Verify passphrases match
+			if string(passphrase) != string(confirmPassphrase) {
+				crypto.ClearBytes(passphrase)
+				return fmt.Errorf("passphrases do not match")
+			}
+		}
+		defer func() {
+			if passphrase != nil {
+				crypto.ClearBytes(passphrase)
+			}
+		}()
+
 		// Setup recovery phrase
 		setupConfig := &recovery.SetupConfig{
-			Passphrase: nil, // No passphrase for now (Phase 5 will add this)
+			Passphrase: passphrase,
 			KDFParams:  nil, // Use defaults
 		}
 
