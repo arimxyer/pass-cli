@@ -41,7 +41,7 @@ func TestMemoryClearing_SetupRecovery(t *testing.T) {
 			t.Error("Expected non-empty mnemonic")
 		}
 
-		if result.VaultRecoveryKey == nil || len(result.VaultRecoveryKey) == 0 {
+		if len(result.VaultRecoveryKey) == 0 {
 			t.Error("Expected non-empty vault recovery key")
 		}
 
@@ -118,7 +118,7 @@ func TestMemoryClearing_PerformRecovery(t *testing.T) {
 		}
 
 		// Verify vault key is returned
-		if vaultKey == nil || len(vaultKey) == 0 {
+		if len(vaultKey) == 0 {
 			t.Error("Expected non-empty vault key")
 		}
 
