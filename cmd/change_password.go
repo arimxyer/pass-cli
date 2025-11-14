@@ -147,6 +147,7 @@ func unlockWithRecovery(vaultService *vault.VaultService, vaultPath string) erro
 
 	// 1. Load vault metadata
 	metadataPath := vault.MetadataPath(vaultPath)
+	// #nosec G304 - vaultPath comes from validated config, not arbitrary user input
 	metadataBytes, err := os.ReadFile(metadataPath)
 	if err != nil {
 		if os.IsNotExist(err) {
