@@ -37,7 +37,7 @@ func TestIntegration_KeychainStatus(t *testing.T) {
 		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
-		input := testPassword + "\n" + testPassword + "\n"
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 		cmd := exec.Command(binaryPath, "init")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)
@@ -170,7 +170,7 @@ func TestIntegration_KeychainStatusWithMetadata(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault with audit
-	input := testPassword + "\n" + testPassword + "\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init", "--enable-audit")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)

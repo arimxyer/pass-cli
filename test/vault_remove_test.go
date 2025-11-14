@@ -36,7 +36,7 @@ func TestIntegration_VaultRemove(t *testing.T) {
 		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
-		input := testPassword + "\n" + testPassword + "\n"
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 		cmd := exec.Command(binaryPath, "init", "--use-keychain")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)
@@ -106,7 +106,7 @@ func TestIntegration_VaultRemove(t *testing.T) {
 		// Recreate vault for this test
 		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
-		input := testPassword + "\n" + testPassword + "\n"
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 		cmd := exec.Command(binaryPath, "init", "--use-keychain")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)
@@ -149,7 +149,7 @@ func TestIntegration_VaultRemove(t *testing.T) {
 		// Recreate vault
 		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
-		input := testPassword + "\n" + testPassword + "\n"
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 		cmd := exec.Command(binaryPath, "init", "--use-keychain")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)
@@ -195,7 +195,7 @@ func TestIntegration_VaultRemove(t *testing.T) {
 
 		for i := 0; i < totalRuns; i++ {
 			// Create vault
-			input := testPassword + "\n" + testPassword + "\n"
+			input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 			cmd := exec.Command(binaryPath, "init", "--use-keychain")
 			cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 			cmd.Stdin = strings.NewReader(input)
@@ -264,7 +264,7 @@ func TestIntegration_VaultRemoveWithMetadata(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault with audit
-	input := testPassword + "\n" + testPassword + "\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init", "--enable-audit")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
