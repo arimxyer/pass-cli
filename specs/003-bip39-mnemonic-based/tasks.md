@@ -283,7 +283,7 @@
 
 ### Tests for User Story 5 (TDD - Write First, Ensure FAIL)
 
-- [ ] **T054** [P] [US5] Integration test for skipped verification in `test/recovery_skip_verify_test.go`:
+- [x] **T054** [P] [US5] Integration test for skipped verification in `test/recovery_skip_verify_test.go`:
   - Init, decline verification
   - Verify vault created
   - Verify recovery still works (user wrote down phrase correctly)
@@ -291,10 +291,11 @@
 ### Implementation for User Story 5
 
 **CLI Integration - Init**:
-- [ ] **T055** [US5] Make verification optional in `cmd/init.go`:
+- [x] **T055** [US5] Make verification optional in `cmd/init.go`:
   - Prompt "Verify your backup? (Y/n)" (default yes)
   - If user declines: skip `recovery.VerifyBackup()` call
   - Display warning: "Skipping verification. Ensure you have written down all 24 words correctly before continuing."
+  - **Already implemented in T029** (lines 170-230)
 
 **Checkpoint**: Verification skip now works. All user stories (P1, P2, P3) are complete.
 
