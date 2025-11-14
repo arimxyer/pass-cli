@@ -146,7 +146,7 @@ func unlockWithRecovery(vaultService *vault.VaultService, vaultPath string) erro
 	fmt.Println()
 
 	// 1. Load vault metadata
-	metadataPath := vaultPath + ".meta"
+	metadataPath := vault.MetadataPath(vaultPath)
 	metadataBytes, err := os.ReadFile(metadataPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -204,7 +204,7 @@ func unlockWithRecovery(vaultService *vault.VaultService, vaultPath string) erro
 				break
 			}
 		}
-		if originalIndex == -1 {
+		if originalIndex == -1 || originalIndex >= len(challengeWords) {
 			return fmt.Errorf("internal error: position mapping failed")
 		}
 		challengeWords[originalIndex] = word
