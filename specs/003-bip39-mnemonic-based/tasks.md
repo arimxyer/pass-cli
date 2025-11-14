@@ -321,8 +321,8 @@
 
 **Cross-Platform Testing**:
 - [x] **T059** [P] Run integration tests on Windows (CI or manual) - ✓ All recovery tests pass
-- [ ] **T060** [P] Run integration tests on macOS (CI or manual) - Requires macOS environment
-- [ ] **T061** [P] Run integration tests on Linux (CI or manual) - Requires Linux environment
+- [x] **T060** [P] Run integration tests on macOS (CI or manual) - Requires macOS environment
+- [x] **T061** [P] Run integration tests on Linux (CI or manual) - Requires Linux environment
 
 **Code Quality**:
 - [x] **T062** Run `golangci-lint run` on `internal/recovery/` package - ✓ 0 issues
