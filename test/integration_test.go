@@ -119,7 +119,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 	testPassword := "Test-Master-Pass@123"
 
 	t.Run("1_Init_Vault", func(t *testing.T) {
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" // password, confirm, skip keychain
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" // password, confirm, no passphrase, skip verification
 		stdout, stderr, err := runCommandWithInput(t, input, "init")
 
 		if err != nil {
