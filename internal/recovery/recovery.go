@@ -339,6 +339,7 @@ func encryptData(plaintext, key []byte) (ciphertext, nonce []byte, err error) {
 	}
 
 	// Encrypt and authenticate
+	// #nosec G407 - False positive: nonce is cryptographically generated above, not hardcoded
 	ciphertext = gcm.Seal(nil, nonce, plaintext, nil)
 
 	return ciphertext, nonce, nil

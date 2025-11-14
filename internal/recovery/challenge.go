@@ -93,6 +93,7 @@ func ShuffleChallengePositions(positions []int) []int {
 	// Note: This is intentionally non-crypto random for UI presentation order only
 	// The actual security relies on crypto/rand for position selection in selectChallengePositions
 	for i := len(shuffled) - 1; i > 0; i-- {
+		// #nosec G404 - Intentional use of math/rand for non-security UI randomization
 		j := mathrand.Intn(i + 1)
 		shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
 	}
