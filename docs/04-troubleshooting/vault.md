@@ -125,23 +125,40 @@ Set-Acl "$env:USERPROFILE\.pass-cli\vault.enc" $acl
 
 **Symptom**: Cannot remember master password
 
-**Unfortunate Reality**: **There is no recovery mechanism**
-
 **Options**:
 
-1. **Try to remember**
-   - Try common variations
-   - Check password manager if stored there
-   - Check secure notes
+1. **Use BIP39 Recovery Phrase** (if enabled during init)
+   ```bash
+   # Recover access with recovery phrase
+   pass-cli change-password --recover
+   ```
+   
+   **Requirements**:
+   - Recovery phrase must have been enabled during `pass-cli init`
+   - You must have your 24-word recovery phrase written down
+   - You'll need to provide 6 random words from the phrase
+   
+   **Process**:
+   1. Run `pass-cli change-password --recover`
+   2. System prompts for 6 random words from your 24-word phrase
+   3. If verification succeeds, you can set a new master password
+   4. Vault is re-encrypted with new password
+   
+   For detailed recovery instructions, see [Recovery Phrase Guide](../../02-guides/recovery-phrase.md).
 
 2. **Check keychain** (if still accessible)
    - macOS: Keychain Access → search "pass-cli"
    - Linux: Seahorse → search "pass-cli"
    - Windows: Credential Manager → search "pass-cli"
 
-3. **If truly lost**
+3. **Try to remember**
+   - Try common variations
+   - Check password manager if stored there
+   - Check secure notes
+
+4. **If recovery phrase not available or wasn't enabled**
    ```bash
-   # Vault is unrecoverable
+   # Vault is unrecoverable without master password or recovery phrase
    # Start fresh
    mv ~/.pass-cli/vault.enc ~/.pass-cli/vault.enc.lost
    pass-cli init
@@ -149,9 +166,11 @@ Set-Acl "$env:USERPROFILE\.pass-cli\vault.enc" $acl
    ```
 
 **Prevention**:
-- Write master password in secure location
-- Store in another password manager
-- Keep backup of master password
+- ✅ Enable recovery phrase during init (it's enabled by default)
+- ✅ Write recovery phrase on paper and store in safe
+- ✅ Write master password in secure location
+- ✅ Store master password in another password manager
+- ✅ Keep backup of master password
 
 ---
 

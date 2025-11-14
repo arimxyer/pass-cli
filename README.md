@@ -171,7 +171,7 @@ For complete command reference, flags, and examples, see [docs/03-reference/comm
 - Optional passphrase protection (25th word)
 - Recover: `pass-cli change-password --recover`
 - Skip during init: `pass-cli init --no-recovery`
-- See [Recovery Guide](specs/003-bip39-mnemonic-based/quickstart.md) for details
+- See [Recovery Guide](docs/02-guides/recovery-phrase.md) for details
 
 **Audit Logging** (Optional):
 - Tamper-evident HMAC-SHA256 signed audit trail
@@ -189,13 +189,14 @@ For complete security details, best practices, and migration guides, see [docs/0
 - [Getting Started](docs/01-getting-started/quick-start.md) - First-time setup and basic workflows
 - [Usage Guide](docs/03-reference/command-reference.md) - Complete command reference, TUI shortcuts, configuration
 - [Installation](docs/01-getting-started/quick-install.md) - All installation methods and package managers
+- [Recovery Phrase](docs/02-guides/recovery-phrase.md) - BIP39 recovery phrase setup and vault recovery
 - [Security](docs/03-reference/security-architecture.md) - Encryption details, best practices, migration guides
-- [Troubleshooting](docs/04-reference/troubleshooting.md) - Common issues and solutions
+- [Troubleshooting](docs/04-troubleshooting/faq.md) - Common issues and solutions
 
 **Additional Resources**:
-- [Doctor Command](docs/05-development/doctor-command.md) - Health check diagnostics
-- [CI/CD Integration](docs/05-development/ci-cd.md) - GitHub Actions and pipeline examples
-- [Branch Workflow](docs/05-development/branch-workflow.md) - Git workflow for contributors
+- [Health Checks](docs/05-operations/health-checks.md) - Doctor command diagnostics
+- [CI/CD Integration](docs/06-development/ci-cd.md) - GitHub Actions and pipeline examples
+- [Branch Workflow](docs/06-development/branch-workflow.md) - Git workflow for contributors
 
 ## Building from Source
 
@@ -232,9 +233,18 @@ cp ~/.pass-cli/vault.enc ~/backup/vault-$(date +%Y%m%d).enc
 
 ### What happens if I forget my master password?
 
-Unfortunately, there's no way to recover your vault without the master password. The encryption is designed to be unbreakable. Keep your master password safe.
+If you enabled the BIP39 recovery phrase during vault initialization (default), you can recover access:
+```bash
+pass-cli change-password --recover
+```
 
-For more questions and troubleshooting, see [docs/04-reference/troubleshooting.md](docs/04-reference/troubleshooting.md).
+You'll need your 24-word recovery phrase. The system will ask for 6 random words to verify, then you can set a new master password.
+
+If you skipped recovery phrase setup (`--no-recovery`) or don't have your recovery phrase, the vault is unrecoverable. Keep your master password and recovery phrase safe.
+
+For more details, see [Recovery Phrase Guide](docs/02-guides/recovery-phrase.md).
+
+For more questions and troubleshooting, see [docs/04-troubleshooting/faq.md](docs/04-troubleshooting/faq.md).
 
 ## Contributing
 
