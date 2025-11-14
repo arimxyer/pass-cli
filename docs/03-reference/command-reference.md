@@ -140,7 +140,7 @@ pass-cli init --no-recovery
 - You keep master password in another password manager
 - You prefer single point of failure (master password only)
 
-For detailed recovery procedures, see [BIP39 Recovery Guide](../../../specs/003-bip39-mnemonic-based/quickstart.md) and [Security Architecture](security-architecture.md#bip39-recovery-phrase).
+For detailed recovery procedures, see [Recovery Phrase Guide](../../02-guides/recovery-phrase.md) and [Security Architecture](security-architecture.md#bip39-recovery-phrase).
 
 #### Notes
 
@@ -652,7 +652,7 @@ If you used `--no-recovery` during initialization, the `--recover` flag will not
 
 - [Password Policy]({{< relref "security-architecture#password-policy" >}}) - Password policy details
 - [BIP39 Recovery]({{< relref "security-architecture#bip39-recovery-phrase" >}}) - Recovery phrase details
-- [Recovery Guide]({{< relref "../../../specs/003-bip39-mnemonic-based/quickstart" >}}) - Detailed recovery procedures
+- [Recovery Guide]({{< relref "../02-guides/recovery-phrase" >}}) - Detailed recovery procedures
 - [Keychain Setup]({{< relref "../02-guides/keychain-setup" >}}) - Keychain integration
 
 ---

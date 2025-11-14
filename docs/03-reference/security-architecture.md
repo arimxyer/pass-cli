@@ -271,7 +271,7 @@ pass-cli change-password --recover
 
 **Important**: Anyone with your 24-word phrase can access your vault. Protect it as carefully as your master password.
 
-For detailed recovery procedures, see [Recovery Guide](../../specs/003-bip39-mnemonic-based/quickstart.md).
+For detailed recovery procedures, see [Recovery Phrase Guide](../../02-guides/recovery-phrase.md).
 
 ## Data Storage Security
 

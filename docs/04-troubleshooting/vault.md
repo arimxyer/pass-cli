@@ -144,7 +144,7 @@ Set-Acl "$env:USERPROFILE\.pass-cli\vault.enc" $acl
    3. If verification succeeds, you can set a new master password
    4. Vault is re-encrypted with new password
    
-   For detailed recovery instructions, see [BIP39 Recovery Guide](../../../specs/003-bip39-mnemonic-based/quickstart.md).
+   For detailed recovery instructions, see [Recovery Phrase Guide](../../02-guides/recovery-phrase.md).
 
 2. **Check keychain** (if still accessible)
    - macOS: Keychain Access → search "pass-cli"
