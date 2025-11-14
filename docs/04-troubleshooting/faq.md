@@ -63,6 +63,16 @@ You'll be prompted to:
 
 The vault will be automatically re-encrypted with the new password.
 
+**If you forgot your master password:**
+```bash
+# Use your BIP39 recovery phrase (if enabled during vault initialization)
+pass-cli change-password --recover
+```
+
+You'll be prompted to enter 6 words from your 24-word recovery phrase to verify your identity, then you can set a new master password.
+
+**Note**: Recovery only works if you enabled the recovery phrase when you initialized your vault. If you used `--no-recovery` during init, recovery is not possible.
+
 ---
 
 **Q: What happens if I forget my master password?**
