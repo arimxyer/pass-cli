@@ -35,8 +35,8 @@ func TestIntegration_InitWithRecovery(t *testing.T) {
 			"PASS_CLI_CONFIG="+configPath,
 		)
 
-		// Input: password, confirm, decline verification
-		stdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
+		// Input: password, confirm, no passphrase, decline verification
+		stdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n")
 		cmd.Stdin = stdin
 
 		output, err := cmd.CombinedOutput()

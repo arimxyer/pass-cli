@@ -32,7 +32,7 @@ func TestIntegration_ChangePasswordWithRecovery(t *testing.T) {
 		testPassword := "Test@Password123"
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n") // password, confirm, skip verification
+		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n") // password, confirm, no passphrase, skip verification
 		initCmd.Stdin = initStdin
 
 		output, err := initCmd.CombinedOutput()
@@ -46,7 +46,7 @@ func TestIntegration_ChangePasswordWithRecovery(t *testing.T) {
 		}
 
 		// Step 2: Load metadata to get recovery configuration
-		metadataPath := vaultPath + ".meta"
+		metadataPath := vault.MetadataPath(vaultPath)
 		metadataBytes, err := os.ReadFile(metadataPath)
 		if err != nil {
 			t.Fatalf("Failed to read metadata: %v", err)
@@ -94,7 +94,7 @@ func TestIntegration_ChangePasswordWithRecovery(t *testing.T) {
 		testPassword := "Test@Password123"
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n")
+		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n") // password, confirm, no passphrase, skip verification
 		initCmd.Stdin = initStdin
 
 		output, err := initCmd.CombinedOutput()
@@ -103,7 +103,7 @@ func TestIntegration_ChangePasswordWithRecovery(t *testing.T) {
 		}
 
 		// Load and verify metadata
-		metadataPath := vaultPath + ".meta"
+		metadataPath := vault.MetadataPath(vaultPath)
 		metadataBytes, err := os.ReadFile(metadataPath)
 		if err != nil {
 			t.Fatalf("Failed to read metadata: %v", err)
@@ -208,7 +208,7 @@ func TestIntegration_ChangePasswordWithRecovery(t *testing.T) {
 		}
 
 		// Verify metadata file doesn't exist OR recovery is not enabled
-		metadataPath := vaultPath + ".meta"
+		metadataPath := vault.MetadataPath(vaultPath)
 		if _, err := os.Stat(metadataPath); err == nil {
 			// Metadata exists, verify recovery is disabled or nil
 			metadataBytes, err := os.ReadFile(metadataPath)
