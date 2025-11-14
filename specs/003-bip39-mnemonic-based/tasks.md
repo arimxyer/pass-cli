@@ -68,30 +68,30 @@
 ### Implementation for User Story 2
 
 **Mnemonic Generation**:
-- [ ] **T018** [P] [US2] Implement mnemonic generation in `internal/recovery/mnemonic.go`:
+- [x] **T018** [P] [US2] Implement mnemonic generation in `internal/recovery/mnemonic.go`:
   - `GenerateMnemonic() (string, error)` - uses `bip39.NewEntropy(256)` and `bip39.NewMnemonic()`
   - Clear entropy with `crypto.ClearBytes()` after use
-- [ ] **T019** [P] [US2] Implement word validation in `internal/recovery/mnemonic.go`:
+- [x] **T019** [P] [US2] Implement word validation in `internal/recovery/mnemonic.go`:
   - `ValidateWord(word string) bool` - checks against BIP39 wordlist
 
 **Challenge Position Selection**:
-- [ ] **T020** [P] [US2] Implement challenge position selection in `internal/recovery/challenge.go`:
+- [x] **T020** [P] [US2] Implement challenge position selection in `internal/recovery/challenge.go`:
   - `selectChallengePositions(totalWords, count int) ([]int, error)` - crypto-secure random, unique positions
-- [ ] **T021** [P] [US2] Implement verify position selection in `internal/recovery/challenge.go`:
+- [x] **T021** [P] [US2] Implement verify position selection in `internal/recovery/challenge.go`:
   - `SelectVerifyPositions(count int) ([]int, error)` - wrapper for selectChallengePositions
-- [ ] **T022** [P] [US2] Implement word splitting in `internal/recovery/challenge.go`:
+- [x] **T022** [P] [US2] Implement word splitting in `internal/recovery/challenge.go`:
   - `splitWords(mnemonic string, challengePos []int) (challenge, stored []string)` - splits 24 words
 
 **Cryptographic Operations**:
-- [ ] **T023** [P] [US2] Implement KDF in `internal/recovery/crypto.go`:
+- [x] **T023** [P] [US2] Implement KDF in `internal/recovery/crypto.go`:
   - `deriveKey(seed, salt []byte, params *KDFParams) []byte` - Argon2id key derivation
-- [ ] **T024** [P] [US2] Implement encryption in `internal/recovery/crypto.go`:
+- [x] **T024** [P] [US2] Implement encryption in `internal/recovery/crypto.go`:
   - `encryptStoredWords(words []string, key []byte) (ciphertext, nonce []byte, error)` - AES-256-GCM
-- [ ] **T025** [P] [US2] Implement decryption in `internal/recovery/crypto.go`:
+- [x] **T025** [P] [US2] Implement decryption in `internal/recovery/crypto.go`:
   - `decryptStoredWords(ciphertext, nonce, key []byte) ([]string, error)` - AES-256-GCM
 
 **Core Recovery Setup**:
-- [ ] **T026** [US2] Implement `SetupRecovery()` in `internal/recovery/recovery.go` (orchestrates T018-T025):
+- [x] **T026** [US2] Implement `SetupRecovery()` in `internal/recovery/recovery.go` (orchestrates T018-T025):
   - Generate mnemonic
   - Select challenge positions
   - Split words
@@ -103,7 +103,7 @@
   - Clear all sensitive data with defer statements
 
 **Backup Verification**:
-- [ ] **T027** [US2] Implement `VerifyBackup()` in `internal/recovery/recovery.go`:
+- [x] **T027** [US2] Implement `VerifyBackup()` in `internal/recovery/recovery.go`:
   - Extract words at positions
   - Compare with user input
   - Return error if mismatch
