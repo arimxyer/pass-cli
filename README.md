@@ -171,7 +171,7 @@ For complete command reference, flags, and examples, see [docs/03-reference/comm
 - Optional passphrase protection (25th word)
 - Recover: `pass-cli change-password --recover`
 - Skip during init: `pass-cli init --no-recovery`
-- See [Recovery Guide](specs/003-bip39-mnemonic-based/quickstart.md) for details
+- See [Recovery Guide](specs/archive/003-bip39-mnemonic-based/quickstart.md) for details
 
 **Audit Logging** (Optional):
 - Tamper-evident HMAC-SHA256 signed audit trail
@@ -190,12 +190,12 @@ For complete security details, best practices, and migration guides, see [docs/0
 - [Usage Guide](docs/03-reference/command-reference.md) - Complete command reference, TUI shortcuts, configuration
 - [Installation](docs/01-getting-started/quick-install.md) - All installation methods and package managers
 - [Security](docs/03-reference/security-architecture.md) - Encryption details, best practices, migration guides
-- [Troubleshooting](docs/04-reference/troubleshooting.md) - Common issues and solutions
+- [Troubleshooting](docs/04-troubleshooting/faq.md) - Common issues and solutions
 
 **Additional Resources**:
-- [Doctor Command](docs/05-development/doctor-command.md) - Health check diagnostics
-- [CI/CD Integration](docs/05-development/ci-cd.md) - GitHub Actions and pipeline examples
-- [Branch Workflow](docs/05-development/branch-workflow.md) - Git workflow for contributors
+- [Health Checks](docs/05-operations/health-checks.md) - Vault health check diagnostics
+- [CI/CD Integration](docs/06-development/ci-cd.md) - GitHub Actions and pipeline examples
+- [Branch Workflow](docs/06-development/branch-workflow.md) - Git workflow for contributors
 
 ## Building from Source
 
@@ -211,7 +211,7 @@ go build -o pass-cli .
 go test ./...
 ```
 
-For testing guidelines, see [test/README.md](test/README.md). For Git workflow, see [docs/05-development/branch-workflow.md](docs/05-development/branch-workflow.md).
+For testing guidelines, see [test/README.md](test/README.md). For Git workflow, see [docs/06-development/branch-workflow.md](docs/06-development/branch-workflow.md).
 
 ## FAQ
 
@@ -232,13 +232,26 @@ cp ~/.pass-cli/vault.enc ~/backup/vault-$(date +%Y%m%d).enc
 
 ### What happens if I forget my master password?
 
-Unfortunately, there's no way to recover your vault without the master password. The encryption is designed to be unbreakable. Keep your master password safe.
+If you have a 24-word BIP39 recovery phrase (generated during vault initialization), you can recover access:
 
-For more questions and troubleshooting, see [docs/04-reference/troubleshooting.md](docs/04-reference/troubleshooting.md).
+```bash
+pass-cli change-password --recover
+```
+
+You'll be challenged to enter 6 random words from your recovery phrase, then you can set a new master password.
+
+**Important**:
+- Recovery phrases were introduced in recent versions. Older vaults don't have them.
+- If you don't have a recovery phrase and forgot your password, the vault is unrecoverable.
+- You can skip recovery phrase generation during init with `pass-cli init --no-recovery` (not recommended).
+
+See [Recovery Guide](specs/archive/003-bip39-mnemonic-based/quickstart.md) for details.
+
+For more questions and troubleshooting, see [docs/04-troubleshooting/faq.md](docs/04-troubleshooting/faq.md).
 
 ## Contributing
 
-Contributions are welcome! See [docs/05-development/branch-workflow.md](docs/05-development/branch-workflow.md) for Git workflow and contribution guidelines.
+Contributions are welcome! See [docs/06-development/branch-workflow.md](docs/06-development/branch-workflow.md) for Git workflow and contribution guidelines.
 
 ## License
 

@@ -68,7 +68,7 @@ Store your master password in OS keychain for convenience?
 Benefits:
   ✓ No need to type password for every operation
   ✓ Secure OS-level storage
-  ✓ Can be disabled later with --no-keychain
+  ✓ Can be disabled later (see Keychain Setup guide)
 
 Enable keychain storage? (y/n): y
 
@@ -159,19 +159,23 @@ pass-cli get github
 
 #### Skip Keychain Integration
 
-```bash
-pass-cli init --no-keychain
-```
-
-Creates a vault without storing the master password in OS keychain. You'll need to enter your password for each operation.
-
-#### Disable Audit Logging
+To initialize a vault without storing the master password in the OS keychain, simply don't use the `--use-keychain` flag:
 
 ```bash
-pass-cli init --no-audit
+pass-cli init
 ```
 
-Creates a vault without audit logging enabled (not recommended for production use).
+During the interactive setup, answer "n" when asked about keychain storage. You'll need to enter your password for each operation.
+
+#### Skip Audit Logging
+
+Audit logging is disabled by default. To enable it during initialization, use:
+
+```bash
+pass-cli init --enable-audit
+```
+
+If you omit this flag, your vault will be created without audit logging.
 
 ## Your First Credential
 

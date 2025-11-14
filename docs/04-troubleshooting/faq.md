@@ -65,6 +65,29 @@ The vault will be automatically re-encrypted with the new password.
 
 ---
 
+**Q: What happens if I forget my master password?**
+
+A: If your vault was initialized with BIP39 recovery (default since recent versions), you can recover:
+
+```bash
+pass-cli change-password --recover
+```
+
+You'll need to:
+1. Enter 6 random words from your 24-word recovery phrase (challenge-response)
+2. Set a new master password
+3. Vault will be re-encrypted with the new password
+
+**Important Notes**:
+- Save your 24-word recovery phrase during initialization (write it down physically)
+- Recovery phrases were introduced in recent versions. Older vaults don't have them.
+- If you don't have a recovery phrase, the vault is unrecoverable without the password
+- You can skip recovery generation with `pass-cli init --no-recovery` (not recommended)
+
+See [BIP39 Recovery Guide](../../specs/archive/003-bip39-mnemonic-based/quickstart.md) for detailed recovery instructions.
+
+---
+
 **Q: Is my data sent to the cloud?**
 
 A: No. Pass-CLI:
