@@ -547,6 +547,92 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 	return nil
 }
 
+// UnlockWithKey unlocks the vault using a provided encryption key (for recovery)
+// Parameters: vaultKey (32-byte AES-256 encryption key from recovery)
+// Returns: error
+func (v *VaultService) UnlockWithKey(vaultKey []byte) error {
+	defer crypto.ClearBytes(vaultKey) // Clear key after use
+
+	if v.unlocked {
+		return nil // Already unlocked
+	}
+
+	// Load vault data using the recovery key
+	data, err := v.storageService.LoadVaultWithKey(vaultKey)
+	if err != nil {
+		// Log unlock failure
+		v.LogAudit(security.EventVaultUnlock, security.OutcomeFailure, "recovery")
+		return fmt.Errorf("failed to unlock vault with recovery key: %w", err)
+	}
+
+	// Unmarshal vault data
+	var vaultData VaultData
+	if err := json.Unmarshal(data, &vaultData); err != nil {
+		return fmt.Errorf("failed to parse vault data: %w", err)
+	}
+
+	// Store in memory (no master password for recovery unlock)
+	v.unlocked = true
+	v.masterPassword = nil // Recovery unlock doesn't have a password
+	v.vaultData = &vaultData
+
+	// Restore audit logging if enabled
+	if vaultData.AuditEnabled && vaultData.AuditLogPath != "" && vaultData.VaultID != "" {
+		if err := v.EnableAudit(vaultData.AuditLogPath, vaultData.VaultID); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to restore audit logging: %v\n", err)
+		}
+	}
+
+	// Load metadata (same as regular Unlock)
+	meta, err := LoadMetadata(v.vaultPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: Corrupted metadata, will recreate: %v\n", err)
+		meta = nil
+	}
+
+	// Synchronize metadata if needed
+	if meta != nil {
+		mismatch := meta.AuditEnabled != vaultData.AuditEnabled
+
+		if mismatch {
+			updatedMeta := &Metadata{
+				Version:         meta.Version,
+				AuditEnabled:    vaultData.AuditEnabled,
+				KeychainEnabled: meta.KeychainEnabled,
+				Recovery:        meta.Recovery, // Preserve recovery metadata
+				CreatedAt:       meta.CreatedAt,
+			}
+
+			if err := SaveMetadata(v.vaultPath, updatedMeta); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to sync metadata: %v\n", err)
+			}
+		}
+	} else if vaultData.AuditEnabled {
+		newMeta := &Metadata{
+			Version:         "1.0",
+			AuditEnabled:    true,
+			KeychainEnabled: false,
+		}
+
+		if err := SaveMetadata(v.vaultPath, newMeta); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to create metadata: %v\n", err)
+		}
+	}
+
+	// Remove backup if exists (successful unlock = migration succeeded)
+	backupPath := v.vaultPath + storage.BackupSuffix
+	if _, err := os.Stat(backupPath); err == nil {
+		if err := os.Remove(backupPath); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to remove backup file: %v\n", err)
+		}
+	}
+
+	// Log unlock success
+	v.LogAudit(security.EventVaultUnlock, security.OutcomeSuccess, "recovery")
+
+	return nil
+}
+
 // UnlockWithKeychain attempts to unlock using keychain-stored password
 func (v *VaultService) UnlockWithKeychain() error {
 	// T018: Check metadata to see if keychain is enabled (FR-007)

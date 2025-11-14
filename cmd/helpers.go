@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"pass-cli/internal/recovery"
 	"pass-cli/internal/vault"
 	"path/filepath"
 	"runtime"
@@ -461,4 +462,33 @@ func promptYesNo(prompt string, defaultYes bool) (bool, error) {
 
 	// Invalid response, use default
 	return defaultYes, nil
+}
+
+// T042: promptForWordWithValidation prompts for a word with BIP39 wordlist validation
+// Allows retry on invalid word input
+// Returns validated word (lowercase, trimmed), error
+func promptForWordWithValidation(position int) (string, error) {
+	const maxAttempts = 3
+
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		// Prompt for word
+		word, err := promptForWord(position)
+		if err != nil {
+			return "", err
+		}
+
+		// Validate word is in BIP39 wordlist
+		if !recovery.ValidateWord(word) {
+			if attempt < maxAttempts {
+				fmt.Printf("✗ Invalid word. Not in BIP39 wordlist. Try again (%d/%d)\n", attempt, maxAttempts)
+				continue
+			}
+			return "", fmt.Errorf("invalid word after %d attempts", maxAttempts)
+		}
+
+		// Word is valid
+		return word, nil
+	}
+
+	return "", fmt.Errorf("failed to read valid word after %d attempts", maxAttempts)
 }

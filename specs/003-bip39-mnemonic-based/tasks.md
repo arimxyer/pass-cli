@@ -180,8 +180,8 @@
   - Clear all sensitive data with defer statements
 
 **CLI Integration - Change Password Command**:
-- [ ] **T039** [US1] Add `--recover` flag to `cmd/change_password.go`
-- [ ] **T040** [US1] Implement recovery flow in `cmd/change_password.go`:
+- [x] **T039** [US1] Add `--recover` flag to `cmd/change_password.go`
+- [x] **T040** [US1] Implement recovery flow in `cmd/change_password.go`:
   - Load vault metadata
   - Shuffle challenge positions
   - Prompt for 6 words (randomized order)
@@ -190,11 +190,11 @@
   - Unlock vault with returned key
   - Prompt for new master password
   - Re-encrypt vault
-- [ ] **T041** [US1] Add error handling to `cmd/change_password.go`:
+- [x] **T041** [US1] Add error handling to `cmd/change_password.go`:
   - Map `recovery.ErrInvalidWord` → "Invalid word. Try again."
   - Map `recovery.ErrDecryptionFailed` → "Recovery failed: Incorrect recovery words"
   - Map `recovery.ErrRecoveryDisabled` → "Recovery not enabled for this vault"
-- [ ] **T042** [US1] Add word-by-word validation to `cmd/helpers.go`:
+- [x] **T042** [US1] Add word-by-word validation to `cmd/helpers.go`:
   - `promptForWordWithValidation(position int) (string, error)` - validates with `recovery.ValidateWord()`, allows retry
 
 **Checkpoint**: At this point, User Stories 1 AND 2 are complete. Users can both set up AND recover vaults.

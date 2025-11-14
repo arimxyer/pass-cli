@@ -137,6 +137,25 @@ func (s *StorageService) LoadVault(password string) ([]byte, error) {
 	return plaintext, nil
 }
 
+// LoadVaultWithKey loads and decrypts vault using a provided encryption key
+// Used for recovery when we have the vault recovery key instead of a password
+// Parameters: key (32-byte AES-256 key)
+// Returns: decrypted vault data, error
+func (s *StorageService) LoadVaultWithKey(key []byte) ([]byte, error) {
+	encryptedVault, err := s.loadEncryptedVault()
+	if err != nil {
+		return nil, err
+	}
+
+	// Decrypt vault data with provided key (skip password-to-key derivation)
+	plaintext, err := s.cryptoService.Decrypt(encryptedVault.Data, key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt vault with recovery key: %w", err)
+	}
+
+	return plaintext, nil
+}
+
 func (s *StorageService) SaveVault(data []byte, password string, callback ProgressCallback) error {
 	// T015: Notify audit logger of save operation start
 	if callback != nil {
