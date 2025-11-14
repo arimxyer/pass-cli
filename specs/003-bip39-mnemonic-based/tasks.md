@@ -153,19 +153,19 @@
 ### Implementation for User Story 1
 
 **Challenge Shuffling**:
-- [ ] **T035** [P] [US1] Implement position shuffling in `internal/recovery/challenge.go`:
+- [x] **T035** [P] [US1] Implement position shuffling in `internal/recovery/challenge.go`:
   - `ShuffleChallengePositions(positions []int) []int` - randomizes prompt order (math/rand, non-crypto)
 
 **Mnemonic Reconstruction**:
-- [ ] **T036** [P] [US1] Implement word reconstruction in `internal/recovery/challenge.go`:
+- [x] **T036** [P] [US1] Implement word reconstruction in `internal/recovery/challenge.go`:
   - `reconstructMnemonic(challengeWords []string, challengePos []int, storedWords []string) (string, error)` - combines 6+18 → 24
 
 **Mnemonic Validation**:
-- [ ] **T037** [P] [US1] Implement checksum validation in `internal/recovery/mnemonic.go`:
+- [x] **T037** [P] [US1] Implement checksum validation in `internal/recovery/mnemonic.go`:
   - `ValidateMnemonic(mnemonic string) bool` - calls `bip39.IsMnemonicValid()`
 
 **Core Recovery Execution**:
-- [ ] **T038** [US1] Implement `PerformRecovery()` in `internal/recovery/recovery.go` (orchestrates T035-T037 + Phase 3):
+- [x] **T038** [US1] Implement `PerformRecovery()` in `internal/recovery/recovery.go` (orchestrates T035-T037 + Phase 3):
   - Validate inputs (6 words, all in wordlist, metadata enabled)
   - Detect metadata corruption (FR-033): verify nonce sizes, encrypted data non-empty, positions valid
   - Return `ErrMetadataCorrupted` if corruption detected before attempting cryptographic operations

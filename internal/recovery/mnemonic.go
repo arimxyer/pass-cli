@@ -51,6 +51,7 @@ func ValidateWord(word string) bool {
 // Parameters: mnemonic string to validate
 // Returns: true if checksum valid, false otherwise
 func ValidateMnemonic(mnemonic string) bool {
-	// TODO: Implement in Phase 4 (T037)
-	return false
+	// Use BIP39 library to validate checksum
+	// This verifies the mnemonic is well-formed and has a valid checksum
+	return bip39.IsMnemonicValid(mnemonic)
 }

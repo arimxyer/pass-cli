@@ -85,8 +85,10 @@ func SetupRecovery(config *SetupConfig) (*SetupResult, error) {
 		}
 	}
 
-	// 6. Derive challenge key from seed + challenge words
-	challengeSeed := append(seed, []byte(strings.Join(challengeWords, " "))...)
+	// 6. Derive challenge key from challenge words only (as mnemonic)
+	// This allows recovery to derive the same key with just the 6 words
+	challengeMnemonic := strings.Join(challengeWords, " ")
+	challengeSeed := bip39.NewSeed(challengeMnemonic, string(config.Passphrase))
 	defer crypto.ClearBytes(challengeSeed)
 	challengeKey := deriveKey(challengeSeed, kdfParams.SaltChallenge, kdfParams)
 	defer crypto.ClearBytes(challengeKey)
@@ -140,8 +142,138 @@ func SetupRecovery(config *SetupConfig) (*SetupResult, error) {
 // Parameters: config (recovery configuration)
 // Returns: vault recovery key (32 bytes), error
 func PerformRecovery(config *RecoveryConfig) ([]byte, error) {
-	// TODO: Implement in Phase 4 (T038)
-	return nil, ErrRecoveryDisabled
+	// 1. Validate recovery is enabled
+	if config.Metadata == nil || !config.Metadata.Enabled {
+		return nil, ErrRecoveryDisabled
+	}
+
+	// 2. Validate word count (must be 6 challenge words)
+	if len(config.ChallengeWords) != ChallengeCount {
+		return nil, ErrInvalidCount
+	}
+
+	// 3. Validate all words are in BIP39 wordlist
+	for _, word := range config.ChallengeWords {
+		if !ValidateWord(word) {
+			return nil, ErrInvalidWord
+		}
+	}
+
+	// 4. Detect metadata corruption (FR-033)
+	if len(config.Metadata.NonceStored) != GCMNonceSize {
+		return nil, ErrMetadataCorrupted
+	}
+	if len(config.Metadata.NonceRecovery) != GCMNonceSize {
+		return nil, ErrMetadataCorrupted
+	}
+	if len(config.Metadata.EncryptedStoredWords) == 0 {
+		return nil, ErrMetadataCorrupted
+	}
+	if len(config.Metadata.EncryptedRecoveryKey) == 0 {
+		return nil, ErrMetadataCorrupted
+	}
+	if len(config.Metadata.ChallengePositions) != ChallengeCount {
+		return nil, ErrMetadataCorrupted
+	}
+	for _, pos := range config.Metadata.ChallengePositions {
+		if pos < 0 || pos >= MnemonicWords {
+			return nil, ErrMetadataCorrupted
+		}
+	}
+
+	// 5. Normalize challenge words (lowercase, trim)
+	normalizedWords := make([]string, len(config.ChallengeWords))
+	for i, word := range config.ChallengeWords {
+		normalizedWords[i] = strings.ToLower(strings.TrimSpace(word))
+	}
+
+	// 6. Generate BIP39 seed from challenge words (with optional passphrase)
+	// Note: We need to reconstruct the partial seed from challenge words first
+	challengeMnemonic := strings.Join(normalizedWords, " ")
+	challengeSeed := bip39.NewSeed(challengeMnemonic, string(config.Passphrase))
+	defer crypto.ClearBytes(challengeSeed)
+
+	// 7. Derive challenge key from seed
+	challengeKey := deriveKey(
+		challengeSeed,
+		config.Metadata.KDFParams.SaltChallenge,
+		&config.Metadata.KDFParams,
+	)
+	defer crypto.ClearBytes(challengeKey)
+
+	// 8. Decrypt stored words (18) with challenge key
+	storedWords, err := decryptStoredWords(
+		config.Metadata.EncryptedStoredWords,
+		config.Metadata.NonceStored,
+		challengeKey,
+	)
+	if err != nil {
+		// Decryption failed = wrong challenge words or wrong passphrase
+		return nil, ErrDecryptionFailed
+	}
+
+	// 9. Reconstruct full 24-word mnemonic
+	fullMnemonic, err := reconstructMnemonic(
+		normalizedWords,
+		config.Metadata.ChallengePositions,
+		storedWords,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// 10. Validate mnemonic checksum
+	if !ValidateMnemonic(fullMnemonic) {
+		return nil, ErrInvalidMnemonic
+	}
+
+	// 11. Generate full BIP39 seed from complete mnemonic (with passphrase)
+	fullSeed := bip39.NewSeed(fullMnemonic, string(config.Passphrase))
+	defer crypto.ClearBytes(fullSeed)
+
+	// 12. Derive recovery key from full seed
+	recoveryKey := deriveKey(
+		fullSeed,
+		config.Metadata.KDFParams.SaltRecovery,
+		&config.Metadata.KDFParams,
+	)
+	defer crypto.ClearBytes(recoveryKey)
+
+	// 13. Decrypt vault recovery key
+	vaultRecoveryKey, err := decryptData(
+		config.Metadata.EncryptedRecoveryKey,
+		config.Metadata.NonceRecovery,
+		recoveryKey,
+	)
+	if err != nil {
+		return nil, ErrDecryptionFailed
+	}
+
+	// 14. Return vault recovery key (caller is responsible for clearing)
+	return vaultRecoveryKey, nil
+}
+
+// decryptData is a helper to decrypt arbitrary data with AES-256-GCM
+func decryptData(ciphertext, nonce, key []byte) ([]byte, error) {
+	// Create AES cipher
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, ErrDecryptionFailed
+	}
+
+	// Create GCM mode
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, ErrDecryptionFailed
+	}
+
+	// Decrypt and verify authentication
+	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
+	if err != nil {
+		return nil, ErrDecryptionFailed
+	}
+
+	return plaintext, nil
 }
 
 // VerifyBackup verifies user wrote down mnemonic correctly

@@ -3,6 +3,7 @@ package recovery
 import (
 	"crypto/rand"
 	"math/big"
+	mathrand "math/rand"
 	"sort"
 	"strings"
 )
@@ -84,14 +85,62 @@ func splitWords(mnemonic string, challengePos []int) (challenge, stored []string
 // Parameters: positions (fixed challenge positions from metadata)
 // Returns: shuffled positions (non-destructive, creates copy)
 func ShuffleChallengePositions(positions []int) []int {
-	// TODO: Implement in Phase 4 (T035)
-	return positions
+	// Create copy to avoid modifying input (non-destructive)
+	shuffled := make([]int, len(positions))
+	copy(shuffled, positions)
+
+	// Fisher-Yates shuffle using math/rand (non-crypto)
+	// Note: This is intentionally non-crypto random for UI presentation order only
+	// The actual security relies on crypto/rand for position selection in selectChallengePositions
+	for i := len(shuffled) - 1; i > 0; i-- {
+		j := mathrand.Intn(i + 1)
+		shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
+	}
+
+	return shuffled
 }
 
 // reconstructMnemonic combines challenge words + stored words into full 24-word phrase
 // Parameters: challengeWords (6), challengePos (indices), storedWords (18)
 // Returns: full 24-word mnemonic, error
 func reconstructMnemonic(challengeWords []string, challengePos []int, storedWords []string) (string, error) {
-	// TODO: Implement in Phase 4 (T036)
-	return "", ErrInvalidMnemonic
+	// Validate inputs
+	if len(challengeWords) != ChallengeCount {
+		return "", ErrInvalidCount
+	}
+	if len(storedWords) != (MnemonicWords - ChallengeCount) {
+		return "", ErrInvalidCount
+	}
+	if len(challengePos) != ChallengeCount {
+		return "", ErrInvalidCount
+	}
+
+	// Create map of challenge positions for quick lookup
+	challengeMap := make(map[int]string)
+	for i, pos := range challengePos {
+		challengeMap[pos] = challengeWords[i]
+	}
+
+	// Build full 24-word mnemonic
+	words := make([]string, MnemonicWords)
+	storedIdx := 0
+
+	for i := 0; i < MnemonicWords; i++ {
+		if word, isChallenge := challengeMap[i]; isChallenge {
+			// This position is a challenge word
+			words[i] = word
+		} else {
+			// This position is a stored word
+			if storedIdx >= len(storedWords) {
+				return "", ErrInvalidCount
+			}
+			words[i] = storedWords[storedIdx]
+			storedIdx++
+		}
+	}
+
+	// Join into single string
+	mnemonic := strings.Join(words, " ")
+
+	return mnemonic, nil
 }
