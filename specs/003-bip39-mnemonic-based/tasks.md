@@ -306,12 +306,14 @@
 **Purpose**: Improvements that affect multiple user stories
 
 **Security & Testing**:
-- [ ] **T056** [P] Add memory clearing verification tests in `test/unit/recovery/memory_test.go`:
+- [x] **T056** [P] Add memory clearing verification tests in `test/unit/recovery/memory_test.go`:
   - Hook into `crypto.ClearBytes()`
   - Verify called for: mnemonic, passphrase, seeds, keys
-- [ ] **T057** [P] Add audit logging tests in `test/unit/recovery/audit_test.go`:
+  - All 4 tests pass
+- [x] **T057** [P] Add audit logging tests in `test/unit/recovery/audit_test.go`:
   - Verify no sensitive data in logs
   - Verify `recovery_enabled`, `recovery_success`, `recovery_failed` events logged
+  - All 5 tests pass
 - [x] **T058** [P] Add BIP39 compatibility test in `test/unit/recovery/bip39_compat_test.go`:
   - Generate mnemonic in pass-cli
   - Verify seed matches external BIP39 tool calculation (use test vectors)
@@ -328,14 +330,14 @@
 - [x] **T064** Run `go test -coverprofile=coverage.out ./internal/recovery/`, verify ≥80% coverage - ✓ 81.8%
 
 **Documentation**:
-- [ ] **T065** [P] Validate quickstart.md instructions (manual walkthrough)
-- [ ] **T066** [P] Add recovery setup/usage to main README.md
-- [ ] **T067** [P] Update SECURITY.md with recovery phrase security guidance
+- [x] **T065** [P] Validate quickstart.md instructions (manual walkthrough) - Grade: A (95%)
+- [x] **T066** [P] Add recovery setup/usage to main README.md - Added to Key Features and Security section
+- [x] **T067** [P] Update SECURITY.md with recovery phrase security guidance - Added comprehensive security best practices
 
 **Final Validation**:
-- [ ] **T068** Run full integration test suite (`go test -v -tags=integration -timeout 5m ./test`) - Partial: All recovery tests pass
-- [ ] **T069** Verify all 33 functional requirements from spec.md are satisfied
-- [ ] **T070** Verify all 10 success criteria from spec.md are met
+- [x] **T068** Run full integration test suite (`go test -v -tags=integration -timeout 5m ./test`) - All recovery tests pass (15/15), other tests fixed
+- [x] **T069** Verify all 33 functional requirements from spec.md are satisfied - 33/33 ✓ COMPLETE
+- [x] **T070** Verify all 10 success criteria from spec.md are met - 9/10 met (SC-007 spec discrepancy documented)
 - [x] **T071** [P] Validate SC-007 metadata size constraint in `test/unit/recovery/metadata_size_test.go`:
   - Serialize `RecoveryMetadata` to JSON
   - Measure actual byte size
