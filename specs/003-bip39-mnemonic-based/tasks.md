@@ -59,11 +59,11 @@
 
 ### Tests for User Story 2 (TDD - Write First, Ensure FAIL)
 
-- [ ] **T013** [P] [US2] Unit test for `GenerateMnemonic()` in `internal/recovery/mnemonic_test.go` (256-bit entropy, 24 words, checksum validation)
-- [ ] **T014** [P] [US2] Unit test for `SelectVerifyPositions()` in `internal/recovery/challenge_test.go` (randomness verified over 10+ attempts per SC-009, uniqueness, count)
-- [ ] **T015** [P] [US2] Unit test for `VerifyBackup()` in `internal/recovery/recovery_test.go` (correct/incorrect words)
-- [ ] **T016** [P] [US2] Unit test for `SetupRecovery()` in `internal/recovery/recovery_test.go` (mnemonic generation, metadata creation, encryption)
-- [ ] **T017** [P] [US2] Integration test for init with recovery in `test/recovery_init_test.go` (full flow, metadata verification, verification retry on failure)
+- [x] **T013** [P] [US2] Unit test for `GenerateMnemonic()` in `internal/recovery/mnemonic_test.go` (256-bit entropy, 24 words, checksum validation)
+- [x] **T014** [P] [US2] Unit test for `SelectVerifyPositions()` in `internal/recovery/challenge_test.go` (randomness verified over 10+ attempts per SC-009, uniqueness, count)
+- [x] **T015** [P] [US2] Unit test for `VerifyBackup()` in `internal/recovery/recovery_test.go` (correct/incorrect words)
+- [x] **T016** [P] [US2] Unit test for `SetupRecovery()` in `internal/recovery/recovery_test.go` (mnemonic generation, metadata creation, encryption)
+- [x] **T017** [P] [US2] Integration test for init with recovery in `test/recovery_init_test.go` (full flow, metadata verification, verification retry on failure)
 
 ### Implementation for User Story 2
 
