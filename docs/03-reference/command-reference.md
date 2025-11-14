@@ -1561,11 +1561,17 @@ secret-tool search service pass-cli
 secret-tool clear service pass-cli vault /old/path/vault.enc
 ```
 
-**Prevention**: When deleting or moving vaults, remove the keychain entry first:
+**Prevention**: When deleting or moving vaults, remove the keychain entry first using your OS credential manager:
+
 ```bash
-# Before deleting vault
-pass-cli change-password --no-keychain  # Disables keychain
-# OR manually remove from OS keychain
+# Windows
+cmdkey /delete:pass-cli
+
+# macOS
+security delete-generic-password -s "pass-cli" -a "$USER"
+
+# Linux
+secret-tool clear service pass-cli vault /old/path/vault.enc
 ```
 
 #### What if first-run detection doesn't trigger?
