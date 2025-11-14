@@ -1,4 +1,4 @@
-### 1. Communication Standards
+﻿### 1. Communication Standards
 
 **Be concise and direct**:
 - Avoid preamble like "Great!", "Sure!", "Let me help"
@@ -165,6 +165,7 @@ Auto-generated from all feature plans. Last updated: 2025-10-30
 - File-based encrypted vault storage (`vault.enc`), automatic backups (`.backup` suffix), manual backups (`.[timestamp].manual.backup` suffix) (001-add-manual-vault)
 - Markdown (GitHub Flavored), Hugo v0.134.3 Extended + Hugo Book theme (alex-shpak/hugo-book), Hugo static site generator (002-comprehensive-documentation-restructuring)
 - File-based (markdown files in docs/ directory, Hugo site in docsite/) (002-comprehensive-documentation-restructuring)
+- File-based encrypted vault storage (existing `vault.enc`), extends existing metadata JSON structure (003-bip39-mnemonic-based)
 
 ## Project Structure
 
@@ -307,9 +308,9 @@ gosec ./...
 - Footer: `Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>`
 
 ## Recent Changes
+- 003-bip39-mnemonic-based: Added Go 1.21+
 - 002-comprehensive-documentation-restructuring: Added Markdown (GitHub Flavored), Hugo v0.134.3 Extended + Hugo Book theme (alex-shpak/hugo-book), Hugo static site generator
 - 001-add-manual-vault: Added Go 1.21+
-- 003-implement-atomic-save: Implemented atomic save pattern for crash-safe vault operations
   - Added `internal/storage/atomic_save.go` with temp file generation, verification, and cleanup functions
   - Refactored `SaveVault()` to use atomic rename workflow (temp → verify → atomic rename × 2)
   - Added verification step that decrypts temp file in-memory before commit
