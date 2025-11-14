@@ -109,20 +109,20 @@
   - Return error if mismatch
 
 **CLI Integration - Init Command**:
-- [ ] **T028** [US2] Modify `cmd/init.go` to integrate recovery setup:
+- [x] **T028** [US2] Modify `cmd/init.go` to integrate recovery setup:
   - Call `recovery.SetupRecovery()` after master password set
   - Display 24-word phrase with warnings (formatted 4x6 grid)
   - Prompt "Verify your backup? (Y/n)"
-- [ ] **T029** [US2] Add verification flow to `cmd/init.go`:
+- [x] **T029** [US2] Add verification flow to `cmd/init.go`:
   - Call `recovery.SelectVerifyPositions(3)`
   - Prompt for 3 random words
   - Call `recovery.VerifyBackup()`
   - Display success/failure message
   - Allow retry on verification failure (edge case: user fails 3+ times, handle gracefully)
-- [ ] **T030** [US2] Save `RecoveryMetadata` to vault in `cmd/init.go`:
+- [x] **T030** [US2] Save `RecoveryMetadata` to vault in `cmd/init.go`:
   - Store `result.Metadata` in `vaultMetadata.Recovery`
   - Encrypt vault with `result.VaultRecoveryKey`
-- [ ] **T031** [US2] Add recovery-specific helper functions to `cmd/helpers.go`:
+- [x] **T031** [US2] Add recovery-specific helper functions to `cmd/helpers.go`:
   - `displayMnemonic(mnemonic string)` - formats 24 words as 4x6 grid
   - `promptForWord(position int) (string, error)` - reads single word with validation
 
