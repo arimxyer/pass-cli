@@ -11,7 +11,7 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 ## Quick Links
 
 - [Quick Start]({{< relref "01-getting-started/quick-start" >}}) - First-time setup and initialization (5 minutes)
-- [Quick Install]({{< relref "01-getting-started/quick-install" >}}) - Installation instructions for all platforms
+- [Quick Install](01-getting-started/quick-install) - Installation instructions for all platforms
 - [Command Reference]({{< relref "03-reference/command-reference" >}}) - Complete command reference
 - [Recovery Phrase]({{< relref "02-guides/recovery-phrase" >}}) - BIP39 recovery phrase setup and usage
 - [Backup & Restore Guide]({{< relref "02-guides/backup-restore" >}}) - Manual vault backup management

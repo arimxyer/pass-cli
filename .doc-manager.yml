@@ -1,0 +1,8 @@
+platform: hugo
+exclude: []
+sources: []
+docs_path: docs
+metadata:
+  language: Go
+  created: '2025-11-17T12:39:34.080505'
+  version: 1.0.0
