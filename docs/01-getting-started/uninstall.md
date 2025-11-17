@@ -109,7 +109,7 @@ history -c
 
 If you encounter issues not covered here:
 
-1. Check the [Troubleshooting Guide]({{< relref "../04-troubleshooting/_index" >}})
+1. Check the [Troubleshooting Guide](../04-troubleshooting/_index)
 2. Review [GitHub Issues](https://github.com/ari1110/pass-cli/issues)
 3. Ask in [GitHub Discussions](https://github.com/ari1110/pass-cli/discussions)
 4. File a [new issue](https://github.com/ari1110/pass-cli/issues/new)
@@ -118,6 +118,6 @@ If you encounter issues not covered here:
 
 After uninstalling, you might want to:
 
-- Review the [Security Architecture]({{< relref "../03-reference/security-architecture" >}})
+- Review the [Security Architecture](../03-reference/security-architecture)
 - Check [pass-cli Documentation](https://ari1110.github.io/pass-cli/) for other topics
 

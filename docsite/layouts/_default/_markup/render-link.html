@@ -1,0 +1,26 @@
+{{- $url := urls.Parse .Destination -}}
+{{- $scheme := $url.Scheme -}}
+
+{{- if $scheme -}}
+  {{/* External link - render as-is */}}
+  <a href="{{ .Destination | safeURL }}"
+    {{- with .Title }} title="{{ . }}"{{ end -}}
+    {{- if strings.HasPrefix .Destination "http" }} target="_blank" rel="noopener"{{ end -}}
+  >
+    {{- .Text | safeHTML -}}
+  </a>
+{{- else -}}
+  {{/* Internal link - validate it exists */}}
+  {{- $path := $url.Path -}}
+  {{- with $.Page.GetPage $path -}}
+    {{/* Valid internal link */}}
+    <a href="{{ .RelPermalink }}"
+      {{- with $.Title }} title="{{ . }}"{{ end -}}
+    >
+      {{- $.Text | safeHTML -}}
+    </a>
+  {{- else -}}
+    {{/* Broken internal link - fail the build */}}
+    {{- errorf "Broken internal link in %s: target '%s' not found" $.Page.File.Path $path -}}
+  {{- end -}}
+{{- end -}}

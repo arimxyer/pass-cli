@@ -445,6 +445,6 @@ Time includes manual re-entry of credentials. Future in-place migration will be 
 
 ## Support
 
-- **Documentation**: [Security Architecture]({{< relref "security-architecture" >}}), [Command Reference]({{< relref "command-reference" >}})
+- **Documentation**: [Security Architecture](security-architecture), [Command Reference](command-reference)
 - **Issues**: [GitHub Issues](https://github.com/ari1110/pass-cli/issues)
 

@@ -471,7 +471,7 @@ Monitor backup health with cron:
 
 ## See Also
 
-- [Security Architecture]({{< relref "../03-reference/security-architecture" >}}) - Encryption details and security best practices
-- [Troubleshooting]({{< relref "../04-troubleshooting/_index" >}}) - General troubleshooting for pass-cli
-- [Health Checks]({{< relref "../05-operations/health-checks" >}}) - Vault health checks and diagnostics
-- [Quick Start]({{< relref "../01-getting-started/quick-start" >}}) - First-time setup and basic workflows
+- [Security Architecture](../03-reference/security-architecture) - Encryption details and security best practices
+- [Troubleshooting](../04-troubleshooting/_index) - General troubleshooting for pass-cli
+- [Health Checks](../05-operations/health-checks) - Vault health checks and diagnostics
+- [Quick Start](../01-getting-started/quick-start) - First-time setup and basic workflows

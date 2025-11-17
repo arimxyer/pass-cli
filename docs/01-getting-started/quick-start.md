@@ -10,7 +10,7 @@ This 5-minute guide will walk you through initializing your vault and storing yo
 
 ## Installation
 
-See [Quick Install]({{< relref "quick-install" >}}) for platform-specific installation instructions (Homebrew, Scoop) or [Manual Installation]({{< relref "manual-install" >}}) for binary download.
+See [Quick Install](quick-install) for platform-specific installation instructions (Homebrew, Scoop) or [Manual Installation](manual-install) for binary download.
 
 After installation, verify pass-cli is available:
 

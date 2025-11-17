@@ -167,7 +167,7 @@ To remove your master password from the keychain, use your operating system's cr
 
 After removing the keychain entry, you'll need to enter your master password for each operation.
 
-See [Keychain Setup]({{< relref "keychain-setup" >}}) for detailed platform-specific instructions.
+See [Keychain Setup](keychain-setup) for detailed platform-specific instructions.
 
 ### Platform-Specific Backends
 
@@ -250,7 +250,7 @@ Health Check Results
 Overall Status: HEALTHY
 ```
 
-See [Health Checks]({{< relref "../05-operations/health-checks" >}}) for detailed health check documentation.
+See [Health Checks](../05-operations/health-checks) for detailed health check documentation.
 
 ### Common First-Time Issues
 

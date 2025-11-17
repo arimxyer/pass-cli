@@ -411,7 +411,7 @@ go tool pprof mem.prof
 
 ## Release Process
 
-See [Release Process]({{< relref "release" >}}) for detailed release instructions.
+See [Release Process](release) for detailed release instructions.
 
 Quick reference:
 

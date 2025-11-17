@@ -22,7 +22,7 @@
 ### Document Organization
 - Start with a clear introduction
 - Use hierarchical headings (H1 → H2 → H3)
-- Include a table of contents for long documents
+- Do not include a table of contents - most platforms, including github, provide a native TOC
 
 ### Code Examples
 - Provide complete, runnable examples

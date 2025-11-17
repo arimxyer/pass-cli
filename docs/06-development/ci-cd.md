@@ -350,5 +350,5 @@ Potential workflow improvements:
 
 - [GoReleaser Documentation](https://goreleaser.com)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [Release Process]({{< relref "release" >}})
-- [Branch Workflow]({{< relref "branch-workflow" >}})
+- [Release Process](release)
+- [Branch Workflow](branch-workflow)

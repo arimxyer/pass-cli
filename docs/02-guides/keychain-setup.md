@@ -137,7 +137,7 @@ Health Check Results
 Overall Status: HEALTHY
 ```
 
-See [Health Checks]({{< relref "../05-operations/health-checks" >}}) for detailed health check documentation.
+See [Health Checks](../05-operations/health-checks) for detailed health check documentation.
 
 ### Common First-Time Issues
 

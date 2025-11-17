@@ -114,7 +114,7 @@ pass-cli list --format json | jq '.[] | .service'
 
 **Q: How secure is Pass-CLI?**
 
-A: See [Security Architecture]({{< relref "../03-reference/security-architecture" >}}) for full details:
+A: See [Security Architecture](../03-reference/security-architecture) for full details:
 - AES-256-GCM encryption
 - PBKDF2 key derivation (600,000 iterations as of January 2025)
 - System keychain integration
