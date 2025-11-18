@@ -40,11 +40,11 @@ Produces formatted output with status indicators:
 Health Check Results
 ====================
 
-✓ Version: v1.2.3 (up to date)
-✓ Vault: vault.enc accessible (600 permissions)
-✓ Config: Valid configuration
-✓ Keychain: Integration active
-✓ Backup: 3 backup files found
+[PASS] Version: v1.2.3 (up to date)
+[PASS] Vault: vault.enc accessible (600 permissions)
+[PASS] Config: Valid configuration
+[PASS] Keychain: Integration active
+[PASS] Backup: 3 backup files found
 
 Overall Status: HEALTHY
 ```
@@ -152,7 +152,7 @@ esac
 
 **Symptom**:
 ```
-✓ Version: Current version: v1.2.3 (unable to check for updates: offline)
+[PASS] Version: Current version: v1.2.3 (unable to check for updates: offline)
 ```
 
 **Details**: The check gracefully falls back when offline. This is not an error - it just means the version check couldn't reach GitHub. Your current version information is still displayed.
@@ -163,7 +163,7 @@ esac
 
 **Symptom**:
 ```
-✗ Vault: Vault file not found
+[FAIL] Vault: Vault file not found
   Recommendation: Run 'pass-cli init' to create a new vault
 ```
 
@@ -173,7 +173,7 @@ esac
 
 **Symptom**:
 ```
-✗ Vault: Vault file has insecure permissions (644)
+[FAIL] Vault: Vault file has insecure permissions (644)
   Recommendation: Run 'chmod 600 /home/user/.pass-cli/vault.enc'
 ```
 
@@ -189,7 +189,7 @@ On Windows, ensure only your user account has read/write access.
 
 **Symptom**:
 ```
-✗ Vault: Vault file is corrupted or tampered
+[FAIL] Vault: Vault file is corrupted or tampered
   Recommendation: Restore from backup or reinitialize vault
 ```
 
@@ -204,7 +204,7 @@ On Windows, ensure only your user account has read/write access.
 
 **Symptom**:
 ```
-✗ Config: Invalid YAML syntax at line 5
+[FAIL] Config: Invalid YAML syntax at line 5
   Recommendation: Fix configuration syntax or delete to use defaults
 ```
 
@@ -214,7 +214,7 @@ On Windows, ensure only your user account has read/write access.
 
 **Symptom**:
 ```
-✓ Config: Using default configuration
+[PASS] Config: Using default configuration
 ```
 
 **Details**: This is normal if you haven't customized your configuration. The system uses sensible defaults.
@@ -239,7 +239,7 @@ On Windows, ensure only your user account has read/write access.
 
 **Symptom**:
 ```
-✗ Keychain: Access denied by OS
+[FAIL] Keychain: Access denied by OS
   Recommendation: Grant keychain access in system settings
 ```
 
@@ -388,7 +388,7 @@ If you run `doctor` on a fresh installation:
 ```bash
 $ pass-cli doctor
 
-✗ Vault: Vault file not found
+[FAIL] Vault: Vault file not found
   Recommendation: Run 'pass-cli init' to create a new vault
 
 Overall Status: ERROR (exit code 2)

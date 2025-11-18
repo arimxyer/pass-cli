@@ -201,18 +201,18 @@ Pass-CLI integrates with your operating system's secure credential storage to sa
 ### Master Password Security
 
 **What Pass-CLI Does:**
-- ✅ Stores master password in system keychain
-- ✅ Clears password from memory after use
-- ✅ Never writes password to disk in plaintext
-- ✅ Never logs password
+- [OK] Stores master password in system keychain
+- [OK] Clears password from memory after use
+- [OK] Never writes password to disk in plaintext
+- [OK] Never logs password
 
 **What You Should Do:**
-- ✅ Use a unique master password (not reused elsewhere)
-- ✅ Make it strong (20+ characters or passphrase)
-- ✅ Store backup securely (password manager, safe place)
-- ✅ Save your BIP39 recovery phrase offline (paper, safe)
-- ❌ Don't share your master password
-- ❌ Don't write it in plaintext files
+- [OK] Use a unique master password (not reused elsewhere)
+- [OK] Make it strong (20+ characters or passphrase)
+- [OK] Store backup securely (password manager, safe place)
+- [OK] Save your BIP39 recovery phrase offline (paper, safe)
+- [ERROR] Don't share your master password
+- [ERROR] Don't write it in plaintext files
 
 ### BIP39 Recovery Phrase
 
@@ -257,17 +257,17 @@ pass-cli change-password --recover
 #### Storage Recommendations
 
 **Secure Storage** (Recommended):
-- ✅ Write on paper and store in physical safe
-- ✅ Safety deposit box
-- ✅ Fireproof/waterproof document safe
-- ✅ Split across multiple secure locations (advanced)
+- [OK] Write on paper and store in physical safe
+- [OK] Safety deposit box
+- [OK] Fireproof/waterproof document safe
+- [OK] Split across multiple secure locations (advanced)
 
 **Insecure Storage** (Avoid):
-- ❌ Digital notes apps
-- ❌ Cloud storage (Dropbox, Google Drive)
-- ❌ Email or messaging apps
-- ❌ Screenshots or photos
-- ❌ Password managers (defeats the purpose)
+- [ERROR] Digital notes apps
+- [ERROR] Cloud storage (Dropbox, Google Drive)
+- [ERROR] Email or messaging apps
+- [ERROR] Screenshots or photos
+- [ERROR] Password managers (defeats the purpose)
 
 **Important**: Anyone with your 24-word phrase can access your vault. Protect it as carefully as your master password.
 
@@ -328,11 +328,11 @@ Before each vault save operation, pass-cli creates an N-1 backup:
 
 **Security Implications**:
 
-- ⚠️ **Backup files contain unencrypted vault structure**: `vault.enc.backup` is AES-256-GCM encrypted (same as vault), but still sensitive
-- ✅ **File permissions**: Backup automatically inherits vault permissions (0600 - owner read/write only)
-- ⚠️ **Temporary files**: `vault.enc.tmp.*` files may remain if process crashes (cleaned up automatically on next save)
-- ✅ **Automatic cleanup**: Backup removed after successful unlock, minimizing exposure window
-- ⚠️ **Contains N-1 state**: Backup has previous vault version (not current), may contain deleted credentials
+- [WARNING] **Backup files contain unencrypted vault structure**: `vault.enc.backup` is AES-256-GCM encrypted (same as vault), but still sensitive
+- [OK] **File permissions**: Backup automatically inherits vault permissions (0600 - owner read/write only)
+- [WARNING] **Temporary files**: `vault.enc.tmp.*` files may remain if process crashes (cleaned up automatically on next save)
+- [OK] **Automatic cleanup**: Backup removed after successful unlock, minimizing exposure window
+- [WARNING] **Contains N-1 state**: Backup has previous vault version (not current), may contain deleted credentials
 
 **Manual Backup Recommendations**:
 
@@ -393,51 +393,51 @@ pass-cli verify-audit
 
 ### What Pass-CLI Protects Against
 
-✅ **Offline Attacks**
+[OK] **Offline Attacks**
 - Vault file encryption protects against offline brute-force
 - PBKDF2 slows down password cracking (600,000 iterations)
 - No plaintext credentials stored anywhere
 
-✅ **File System Compromise**
+[OK] **File System Compromise**
 - Encrypted vault remains secure even if file is stolen
 - File permissions prevent unauthorized local access
 
-✅ **Process Memory Dumps**
+[OK] **Process Memory Dumps**
 - Sensitive data cleared from memory after use
 - Master password not kept in memory permanently
 
-✅ **Accidental Disclosure**
+[OK] **Accidental Disclosure**
 - No cloud storage = no cloud breach risk
 - No network calls = no network interception
 
-✅ **Unauthorized Local Access**
+[OK] **Unauthorized Local Access**
 - System keychain protects master password
 - File permissions restrict vault access
 
 ### What Pass-CLI Does NOT Protect Against
 
-❌ **Malware on Your Machine**
+[ERROR] **Malware on Your Machine**
 - Keyloggers can capture master password when entered
 - Memory scrapers can extract decrypted credentials
 - Root/admin access bypasses file permissions
 
-❌ **Physical Access Attacks**
+[ERROR] **Physical Access Attacks**
 - Attacker with physical access can copy vault file
 - Vault encryption is only protection (strong password essential)
 
-❌ **Side-Channel Attacks**
+[ERROR] **Side-Channel Attacks**
 - Timing attacks, power analysis not mitigated
 - Not designed for hostile multi-user systems
 
-❌ **Weak Master Passwords**
+[ERROR] **Weak Master Passwords**
 - PBKDF2 slows attacks but doesn't prevent them
 - Short/common passwords can be brute-forced
 
-❌ **Social Engineering**
+[ERROR] **Social Engineering**
 - Cannot protect against phishing for master password
 - User education essential
 
-❌ **TUI Display Security (Interactive Mode)**
+[ERROR] **TUI Display Security (Interactive Mode)**
 - Shoulder surfing: Credentials visible on screen in TUI mode
 - Screen recording: TUI displays service names and details
 - Password visibility toggle: `Ctrl+P` shows plaintext passwords
@@ -486,9 +486,9 @@ pass-cli verify-audit
 
 ### Out of Scope
 
-- ✗ Cloud synchronization
-- ✗ Multi-user support
-- ✗ Hardware security module (HSM) integration
-- ✗ Biometric authentication
-- ✗ Two-factor authentication for master password
+- [FAIL] Cloud synchronization
+- [FAIL] Multi-user support
+- [FAIL] Hardware security module (HSM) integration
+- [FAIL] Biometric authentication
+- [FAIL] Two-factor authentication for master password
 

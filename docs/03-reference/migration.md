@@ -200,7 +200,7 @@ pass-cli get github
 
 ### Option B: In-Place Migration (Future Feature)
 
-> **⚠️ WARNING**: This feature is **NOT YET IMPLEMENTED**. The `pass-cli migrate` command does not currently exist. Use Option A (Manual Migration) instead.
+> **[WARNING] WARNING**: This feature is **NOT YET IMPLEMENTED**. The `pass-cli migrate` command does not currently exist. Use Option A (Manual Migration) instead.
 
 **Status**: Not yet implemented. Planned for future release.
 
@@ -263,35 +263,35 @@ pass-cli migrate --iterations 600000 --enable-audit
 ### Vault File Format
 
 **100k Iteration Vaults**:
-- ✅ Fully supported
-- ✅ Auto-detected by iteration count in metadata
-- ✅ No performance degradation
-- ✅ Can be used alongside 600k vaults
+- [OK] Fully supported
+- [OK] Auto-detected by iteration count in metadata
+- [OK] No performance degradation
+- [OK] Can be used alongside 600k vaults
 
 **600k Iteration Vaults**:
-- ⚠️ **Not compatible with older Pass-CLI versions** (pre-January 2025)
-- ✅ Auto-detected by iteration count in metadata
-- ✅ Future-proof format
+- [WARNING] **Not compatible with older Pass-CLI versions** (pre-January 2025)
+- [OK] Auto-detected by iteration count in metadata
+- [OK] Future-proof format
 
 ### Password Policy
 
 **Existing Credentials**:
-- ✅ Old passwords (not meeting policy) remain valid
-- ⚠️ Policy enforced only when creating/updating credentials
-- ✅ No forced password changes
+- [OK] Old passwords (not meeting policy) remain valid
+- [WARNING] Policy enforced only when creating/updating credentials
+- [OK] No forced password changes
 
 **New/Updated Credentials**:
-- ⚠️ Must meet new policy requirements
-- ✅ Real-time validation with helpful error messages
-- ✅ TUI shows password strength indicator
+- [WARNING] Must meet new policy requirements
+- [OK] Real-time validation with helpful error messages
+- [OK] TUI shows password strength indicator
 
 ### Cross-Version Compatibility Matrix
 
 | Vault Type | Pass-CLI (Old) | Pass-CLI (Jan 2025) |
 |------------|----------------|---------------------|
-| 100k iterations | ✅ Read/Write | ✅ Read/Write |
-| 600k iterations | ❌ Incompatible | ✅ Read/Write |
-| With audit logging | ❌ Incompatible | ✅ Read/Write |
+| 100k iterations | [OK] Read/Write | [OK] Read/Write |
+| 600k iterations | [ERROR] Incompatible | [OK] Read/Write |
+| With audit logging | [ERROR] Incompatible | [OK] Read/Write |
 
 ## Troubleshooting
 
@@ -423,25 +423,25 @@ Time includes manual re-entry of credentials. Future in-place migration will be 
 
 ### Before Migration
 
-1. ✅ Backup vault file: `cp ~/.pass-cli/vault.enc ~/backup/`
-2. ✅ Export credentials: `pass-cli list --format json > backup.json`
-3. ✅ Test new Pass-CLI version with test vault first
-4. ✅ Read this migration guide completely
+1. [OK] Backup vault file: `cp ~/.pass-cli/vault.enc ~/backup/`
+2. [OK] Export credentials: `pass-cli list --format json > backup.json`
+3. [OK] Test new Pass-CLI version with test vault first
+4. [OK] Read this migration guide completely
 
 ### During Migration
 
-1. ✅ Use `pass-cli generate` command for policy-compliant passwords
-2. ✅ Verify each credential after adding
-3. ✅ Test vault unlock multiple times
-4. ✅ Enable audit logging for compliance needs
+1. [OK] Use `pass-cli generate` command for policy-compliant passwords
+2. [OK] Verify each credential after adding
+3. [OK] Test vault unlock multiple times
+4. [OK] Enable audit logging for compliance needs
 
 ### After Migration
 
-1. ✅ Verify all credentials accessible
-2. ✅ Test credential retrieval in scripts
-3. ✅ Update documentation/runbooks with new requirements
-4. ✅ Delete old vault backup after 30-day grace period
-5. ✅ Run `pass-cli verify-audit` monthly (if audit logging enabled)
+1. [OK] Verify all credentials accessible
+2. [OK] Test credential retrieval in scripts
+3. [OK] Update documentation/runbooks with new requirements
+4. [OK] Delete old vault backup after 30-day grace period
+5. [OK] Run `pass-cli verify-audit` monthly (if audit logging enabled)
 
 ## Support
 

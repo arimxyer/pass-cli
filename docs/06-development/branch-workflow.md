@@ -129,8 +129,8 @@ The release workflow will:
 ### Main Branch Protection
 
 **Enabled protections:**
-- ✅ Require pull request before merging
-- ✅ Require status checks to pass:
+- [OK] Require pull request before merging
+- [OK] Require status checks to pass:
   - `Detect Code Changes`
   - `Lint`
   - `Unit Tests`
@@ -139,9 +139,9 @@ The release workflow will:
   - `Integration Tests (windows-latest)`
   - `Security Scan`
   - `Build`
-- ✅ Block force pushes
-- ✅ Restrict deletions
-- ✅ Repository admins can bypass (for emergency fixes)
+- [OK] Block force pushes
+- [OK] Restrict deletions
+- [OK] Repository admins can bypass (for emergency fixes)
 
 **Result**: All changes require PR and passing CI. Direct pushes blocked.
 

@@ -78,10 +78,10 @@ You'll be prompted to enter 6 words from your 24-word recovery phrase to verify 
 **Q: Is my data sent to the cloud?**
 
 A: No. Pass-CLI:
-- ✅ Works completely offline
-- ✅ Never makes network calls
-- ✅ Stores everything locally
-- ✅ No telemetry or tracking
+- [OK] Works completely offline
+- [OK] Never makes network calls
+- [OK] Stores everything locally
+- [OK] No telemetry or tracking
 
 ---
 

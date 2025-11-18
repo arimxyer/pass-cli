@@ -132,7 +132,7 @@ Test on all supported platforms:
 ### Prerequisites
 
 1. **Stable Release**: Must have a stable version with release artifacts
-2. **Open Source**: Must have an OSI-approved license (MIT ✓)
+2. **Open Source**: Must have an OSI-approved license (MIT [PASS])
 3. **Notable Project**: Should have some community adoption
 4. **Documentation**: README, LICENSE, and proper documentation
 
@@ -241,20 +241,20 @@ done
 ## Formula Best Practices
 
 ### Do's
-- ✅ Use stable release URLs (not `latest`)
-- ✅ Include accurate SHA256 checksums
-- ✅ Support all relevant platforms
-- ✅ Include meaningful tests
-- ✅ Add shell completion generation
-- ✅ Provide helpful caveats for first-time users
-- ✅ Keep formula simple and maintainable
+- [OK] Use stable release URLs (not `latest`)
+- [OK] Include accurate SHA256 checksums
+- [OK] Support all relevant platforms
+- [OK] Include meaningful tests
+- [OK] Add shell completion generation
+- [OK] Provide helpful caveats for first-time users
+- [OK] Keep formula simple and maintainable
 
 ### Don'ts
-- ❌ Don't use `latest` tag in URLs
-- ❌ Don't skip checksums
-- ❌ Don't include build-time patches without good reason
-- ❌ Don't add unnecessary dependencies
-- ❌ Don't use deprecated Homebrew DSL features
+- [ERROR] Don't use `latest` tag in URLs
+- [ERROR] Don't skip checksums
+- [ERROR] Don't include build-time patches without good reason
+- [ERROR] Don't add unnecessary dependencies
+- [ERROR] Don't use deprecated Homebrew DSL features
 
 ## Troubleshooting
 

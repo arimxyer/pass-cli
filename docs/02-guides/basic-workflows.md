@@ -88,8 +88,8 @@ $ pass-cli add github -u myuser --generate
 # Generate with custom length
 $ pass-cli add github -u myuser --generate --gen-length 32
 
-✓ Generated 32-character password
-✓ Credential 'github' added successfully
+[PASS] Generated 32-character password
+[PASS] Credential 'github' added successfully
 ```
 
 **Generate During Update (Password Rotation):**
@@ -100,8 +100,8 @@ $ pass-cli update github --generate
 # Generate with custom length
 $ pass-cli update github --generate --gen-length 24
 
-✓ Generated 24-character password
-✓ Credential 'github' updated successfully
+[PASS] Generated 24-character password
+[PASS] Credential 'github' updated successfully
 ```
 
 **TUI Generation:**
@@ -119,7 +119,7 @@ If you didn't enable keychain during initialization, you can enable it anytime:
 $ pass-cli keychain enable
 
 Master password: ••••••••••••
-✅ Keychain integration enabled for vault at /home/user/.pass-cli/vault.enc
+[OK] Keychain integration enabled for vault at /home/user/.pass-cli/vault.enc
 
 Future commands will not prompt for password when keychain is available.
 ```
@@ -133,12 +133,12 @@ $ pass-cli keychain status
 
 Keychain Status for /home/user/.pass-cli/vault.enc:
 
-✓ System Keychain:        Available (macOS Keychain)
-✓ Password Stored:        Yes
-✓ Backend:                keychain
-✓ Vault Configuration:    Keychain enabled
+[PASS] System Keychain:        Available (macOS Keychain)
+[PASS] Password Stored:        Yes
+[PASS] Backend:                keychain
+[PASS] Vault Configuration:    Keychain enabled
 
-✓ Keychain integration is properly configured.
+[PASS] Keychain integration is properly configured.
 Your vault password is securely stored in the system keychain.
 Future commands will not prompt for password.
 ```
@@ -149,9 +149,9 @@ $ pass-cli keychain status
 
 Keychain Status for /home/user/.pass-cli/vault.enc:
 
-✓ System Keychain:        Available (Windows Credential Manager)
-✗ Password Stored:        No
-✓ Vault Configuration:    Keychain not enabled
+[PASS] System Keychain:        Available (Windows Credential Manager)
+[FAIL] Password Stored:        No
+[PASS] Vault Configuration:    Keychain not enabled
 
 The system keychain is available but no password is stored for this vault.
 Suggestion: Enable keychain integration with 'pass-cli keychain enable'
@@ -241,11 +241,11 @@ $ pass-cli doctor
 Health Check Results
 ====================
 
-✓ Version: v1.2.3 (up to date)
-✓ Vault: vault.enc accessible (600 permissions)
-✓ Config: Valid configuration
-✓ Keychain: Integration active
-✓ Backup: 3 backup files found
+[PASS] Version: v1.2.3 (up to date)
+[PASS] Vault: vault.enc accessible (600 permissions)
+[PASS] Config: Valid configuration
+[PASS] Keychain: Integration active
+[PASS] Backup: 3 backup files found
 
 Overall Status: HEALTHY
 ```

@@ -81,10 +81,10 @@ All master passwords must meet complexity requirements:
 - **Symbol**: At least one special symbol (!@#$%^&*()-_=+[]{}|;:,.<>?)
 
 **Examples**:
-- ✅ `MySecureP@ssw0rd2025!` (meets all requirements)
-- ✅ `Correct-Horse-Battery-29!` (meets all requirements)
-- ❌ `password123` (too short, no uppercase, no symbol)
-- ❌ `MyPassword` (no digit, no symbol)
+- [OK] `MySecureP@ssw0rd2025!` (meets all requirements)
+- [OK] `Correct-Horse-Battery-29!` (meets all requirements)
+- [ERROR] `password123` (too short, no uppercase, no symbol)
+- [ERROR] `MyPassword` (no digit, no symbol)
 
 #### Audit Logging (Optional)
 
@@ -309,7 +309,7 @@ Password: mySecretPassword123!
 URL:      https://github.com
 Notes:    Personal account
 
-✓ Password copied to clipboard (will clear in 5 seconds)
+[PASS] Password copied to clipboard (will clear in 5 seconds)
 ```
 
 **Quiet mode:**
@@ -575,16 +575,16 @@ Enter current master password: ********
 
 Enter new master password (min 12 characters with uppercase, lowercase, digit, symbol): ********
 
-Password strength: Strong ✅
-- Length: 16 characters ✅
-- Uppercase: Yes ✅
-- Lowercase: Yes ✅
-- Digits: Yes ✅
-- Symbols: Yes ✅
+Password strength: Strong [OK]
+- Length: 16 characters [OK]
+- Uppercase: Yes [OK]
+- Lowercase: Yes [OK]
+- Digits: Yes [OK]
+- Symbols: Yes [OK]
 
 Confirm new master password: ********
 
-✅ Master password changed successfully!
+[OK] Master password changed successfully!
 ```
 
 **Recovery flow with BIP39 phrase:**
@@ -599,29 +599,29 @@ BIP39 Recovery Phrase Challenge
 You will be asked to provide 6 words from your 24-word recovery phrase.
 
 Enter word #7: device
-✓ (1/6)
+[PASS] (1/6)
 
 Enter word #12: diesel
-✓ (2/6)
+[PASS] (2/6)
 
 Enter word #18: identify
-✓ (3/6)
+[PASS] (3/6)
 
 Enter word #3: about
-✓ (4/6)
+[PASS] (4/6)
 
 Enter word #22: spin
-✓ (5/6)
+[PASS] (5/6)
 
 Enter word #15: hybrid
-✓ (6/6)
+[PASS] (6/6)
 
-✅ Recovery phrase verified successfully!
+[OK] Recovery phrase verified successfully!
 
 Enter new master password: ********
 Confirm new master password: ********
 
-✅ Master password changed successfully!
+[OK] Master password changed successfully!
 Your vault has been re-encrypted with the new password.
 ```
 
@@ -825,9 +825,9 @@ Usage History for 'github':
 
 Location                                    Git Repo             Last Access          Count  Fields
 ──────────────────────────────────────────────────────────────────────────────────────────────────
-/home/user/projects/webapp                  ✓ webapp             2025-11-12 14:30     12     password(8), username(4)
-/home/user/projects/api-service             ✓ api-service        2025-11-10 09:15     5      password(5)
-/home/user/scripts                          ✗ (not a git repo)   2025-11-08 16:45     3      password(2), url(1)
+/home/user/projects/webapp                  [PASS] webapp             2025-11-12 14:30     12     password(8), username(4)
+/home/user/projects/api-service             [PASS] api-service        2025-11-10 09:15     5      password(5)
+/home/user/scripts                          [FAIL] (not a git repo)   2025-11-08 16:45     3      password(2), url(1)
 
 Total locations: 3
 Total accesses: 20
@@ -866,7 +866,7 @@ Total accesses: 20
 
 #### Notes
 
-- **Path Validation**: Shows ✓ if location path still exists, ✗ if deleted
+- **Path Validation**: Shows [PASS] if location path still exists, [FAIL] if deleted
 - **Git Integration**: Detects git repositories and shows repo name
 - **Field Tracking**: Counts which credential fields were accessed
 - **Automatic**: Usage tracked automatically on every `get` command
@@ -920,7 +920,7 @@ pass-cli config init
 
 **Output:**
 ```
-✅ Configuration file created: /home/user/.pass-cli/config.yml
+[OK] Configuration file created: /home/user/.pass-cli/config.yml
 
 Edit the file to customize your settings:
 - Terminal warnings
@@ -982,7 +982,7 @@ pass-cli config validate
 
 **Output (Valid):**
 ```
-✅ Configuration is valid
+[OK] Configuration is valid
 
 Settings:
   Vault path: ~/.pass-cli/vault.enc
@@ -992,7 +992,7 @@ Settings:
 
 **Output (Invalid):**
 ```
-❌ Configuration has errors:
+[ERROR] Configuration has errors:
 
 Line 12: Invalid terminal width: 0 (must be between 1-10000)
 Line 25: Duplicate keybinding: Ctrl+S assigned to both 'save' and 'search'
@@ -1029,10 +1029,10 @@ pass-cli config reset --force
 
 **Output:**
 ```
-⚠️  This will overwrite your current configuration.
+[WARNING]  This will overwrite your current configuration.
 Are you sure you want to reset to defaults? (y/n): y
 
-✅ Configuration reset to defaults: /home/user/.pass-cli/config.yml
+[OK] Configuration reset to defaults: /home/user/.pass-cli/config.yml
 ```
 
 #### See Also
@@ -1086,7 +1086,7 @@ pass-cli keychain enable --force
 ```
 Master password: ********
 
-✅ Keychain integration enabled for vault at /home/user/.pass-cli/vault.enc
+[OK] Keychain integration enabled for vault at /home/user/.pass-cli/vault.enc
 
 Future commands will not prompt for password when keychain is available.
 ```
@@ -1117,9 +1117,9 @@ pass-cli keychain status
 ```
 Keychain Status for /home/user/.pass-cli/vault.enc:
 
-✓ System Keychain:        Available (keychain)
-✓ Password Stored:        Yes
-✓ Backend:                keychain
+[PASS] System Keychain:        Available (keychain)
+[PASS] Password Stored:        Yes
+[PASS] Backend:                keychain
 
 Your vault password is securely stored in the system keychain.
 Future commands will not prompt for password.
@@ -1129,8 +1129,8 @@ Future commands will not prompt for password.
 ```
 Keychain Status for /home/user/.pass-cli/vault.enc:
 
-✓ System Keychain:        Available (wincred)
-✗ Password Stored:        No
+[PASS] System Keychain:        Available (wincred)
+[FAIL] Password Stored:        No
 
 The system keychain is available but no password is stored for this vault.
 Run 'pass-cli keychain enable' to store your password and skip future prompts.
@@ -1140,8 +1140,8 @@ Run 'pass-cli keychain enable' to store your password and skip future prompts.
 ```
 Keychain Status for /home/user/.pass-cli/vault.enc:
 
-✗ System Keychain:        Not available on this platform
-✗ Password Stored:        N/A
+[FAIL] System Keychain:        Not available on this platform
+[FAIL] Password Stored:        N/A
 
 System keychain is not accessible. You will be prompted for password on each command.
 ```
@@ -1181,7 +1181,7 @@ Permanently deletes:
 2. The master password from the system keychain
 3. Any orphaned keychain entries
 
-**⚠️ WARNING:** This operation is irreversible. All stored credentials will be lost. Ensure you have backups before proceeding.
+**[WARNING] WARNING:** This operation is irreversible. All stored credentials will be lost. Ensure you have backups before proceeding.
 
 **Arguments:**
 
@@ -1210,10 +1210,10 @@ pass-cli vault remove /path/to/vault.enc --force
 
 **Output:**
 ```
-⚠️  WARNING: This will permanently delete the vault and all stored credentials.
+[WARNING]  WARNING: This will permanently delete the vault and all stored credentials.
 Are you sure you want to remove /home/user/.pass-cli/vault.enc? (y/n): y
 
-✅ Vault removed successfully:
+[OK] Vault removed successfully:
    • Vault file deleted
    • Keychain entry removed
    • Orphaned entries cleaned up
@@ -1257,7 +1257,7 @@ pass-cli vault backup create --verbose
 
 **Output:**
 ```
-✅ Manual backup created successfully:
+[OK] Manual backup created successfully:
    /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
    Size: 2.45 MB
 ```
@@ -1274,7 +1274,7 @@ pass-cli vault backup restore [flags]
 **Description:**
 Automatically selects the newest valid backup (automatic or manual) and restores it. Considers both `vault.enc.backup` (automatic) and `vault.enc.*.manual.backup` files.
 
-**⚠️ WARNING:** This command overwrites your current vault file with the backup.
+**[WARNING] WARNING:** This command overwrites your current vault file with the backup.
 
 **Flags:**
 
@@ -1305,10 +1305,10 @@ Found backup: /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
 Backup age: 2 hours ago
 Size: 2.45 MB
 
-⚠️  This will overwrite your current vault file.
+[WARNING]  This will overwrite your current vault file.
 Are you sure you want to restore from this backup? (y/n): y
 
-✅ Vault restored successfully from backup
+[OK] Vault restored successfully from backup
 ```
 
 ###### vault backup info
@@ -1348,16 +1348,16 @@ pass-cli vault backup info --verbose
 📦 Backup Status for: /home/user/.pass-cli/vault.enc
 
 Automatic Backup:
-  ✅ vault.enc.backup
+  [OK] vault.enc.backup
      Size: 2.45 MB
      Created: 1 day ago (2025-11-11 14:30:22)
 
 Manual Backups:
-  ✅ vault.enc.20251112-143022.manual.backup ← Would be used for restore
+  [OK] vault.enc.20251112-143022.manual.backup ← Would be used for restore
      Size: 2.45 MB
      Created: 2 hours ago (2025-11-12 14:30:22)
 
-  ✅ vault.enc.20251110-091545.manual.backup
+  [OK] vault.enc.20251110-091545.manual.backup
      Size: 2.40 MB
      Created: 2 days ago (2025-11-10 09:15:45)
 
@@ -1424,13 +1424,13 @@ PASS_AUDIT_LOG=/custom/audit.log pass-cli verify-audit
 ```
 🔍 Verifying audit log: /home/user/.pass-cli/audit.log
 
-✅ Audit log verification complete:
+[OK] Audit log verification complete:
    Total entries: 127
    Valid entries: 127
    Invalid entries: 0
    Tampered entries: 0
 
-Audit log integrity: VERIFIED ✅
+Audit log integrity: VERIFIED [OK]
 ```
 
 #### Output (Tampered Detected)
@@ -1438,7 +1438,7 @@ Audit log integrity: VERIFIED ✅
 ```
 🔍 Verifying audit log: /home/user/.pass-cli/audit.log
 
-⚠️  Audit log verification failed:
+[WARNING]  Audit log verification failed:
    Total entries: 127
    Valid entries: 123
    Invalid entries: 4
@@ -1450,7 +1450,7 @@ Invalid entries detected:
   Line 89: Invalid JSON structure
   Line 102: Missing required fields
 
-Audit log integrity: FAILED ❌
+Audit log integrity: FAILED [ERROR]
 
 CRITICAL: Audit log may have been tampered with or corrupted.
 Review the log file and investigate the flagged entries.
@@ -1510,11 +1510,11 @@ Review the log file and investigate the flagged entries.
 Health Check Results
 ====================
 
-✓ Version: v1.2.3 (up to date)
-✓ Vault: vault.enc accessible (600 permissions)
-✓ Config: Valid configuration
-✓ Keychain: Integration active
-✓ Backup: 3 backup files found
+[PASS] Version: v1.2.3 (up to date)
+[PASS] Vault: vault.enc accessible (600 permissions)
+[PASS] Config: Valid configuration
+[PASS] Keychain: Integration active
+[PASS] Backup: 3 backup files found
 
 Overall Status: HEALTHY
 ```
