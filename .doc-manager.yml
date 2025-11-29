@@ -1,0 +1,94 @@
+platform: hugo
+exclude:
+- '*.pb.go'
+- '*_test.go'
+- vendor/*
+- test/*
+sources:
+- cmd
+- internal
+docs_path: docs
+use_gitignore: true
+doc_mappings:
+  cli: docs/reference/command-reference.md
+  api: docs/reference/api.md
+  config: docs/reference/configuration.md
+  dependency: docs/getting-started/installation.md
+  infrastructure: docs/development/ci-cd.md
+metadata:
+  language: Go
+  created: '2025-11-28T23:13:03.879609'
+  version: 1.0.0
+include_root_readme: false
+
+# ============================================================================
+# Configuration Guide & Examples
+# ============================================================================
+
+# Exclude Patterns
+# ----------------
+# Use glob patterns to exclude files from documentation tracking.
+# Examples:
+#   exclude:
+#     - "**/node_modules/**"     # Exclude all node_modules directories
+#     - "**/*.pyc"               # Exclude Python bytecode files
+#     - "**/dist/**"             # Exclude build artifacts
+#     - "**/.git/**"             # Exclude git directory
+#     - "**/venv/**"             # Exclude Python virtual environments
+#     - "**/__pycache__/**"      # Exclude Python cache
+
+# Source Files (Glob Patterns)
+# -----------------------------
+# Glob patterns to specify which source files to track.
+# IMPORTANT: Use glob patterns (e.g., 'src/**/*.py'), not just directory names.
+# Examples:
+#   sources:
+#     - "src/**/*.py"            # All Python files in src/
+#     - "lib/**/*.js"            # All JavaScript files in lib/
+#     - "packages/core/**/*.ts"  # TypeScript files in packages/core/
+#     - "**/*.go"                # All Go files in project
+
+# Documentation Path
+# -------------------
+# Path to documentation directory (relative to project root).
+# Common values: docs, doc, documentation, website/docs
+
+# Platform
+# --------
+# Documentation platform: mkdocs, sphinx, hugo, docusaurus, etc.
+# Set to 'unknown' if not using a specific platform.
+
+# Include Root README
+# -------------------
+# Set to true to include the root README.md in documentation operations.
+# When enabled, validation, quality assessment, and change detection
+# will include the root README.md alongside docs in the docs/ directory.
+# Default: false (backwards compatible)
+
+# Use Gitignore
+# -------------
+# Set to true to automatically exclude files based on .gitignore patterns.
+# When enabled, files ignored by git will also be excluded from doc tracking.
+# Priority: user excludes > .gitignore > built-in defaults
+# Default: false (opt-in feature)
+# Example:
+#   use_gitignore: true
+#   exclude:              # Additional patterns beyond .gitignore
+#     - "specs/**"
+
+# Documentation Path Mappings
+# ---------------------------
+# Map change categories to documentation file paths.
+# Supports non-standard layouts (documentation/, wiki/, _docs/, etc.).
+# When not configured, falls back to default paths in docs/.
+# Example:
+#   doc_mappings:
+#     cli: 'docs/reference/command-reference.md'
+#     api: 'docs/reference/api.md'
+#     config: 'docs/reference/configuration.md'
+#     dependency: 'docs/getting-started/installation.md'
+#     infrastructure: 'docs/development/ci-cd.md'
+# Non-standard layout example:
+#   doc_mappings:
+#     cli: 'documentation/commands.md'  # Uses documentation/ instead of docs/
+#     api: 'wiki/API-Reference.md'      # Uses wiki/ directory
