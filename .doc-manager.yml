@@ -5,16 +5,17 @@ exclude:
 - vendor/*
 - test/*
 sources:
-- cmd
-- internal
+- cmd/**/*.go
+- internal/**/*.go
+- '*.go'
 docs_path: docs
 use_gitignore: true
 doc_mappings:
-  cli: docs/reference/command-reference.md
-  api: docs/reference/api.md
-  config: docs/reference/configuration.md
-  dependency: docs/getting-started/installation.md
-  infrastructure: docs/development/ci-cd.md
+  cli: docs/03-reference/command-reference.md
+  api: docs/03-reference/security-architecture.md
+  config: docs/03-reference/configuration.md
+  dependency: docs/01-getting-started/manual-install.md
+  infrastructure: docs/06-development/ci-cd.md
 metadata:
   language: Go
   created: '2025-11-28T23:13:03.879609'

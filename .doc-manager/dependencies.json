@@ -1,40 +1,381 @@
 {
-  "generated_at": "2025-11-28T23:13:06.481603",
+  "generated_at": "2025-11-28T23:31:54.774328",
   "doc_to_code": {
-    "01-getting-started/manual-install.md": [],
-    "01-getting-started/quick-install.md": [],
-    "01-getting-started/quick-start.md": [],
-    "02-guides/backup-restore.md": [],
-    "02-guides/basic-workflows.md": [],
-    "02-guides/keychain-setup.md": [],
-    "02-guides/recovery-phrase.md": [],
-    "02-guides/scripting-guide.md": [],
-    "02-guides/tui-guide.md": [],
-    "02-guides/usage-tracking.md": [],
+    "01-getting-started/manual-install.md": [
+      "cmd/init.go",
+      "cmd/version.go"
+    ],
+    "01-getting-started/quick-install.md": [
+      "cmd/version.go"
+    ],
+    "01-getting-started/quick-start.md": [
+      "cmd/add.go",
+      "cmd/delete.go",
+      "cmd/doctor.go",
+      "cmd/get.go",
+      "cmd/init.go",
+      "cmd/list.go",
+      "cmd/update.go",
+      "cmd/version.go"
+    ],
+    "02-guides/backup-restore.md": [
+      "cmd/doctor.go",
+      "cmd/vault_backup_create.go",
+      "cmd/vault_backup_info.go",
+      "cmd/vault_backup_restore.go"
+    ],
+    "02-guides/basic-workflows.md": [
+      "cmd/doctor.go",
+      "cmd/generate.go",
+      "cmd/keychain_enable.go",
+      "cmd/keychain_status.go",
+      "cmd/list.go",
+      "cmd/tui.go",
+      "cmd/tui/app.go",
+      "cmd/tui/components/detail.go",
+      "cmd/tui/components/forms.go",
+      "cmd/tui/components/sidebar.go",
+      "cmd/tui/components/statusbar.go",
+      "cmd/tui/components/table.go",
+      "cmd/tui/events/focus.go",
+      "cmd/tui/events/handlers.go",
+      "cmd/tui/layout/manager.go",
+      "cmd/tui/layout/pages.go",
+      "cmd/tui/main.go",
+      "cmd/tui/models/navigation.go",
+      "cmd/tui/models/search.go",
+      "cmd/tui/models/state.go",
+      "cmd/tui/styles/theme.go"
+    ],
+    "02-guides/keychain-setup.md": [
+      "cmd/doctor.go",
+      "cmd/keychain_enable.go",
+      "cmd/keychain_status.go",
+      "cmd/tui.go",
+      "cmd/tui/app.go",
+      "cmd/tui/components/detail.go",
+      "cmd/tui/components/forms.go",
+      "cmd/tui/components/sidebar.go",
+      "cmd/tui/components/statusbar.go",
+      "cmd/tui/components/table.go",
+      "cmd/tui/events/focus.go",
+      "cmd/tui/events/handlers.go",
+      "cmd/tui/layout/manager.go",
+      "cmd/tui/layout/pages.go",
+      "cmd/tui/main.go",
+      "cmd/tui/models/navigation.go",
+      "cmd/tui/models/search.go",
+      "cmd/tui/models/state.go",
+      "cmd/tui/styles/theme.go"
+    ],
+    "02-guides/recovery-phrase.md": [
+      "cmd/init.go"
+    ],
+    "02-guides/scripting-guide.md": [
+      "cmd/list.go"
+    ],
+    "02-guides/tui-guide.md": [
+      "cmd/get.go",
+      "cmd/list.go"
+    ],
+    "02-guides/usage-tracking.md": [
+      "cmd/list.go"
+    ],
     "03-reference/_index.md": [],
-    "03-reference/command-reference.md": [],
+    "03-reference/command-reference.md": [
+      "cmd/add.go",
+      "cmd/config.go",
+      "cmd/delete.go",
+      "cmd/doctor.go",
+      "cmd/generate.go",
+      "cmd/get.go",
+      "cmd/init.go",
+      "cmd/keychain.go",
+      "cmd/keychain_enable.go",
+      "cmd/keychain_status.go",
+      "cmd/list.go",
+      "cmd/update.go",
+      "cmd/usage.go",
+      "cmd/vault.go",
+      "cmd/vault_backup.go",
+      "cmd/vault_backup_create.go",
+      "cmd/vault_backup_info.go",
+      "cmd/vault_backup_restore.go",
+      "cmd/vault_remove.go",
+      "cmd/version.go"
+    ],
     "03-reference/configuration.md": [],
-    "03-reference/known-limitations.md": [],
-    "03-reference/migration.md": [],
-    "03-reference/security-architecture.md": [],
-    "04-troubleshooting/faq.md": [],
-    "04-troubleshooting/installation.md": [],
-    "04-troubleshooting/keychain.md": [],
-    "04-troubleshooting/tui.md": [],
-    "04-troubleshooting/vault.md": [],
-    "05-operations/health-checks.md": [],
-    "05-operations/security-operations.md": [],
+    "03-reference/known-limitations.md": [
+      "cmd/init.go"
+    ],
+    "03-reference/migration.md": [
+      "cmd/generate.go",
+      "cmd/init.go",
+      "cmd/list.go"
+    ],
+    "03-reference/security-architecture.md": [
+      "cmd/init.go"
+    ],
+    "04-troubleshooting/faq.md": [
+      "cmd/list.go"
+    ],
+    "04-troubleshooting/installation.md": [
+      "cmd/init.go",
+      "cmd/list.go",
+      "cmd/version.go"
+    ],
+    "04-troubleshooting/keychain.md": [
+      "cmd/init.go"
+    ],
+    "04-troubleshooting/tui.md": [
+      "cmd/get.go",
+      "cmd/list.go",
+      "cmd/tui.go",
+      "cmd/tui/app.go",
+      "cmd/tui/components/detail.go",
+      "cmd/tui/components/forms.go",
+      "cmd/tui/components/sidebar.go",
+      "cmd/tui/components/statusbar.go",
+      "cmd/tui/components/table.go",
+      "cmd/tui/events/focus.go",
+      "cmd/tui/events/handlers.go",
+      "cmd/tui/layout/manager.go",
+      "cmd/tui/layout/pages.go",
+      "cmd/tui/main.go",
+      "cmd/tui/models/navigation.go",
+      "cmd/tui/models/search.go",
+      "cmd/tui/models/state.go",
+      "cmd/tui/styles/theme.go"
+    ],
+    "04-troubleshooting/vault.md": [
+      "cmd/init.go",
+      "cmd/list.go"
+    ],
+    "05-operations/health-checks.md": [
+      "cmd/doctor.go",
+      "cmd/init.go"
+    ],
+    "05-operations/security-operations.md": [
+      "cmd/generate.go",
+      "cmd/init.go",
+      "cmd/list.go",
+      "cmd/version.go"
+    ],
     "06-development/branch-workflow.md": [],
     "06-development/ci-cd.md": [],
-    "06-development/contributing.md": [],
+    "06-development/contributing.md": [
+      "cmd/add.go",
+      "cmd/init.go",
+      "cmd/root.go"
+    ],
     "06-development/documentation-lifecycle.md": [],
-    "06-development/homebrew.md": [],
+    "06-development/homebrew.md": [
+      "cmd/version.go"
+    ],
     "06-development/release.md": [],
-    "06-development/scoop.md": [],
+    "06-development/scoop.md": [
+      "cmd/version.go"
+    ],
     "_index.md": [],
     "README.md": []
   },
-  "code_to_doc": {},
+  "code_to_doc": {
+    "cmd/init.go": [
+      "01-getting-started/manual-install.md",
+      "01-getting-started/quick-start.md",
+      "02-guides/recovery-phrase.md",
+      "03-reference/command-reference.md",
+      "03-reference/known-limitations.md",
+      "03-reference/migration.md",
+      "03-reference/security-architecture.md",
+      "04-troubleshooting/installation.md",
+      "04-troubleshooting/keychain.md",
+      "04-troubleshooting/vault.md",
+      "05-operations/health-checks.md",
+      "05-operations/security-operations.md",
+      "06-development/contributing.md"
+    ],
+    "cmd/version.go": [
+      "01-getting-started/manual-install.md",
+      "01-getting-started/quick-install.md",
+      "01-getting-started/quick-start.md",
+      "03-reference/command-reference.md",
+      "04-troubleshooting/installation.md",
+      "05-operations/security-operations.md",
+      "06-development/homebrew.md",
+      "06-development/scoop.md"
+    ],
+    "cmd/add.go": [
+      "01-getting-started/quick-start.md",
+      "03-reference/command-reference.md",
+      "06-development/contributing.md"
+    ],
+    "cmd/delete.go": [
+      "01-getting-started/quick-start.md",
+      "03-reference/command-reference.md"
+    ],
+    "cmd/doctor.go": [
+      "01-getting-started/quick-start.md",
+      "02-guides/backup-restore.md",
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
+      "05-operations/health-checks.md"
+    ],
+    "cmd/get.go": [
+      "01-getting-started/quick-start.md",
+      "02-guides/tui-guide.md",
+      "03-reference/command-reference.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/list.go": [
+      "01-getting-started/quick-start.md",
+      "02-guides/basic-workflows.md",
+      "02-guides/scripting-guide.md",
+      "02-guides/tui-guide.md",
+      "02-guides/usage-tracking.md",
+      "03-reference/command-reference.md",
+      "03-reference/migration.md",
+      "04-troubleshooting/faq.md",
+      "04-troubleshooting/installation.md",
+      "04-troubleshooting/tui.md",
+      "04-troubleshooting/vault.md",
+      "05-operations/security-operations.md"
+    ],
+    "cmd/update.go": [
+      "01-getting-started/quick-start.md",
+      "03-reference/command-reference.md"
+    ],
+    "cmd/vault_backup_create.go": [
+      "02-guides/backup-restore.md",
+      "03-reference/command-reference.md"
+    ],
+    "cmd/vault_backup_info.go": [
+      "02-guides/backup-restore.md",
+      "03-reference/command-reference.md"
+    ],
+    "cmd/vault_backup_restore.go": [
+      "02-guides/backup-restore.md",
+      "03-reference/command-reference.md"
+    ],
+    "cmd/generate.go": [
+      "02-guides/basic-workflows.md",
+      "03-reference/command-reference.md",
+      "03-reference/migration.md",
+      "05-operations/security-operations.md"
+    ],
+    "cmd/keychain_enable.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md"
+    ],
+    "cmd/keychain_status.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md"
+    ],
+    "cmd/tui.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/app.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/components/detail.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/components/forms.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/components/sidebar.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/components/statusbar.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/components/table.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/events/focus.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/events/handlers.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/layout/manager.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/layout/pages.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/main.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/models/navigation.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/models/search.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/models/state.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/tui/styles/theme.go": [
+      "02-guides/basic-workflows.md",
+      "02-guides/keychain-setup.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "cmd/config.go": [
+      "03-reference/command-reference.md"
+    ],
+    "cmd/keychain.go": [
+      "03-reference/command-reference.md"
+    ],
+    "cmd/usage.go": [
+      "03-reference/command-reference.md"
+    ],
+    "cmd/vault.go": [
+      "03-reference/command-reference.md"
+    ],
+    "cmd/vault_backup.go": [
+      "03-reference/command-reference.md"
+    ],
+    "cmd/vault_remove.go": [
+      "03-reference/command-reference.md"
+    ],
+    "cmd/root.go": [
+      "06-development/contributing.md"
+    ]
+  },
   "unmatched_references": {
     "checksums.txt": [
       "01-getting-started/manual-install.md",
@@ -114,10 +455,6 @@
     "vault-requiring": [
       "01-getting-started/quick-start.md",
       "03-reference/command-reference.md"
-    ],
-    "init": [
-      "01-getting-started/quick-start.md",
-      "06-development/contributing.md"
     ],
     "pass-cli get github": [
       "01-getting-started/quick-start.md",
@@ -305,9 +642,6 @@
       "03-reference/command-reference.md"
     ],
     "by": [
-      "03-reference/command-reference.md"
-    ],
-    "get": [
       "03-reference/command-reference.md"
     ],
     "windows": [
@@ -503,9 +837,6 @@
     "pass-cli list # This is CLI mode": [
       "04-troubleshooting/tui.md"
     ],
-    "doctor": [
-      "05-operations/health-checks.md"
-    ],
     "complete": [
       "05-operations/health-checks.md",
       "_index.md",
@@ -543,12 +874,6 @@
       "06-development/ci-cd.md"
     ],
     "cobra": [
-      "06-development/contributing.md"
-    ],
-    "root": [
-      "06-development/contributing.md"
-    ],
-    "add": [
       "06-development/contributing.md"
     ],
     "docs": [
