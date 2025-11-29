@@ -36,7 +36,7 @@ pass-cli doctor
 
 Produces formatted output with status indicators:
 
-```
+```text
 Health Check Results
 ====================
 
@@ -141,7 +141,7 @@ esac
 #### Update Available (Warning)
 
 **Symptom**:
-```
+```text
 ⚠ Version: Update available: v1.2.3 → v1.2.4
   Recommendation: Update to latest version: https://github.com/ari1110/pass-cli/releases/tag/v1.2.4
 ```
@@ -151,7 +151,7 @@ esac
 #### Network Timeout (Pass with Error)
 
 **Symptom**:
-```
+```text
 [PASS] Version: Current version: v1.2.3 (unable to check for updates: offline)
 ```
 
@@ -162,7 +162,7 @@ esac
 #### Vault Not Found (Error)
 
 **Symptom**:
-```
+```text
 [FAIL] Vault: Vault file not found
   Recommendation: Run 'pass-cli init' to create a new vault
 ```
@@ -172,7 +172,7 @@ esac
 #### Permission Issues (Error)
 
 **Symptom**:
-```
+```text
 [FAIL] Vault: Vault file has insecure permissions (644)
   Recommendation: Run 'chmod 600 /home/user/.pass-cli/vault.enc'
 ```
@@ -188,7 +188,7 @@ On Windows, ensure only your user account has read/write access.
 #### Vault Corrupted (Error)
 
 **Symptom**:
-```
+```text
 [FAIL] Vault: Vault file is corrupted or tampered
   Recommendation: Restore from backup or reinitialize vault
 ```
@@ -203,7 +203,7 @@ On Windows, ensure only your user account has read/write access.
 #### Invalid Configuration (Error)
 
 **Symptom**:
-```
+```text
 [FAIL] Config: Invalid YAML syntax at line 5
   Recommendation: Fix configuration syntax or delete to use defaults
 ```
@@ -213,7 +213,7 @@ On Windows, ensure only your user account has read/write access.
 #### Missing Configuration (Pass)
 
 **Symptom**:
-```
+```text
 [PASS] Config: Using default configuration
 ```
 
@@ -224,7 +224,7 @@ On Windows, ensure only your user account has read/write access.
 #### Keychain Unavailable (Warning)
 
 **Symptom**:
-```
+```text
 ⚠ Keychain: OS keychain not available (running in SSH session)
   Recommendation: Use local environment or enable keychain access
 ```
@@ -238,7 +238,7 @@ On Windows, ensure only your user account has read/write access.
 #### Permission Denied (Error)
 
 **Symptom**:
-```
+```text
 [FAIL] Keychain: Access denied by OS
   Recommendation: Grant keychain access in system settings
 ```
@@ -253,7 +253,7 @@ On Windows, ensure only your user account has read/write access.
 #### No Backups Found (Warning)
 
 **Symptom**:
-```
+```text
 ⚠ Backup: No backup files found
   Recommendation: Backups are created automatically after modifications
 ```
@@ -263,7 +263,7 @@ On Windows, ensure only your user account has read/write access.
 #### Backup Integrity Issue (Warning)
 
 **Symptom**:
-```
+```text
 ⚠ Backup: Backup file corrupted: vault.enc.backup.2
   Recommendation: Remove corrupted backup or restore from valid backup
 ```

@@ -57,7 +57,7 @@ Pass-CLI is designed with security as the primary concern. All credentials are e
 
 #### Key Derivation Process
 
-```
+```text
 Master Key = PBKDF2(
     password = user's master password,
     salt = unique 32-byte random salt,
@@ -86,22 +86,22 @@ Master Key = PBKDF2(
 #### Encrypting Credentials
 
 1. **Generate Salt** (first time only)
-   ```
+   ```text
    salt = crypto/rand.Read(32 bytes)
    ```
 
 2. **Derive Encryption Key**
-   ```
+   ```text
    key = PBKDF2(master_password, salt, 600000, SHA256, 32)
    ```
 
 3. **Generate Nonce**
-   ```
+   ```text
    nonce = crypto/rand.Read(12 bytes)  // Per-encryption unique
    ```
 
 4. **Encrypt Data**
-   ```
+   ```text
    ciphertext = AES-256-GCM.Encrypt(
        plaintext = JSON(credentials),
        key = derived_key,
@@ -111,7 +111,7 @@ Master Key = PBKDF2(
    ```
 
 5. **Combine Components**
-   ```
+   ```text
    vault_file = nonce || ciphertext || auth_tag
    ```
 
@@ -121,7 +121,7 @@ Master Key = PBKDF2(
 2. **Read Vault File** and extract salt, nonce, ciphertext
 3. **Derive Key** using PBKDF2 with stored salt
 4. **Decrypt and Verify**
-   ```
+   ```text
    plaintext = AES-256-GCM.Decrypt(
        ciphertext,
        key,
@@ -271,7 +271,7 @@ pass-cli change-password --recover
 
 **Important**: Anyone with your 24-word phrase can access your vault. Protect it as carefully as your master password.
 
-For detailed recovery procedures, see [Recovery Phrase Guide](../../02-guides/recovery-phrase.md).
+For detailed recovery procedures, see [Recovery Phrase Guide](../02-guides/recovery-phrase.md).
 
 ## Data Storage Security
 
@@ -289,7 +289,7 @@ Vault files are created with restricted permissions:
 
 ### Vault File Structure
 
-```
+```text
 +------------------+
 | Salt (32 bytes)  |  ← PBKDF2 salt
 +------------------+

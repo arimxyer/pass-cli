@@ -144,6 +144,6 @@ See [Health Checks](../05-operations/health-checks) for detailed health check do
 #### Keychain Access Denied (macOS)
 
 **Symptom**:
-```
+```text
 ⚠ Keychain: Access denied by OS
 ```

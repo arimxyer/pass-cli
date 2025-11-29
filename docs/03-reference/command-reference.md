@@ -140,7 +140,7 @@ pass-cli init --no-recovery
 - You keep master password in another password manager
 - You prefer single point of failure (master password only)
 
-For detailed recovery procedures, see [Recovery Phrase Guide](../../02-guides/recovery-phrase.md) and [Security Architecture](security-architecture.md#bip39-recovery-phrase).
+For detailed recovery procedures, see [Recovery Phrase Guide](../02-guides/recovery-phrase.md) and [Security Architecture](security-architecture.md#bip39-recovery-phrase).
 
 #### Notes
 
@@ -220,7 +220,7 @@ pass-cli add github \
 
 When not using flags, you'll be prompted:
 
-```
+```text
 Enter username: user@example.com
 Enter password: ******* (hidden input)
 Enter URL (optional): https://github.com
@@ -302,7 +302,7 @@ pass-cli get github --masked
 #### Output Examples
 
 **Default output:**
-```
+```text
 Service:  github
 Username: user@example.com
 Password: mySecretPassword123!
@@ -372,7 +372,7 @@ pass-cli list --unused --days 90
 #### Output Examples
 
 **Table format (default):**
-```
+```text
 +----------+----------------------+---------------------+
 | SERVICE  | USERNAME             | LAST ACCESSED       |
 +----------+----------------------+---------------------+
@@ -383,7 +383,7 @@ pass-cli list --unused --days 90
 ```
 
 **Simple format:**
-```
+```text
 github
 aws-prod
 database
@@ -468,7 +468,7 @@ pass-cli update github \
 
 If no flags provided, prompts for password:
 
-```
+```text
 Enter new password (leave blank to keep current): *******
 Password updated successfully!
 ```
@@ -512,7 +512,7 @@ pass-cli delete github -f
 
 Without `--force`:
 
-```
+```text
 Are you sure you want to delete 'github'? (yes/no): yes
 Credential 'github' deleted successfully!
 ```
@@ -567,7 +567,7 @@ pass-cli change-password --recover
 #### Interactive Flow
 
 **Normal password change:**
-```
+```text
 🔐 Change Master Password
 📁 Vault location: /home/user/.pass-cli/vault.enc
 
@@ -588,7 +588,7 @@ Confirm new master password: ********
 ```
 
 **Recovery flow with BIP39 phrase:**
-```
+```text
 🔐 Recover Vault Access
 📁 Vault location: /home/user/.pass-cli/vault.enc
 
@@ -751,12 +751,12 @@ pass-cli version --verbose
 #### Output Examples
 
 **Default:**
-```
+```text
 pass-cli version X.Y.Z
 ```
 
 **Verbose:**
-```
+```text
 pass-cli version X.Y.Z
   commit: abc123f
   built:  2025-01-20T10:30:00Z
@@ -820,7 +820,7 @@ pass-cli usage redis --format simple
 
 #### Output (Table Format)
 
-```
+```text
 Usage History for 'github':
 
 Location                                    Git Repo             Last Access          Count  Fields
@@ -858,7 +858,7 @@ Total accesses: 20
 
 #### Output (Simple Format)
 
-```
+```text
 /home/user/projects/webapp
 /home/user/projects/api-service
 /home/user/scripts
@@ -919,7 +919,7 @@ pass-cli config init
 ```
 
 **Output:**
-```
+```text
 [OK] Configuration file created: /home/user/.pass-cli/config.yml
 
 Edit the file to customize your settings:
@@ -981,7 +981,7 @@ pass-cli config validate
 ```
 
 **Output (Valid):**
-```
+```text
 [OK] Configuration is valid
 
 Settings:
@@ -991,7 +991,7 @@ Settings:
 ```
 
 **Output (Invalid):**
-```
+```text
 [ERROR] Configuration has errors:
 
 Line 12: Invalid terminal width: 0 (must be between 1-10000)
@@ -1028,7 +1028,7 @@ pass-cli config reset --force
 ```
 
 **Output:**
-```
+```text
 [WARNING]  This will overwrite your current configuration.
 Are you sure you want to reset to defaults? (y/n): y
 
@@ -1083,7 +1083,7 @@ pass-cli keychain enable --force
 ```
 
 **Output:**
-```
+```text
 Master password: ********
 
 [OK] Keychain integration enabled for vault at /home/user/.pass-cli/vault.enc
@@ -1114,7 +1114,7 @@ pass-cli keychain status
 **Output Examples:**
 
 **When keychain is enabled:**
-```
+```text
 Keychain Status for /home/user/.pass-cli/vault.enc:
 
 [PASS] System Keychain:        Available (keychain)
@@ -1126,7 +1126,7 @@ Future commands will not prompt for password.
 ```
 
 **When keychain is available but not enabled:**
-```
+```text
 Keychain Status for /home/user/.pass-cli/vault.enc:
 
 [PASS] System Keychain:        Available (wincred)
@@ -1137,7 +1137,7 @@ Run 'pass-cli keychain enable' to store your password and skip future prompts.
 ```
 
 **When keychain is not available:**
-```
+```text
 Keychain Status for /home/user/.pass-cli/vault.enc:
 
 [FAIL] System Keychain:        Not available on this platform
@@ -1209,7 +1209,7 @@ pass-cli vault remove /path/to/vault.enc --force
 ```
 
 **Output:**
-```
+```text
 [WARNING]  WARNING: This will permanently delete the vault and all stored credentials.
 Are you sure you want to remove /home/user/.pass-cli/vault.enc? (y/n): y
 
@@ -1256,7 +1256,7 @@ pass-cli vault backup create --verbose
 ```
 
 **Output:**
-```
+```text
 [OK] Manual backup created successfully:
    /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
    Size: 2.45 MB
@@ -1300,7 +1300,7 @@ pass-cli vault backup restore --verbose
 ```
 
 **Output:**
-```
+```text
 Found backup: /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
 Backup age: 2 hours ago
 Size: 2.45 MB
@@ -1344,7 +1344,7 @@ pass-cli vault backup info --verbose
 ```
 
 **Output:**
-```
+```text
 📦 Backup Status for: /home/user/.pass-cli/vault.enc
 
 Automatic Backup:
@@ -1421,7 +1421,7 @@ PASS_AUDIT_LOG=/custom/audit.log pass-cli verify-audit
 
 #### Output (All Valid)
 
-```
+```text
 🔍 Verifying audit log: /home/user/.pass-cli/audit.log
 
 [OK] Audit log verification complete:
@@ -1435,7 +1435,7 @@ Audit log integrity: VERIFIED [OK]
 
 #### Output (Tampered Detected)
 
-```
+```text
 🔍 Verifying audit log: /home/user/.pass-cli/audit.log
 
 [WARNING]  Audit log verification failed:
@@ -1506,7 +1506,7 @@ Review the log file and investigate the flagged entries.
 - `2` = Errors detected (action required)
 
 **Example Output**:
-```
+```text
 Health Check Results
 ====================
 

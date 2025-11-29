@@ -148,12 +148,12 @@ The release workflow will:
 ## CI/CD Pipeline
 
 ### On Feature Branch Push
-```
+```text
 Feature branch push → No CI (saves compute time)
 ```
 
 ### On PR to `main`
-```
+```text
 PR created → CI runs automatically (lint, tests, security, build)
           → PR shows CI status
           → Merge blocked until CI passes
@@ -162,12 +162,12 @@ PR created → CI runs automatically (lint, tests, security, build)
 **Smart filtering**: CI skips test jobs when only non-code files change (docs/, specs/, .md files).
 
 ### On Merge to `main`
-```
+```text
 PR merged → main branch updated → CI runs on main (verification)
 ```
 
 ### On Release Tag
-```
+```text
 Tag pushed to main (v*) →
   Release workflow runs →
   Build binaries for all platforms →

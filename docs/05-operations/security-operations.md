@@ -11,7 +11,7 @@ Best practices, security checklist, incident response procedures, and security a
 ### Password Management
 
 1. **Strong Master Password**
-   ```
+   ```text
    [OK] Good: "correct-horse-battery-staple-29!" (33 chars)
    [OK] Good: "MyD0g!sN@med$potAnd1L0veH1m" (29 chars)
    [ERROR] Bad:  "password123" (11 chars, common)
@@ -110,7 +110,7 @@ Best practices, security checklist, incident response procedures, and security a
 2. **File System Security**
    - Don't commit vault to version control
    - Add to `.gitignore`:
-     ```
+     ```ini
      .pass-cli/
      *.enc
      ```
