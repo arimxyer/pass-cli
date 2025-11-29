@@ -338,7 +338,7 @@ When releasing a new version:
    git commit -am "pass-cli: Update to version 1.1.0"
    ```
 
-### Automatic Update (with checkver)
+### Automatic Update (With Checkver)
 
 If autoupdate is configured correctly, maintainers can update automatically:
 
@@ -495,7 +495,7 @@ For maintainers updating the manifest:
 - [ ] Tag release in pass-cli repository
 - [ ] Update release notes
 
-## Integration with CI/CD
+## Integration With CI/CD
 
 Add to your release workflow:
 

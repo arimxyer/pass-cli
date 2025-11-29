@@ -96,7 +96,7 @@ pass-cli vault backup create --verbose
 - **Before system changes**: OS upgrades, migrations, or hardware changes
 - **Before major updates**: Upgrading pass-cli to a new version
 
-## Restoring from Backup
+## Restoring From Backup
 
 The restore command automatically selects the newest valid backup (manual or automatic) and replaces your current vault.
 

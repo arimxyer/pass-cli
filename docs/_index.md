@@ -1,5 +1,5 @@
 ---
-title: "pass-cli Documentation"
+title: "Pass-CLI Documentation"
 cascade:
   type: docs
 ---

@@ -900,7 +900,7 @@ Manages settings for:
 
 #### Subcommands
 
-##### config init
+##### Config Init
 
 Create configuration file with commented examples.
 
@@ -928,7 +928,7 @@ Edit the file to customize your settings:
 - Vault location
 ```
 
-##### config edit
+##### Config Edit
 
 Open configuration file in your default editor.
 
@@ -953,7 +953,7 @@ pass-cli config edit
 EDITOR=vim pass-cli config edit
 ```
 
-##### config validate
+##### Config Validate
 
 Validate configuration file syntax and settings.
 
@@ -1001,7 +1001,7 @@ Line 34: Unknown action: 'invalid_action'
 Fix these errors and run 'config validate' again.
 ```
 
-##### config reset
+##### Config Reset
 
 Reset configuration to default values.
 
@@ -1053,7 +1053,7 @@ pass-cli keychain <subcommand>
 
 #### Subcommands
 
-##### keychain enable
+##### Keychain Enable
 
 Enable keychain integration for an existing vault by storing the master password in the system keychain.
 
@@ -1091,7 +1091,7 @@ Master password: ********
 Future commands will not prompt for password when keychain is available.
 ```
 
-##### keychain status
+##### Keychain Status
 
 Display keychain integration status for the current vault.
 
@@ -1166,7 +1166,7 @@ pass-cli vault <subcommand>
 
 #### Subcommands
 
-##### vault remove
+##### Vault Remove
 
 Permanently delete a vault file and its associated keychain entry.
 
@@ -1219,7 +1219,7 @@ Are you sure you want to remove /home/user/.pass-cli/vault.enc? (y/n): y
    • Orphaned entries cleaned up
 ```
 
-##### vault backup
+##### Vault Backup
 
 Manage vault backups for disaster recovery.
 
@@ -1228,7 +1228,7 @@ Manage vault backups for disaster recovery.
 pass-cli vault backup <subcommand>
 ```
 
-###### vault backup create
+###### Vault Backup Create
 
 Create a timestamped manual backup of the vault.
 
@@ -1262,7 +1262,7 @@ pass-cli vault backup create --verbose
    Size: 2.45 MB
 ```
 
-###### vault backup restore
+###### Vault Backup Restore
 
 Restore vault from the most recent backup.
 
@@ -1311,7 +1311,7 @@ Are you sure you want to restore from this backup? (y/n): y
 [OK] Vault restored successfully from backup
 ```
 
-###### vault backup info
+###### Vault Backup Info
 
 View backup status and information.
 

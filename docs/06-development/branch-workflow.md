@@ -202,22 +202,22 @@ git push origin v0.x.x
 
 ## Common Commands
 
-### Check which branch you're on
+### Check Which Branch You're On
 ```bash
 git branch --show-current
 ```
 
-### See recent commits on main
+### See Recent Commits on Main
 ```bash
 git log main --oneline -10
 ```
 
-### Compare your branch with main
+### Compare Your Branch With Main
 ```bash
 git diff main..HEAD
 ```
 
-### Update your branch with latest main
+### Update Your Branch With Latest Main
 ```bash
 # While on your feature branch
 git fetch origin
@@ -227,12 +227,12 @@ git rebase origin/main
 git merge origin/main
 ```
 
-### List all branches
+### List All Branches
 ```bash
 git branch -a
 ```
 
-### Delete merged feature branches
+### Delete Merged Feature Branches
 ```bash
 # Delete local branch
 git branch -d feat/my-feature
@@ -253,7 +253,7 @@ git push origin --delete feat/my-feature
 
 ## Troubleshooting
 
-### "Cannot push to main" error
+### "Cannot Push to Main" Error
 This is expected! Create a pull request from your feature branch instead.
 
 ```bash
@@ -264,7 +264,7 @@ git checkout feat/my-feature  # Switch to your feature branch
 # Now push and create PR
 ```
 
-### PR has merge conflicts
+### PR Has Merge Conflicts
 
 ```bash
 # Update your branch with latest main
@@ -281,7 +281,7 @@ git rebase --continue
 git push origin your-feature-branch --force-with-lease
 ```
 
-### CI failing on your PR
+### CI Failing on Your PR
 
 ```bash
 # Pull the latest changes from your PR branch
@@ -299,7 +299,7 @@ git push origin your-feature-branch
 # CI will automatically re-run on the PR
 ```
 
-### Forgot to create feature branch
+### Forgot to Create Feature Branch
 
 ```bash
 # If you made changes directly on main

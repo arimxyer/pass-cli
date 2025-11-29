@@ -148,7 +148,7 @@ esac
 
 **Solution**: Update pass-cli to the latest version using your package manager or download from GitHub.
 
-#### Network Timeout (Pass with Error)
+#### Network Timeout (Pass With Error)
 
 **Symptom**:
 ```text
@@ -357,7 +357,7 @@ echo "pass_cli_health_status $metric" >> /var/lib/prometheus/node_exporter/pass_
 
 ## Troubleshooting Tips
 
-### Run with Verbose Logging
+### Run With Verbose Logging
 
 For detailed diagnostic information:
 

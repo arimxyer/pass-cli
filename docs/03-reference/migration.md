@@ -295,7 +295,7 @@ pass-cli migrate --iterations 600000 --enable-audit
 
 ## Troubleshooting
 
-### Problem: "Password does not meet requirements"
+### Problem: "Password Does Not Meet Requirements"
 
 **Symptom**: Error when creating/updating credentials.
 
@@ -314,7 +314,7 @@ Admin#2025$Password
 pass-cli generate  # Automatically meets policy requirements
 ```
 
-### Problem: Vault unlock is slower after upgrade
+### Problem: Vault Unlock Is Slower After Upgrade
 
 **Symptom**: Vault unlock takes 50-100ms instead of 15-20ms.
 
@@ -327,7 +327,7 @@ pass-cli generate  # Automatically meets policy requirements
 - Mid-range CPU (2018-2022): 200-500ms
 - Older CPU (2015-2017): 500-1000ms
 
-### Problem: Cannot downgrade to older Pass-CLI version
+### Problem: Cannot Downgrade to Older Pass-CLI Version
 
 **Symptom**: "Invalid vault format" error when using old Pass-CLI with new vault.
 
@@ -336,7 +336,7 @@ pass-cli generate  # Automatically meets policy requirements
 2. Or create new vault with old Pass-CLI version
 3. Or upgrade to latest Pass-CLI version
 
-### Problem: Audit log verification fails
+### Problem: Audit Log Verification Fails
 
 **Symptom**: `pass-cli verify-audit` reports HMAC verification failures.
 
@@ -357,7 +357,7 @@ mv ~/.pass-cli/audit.log ~/.pass-cli/audit.log.corrupted
 pass-cli init --enable-audit
 ```
 
-### Problem: "Vault file corrupted" after migration
+### Problem: "Vault File Corrupted" After Migration
 
 **Symptom**: Cannot unlock vault after re-initialization.
 
@@ -374,15 +374,15 @@ pass-cli list
 
 ## FAQ
 
-### Q: Do I have to migrate?
+### Q: Do I Have to Migrate?
 
 **A**: No. Existing vaults with 100k iterations continue to work indefinitely. Migration is optional for users wanting stronger security.
 
-### Q: Will migration delete my credentials?
+### Q: Will Migration Delete My Credentials?
 
 **A**: No. Migration is non-destructive. Always creates backup before changes. Credentials are preserved.
 
-### Q: How long does migration take?
+### Q: How Long Does Migration Take?
 
 **A**: Depends on vault size:
 - Small vault (< 20 credentials): 5-10 minutes
@@ -391,31 +391,31 @@ pass-cli list
 
 Time includes manual re-entry of credentials. Future in-place migration will be automatic (seconds).
 
-### Q: Can I migrate back to 100k iterations?
+### Q: Can I Migrate Back to 100k Iterations?
 
 **A**: Technically yes (create new vault), but not recommended. Forward migration only makes sense for security.
 
-### Q: Does audit logging slow down vault operations?
+### Q: Does Audit Logging Slow Down Vault Operations?
 
 **A**: Minimal impact (~1-2ms per operation). Audit logging uses asynchronous writes and graceful degradation.
 
-### Q: What if I forget my master password after migration?
+### Q: What If I Forget My Master Password After Migration?
 
 **A**: If you enabled BIP39 recovery during `pass-cli init`, you can recover using `pass-cli change-password --recover` and your 24-word recovery phrase. If you used `--no-recovery` or are on an older vault without recovery, the vault is unrecoverable. Keep master password and recovery phrase backups secure.
 
-### Q: Are audit logs encrypted?
+### Q: Are Audit Logs Encrypted?
 
 **A**: Audit logs are **not encrypted** (they contain service names, not passwords). Logs are **tamper-evident** via HMAC signatures. If encryption is required, use full-disk encryption.
 
-### Q: Can I disable audit logging after enabling?
+### Q: Can I Disable Audit Logging After Enabling?
 
 **A**: Yes, but audit logs remain on disk. You can manually delete old logs. Future releases may add a command to disable audit logging cleanly.
 
-### Q: Will old Pass-CLI versions work with migrated vaults?
+### Q: Will Old Pass-CLI Versions Work With Migrated Vaults?
 
 **A**: No. 600k iteration vaults require January 2025+ Pass-CLI versions. Keep old vault backup if you need old version compatibility.
 
-### Q: Is there a tool to convert vault format?
+### Q: Is There a Tool to Convert Vault Format?
 
 **A**: Not yet. Currently requires manual re-initialization. In-place migration planned for future release.
 

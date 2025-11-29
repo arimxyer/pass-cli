@@ -74,7 +74,7 @@ Master Key = PBKDF2(
 3. **Standard**: NIST recommended for password-based cryptography
 4. **Deterministic**: Same password + salt = same key
 
-#### Migration from 100k to 600k Iterations
+#### Migration From 100k to 600k Iterations
 
 - **Backward Compatibility**: Vaults with 100k iterations continue to work
 - **Automatic Detection**: Iteration count stored in vault metadata

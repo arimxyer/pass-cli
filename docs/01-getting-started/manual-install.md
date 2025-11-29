@@ -6,7 +6,7 @@ toc: true
 
 Manual installation gives you direct control over the binary location and version.
 
-### Download Pre-built Binaries
+### Download Pre-Built Binaries
 
 1. **Visit the Releases Page**
 
@@ -166,7 +166,7 @@ $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";
 pass-cli version
 ```
 
-## Building from Source
+## Building From Source
 
 Building from source gives you the latest development version and allows customization.
 
