@@ -10,7 +10,7 @@ style:
     # Examples:
     #   sentence_case: "This is a heading"
     #   title_case: "This Is A Heading"
-    case: title_case
+    case: sentence_case
 
     # Enforce consistent heading case throughout project
     consistency_required: true
