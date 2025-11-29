@@ -4,6 +4,9 @@ exclude:
 - '*_test.go'
 - vendor/*
 - test/*
+- specs/*
+- .specify/*
+- .spec-workflow/*
 sources:
 - cmd/**/*.go
 - internal/**/*.go
