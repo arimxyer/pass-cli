@@ -469,7 +469,7 @@ For questions or discussions, visit [GitHub Discussions](https://github.com/ari1
 
 - **Issues**: [GitHub Issues](https://github.com/ari1110/pass-cli/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/ari1110/pass-cli/discussions)
-- **Documentation**: [docs/](../)
+- **Documentation**: [docs/](../_index.md)
 
 ## Resources
 

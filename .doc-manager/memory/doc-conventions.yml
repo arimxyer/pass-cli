@@ -10,7 +10,7 @@ style:
     # Examples:
     #   sentence_case: "This is a heading"
     #   title_case: "This Is A Heading"
-    case: sentence_case
+    case: title_case
 
     # Enforce consistent heading case throughout project
     consistency_required: true
@@ -43,7 +43,7 @@ structure:
     min_length: 500
 
   # Maximum heading depth (1-6, where 1 is #, 6 is ######)
-  max_heading_depth: 3
+  max_heading_depth: 6
 
   # Enforce strict heading hierarchy (no skipping levels: H1→H3 is invalid)
   # Options: strict | relaxed
