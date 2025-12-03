@@ -272,7 +272,7 @@ For maximum portability:
 CGO_ENABLED=0 go build -ldflags="-s -w" -o pass-cli .
 ```
 
-#### All Platforms (using GoReleaser)
+#### All Platforms (Using GoReleaser)
 
 ```bash
 # Install GoReleaser

@@ -10,10 +10,26 @@ style:
     # Examples:
     #   sentence_case: "This is a heading"
     #   title_case: "This Is A Heading"
-    case: sentence_case
+    case: title_case
 
     # Enforce consistent heading case throughout project
     consistency_required: true
+
+    # Brand names and terms that should not be case-corrected
+    # These maintain their original casing even in title_case headings
+    exceptions:
+      - macOS
+      - iOS
+      - iPadOS
+      - iPhone
+      - iPad
+      - GoReleaser
+      - GitHub
+      - GitLab
+      - PowerShell
+      - npm
+      - pnpm
+      - yarn
 
   code:
     # Format for inline code references: backticks | html

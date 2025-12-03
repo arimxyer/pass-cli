@@ -23,7 +23,15 @@ metadata:
   language: Go
   created: '2025-11-28T23:13:03.879609'
   version: 1.0.0
-include_root_readme: false
+include_root_readme: true
+
+api_coverage:
+  strategy: all_then_underscore
+  preset: go-test
+  exclude_symbols:
+    - "*_test"
+    - "mock*"
+    - "Mock*"
 
 # ============================================================================
 # Configuration Guide & Examples

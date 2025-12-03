@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-11-28T23:35:18.475441",
+  "generated_at": "2025-12-03T15:44:16.471148",
   "doc_to_code": {
     "01-getting-started/manual-install.md": [
       "cmd/init.go",
@@ -177,7 +177,18 @@
       "cmd/version.go"
     ],
     "_index.md": [],
-    "README.md": []
+    "README.md": [
+      "cmd/doctor.go",
+      "cmd/generate.go",
+      "cmd/init.go",
+      "cmd/keychain_enable.go",
+      "cmd/keychain_status.go",
+      "cmd/list.go",
+      "cmd/vault_backup_create.go",
+      "cmd/vault_backup_info.go",
+      "cmd/vault_backup_restore.go",
+      "cmd/vault_remove.go"
+    ]
   },
   "code_to_doc": {
     "cmd/init.go": [
@@ -193,7 +204,8 @@
       "04-troubleshooting/vault.md",
       "05-operations/health-checks.md",
       "05-operations/security-operations.md",
-      "06-development/contributing.md"
+      "06-development/contributing.md",
+      "README.md"
     ],
     "cmd/version.go": [
       "01-getting-started/manual-install.md",
@@ -220,7 +232,8 @@
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
       "03-reference/command-reference.md",
-      "05-operations/health-checks.md"
+      "05-operations/health-checks.md",
+      "README.md"
     ],
     "cmd/get.go": [
       "01-getting-started/quick-start.md",
@@ -240,7 +253,8 @@
       "04-troubleshooting/installation.md",
       "04-troubleshooting/tui.md",
       "04-troubleshooting/vault.md",
-      "05-operations/security-operations.md"
+      "05-operations/security-operations.md",
+      "README.md"
     ],
     "cmd/update.go": [
       "01-getting-started/quick-start.md",
@@ -248,31 +262,37 @@
     ],
     "cmd/vault_backup_create.go": [
       "02-guides/backup-restore.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "cmd/vault_backup_info.go": [
       "02-guides/backup-restore.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "cmd/vault_backup_restore.go": [
       "02-guides/backup-restore.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "cmd/generate.go": [
       "02-guides/basic-workflows.md",
       "03-reference/command-reference.md",
       "03-reference/migration.md",
-      "05-operations/security-operations.md"
+      "05-operations/security-operations.md",
+      "README.md"
     ],
     "cmd/keychain_enable.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "cmd/keychain_status.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "cmd/tui.go": [
       "02-guides/basic-workflows.md",
@@ -370,7 +390,8 @@
       "03-reference/command-reference.md"
     ],
     "cmd/vault_remove.go": [
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "cmd/root.go": [
       "06-development/contributing.md"
@@ -387,7 +408,8 @@
       "03-reference/command-reference.md",
       "03-reference/migration.md",
       "04-troubleshooting/tui.md",
-      "06-development/homebrew.md"
+      "06-development/homebrew.md",
+      "README.md"
     ],
     "explicit": [
       "01-getting-started/manual-install.md",
@@ -414,7 +436,8 @@
       "04-troubleshooting/keychain.md",
       "04-troubleshooting/vault.md",
       "05-operations/health-checks.md",
-      "05-operations/security-operations.md"
+      "05-operations/security-operations.md",
+      "README.md"
     ],
     "pass-cli add test # Add a test credential": [
       "01-getting-started/manual-install.md"
@@ -443,14 +466,16 @@
       "04-troubleshooting/installation.md",
       "04-troubleshooting/tui.md",
       "04-troubleshooting/vault.md",
-      "05-operations/security-operations.md"
+      "05-operations/security-operations.md",
+      "README.md"
     ],
     "pass-cli add github": [
       "01-getting-started/quick-start.md",
       "02-guides/backup-restore.md",
       "02-guides/basic-workflows.md",
       "03-reference/command-reference.md",
-      "03-reference/migration.md"
+      "03-reference/migration.md",
+      "README.md"
     ],
     "vault-requiring": [
       "01-getting-started/quick-start.md",
@@ -463,7 +488,8 @@
       "02-guides/tui-guide.md",
       "03-reference/command-reference.md",
       "03-reference/migration.md",
-      "04-troubleshooting/tui.md"
+      "04-troubleshooting/tui.md",
+      "README.md"
     ],
     "vault.enc.backup": [
       "02-guides/backup-restore.md",
@@ -473,18 +499,21 @@
     ],
     "pass-cli vault backup info": [
       "02-guides/backup-restore.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli vault backup create": [
       "02-guides/backup-restore.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli doctor": [
       "02-guides/backup-restore.md",
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
       "03-reference/command-reference.md",
-      "05-operations/health-checks.md"
+      "05-operations/health-checks.md",
+      "README.md"
     ],
     "restore": [
       "02-guides/backup-restore.md"
@@ -494,13 +523,15 @@
     ],
     "pass-cli vault backup restore": [
       "02-guides/backup-restore.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli generate": [
       "02-guides/basic-workflows.md",
       "03-reference/command-reference.md",
       "03-reference/migration.md",
-      "05-operations/security-operations.md"
+      "05-operations/security-operations.md",
+      "README.md"
     ],
     "pass-cli generate --length": [
       "02-guides/basic-workflows.md"
@@ -517,23 +548,27 @@
     "pass-cli keychain enable": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli keychain status": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli get github --json": [
       "02-guides/basic-workflows.md"
     ],
     "pass-cli update github": [
       "02-guides/basic-workflows.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli delete github": [
       "02-guides/basic-workflows.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli tui # Opens directly, no password prompt": [
       "02-guides/basic-workflows.md",
@@ -551,7 +586,8 @@
       "03-reference/command-reference.md",
       "03-reference/security-architecture.md",
       "04-troubleshooting/faq.md",
-      "04-troubleshooting/vault.md"
+      "04-troubleshooting/vault.md",
+      "README.md"
     ],
     "in": [
       "02-guides/scripting-guide.md"
@@ -609,7 +645,8 @@
       "02-guides/usage-tracking.md"
     ],
     "cli": [
-      "03-reference/_index.md"
+      "03-reference/_index.md",
+      "README.md"
     ],
     "MyPassword": [
       "03-reference/command-reference.md"
@@ -618,13 +655,15 @@
       "03-reference/command-reference.md",
       "03-reference/migration.md",
       "03-reference/security-architecture.md",
-      "04-troubleshooting/vault.md"
+      "04-troubleshooting/vault.md",
+      "README.md"
     ],
     "EDITOR": [
       "03-reference/command-reference.md"
     ],
     "pass-cli init --enable-audit": [
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli get github --quiet": [
       "03-reference/command-reference.md"
@@ -881,6 +920,18 @@
     ],
     "pass-cli --help": [
       "06-development/scoop.md"
+    ],
+    "pass-cli init --no-recovery": [
+      "README.md"
+    ],
+    "cross-platform": [
+      "README.md"
+    ],
+    "core": [
+      "README.md"
+    ],
+    "pass-cli vault remove": [
+      "README.md"
     ]
   },
   "reference_to_doc": {
@@ -897,7 +948,8 @@
       "03-reference/command-reference.md",
       "03-reference/migration.md",
       "04-troubleshooting/tui.md",
-      "06-development/homebrew.md"
+      "06-development/homebrew.md",
+      "README.md"
     ],
     "explicit": [
       "01-getting-started/manual-install.md",
@@ -924,7 +976,8 @@
       "04-troubleshooting/keychain.md",
       "04-troubleshooting/vault.md",
       "05-operations/health-checks.md",
-      "05-operations/security-operations.md"
+      "05-operations/security-operations.md",
+      "README.md"
     ],
     "pass-cli add test # Add a test credential": [
       "01-getting-started/manual-install.md"
@@ -968,7 +1021,8 @@
     ],
     "doctor": [
       "01-getting-started/quick-start.md",
-      "05-operations/health-checks.md"
+      "05-operations/health-checks.md",
+      "README.md"
     ],
     "help": [
       "01-getting-started/quick-start.md",
@@ -989,7 +1043,8 @@
       "04-troubleshooting/installation.md",
       "04-troubleshooting/tui.md",
       "04-troubleshooting/vault.md",
-      "05-operations/security-operations.md"
+      "05-operations/security-operations.md",
+      "README.md"
     ],
     "echo": [
       "01-getting-started/quick-start.md"
@@ -999,7 +1054,8 @@
       "02-guides/backup-restore.md",
       "02-guides/basic-workflows.md",
       "03-reference/command-reference.md",
-      "03-reference/migration.md"
+      "03-reference/migration.md",
+      "README.md"
     ],
     "vault-requiring": [
       "01-getting-started/quick-start.md",
@@ -1012,7 +1068,8 @@
       "02-guides/tui-guide.md",
       "03-reference/command-reference.md",
       "03-reference/migration.md",
-      "04-troubleshooting/tui.md"
+      "04-troubleshooting/tui.md",
+      "README.md"
     ],
     "vault.enc.backup": [
       "02-guides/backup-restore.md",
@@ -1025,25 +1082,29 @@
     ],
     "pass-cli vault backup info": [
       "02-guides/backup-restore.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli vault backup create": [
       "02-guides/backup-restore.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli doctor": [
       "02-guides/backup-restore.md",
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
       "03-reference/command-reference.md",
-      "05-operations/health-checks.md"
+      "05-operations/health-checks.md",
+      "README.md"
     ],
     "restore": [
       "02-guides/backup-restore.md"
     ],
     "pass-cli vault backup restore": [
       "02-guides/backup-restore.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "secret-tool clear service pass-cli": [
       "02-guides/basic-workflows.md"
@@ -1056,7 +1117,8 @@
       "02-guides/basic-workflows.md",
       "03-reference/command-reference.md",
       "03-reference/migration.md",
-      "05-operations/security-operations.md"
+      "05-operations/security-operations.md",
+      "README.md"
     ],
     "pass-cli generate --length": [
       "02-guides/basic-workflows.md"
@@ -1073,23 +1135,27 @@
     "pass-cli keychain enable": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli keychain status": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli get github --json": [
       "02-guides/basic-workflows.md"
     ],
     "pass-cli update github": [
       "02-guides/basic-workflows.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli delete github": [
       "02-guides/basic-workflows.md",
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli tui # Opens directly, no password prompt": [
       "02-guides/basic-workflows.md",
@@ -1110,7 +1176,8 @@
       "03-reference/command-reference.md",
       "03-reference/security-architecture.md",
       "04-troubleshooting/faq.md",
-      "04-troubleshooting/vault.md"
+      "04-troubleshooting/vault.md",
+      "README.md"
     ],
     "in": [
       "02-guides/scripting-guide.md"
@@ -1177,7 +1244,8 @@
       "02-guides/usage-tracking.md"
     ],
     "cli": [
-      "03-reference/_index.md"
+      "03-reference/_index.md",
+      "README.md"
     ],
     "password123": [
       "03-reference/command-reference.md"
@@ -1189,7 +1257,8 @@
       "03-reference/command-reference.md",
       "03-reference/migration.md",
       "03-reference/security-architecture.md",
-      "04-troubleshooting/vault.md"
+      "04-troubleshooting/vault.md",
+      "README.md"
     ],
     "username": [
       "03-reference/command-reference.md"
@@ -1243,7 +1312,8 @@
       "03-reference/command-reference.md"
     ],
     "pass-cli init --enable-audit": [
-      "03-reference/command-reference.md"
+      "03-reference/command-reference.md",
+      "README.md"
     ],
     "pass-cli get github --quiet": [
       "03-reference/command-reference.md"
@@ -1600,6 +1670,21 @@
     ],
     "pass-cli --help": [
       "06-development/scoop.md"
+    ],
+    "pass-cli init --no-recovery": [
+      "README.md"
+    ],
+    "pass": [
+      "README.md"
+    ],
+    "cross-platform": [
+      "README.md"
+    ],
+    "core": [
+      "README.md"
+    ],
+    "pass-cli vault remove": [
+      "README.md"
     ]
   },
   "all_references": {
@@ -3469,6 +3554,114 @@
       {
         "reference": "pass-cli --help",
         "doc_file": "06-development/scoop.md"
+      },
+      {
+        "reference": "doctor",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli keychain enable",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli keychain status",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli change-password --recover",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli init --no-recovery",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli init --enable-audit",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli init",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli add github",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli get github",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli list",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli list",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli init",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli add github",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli get github",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli get github",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli list",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli update github",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli delete github",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli generate",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli vault remove",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli vault backup create",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli vault backup restore",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli vault backup info",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli doctor",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "pass-cli change-password",
+        "doc_file": "README.md"
       }
     ],
     "semantic_command": [
@@ -3606,6 +3799,26 @@
       },
       {
         "reference": "complete",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "cross-platform",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "complete",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "doctor",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "cli",
+        "doc_file": "README.md"
+      },
+      {
+        "reference": "core",
         "doc_file": "README.md"
       }
     ],
@@ -3773,6 +3986,9 @@
       "06-development/release.md",
       "06-development/scoop.md",
       "_index.md",
+      "README.md"
+    ],
+    "https://img.shields.io/github/last-commit/ari1110/pass-cli?label=Last%20Updated": [
       "README.md"
     ]
   }
