@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-12-03T22:51:30.865354",
+  "generated_at": "2025-12-03T23:03:27.912688",
   "doc_to_code": {
     "01-getting-started/manual-install.md": [
       "cmd/init.go",
@@ -830,9 +830,6 @@
     "migration": [
       "03-reference/migration.md"
     ],
-    "planned": [
-      "03-reference/migration.md"
-    ],
     "pass-cli add service1": [
       "03-reference/migration.md"
     ],
@@ -843,6 +840,9 @@
       "03-reference/migration.md"
     ],
     "pass-cli get service1": [
+      "03-reference/migration.md"
+    ],
+    "pass-cli add newservice": [
       "03-reference/migration.md"
     ],
     "pass-cli get oldservice": [
@@ -1492,9 +1492,6 @@
     "migration": [
       "03-reference/migration.md"
     ],
-    "planned": [
-      "03-reference/migration.md"
-    ],
     "pass-cli add service1": [
       "03-reference/migration.md"
     ],
@@ -1505,6 +1502,9 @@
       "03-reference/migration.md"
     ],
     "pass-cli get service1": [
+      "03-reference/migration.md"
+    ],
+    "pass-cli add newservice": [
       "03-reference/migration.md"
     ],
     "pass-cli get oldservice": [
@@ -3156,19 +3156,11 @@
         "doc_file": "03-reference/migration.md"
       },
       {
-        "reference": "pass-cli migrate",
+        "reference": "pass-cli init",
         "doc_file": "03-reference/migration.md"
       },
       {
-        "reference": "pass-cli migrate",
-        "doc_file": "03-reference/migration.md"
-      },
-      {
-        "reference": "pass-cli",
-        "doc_file": "03-reference/migration.md"
-      },
-      {
-        "reference": "pass-cli",
+        "reference": "pass-cli add newservice",
         "doc_file": "03-reference/migration.md"
       },
       {
@@ -3747,10 +3739,6 @@
       },
       {
         "reference": "migration",
-        "doc_file": "03-reference/migration.md"
-      },
-      {
-        "reference": "planned",
         "doc_file": "03-reference/migration.md"
       },
       {

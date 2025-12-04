@@ -28,12 +28,6 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 - **Audit Logging**: HMAC-signed audit logs for all operations
 - **Manual Backups**: Create and restore vault backups on demand
 
-## Getting Help
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/ari1110/pass-cli/issues)
-- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/ari1110/pass-cli/discussions)
-- **Documentation**: You're reading it!
-
 ## Contributing
 
 See [Contributing Guide](06-development/contributing) for developer documentation and contribution guidelines.

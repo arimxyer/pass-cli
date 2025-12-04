@@ -198,26 +198,9 @@ pass-cli get github
 
 **Time Required**: ~5-10 minutes for 20 credentials.
 
-### Option B: In-Place Migration (Future Feature)
+### Option B: In-Place Migration (Planned)
 
-> **[WARNING] WARNING**: This feature is **NOT YET IMPLEMENTED**. The `pass-cli migrate` command does not currently exist. Use Option A (Manual Migration) instead.
-
-**Status**: Not yet implemented. Planned for future release.
-
-**Planned Command** (for future reference only):
-```bash
-# Future: Migrate vault to 600k iterations in-place
-pass-cli migrate --iterations 600000
-
-# Future: Migrate with audit logging enabled
-pass-cli migrate --iterations 600000 --enable-audit
-```
-
-**Expected Behavior**:
-- Reads existing vault with current iteration count
-- Re-encrypts all credentials with 600k iterations
-- Creates backup automatically
-- Atomic operation (rollback on failure)
+> **Note**: An automated `pass-cli migrate` command is planned for a future release. Until then, use Option A (Fresh Vault) or Option C (Hybrid Approach).
 
 ### Option C: Hybrid Approach (Keep Old Vault)
 
@@ -225,37 +208,38 @@ pass-cli migrate --iterations 600000 --enable-audit
 
 **Steps**:
 
-1. **Create new vault in custom location**:
+1. **Create new vault in separate location**:
    ```bash
-   # Create config for new vault
-   mkdir -p ~/.pass-cli
-   echo "vault_path: ~/.pass-cli/vault-new.enc" > ~/.pass-cli/config-new.yml
+   # Backup current config
+   cp ~/.pass-cli/config.yml ~/.pass-cli/config.yml.backup
 
-   # Initialize new vault
-   pass-cli --config ~/.pass-cli/config-new.yml init --enable-audit
+   # Point config to new vault location
+   echo "vault_path: ~/.pass-cli/vault-new.enc" > ~/.pass-cli/config.yml
+
+   # Initialize new vault (uses 600k iterations)
+   pass-cli init --enable-audit
    ```
 
 2. **Add new credentials to new vault**:
    ```bash
-   pass-cli --config ~/.pass-cli/config-new.yml add newservice
+   pass-cli add newservice
    ```
 
-3. **Keep old vault for existing credentials**:
+3. **Switch back to old vault when needed**:
    ```bash
-   # Use default config (points to ~/.pass-cli/vault.enc)
+   # Restore original config to access old vault
+   cp ~/.pass-cli/config.yml.backup ~/.pass-cli/config.yml
    pass-cli get oldservice
    ```
 
-4. **Switch to new vault when ready**:
+4. **Promote new vault when ready**:
    ```bash
-   # Backup old vault
-   mv ~/.pass-cli/vault.enc ~/.pass-cli/vault-old-backup.enc
+   # Point config back to new vault
+   echo "vault_path: ~/.pass-cli/vault-new.enc" > ~/.pass-cli/config.yml
 
-   # Promote new vault to default
+   # Or rename new vault to default location
    mv ~/.pass-cli/vault-new.enc ~/.pass-cli/vault.enc
-
-   # Update default config (or remove custom config file)
-   rm ~/.pass-cli/config-new.yml
+   rm ~/.pass-cli/config.yml  # Use default location
    ```
 
 ## Backward Compatibility
@@ -269,7 +253,7 @@ pass-cli migrate --iterations 600000 --enable-audit
 - [OK] Can be used alongside 600k vaults
 
 **600k Iteration Vaults**:
-- [WARNING] **Not compatible with older Pass-CLI versions** (pre-January 2025)
+- [WARNING] **Not compatible with Pass-CLI versions before v0.3.0**
 - [OK] Auto-detected by iteration count in metadata
 - [OK] Future-proof format
 
@@ -413,7 +397,7 @@ Time includes manual re-entry of credentials. Future in-place migration will be 
 
 ### Q: Will Old Pass-CLI Versions Work With Migrated Vaults?
 
-**A**: No. 600k iteration vaults require January 2025+ Pass-CLI versions. Keep old vault backup if you need old version compatibility.
+**A**: No. 600k iteration vaults require Pass-CLI v0.3.0 or later. Keep old vault backup if you need compatibility with older versions.
 
 ### Q: Is There a Tool to Convert Vault Format?
 

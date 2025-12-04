@@ -1521,7 +1521,7 @@ Overall Status: HEALTHY
 
 See [Health Checks](../05-operations/health-checks) for detailed documentation and troubleshooting.
 
-#### Why does doctor report orphaned keychain entries?
+#### Why Does Doctor Report Orphaned Keychain Entries?
 
 **Symptom**: Doctor reports "⚠ Keychain: Orphaned entry detected"
 
@@ -1574,7 +1574,7 @@ security delete-generic-password -s "pass-cli" -a "$USER"
 secret-tool clear service pass-cli vault /old/path/vault.enc
 ```
 
-#### What if first-run detection doesn't trigger?
+#### What If First-Run Detection Doesn't Trigger?
 
 **Expected Behavior**: When running vault-requiring commands (`add`, `get`, `list`, `update`, `delete`) for the first time without an existing vault, pass-cli offers guided initialization.
 

@@ -216,14 +216,19 @@ After writing down your recovery phrase:
 2. **Store phrase securely** before testing recovery
 3. **Optional**: Test recovery in safe environment:
    ```bash
-   # Create test vault
-   pass-cli init --config /tmp/test-config.yaml
-   
-   # Test recovery
-   pass-cli change-password --recover --config /tmp/test-config.yaml
-   
-   # Clean up test vault
-   rm -rf /tmp/test-config.yaml ~/.pass-cli/vault.enc
+   # Backup existing config (if any)
+   cp ~/.pass-cli/config.yml ~/.pass-cli/config.yml.backup 2>/dev/null
+
+   # Point to temporary test vault
+   echo "vault_path: /tmp/test-vault.enc" > ~/.pass-cli/config.yml
+
+   # Create test vault and test recovery
+   pass-cli init
+   pass-cli change-password --recover
+
+   # Restore original config and clean up
+   mv ~/.pass-cli/config.yml.backup ~/.pass-cli/config.yml 2>/dev/null || rm ~/.pass-cli/config.yml
+   rm -f /tmp/test-vault.enc
    ```
 
 ## Advanced: Passphrase Protection
