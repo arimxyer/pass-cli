@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-12-03T15:44:16.471148",
+  "generated_at": "2025-12-03T22:51:30.865354",
   "doc_to_code": {
     "01-getting-started/manual-install.md": [
       "cmd/init.go",

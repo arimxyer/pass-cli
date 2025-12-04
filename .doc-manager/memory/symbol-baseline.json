@@ -1,7 +1,7 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "created_at": "2025-11-29T04:31:53.752027+00:00",
-  "updated_at": "2025-12-03T20:44:14.859700+00:00",
+  "updated_at": "2025-12-04T03:51:29.511060+00:00",
   "project_root": "R:\\Test-Projects\\pass-cli",
   "symbols": {
     "init": [
@@ -1127,7 +1127,93 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Location",
+            "parent_symbol": "usageRecordWithPath",
+            "field_type": "string",
+            "default_value": null,
+            "file": "cmd/usage.go",
+            "line": 62,
+            "column": 1,
+            "tags": {
+              "json": "location"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "GitRepo",
+            "parent_symbol": "usageRecordWithPath",
+            "field_type": "string",
+            "default_value": null,
+            "file": "cmd/usage.go",
+            "line": 63,
+            "column": 1,
+            "tags": {
+              "json": "git_repository"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "PathExists",
+            "parent_symbol": "usageRecordWithPath",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "cmd/usage.go",
+            "line": 64,
+            "column": 1,
+            "tags": {
+              "json": "path_exists"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "LastAccess",
+            "parent_symbol": "usageRecordWithPath",
+            "field_type": "string",
+            "default_value": null,
+            "file": "cmd/usage.go",
+            "line": 65,
+            "column": 1,
+            "tags": {
+              "json": "last_access"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "AccessCount",
+            "parent_symbol": "usageRecordWithPath",
+            "field_type": "int",
+            "default_value": null,
+            "file": "cmd/usage.go",
+            "line": 66,
+            "column": 1,
+            "tags": {
+              "json": "access_count"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "FieldCounts",
+            "parent_symbol": "usageRecordWithPath",
+            "field_type": "map[string]int",
+            "default_value": null,
+            "file": "cmd/usage.go",
+            "line": 67,
+            "column": 1,
+            "tags": {
+              "json": "field_counts"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "runVaultBackupCreate": [
@@ -4139,7 +4225,93 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Terminal",
+            "parent_symbol": "Config",
+            "field_type": "TerminalConfig",
+            "default_value": null,
+            "file": "internal/config/config.go",
+            "line": 15,
+            "column": 1,
+            "tags": {
+              "mapstructure": "terminal"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Keybindings",
+            "parent_symbol": "Config",
+            "field_type": "map[string]string",
+            "default_value": null,
+            "file": "internal/config/config.go",
+            "line": 16,
+            "column": 1,
+            "tags": {
+              "mapstructure": "keybindings"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "VaultPath",
+            "parent_symbol": "Config",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/config/config.go",
+            "line": 17,
+            "column": 1,
+            "tags": {
+              "mapstructure": "vault_path"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Theme",
+            "parent_symbol": "Config",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/config/config.go",
+            "line": 18,
+            "column": 1,
+            "tags": {
+              "mapstructure": "theme"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "LoadErrors",
+            "parent_symbol": "Config",
+            "field_type": "[]string",
+            "default_value": null,
+            "file": "internal/config/config.go",
+            "line": 21,
+            "column": 1,
+            "tags": {
+              "mapstructure": "-"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "ParsedKeybindings",
+            "parent_symbol": "Config",
+            "field_type": "map[string]*Keybinding",
+            "default_value": null,
+            "file": "internal/config/config.go",
+            "line": 24,
+            "column": 1,
+            "tags": {
+              "mapstructure": "-"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "TerminalConfig": [
@@ -4151,7 +4323,79 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "WarningEnabled",
+            "parent_symbol": "TerminalConfig",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/config/config.go",
+            "line": 29,
+            "column": 1,
+            "tags": {
+              "mapstructure": "warning_enabled"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "MinWidth",
+            "parent_symbol": "TerminalConfig",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/config/config.go",
+            "line": 30,
+            "column": 1,
+            "tags": {
+              "mapstructure": "min_width"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "MinHeight",
+            "parent_symbol": "TerminalConfig",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/config/config.go",
+            "line": 31,
+            "column": 1,
+            "tags": {
+              "mapstructure": "min_height"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "DetailPosition",
+            "parent_symbol": "TerminalConfig",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/config/config.go",
+            "line": 32,
+            "column": 1,
+            "tags": {
+              "mapstructure": "detail_position"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "DetailAutoThreshold",
+            "parent_symbol": "TerminalConfig",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/config/config.go",
+            "line": 33,
+            "column": 1,
+            "tags": {
+              "mapstructure": "detail_auto_threshold"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "ValidationResult": [
@@ -4573,7 +4817,79 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Name",
+            "parent_symbol": "CheckResult",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 33,
+            "column": 1,
+            "tags": {
+              "json": "name"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Status",
+            "parent_symbol": "CheckResult",
+            "field_type": "CheckStatus",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 34,
+            "column": 1,
+            "tags": {
+              "json": "status"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Message",
+            "parent_symbol": "CheckResult",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 35,
+            "column": 1,
+            "tags": {
+              "json": "message"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Recommendation",
+            "parent_symbol": "CheckResult",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 36,
+            "column": 1,
+            "tags": {
+              "json": "recommendation"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Details",
+            "parent_symbol": "CheckResult",
+            "field_type": null,
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 37,
+            "column": 1,
+            "tags": {
+              "json": "details"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "HealthSummary": [
@@ -4585,7 +4901,65 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Passed",
+            "parent_symbol": "HealthSummary",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 42,
+            "column": 1,
+            "tags": {
+              "json": "passed"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Warnings",
+            "parent_symbol": "HealthSummary",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 43,
+            "column": 1,
+            "tags": {
+              "json": "warnings"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Errors",
+            "parent_symbol": "HealthSummary",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 44,
+            "column": 1,
+            "tags": {
+              "json": "errors"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "ExitCode",
+            "parent_symbol": "HealthSummary",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 45,
+            "column": 1,
+            "tags": {
+              "json": "exit_code"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "HealthReport": [
@@ -4597,7 +4971,51 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Summary",
+            "parent_symbol": "HealthReport",
+            "field_type": "HealthSummary",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 50,
+            "column": 1,
+            "tags": {
+              "json": "summary"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Checks",
+            "parent_symbol": "HealthReport",
+            "field_type": "[]CheckResult",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 51,
+            "column": 1,
+            "tags": {
+              "json": "checks"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Timestamp",
+            "parent_symbol": "HealthReport",
+            "field_type": "time.Time",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 52,
+            "column": 1,
+            "tags": {
+              "json": "timestamp"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "CheckOptions": [
@@ -4609,7 +5027,81 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "CurrentVersion",
+            "parent_symbol": "CheckOptions",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 57,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "GitHubRepo",
+            "parent_symbol": "CheckOptions",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 58,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "VaultPath",
+            "parent_symbol": "CheckOptions",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 59,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "VaultPathSource",
+            "parent_symbol": "CheckOptions",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 60,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "VaultDir",
+            "parent_symbol": "CheckOptions",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 61,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "ConfigPath",
+            "parent_symbol": "CheckOptions",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/checker.go",
+            "line": 62,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "NewConfigChecker": [
@@ -4777,7 +5269,79 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Current",
+            "parent_symbol": "VersionCheckDetails",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 7,
+            "column": 1,
+            "tags": {
+              "json": "current"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Latest",
+            "parent_symbol": "VersionCheckDetails",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 8,
+            "column": 1,
+            "tags": {
+              "json": "latest"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "UpdateURL",
+            "parent_symbol": "VersionCheckDetails",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 9,
+            "column": 1,
+            "tags": {
+              "json": "update_url"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "UpToDate",
+            "parent_symbol": "VersionCheckDetails",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 10,
+            "column": 1,
+            "tags": {
+              "json": "up_to_date"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "CheckError",
+            "parent_symbol": "VersionCheckDetails",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 11,
+            "column": 1,
+            "tags": {
+              "json": "check_error"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "VaultCheckDetails": [
@@ -4789,7 +5353,93 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Path",
+            "parent_symbol": "VaultCheckDetails",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 16,
+            "column": 1,
+            "tags": {
+              "json": "path"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Exists",
+            "parent_symbol": "VaultCheckDetails",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 17,
+            "column": 1,
+            "tags": {
+              "json": "exists"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Readable",
+            "parent_symbol": "VaultCheckDetails",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 18,
+            "column": 1,
+            "tags": {
+              "json": "readable"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Size",
+            "parent_symbol": "VaultCheckDetails",
+            "field_type": "int64",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 19,
+            "column": 1,
+            "tags": {
+              "json": "size"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Permissions",
+            "parent_symbol": "VaultCheckDetails",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 20,
+            "column": 1,
+            "tags": {
+              "json": "permissions"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Error",
+            "parent_symbol": "VaultCheckDetails",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 21,
+            "column": 1,
+            "tags": {
+              "json": "error"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "ConfigCheckDetails": [
@@ -4801,7 +5451,79 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Path",
+            "parent_symbol": "ConfigCheckDetails",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 26,
+            "column": 1,
+            "tags": {
+              "json": "path"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Exists",
+            "parent_symbol": "ConfigCheckDetails",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 27,
+            "column": 1,
+            "tags": {
+              "json": "exists"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Valid",
+            "parent_symbol": "ConfigCheckDetails",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 28,
+            "column": 1,
+            "tags": {
+              "json": "valid"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Errors",
+            "parent_symbol": "ConfigCheckDetails",
+            "field_type": "[]ConfigError",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 29,
+            "column": 1,
+            "tags": {
+              "json": "errors"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "UnknownKeys",
+            "parent_symbol": "ConfigCheckDetails",
+            "field_type": "[]string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 30,
+            "column": 1,
+            "tags": {
+              "json": "unknown_keys"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "ConfigError": [
@@ -4813,7 +5535,65 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Key",
+            "parent_symbol": "ConfigError",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 35,
+            "column": 1,
+            "tags": {
+              "json": "key"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Problem",
+            "parent_symbol": "ConfigError",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 36,
+            "column": 1,
+            "tags": {
+              "json": "problem"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "CurrentValue",
+            "parent_symbol": "ConfigError",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 37,
+            "column": 1,
+            "tags": {
+              "json": "current"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "ExpectedValue",
+            "parent_symbol": "ConfigError",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 38,
+            "column": 1,
+            "tags": {
+              "json": "expected"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "KeychainCheckDetails": [
@@ -4825,7 +5605,79 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Available",
+            "parent_symbol": "KeychainCheckDetails",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 43,
+            "column": 1,
+            "tags": {
+              "json": "available"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Backend",
+            "parent_symbol": "KeychainCheckDetails",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 44,
+            "column": 1,
+            "tags": {
+              "json": "backend"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "CurrentVault",
+            "parent_symbol": "KeychainCheckDetails",
+            "field_type": "*KeychainEntry",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 45,
+            "column": 1,
+            "tags": {
+              "json": "current_vault"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "OrphanedEntries",
+            "parent_symbol": "KeychainCheckDetails",
+            "field_type": "[]KeychainEntry",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 46,
+            "column": 1,
+            "tags": {
+              "json": "orphaned_entries"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "AccessError",
+            "parent_symbol": "KeychainCheckDetails",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 47,
+            "column": 1,
+            "tags": {
+              "json": "access_error"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "KeychainEntry": [
@@ -4837,7 +5689,51 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Key",
+            "parent_symbol": "KeychainEntry",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 52,
+            "column": 1,
+            "tags": {
+              "json": "key"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "VaultPath",
+            "parent_symbol": "KeychainEntry",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 53,
+            "column": 1,
+            "tags": {
+              "json": "vault_path"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Exists",
+            "parent_symbol": "KeychainEntry",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 54,
+            "column": 1,
+            "tags": {
+              "json": "exists"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "BackupCheckDetails": [
@@ -4849,7 +5745,51 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "VaultDir",
+            "parent_symbol": "BackupCheckDetails",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 59,
+            "column": 1,
+            "tags": {
+              "json": "vault_dir"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "BackupFiles",
+            "parent_symbol": "BackupCheckDetails",
+            "field_type": "[]BackupFile",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 60,
+            "column": 1,
+            "tags": {
+              "json": "backup_files"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "OldBackups",
+            "parent_symbol": "BackupCheckDetails",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 61,
+            "column": 1,
+            "tags": {
+              "json": "old_backups"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "BackupFile": [
@@ -4861,7 +5801,79 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Path",
+            "parent_symbol": "BackupFile",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 66,
+            "column": 1,
+            "tags": {
+              "json": "path"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Size",
+            "parent_symbol": "BackupFile",
+            "field_type": "int64",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 67,
+            "column": 1,
+            "tags": {
+              "json": "size"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "ModifiedAt",
+            "parent_symbol": "BackupFile",
+            "field_type": "time.Time",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 68,
+            "column": 1,
+            "tags": {
+              "json": "modified_at"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "AgeHours",
+            "parent_symbol": "BackupFile",
+            "field_type": "float64",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 69,
+            "column": 1,
+            "tags": {
+              "json": "age_hours"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Status",
+            "parent_symbol": "BackupFile",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/health/types.go",
+            "line": 70,
+            "column": 1,
+            "tags": {
+              "json": "status"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "NewVaultChecker": [
@@ -5243,7 +6255,33 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Passphrase",
+            "parent_symbol": "SetupConfig",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/recovery/recovery.go",
+            "line": 17,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "KDFParams",
+            "parent_symbol": "SetupConfig",
+            "field_type": "*vault.KDFParams",
+            "default_value": null,
+            "file": "internal/recovery/recovery.go",
+            "line": 18,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "SetupResult": [
@@ -5267,7 +6305,45 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "ChallengeWords",
+            "parent_symbol": "RecoveryConfig",
+            "field_type": "[]string",
+            "default_value": null,
+            "file": "internal/recovery/recovery.go",
+            "line": 30,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Passphrase",
+            "parent_symbol": "RecoveryConfig",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/recovery/recovery.go",
+            "line": 31,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Metadata",
+            "parent_symbol": "RecoveryConfig",
+            "field_type": "*vault.RecoveryMetadata",
+            "default_value": null,
+            "file": "internal/recovery/recovery.go",
+            "line": 32,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "VerifyConfig": [
@@ -5279,7 +6355,45 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Mnemonic",
+            "parent_symbol": "VerifyConfig",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/recovery/recovery.go",
+            "line": 37,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "VerifyPositions",
+            "parent_symbol": "VerifyConfig",
+            "field_type": "[]int",
+            "default_value": null,
+            "file": "internal/recovery/recovery.go",
+            "line": 38,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "UserWords",
+            "parent_symbol": "VerifyConfig",
+            "field_type": "[]string",
+            "default_value": null,
+            "file": "internal/recovery/recovery.go",
+            "line": 39,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "GetOrCreateAuditKey": [
@@ -5387,7 +6501,79 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Timestamp",
+            "parent_symbol": "AuditLogEntry",
+            "field_type": "time.Time",
+            "default_value": null,
+            "file": "internal/security/audit.go",
+            "line": 19,
+            "column": 1,
+            "tags": {
+              "json": "timestamp"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "EventType",
+            "parent_symbol": "AuditLogEntry",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/security/audit.go",
+            "line": 20,
+            "column": 1,
+            "tags": {
+              "json": "event_type"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Outcome",
+            "parent_symbol": "AuditLogEntry",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/security/audit.go",
+            "line": 21,
+            "column": 1,
+            "tags": {
+              "json": "outcome"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "CredentialName",
+            "parent_symbol": "AuditLogEntry",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/security/audit.go",
+            "line": 22,
+            "column": 1,
+            "tags": {
+              "json": "credential_name"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "HMACSignature",
+            "parent_symbol": "AuditLogEntry",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/security/audit.go",
+            "line": 23,
+            "column": 1,
+            "tags": {
+              "json": "hmac_signature"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "AuditLogger": [
@@ -6259,7 +7445,79 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Version",
+            "parent_symbol": "VaultMetadata",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/storage/storage.go",
+            "line": 36,
+            "column": 1,
+            "tags": {
+              "json": "version"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "CreatedAt",
+            "parent_symbol": "VaultMetadata",
+            "field_type": "time.Time",
+            "default_value": null,
+            "file": "internal/storage/storage.go",
+            "line": 37,
+            "column": 1,
+            "tags": {
+              "json": "created_at"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "UpdatedAt",
+            "parent_symbol": "VaultMetadata",
+            "field_type": "time.Time",
+            "default_value": null,
+            "file": "internal/storage/storage.go",
+            "line": 38,
+            "column": 1,
+            "tags": {
+              "json": "updated_at"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Salt",
+            "parent_symbol": "VaultMetadata",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/storage/storage.go",
+            "line": 39,
+            "column": 1,
+            "tags": {
+              "json": "salt"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Iterations",
+            "parent_symbol": "VaultMetadata",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/storage/storage.go",
+            "line": 40,
+            "column": 1,
+            "tags": {
+              "json": "iterations"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "EncryptedVault": [
@@ -6271,7 +7529,37 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Metadata",
+            "parent_symbol": "EncryptedVault",
+            "field_type": "VaultMetadata",
+            "default_value": null,
+            "file": "internal/storage/storage.go",
+            "line": 44,
+            "column": 1,
+            "tags": {
+              "json": "metadata"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Data",
+            "parent_symbol": "EncryptedVault",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/storage/storage.go",
+            "line": 45,
+            "column": 1,
+            "tags": {
+              "json": "data"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "StorageService": [
@@ -6463,7 +7751,57 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "VaultPath",
+            "parent_symbol": "GuidedInitConfig",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/firstrun.go",
+            "line": 37,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "EnableKeychain",
+            "parent_symbol": "GuidedInitConfig",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/vault/firstrun.go",
+            "line": 38,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "EnableAuditLog",
+            "parent_symbol": "GuidedInitConfig",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/vault/firstrun.go",
+            "line": 39,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "MasterPassword",
+            "parent_symbol": "GuidedInitConfig",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/vault/firstrun.go",
+            "line": 40,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "MetadataPath": [
@@ -6553,7 +7891,93 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Version",
+            "parent_symbol": "Metadata",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 12,
+            "column": 1,
+            "tags": {
+              "json": "version"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "CreatedAt",
+            "parent_symbol": "Metadata",
+            "field_type": "time.Time",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 13,
+            "column": 1,
+            "tags": {
+              "json": "created_at"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "LastModified",
+            "parent_symbol": "Metadata",
+            "field_type": "time.Time",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 14,
+            "column": 1,
+            "tags": {
+              "json": "last_modified"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "KeychainEnabled",
+            "parent_symbol": "Metadata",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 15,
+            "column": 1,
+            "tags": {
+              "json": "keychain_enabled"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "AuditEnabled",
+            "parent_symbol": "Metadata",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 16,
+            "column": 1,
+            "tags": {
+              "json": "audit_enabled"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Recovery",
+            "parent_symbol": "Metadata",
+            "field_type": "*RecoveryMetadata",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 17,
+            "column": 1,
+            "tags": {
+              "json": "recovery,omitempty"
+            },
+            "is_optional": true,
+            "doc": null
+          }
+        ]
       }
     ],
     "RecoveryMetadata": [
@@ -6565,7 +7989,135 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Enabled",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 22,
+            "column": 1,
+            "tags": {
+              "json": "enabled"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Version",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 23,
+            "column": 1,
+            "tags": {
+              "json": "version"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "PassphraseRequired",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 24,
+            "column": 1,
+            "tags": {
+              "json": "passphrase_required"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "ChallengePositions",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "[]int",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 25,
+            "column": 1,
+            "tags": {
+              "json": "challenge_positions"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "KDFParams",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "KDFParams",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 26,
+            "column": 1,
+            "tags": {
+              "json": "kdf_params"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "EncryptedStoredWords",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 27,
+            "column": 1,
+            "tags": {
+              "json": "encrypted_stored_words"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "NonceStored",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 28,
+            "column": 1,
+            "tags": {
+              "json": "nonce_stored"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "EncryptedRecoveryKey",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 29,
+            "column": 1,
+            "tags": {
+              "json": "encrypted_recovery_key"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "NonceRecovery",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 30,
+            "column": 1,
+            "tags": {
+              "json": "nonce_recovery"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "KDFParams": [
@@ -6577,7 +8129,93 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Algorithm",
+            "parent_symbol": "KDFParams",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 35,
+            "column": 1,
+            "tags": {
+              "json": "algorithm"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Time",
+            "parent_symbol": "KDFParams",
+            "field_type": "uint32",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 36,
+            "column": 1,
+            "tags": {
+              "json": "time"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Memory",
+            "parent_symbol": "KDFParams",
+            "field_type": "uint32",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 37,
+            "column": 1,
+            "tags": {
+              "json": "memory"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Threads",
+            "parent_symbol": "KDFParams",
+            "field_type": "uint8",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 38,
+            "column": 1,
+            "tags": {
+              "json": "threads"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "SaltChallenge",
+            "parent_symbol": "KDFParams",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 39,
+            "column": 1,
+            "tags": {
+              "json": "salt_challenge"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "SaltRecovery",
+            "parent_symbol": "KDFParams",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/vault/metadata.go",
+            "line": 40,
+            "column": 1,
+            "tags": {
+              "json": "salt_recovery"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "GetStorageService": [
@@ -6889,7 +8527,93 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Location",
+            "parent_symbol": "UsageRecord",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 54,
+            "column": 1,
+            "tags": {
+              "json": "location"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Timestamp",
+            "parent_symbol": "UsageRecord",
+            "field_type": "time.Time",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 55,
+            "column": 1,
+            "tags": {
+              "json": "timestamp"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "GitRepo",
+            "parent_symbol": "UsageRecord",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 56,
+            "column": 1,
+            "tags": {
+              "json": "git_repo"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Count",
+            "parent_symbol": "UsageRecord",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 57,
+            "column": 1,
+            "tags": {
+              "json": "count"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "LineNumber",
+            "parent_symbol": "UsageRecord",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 58,
+            "column": 1,
+            "tags": {
+              "json": "line_number,omitempty"
+            },
+            "is_optional": true,
+            "doc": null
+          },
+          {
+            "name": "FieldAccess",
+            "parent_symbol": "UsageRecord",
+            "field_type": "map[string]int",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 59,
+            "column": 1,
+            "tags": {
+              "json": "field_access"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "Credential": [
@@ -6901,7 +8625,149 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Service",
+            "parent_symbol": "Credential",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 65,
+            "column": 1,
+            "tags": {
+              "json": "service"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Username",
+            "parent_symbol": "Credential",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 66,
+            "column": 1,
+            "tags": {
+              "json": "username"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Password",
+            "parent_symbol": "Credential",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 67,
+            "column": 1,
+            "tags": {
+              "json": "password"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Category",
+            "parent_symbol": "Credential",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 68,
+            "column": 1,
+            "tags": {
+              "json": "category,omitempty"
+            },
+            "is_optional": true,
+            "doc": null
+          },
+          {
+            "name": "URL",
+            "parent_symbol": "Credential",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 69,
+            "column": 1,
+            "tags": {
+              "json": "url,omitempty"
+            },
+            "is_optional": true,
+            "doc": null
+          },
+          {
+            "name": "Notes",
+            "parent_symbol": "Credential",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 70,
+            "column": 1,
+            "tags": {
+              "json": "notes"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "CreatedAt",
+            "parent_symbol": "Credential",
+            "field_type": "time.Time",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 71,
+            "column": 1,
+            "tags": {
+              "json": "created_at"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "UpdatedAt",
+            "parent_symbol": "Credential",
+            "field_type": "time.Time",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 72,
+            "column": 1,
+            "tags": {
+              "json": "updated_at"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "ModifiedCount",
+            "parent_symbol": "Credential",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 73,
+            "column": 1,
+            "tags": {
+              "json": "modified_count"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "UsageRecord",
+            "parent_symbol": "Credential",
+            "field_type": "map[string]UsageRecord",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 74,
+            "column": 1,
+            "tags": {
+              "json": "usage_records"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "VaultData": [
@@ -6913,7 +8779,79 @@
         "column": 0,
         "signature": null,
         "parent": null,
-        "doc": null
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Credentials",
+            "parent_symbol": "VaultData",
+            "field_type": "map[string]Credential",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 79,
+            "column": 1,
+            "tags": {
+              "json": "credentials"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Version",
+            "parent_symbol": "VaultData",
+            "field_type": "int",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 80,
+            "column": 1,
+            "tags": {
+              "json": "version"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "AuditEnabled",
+            "parent_symbol": "VaultData",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 82,
+            "column": 1,
+            "tags": {
+              "json": "audit_enabled,omitempty"
+            },
+            "is_optional": true,
+            "doc": null
+          },
+          {
+            "name": "AuditLogPath",
+            "parent_symbol": "VaultData",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 83,
+            "column": 1,
+            "tags": {
+              "json": "audit_log_path,omitempty"
+            },
+            "is_optional": true,
+            "doc": null
+          },
+          {
+            "name": "VaultID",
+            "parent_symbol": "VaultData",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/vault/vault.go",
+            "line": 84,
+            "column": 1,
+            "tags": {
+              "json": "vault_id,omitempty"
+            },
+            "is_optional": true,
+            "doc": null
+          }
+        ]
       }
     ],
     "UpdateOpts": [

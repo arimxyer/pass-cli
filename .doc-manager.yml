@@ -29,9 +29,52 @@ api_coverage:
   strategy: all_then_underscore
   preset: go-test
   exclude_symbols:
+    # Test symbols
     - "*_test"
     - "mock*"
     - "Mock*"
+
+    # Internal data structures (not user-facing config)
+    # Vault/Credential types
+    - "Credential"
+    - "VaultData"
+    - "RecoveryMetadata"
+    - "UsageRecord"
+    - "UpdateOpts"
+    - "CredentialMetadata"
+    - "usageRecordWithPath"
+
+    # Service types (internal API)
+    - "KeychainService"
+    - "CryptoService"
+    - "VaultService"
+
+    # Health check types
+    - "HealthReport"
+    - "CheckResult"
+    - "HealthSummary"
+    - "BackupChecker"
+    - "ConfigChecker"
+    - "VersionCheckDetails"
+    - "VaultCheckDetails"
+    - "ConfigCheckDetails"
+    - "KeychainCheckDetails"
+    - "BackupCheckDetails"
+    - "ConfigError"
+    - "KeychainEntry"
+    - "BackupFile"
+
+    # Validation types (internal)
+    - "ValidationResult"
+    - "ValidationError"
+    - "ValidationWarning"
+    - "Keybinding"
+
+    # Vault operation types
+    - "KeychainStatus"
+    - "RemoveVaultResult"
+
+    # Only Config and TerminalConfig are user-facing configuration
 
 # ============================================================================
 # Configuration Guide & Examples
