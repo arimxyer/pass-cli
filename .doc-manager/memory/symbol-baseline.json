@@ -1,7 +1,12 @@
 {
+  "_meta": {
+    "generated_by": "doc-manager-mcp",
+    "tool_version": "1.2.2",
+    "warning": "AUTO-GENERATED FILE - Do not edit manually. Changes will be overwritten by doc-manager."
+  },
   "version": "1.1",
   "created_at": "2025-11-29T04:31:53.752027+00:00",
-  "updated_at": "2025-12-04T04:03:25.906988+00:00",
+  "updated_at": "2025-12-05T03:36:50.414991+00:00",
   "project_root": "R:\\Test-Projects\\pass-cli",
   "symbols": {
     "init": [

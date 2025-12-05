@@ -1494,32 +1494,119 @@ Review the log file and investigate the flagged entries.
 
 ---
 
-**Use Cases:**
-- Decommissioning a vault that's no longer needed
+### doctor - System Health Check
+
+Run diagnostic checks on your pass-cli installation.
+
+#### Synopsis
+
+```bash
+pass-cli doctor [flags]
+```
+
+#### Description
+
+Performs comprehensive health checks on your vault, configuration, keychain integration, and backups. Useful for troubleshooting issues or verifying system state.
+
+**Checks Performed:**
+1. **Version Check**: Compares installed version against latest release
+2. **Vault Check**: Verifies vault file exists and has correct permissions
 3. **Config Check**: Validates configuration syntax and settings
 4. **Keychain Check**: Tests OS keychain integration status
 5. **Backup Check**: Verifies backup files exist and are accessible
 
-**Exit Codes**:
-- `0` = All checks passed (HEALTHY)
-- `1` = Warnings detected (review recommended)
-- `2` = Errors detected (action required)
+#### Flags
 
-**Example Output**:
-```text
-Health Check Results
-====================
+| Flag | Type | Description |
+|------|------|-------------|
+| `--json` | bool | Output results as JSON |
+| `--quiet` | bool | Only show warnings and errors |
 
-[PASS] Version: v1.2.3 (up to date)
-[PASS] Vault: vault.enc accessible (600 permissions)
-[PASS] Config: Valid configuration
-[PASS] Keychain: Integration active
-[PASS] Backup: 3 backup files found
+#### Examples
 
-Overall Status: HEALTHY
+```bash
+# Run all health checks
+pass-cli doctor
+
+# Output as JSON (for scripts)
+pass-cli doctor --json
+
+# Show only problems
+pass-cli doctor --quiet
 ```
 
-See [Health Checks](../05-operations/health-checks) for detailed documentation and troubleshooting.
+#### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | All checks passed (HEALTHY) |
+| 1 | Warnings detected (review recommended) |
+| 2 | Errors detected (action required) |
+
+#### See Also
+
+- [Health Checks Guide](../05-operations/health-checks) - Detailed documentation and troubleshooting
+
+---
+
+### tui - Interactive Terminal Interface
+
+Launch the interactive terminal user interface.
+
+#### Synopsis
+
+```bash
+pass-cli tui
+pass-cli        # Also launches TUI when no command specified
+```
+
+#### Description
+
+Opens an interactive terminal interface for browsing and managing credentials. The TUI provides keyboard-driven navigation, search, and credential operations without memorizing CLI commands.
+
+**Features:**
+- Sidebar navigation with credential tree
+- Detail panel with credential information
+- Search and filter credentials
+- Add, edit, and delete credentials
+- Copy passwords to clipboard
+- Usage statistics display
+
+#### Flags
+
+None.
+
+#### Examples
+
+```bash
+# Launch TUI explicitly
+pass-cli tui
+
+# Launch TUI (default when no command given)
+pass-cli
+```
+
+#### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `Tab` | Switch between panels |
+| `Enter` | Select/expand item |
+| `Esc` | Cancel/go back |
+| `/` | Search |
+| `a` | Add credential |
+| `e` | Edit credential |
+| `d` | Delete credential |
+| `c` | Copy password |
+| `q` | Quit |
+
+#### See Also
+
+- [TUI Guide](../02-guides/tui-guide) - Complete TUI documentation and customization
+
+---
+
+### Troubleshooting
 
 #### Why Does Doctor Report Orphaned Keychain Entries?
 
@@ -1530,47 +1617,23 @@ See [Health Checks](../05-operations/health-checks) for detailed documentation a
 - Vault path changed but old keychain entry wasn't cleaned up
 - Multiple vaults were created and old entries weren't removed
 
-**Impact**: Low - orphaned entries don't affect current vault operations, but clutter the keychain
-
 **Solutions**:
 
-**Option 1: Clean up manually** (macOS):
+**macOS**:
 ```bash
-# Open Keychain Access
 open -a "Keychain Access"
-
-# Search for "pass-cli"
-# Delete old/orphaned entries
+# Search for "pass-cli" and delete old entries
 ```
 
-**Option 2: Clean up manually** (Windows):
+**Windows**:
 ```powershell
-# Open Credential Manager
 control /name Microsoft.CredentialManager
-
-# Navigate to "Windows Credentials"
-# Remove old "pass-cli" entries
+# Navigate to "Windows Credentials" and remove old "pass-cli" entries
 ```
 
-**Option 3: Clean up manually** (Linux):
+**Linux**:
 ```bash
-# List all pass-cli keychain entries
 secret-tool search service pass-cli
-
-# Delete specific entry
-secret-tool clear service pass-cli vault /old/path/vault.enc
-```
-
-**Prevention**: When deleting or moving vaults, remove the keychain entry first using your OS credential manager:
-
-```bash
-# Windows
-cmdkey /delete:pass-cli
-
-# macOS
-security delete-generic-password -s "pass-cli" -a "$USER"
-
-# Linux
 secret-tool clear service pass-cli vault /old/path/vault.enc
 ```
 

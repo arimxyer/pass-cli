@@ -1,5 +1,10 @@
 {
-  "generated_at": "2025-12-03T23:03:27.912688",
+  "_meta": {
+    "generated_by": "doc-manager-mcp",
+    "tool_version": "1.2.2",
+    "warning": "AUTO-GENERATED FILE - Do not edit manually. Changes will be overwritten by doc-manager."
+  },
+  "generated_at": "2025-12-04T22:36:51.415742",
   "doc_to_code": {
     "01-getting-started/manual-install.md": [
       "cmd/init.go",
@@ -94,6 +99,22 @@
       "cmd/keychain_enable.go",
       "cmd/keychain_status.go",
       "cmd/list.go",
+      "cmd/tui.go",
+      "cmd/tui/app.go",
+      "cmd/tui/components/detail.go",
+      "cmd/tui/components/forms.go",
+      "cmd/tui/components/sidebar.go",
+      "cmd/tui/components/statusbar.go",
+      "cmd/tui/components/table.go",
+      "cmd/tui/events/focus.go",
+      "cmd/tui/events/handlers.go",
+      "cmd/tui/layout/manager.go",
+      "cmd/tui/layout/pages.go",
+      "cmd/tui/main.go",
+      "cmd/tui/models/navigation.go",
+      "cmd/tui/models/search.go",
+      "cmd/tui/models/state.go",
+      "cmd/tui/styles/theme.go",
       "cmd/update.go",
       "cmd/usage.go",
       "cmd/vault.go",
@@ -297,81 +318,97 @@
     "cmd/tui.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/app.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/components/detail.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/components/forms.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/components/sidebar.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/components/statusbar.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/components/table.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/events/focus.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/events/handlers.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/layout/manager.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/layout/pages.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/main.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/models/navigation.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/models/search.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/models/state.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/tui/styles/theme.go": [
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "cmd/config.go": [
@@ -602,10 +639,12 @@
       "02-guides/tui-guide.md"
     ],
     "Enter": [
-      "02-guides/tui-guide.md"
+      "02-guides/tui-guide.md",
+      "03-reference/command-reference.md"
     ],
     "Esc": [
       "02-guides/tui-guide.md",
+      "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
     "pass-cli get": [
@@ -620,7 +659,8 @@
       "02-guides/tui-guide.md"
     ],
     "no": [
-      "02-guides/tui-guide.md"
+      "02-guides/tui-guide.md",
+      "03-reference/command-reference.md"
     ],
     "pass-cli # Opens interactive interface": [
       "02-guides/tui-guide.md"
@@ -681,9 +721,6 @@
       "03-reference/command-reference.md"
     ],
     "by": [
-      "03-reference/command-reference.md"
-    ],
-    "windows": [
       "03-reference/command-reference.md"
     ],
     "pass-cli verify-audit": [
@@ -794,6 +831,17 @@
     "pass-cli verify-audit /path/to/audit.log": [
       "03-reference/command-reference.md"
     ],
+    "pass-cli doctor [flags]": [
+      "03-reference/command-reference.md",
+      "05-operations/health-checks.md"
+    ],
+    "pass-cli tui": [
+      "03-reference/command-reference.md",
+      "04-troubleshooting/tui.md"
+    ],
+    "pass-cli # Also launches TUI when no command specified": [
+      "03-reference/command-reference.md"
+    ],
     "pass-cli help": [
       "03-reference/command-reference.md"
     ],
@@ -867,9 +915,6 @@
     "of": [
       "04-troubleshooting/tui.md"
     ],
-    "pass-cli tui": [
-      "04-troubleshooting/tui.md"
-    ],
     "pass-cli # No arguments": [
       "04-troubleshooting/tui.md"
     ],
@@ -880,9 +925,6 @@
       "05-operations/health-checks.md",
       "_index.md",
       "README.md"
-    ],
-    "pass-cli doctor [flags]": [
-      "05-operations/health-checks.md"
     ],
     "pass-cli doctor # Show details": [
       "05-operations/health-checks.md"
@@ -922,759 +964,6 @@
       "06-development/scoop.md"
     ],
     "pass-cli init --no-recovery": [
-      "README.md"
-    ],
-    "cross-platform": [
-      "README.md"
-    ],
-    "core": [
-      "README.md"
-    ],
-    "pass-cli vault remove": [
-      "README.md"
-    ]
-  },
-  "reference_to_doc": {
-    "checksums.txt": [
-      "01-getting-started/manual-install.md",
-      "06-development/scoop.md"
-    ],
-    "grep": [
-      "01-getting-started/manual-install.md"
-    ],
-    "pass-cli": [
-      "01-getting-started/manual-install.md",
-      "02-guides/tui-guide.md",
-      "03-reference/command-reference.md",
-      "03-reference/migration.md",
-      "04-troubleshooting/tui.md",
-      "06-development/homebrew.md",
-      "README.md"
-    ],
-    "explicit": [
-      "01-getting-started/manual-install.md",
-      "02-guides/tui-guide.md"
-    ],
-    "pass-cli version": [
-      "01-getting-started/manual-install.md",
-      "01-getting-started/quick-install.md",
-      "01-getting-started/quick-start.md",
-      "03-reference/command-reference.md",
-      "04-troubleshooting/installation.md",
-      "05-operations/security-operations.md",
-      "06-development/homebrew.md",
-      "06-development/scoop.md"
-    ],
-    "pass-cli init": [
-      "01-getting-started/manual-install.md",
-      "01-getting-started/quick-start.md",
-      "02-guides/recovery-phrase.md",
-      "03-reference/command-reference.md",
-      "03-reference/migration.md",
-      "03-reference/security-architecture.md",
-      "04-troubleshooting/installation.md",
-      "04-troubleshooting/keychain.md",
-      "04-troubleshooting/vault.md",
-      "05-operations/health-checks.md",
-      "05-operations/security-operations.md",
-      "README.md"
-    ],
-    "pass-cli add test # Add a test credential": [
-      "01-getting-started/manual-install.md"
-    ],
-    "pass-cli get test # Retrieve it": [
-      "01-getting-started/manual-install.md"
-    ],
-    "pass-cli delete test": [
-      "01-getting-started/manual-install.md"
-    ],
-    "add": [
-      "01-getting-started/quick-start.md",
-      "03-reference/command-reference.md",
-      "06-development/contributing.md"
-    ],
-    "get": [
-      "01-getting-started/quick-start.md",
-      "03-reference/command-reference.md"
-    ],
-    "list": [
-      "01-getting-started/quick-start.md",
-      "03-reference/command-reference.md"
-    ],
-    "update": [
-      "01-getting-started/quick-start.md",
-      "03-reference/command-reference.md"
-    ],
-    "delete": [
-      "01-getting-started/quick-start.md",
-      "03-reference/command-reference.md"
-    ],
-    "vault_path": [
-      "01-getting-started/quick-start.md",
-      "02-guides/scripting-guide.md",
-      "03-reference/configuration.md",
-      "03-reference/migration.md",
-      "05-operations/health-checks.md"
-    ],
-    "version": [
-      "01-getting-started/quick-start.md"
-    ],
-    "doctor": [
-      "01-getting-started/quick-start.md",
-      "05-operations/health-checks.md",
-      "README.md"
-    ],
-    "help": [
-      "01-getting-started/quick-start.md",
-      "03-reference/configuration.md"
-    ],
-    "init": [
-      "01-getting-started/quick-start.md",
-      "06-development/contributing.md"
-    ],
-    "pass-cli list": [
-      "01-getting-started/quick-start.md",
-      "02-guides/basic-workflows.md",
-      "02-guides/scripting-guide.md",
-      "02-guides/usage-tracking.md",
-      "03-reference/command-reference.md",
-      "03-reference/migration.md",
-      "04-troubleshooting/faq.md",
-      "04-troubleshooting/installation.md",
-      "04-troubleshooting/tui.md",
-      "04-troubleshooting/vault.md",
-      "05-operations/security-operations.md",
-      "README.md"
-    ],
-    "echo": [
-      "01-getting-started/quick-start.md"
-    ],
-    "pass-cli add github": [
-      "01-getting-started/quick-start.md",
-      "02-guides/backup-restore.md",
-      "02-guides/basic-workflows.md",
-      "03-reference/command-reference.md",
-      "03-reference/migration.md",
-      "README.md"
-    ],
-    "vault-requiring": [
-      "01-getting-started/quick-start.md",
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli get github": [
-      "01-getting-started/quick-start.md",
-      "02-guides/basic-workflows.md",
-      "02-guides/scripting-guide.md",
-      "02-guides/tui-guide.md",
-      "03-reference/command-reference.md",
-      "03-reference/migration.md",
-      "04-troubleshooting/tui.md",
-      "README.md"
-    ],
-    "vault.enc.backup": [
-      "02-guides/backup-restore.md",
-      "03-reference/command-reference.md",
-      "03-reference/security-architecture.md",
-      "04-troubleshooting/vault.md"
-    ],
-    "info": [
-      "02-guides/backup-restore.md"
-    ],
-    "pass-cli vault backup info": [
-      "02-guides/backup-restore.md",
-      "03-reference/command-reference.md",
-      "README.md"
-    ],
-    "pass-cli vault backup create": [
-      "02-guides/backup-restore.md",
-      "03-reference/command-reference.md",
-      "README.md"
-    ],
-    "pass-cli doctor": [
-      "02-guides/backup-restore.md",
-      "02-guides/basic-workflows.md",
-      "02-guides/keychain-setup.md",
-      "03-reference/command-reference.md",
-      "05-operations/health-checks.md",
-      "README.md"
-    ],
-    "restore": [
-      "02-guides/backup-restore.md"
-    ],
-    "pass-cli vault backup restore": [
-      "02-guides/backup-restore.md",
-      "03-reference/command-reference.md",
-      "README.md"
-    ],
-    "secret-tool clear service pass-cli": [
-      "02-guides/basic-workflows.md"
-    ],
-    "jq": [
-      "02-guides/basic-workflows.md",
-      "05-operations/health-checks.md"
-    ],
-    "pass-cli generate": [
-      "02-guides/basic-workflows.md",
-      "03-reference/command-reference.md",
-      "03-reference/migration.md",
-      "05-operations/security-operations.md",
-      "README.md"
-    ],
-    "pass-cli generate --length": [
-      "02-guides/basic-workflows.md"
-    ],
-    "pass-cli add github -u": [
-      "02-guides/basic-workflows.md"
-    ],
-    "pass-cli update github --generate": [
-      "02-guides/basic-workflows.md"
-    ],
-    "pass-cli update github --generate --gen-length": [
-      "02-guides/basic-workflows.md"
-    ],
-    "pass-cli keychain enable": [
-      "02-guides/basic-workflows.md",
-      "02-guides/keychain-setup.md",
-      "03-reference/command-reference.md",
-      "README.md"
-    ],
-    "pass-cli keychain status": [
-      "02-guides/basic-workflows.md",
-      "02-guides/keychain-setup.md",
-      "03-reference/command-reference.md",
-      "README.md"
-    ],
-    "pass-cli get github --json": [
-      "02-guides/basic-workflows.md"
-    ],
-    "pass-cli update github": [
-      "02-guides/basic-workflows.md",
-      "03-reference/command-reference.md",
-      "README.md"
-    ],
-    "pass-cli delete github": [
-      "02-guides/basic-workflows.md",
-      "03-reference/command-reference.md",
-      "README.md"
-    ],
-    "pass-cli tui # Opens directly, no password prompt": [
-      "02-guides/basic-workflows.md",
-      "02-guides/keychain-setup.md"
-    ],
-    "use": [
-      "02-guides/keychain-setup.md"
-    ],
-    "change-password --recover": [
-      "02-guides/recovery-phrase.md"
-    ],
-    "recovery": [
-      "02-guides/recovery-phrase.md",
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli change-password": [
-      "02-guides/recovery-phrase.md",
-      "03-reference/command-reference.md",
-      "03-reference/security-architecture.md",
-      "04-troubleshooting/faq.md",
-      "04-troubleshooting/vault.md",
-      "README.md"
-    ],
-    "in": [
-      "02-guides/scripting-guide.md"
-    ],
-    "pass-cli add service": [
-      "02-guides/scripting-guide.md"
-    ],
-    "pass-cli update testservice": [
-      "02-guides/scripting-guide.md"
-    ],
-    "Tab": [
-      "02-guides/tui-guide.md"
-    ],
-    "Enter": [
-      "02-guides/tui-guide.md"
-    ],
-    "Esc": [
-      "02-guides/tui-guide.md",
-      "04-troubleshooting/tui.md"
-    ],
-    "pass-cli get": [
-      "02-guides/tui-guide.md",
-      "03-reference/command-reference.md",
-      "04-troubleshooting/tui.md"
-    ],
-    "detail_position": [
-      "02-guides/tui-guide.md"
-    ],
-    "auto": [
-      "02-guides/tui-guide.md"
-    ],
-    "right": [
-      "02-guides/tui-guide.md"
-    ],
-    "bottom": [
-      "02-guides/tui-guide.md"
-    ],
-    "detail_auto_threshold": [
-      "02-guides/tui-guide.md"
-    ],
-    "no": [
-      "02-guides/tui-guide.md"
-    ],
-    "pass-cli # Opens interactive interface": [
-      "02-guides/tui-guide.md"
-    ],
-    "pass-cli list # Outputs credential table to stdout": [
-      "02-guides/tui-guide.md"
-    ],
-    "pass-cli add newcred # Interactive prompts for credential data": [
-      "02-guides/tui-guide.md"
-    ],
-    "pass-cli list --by-project": [
-      "02-guides/usage-tracking.md"
-    ],
-    "pass-cli get testservice": [
-      "02-guides/usage-tracking.md"
-    ],
-    "pass-cli usage github": [
-      "02-guides/usage-tracking.md",
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli usage aws-prod": [
-      "02-guides/usage-tracking.md"
-    ],
-    "cli": [
-      "03-reference/_index.md",
-      "README.md"
-    ],
-    "password123": [
-      "03-reference/command-reference.md"
-    ],
-    "MyPassword": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli change-password --recover": [
-      "03-reference/command-reference.md",
-      "03-reference/migration.md",
-      "03-reference/security-architecture.md",
-      "04-troubleshooting/vault.md",
-      "README.md"
-    ],
-    "username": [
-      "03-reference/command-reference.md"
-    ],
-    "password": [
-      "03-reference/command-reference.md"
-    ],
-    "url": [
-      "03-reference/command-reference.md"
-    ],
-    "notes": [
-      "03-reference/command-reference.md"
-    ],
-    "service": [
-      "03-reference/command-reference.md"
-    ],
-    "created": [
-      "03-reference/command-reference.md"
-    ],
-    "modified": [
-      "03-reference/command-reference.md"
-    ],
-    "accessed": [
-      "03-reference/command-reference.md"
-    ],
-    "gen": [
-      "03-reference/command-reference.md"
-    ],
-    "pwd": [
-      "03-reference/command-reference.md"
-    ],
-    "a-z": [
-      "03-reference/command-reference.md"
-    ],
-    "table": [
-      "03-reference/command-reference.md"
-    ],
-    "json": [
-      "03-reference/command-reference.md"
-    ],
-    "simple": [
-      "03-reference/command-reference.md"
-    ],
-    "config reset": [
-      "03-reference/command-reference.md"
-    ],
-    "EDITOR": [
-      "03-reference/command-reference.md"
-    ],
-    "audit-log-path": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli init --enable-audit": [
-      "03-reference/command-reference.md",
-      "README.md"
-    ],
-    "pass-cli get github --quiet": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli get github --field": [
-      "03-reference/command-reference.md"
-    ],
-    "any": [
-      "03-reference/command-reference.md"
-    ],
-    "each": [
-      "03-reference/command-reference.md"
-    ],
-    "this": [
-      "03-reference/command-reference.md"
-    ],
-    "by": [
-      "03-reference/command-reference.md"
-    ],
-    "windows": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli verify-audit": [
-      "03-reference/command-reference.md",
-      "03-reference/migration.md",
-      "03-reference/security-architecture.md"
-    ],
-    "pass-cli add <service> [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli add github \\": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli get <service> [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli list [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli update <service> [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli update github \\": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli delete <service> [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli change-password [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli generate [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli version [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli usage <service> [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli usage aws": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli usage postgres": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli usage heroku": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli usage redis": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli config <subcommand>": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli config init": [
-      "03-reference/command-reference.md",
-      "03-reference/configuration.md"
-    ],
-    "pass-cli config edit": [
-      "03-reference/command-reference.md",
-      "03-reference/configuration.md"
-    ],
-    "pass-cli config validate": [
-      "03-reference/command-reference.md",
-      "03-reference/configuration.md"
-    ],
-    "pass-cli config reset [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli config reset": [
-      "03-reference/command-reference.md",
-      "03-reference/configuration.md"
-    ],
-    "pass-cli keychain <subcommand>": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli keychain enable [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli keychain status [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli vault <subcommand>": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli vault remove <path> [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli vault remove /path/to/vault.enc": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli vault backup <subcommand>": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli vault backup create [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli vault backup restore [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli vault backup info [flags]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli verify-audit [audit-log-path]": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli verify-audit /path/to/audit.log": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli help": [
-      "03-reference/command-reference.md"
-    ],
-    "quit": [
-      "03-reference/configuration.md"
-    ],
-    "add_credential": [
-      "03-reference/configuration.md"
-    ],
-    "edit_credential": [
-      "03-reference/configuration.md"
-    ],
-    "delete_credential": [
-      "03-reference/configuration.md"
-    ],
-    "toggle_detail": [
-      "03-reference/configuration.md"
-    ],
-    "toggle_sidebar": [
-      "03-reference/configuration.md"
-    ],
-    "search": [
-      "03-reference/configuration.md"
-    ],
-    "InputField": [
-      "03-reference/known-limitations.md"
-    ],
-    "string": [
-      "03-reference/known-limitations.md"
-    ],
-    "defer": [
-      "03-reference/known-limitations.md"
-    ],
-    "pass-cli init # CLI mode": [
-      "03-reference/known-limitations.md"
-    ],
-    "pass-cli # TUI mode": [
-      "03-reference/known-limitations.md"
-    ],
-    "pass-cli migrate": [
-      "03-reference/migration.md"
-    ],
-    "every": [
-      "03-reference/migration.md"
-    ],
-    "migration": [
-      "03-reference/migration.md"
-    ],
-    "pass-cli add service1": [
-      "03-reference/migration.md"
-    ],
-    "pass-cli add service2": [
-      "03-reference/migration.md"
-    ],
-    "pass-cli generate # Copy generated password": [
-      "03-reference/migration.md"
-    ],
-    "pass-cli get service1": [
-      "03-reference/migration.md"
-    ],
-    "pass-cli add newservice": [
-      "03-reference/migration.md"
-    ],
-    "pass-cli get oldservice": [
-      "03-reference/migration.md"
-    ],
-    "pass-cli generate # Automatically meets policy requirements": [
-      "03-reference/migration.md"
-    ],
-    "CryptGenRandom": [
-      "03-reference/security-architecture.md"
-    ],
-    "fsync": [
-      "03-reference/security-architecture.md"
-    ],
-    "vault.enc": [
-      "03-reference/security-architecture.md",
-      "04-troubleshooting/vault.md"
-    ],
-    "change-password": [
-      "04-troubleshooting/faq.md"
-    ],
-    "Backspace": [
-      "04-troubleshooting/tui.md"
-    ],
-    "of": [
-      "04-troubleshooting/tui.md"
-    ],
-    "pass-cli tui": [
-      "04-troubleshooting/tui.md"
-    ],
-    "pass-cli # No arguments": [
-      "04-troubleshooting/tui.md"
-    ],
-    "pass-cli list # This is CLI mode": [
-      "04-troubleshooting/tui.md"
-    ],
-    "libsecret": [
-      "05-operations/health-checks.md"
-    ],
-    "apt-get install libsecret-1-0": [
-      "05-operations/health-checks.md"
-    ],
-    "keyring": [
-      "05-operations/health-checks.md"
-    ],
-    "gnome-keyring": [
-      "05-operations/health-checks.md"
-    ],
-    "complete": [
-      "05-operations/health-checks.md",
-      "_index.md",
-      "README.md"
-    ],
-    "pass-cli doctor [flags]": [
-      "05-operations/health-checks.md"
-    ],
-    "pass-cli doctor # Show details": [
-      "05-operations/health-checks.md"
-    ],
-    "pass-cli update service": [
-      "05-operations/security-operations.md"
-    ],
-    "pass-cli get service --json": [
-      "05-operations/security-operations.md"
-    ],
-    "history -c": [
-      "05-operations/security-operations.md"
-    ],
-    "pass-cli delete old-service": [
-      "05-operations/security-operations.md"
-    ],
-    "main": [
-      "06-development/branch-workflow.md",
-      "06-development/ci-cd.md"
-    ],
-    "Lint": [
-      "06-development/branch-workflow.md"
-    ],
-    "Build": [
-      "06-development/branch-workflow.md"
-    ],
-    ".github/workflows/release.yml": [
-      "06-development/branch-workflow.md",
-      "06-development/release.md"
-    ],
-    ".github/workflows/ci.yml": [
-      "06-development/branch-workflow.md"
-    ],
-    "common": [
-      "06-development/branch-workflow.md",
-      "06-development/contributing.md"
-    ],
-    "ci.yml": [
-      "06-development/ci-cd.md"
-    ],
-    "release.yml": [
-      "06-development/ci-cd.md"
-    ],
-    ".github/dependabot.yml": [
-      "06-development/ci-cd.md"
-    ],
-    "contents": [
-      "06-development/ci-cd.md"
-    ],
-    "packages": [
-      "06-development/ci-cd.md"
-    ],
-    "go vet": [
-      "06-development/contributing.md"
-    ],
-    "gofmt": [
-      "06-development/contributing.md"
-    ],
-    "cobra": [
-      "06-development/contributing.md"
-    ],
-    "root": [
-      "06-development/contributing.md"
-    ],
-    "git log --follow": [
-      "06-development/documentation-lifecycle.md"
-    ],
-    "docs": [
-      "06-development/documentation-lifecycle.md"
-    ],
-    "homebrew/pass-cli.rb": [
-      "06-development/homebrew.md"
-    ],
-    "Formula/pass-cli.rb": [
-      "06-development/homebrew.md"
-    ],
-    "latest": [
-      "06-development/homebrew.md",
-      "06-development/scoop.md"
-    ],
-    "brew test pass-cli": [
-      "06-development/homebrew.md"
-    ],
-    "update-docs-version.yml": [
-      "06-development/release.md"
-    ],
-    "netgo": [
-      "06-development/release.md"
-    ],
-    ".goreleaser.yml": [
-      "06-development/release.md",
-      "06-development/scoop.md"
-    ],
-    "scoop/pass-cli.json": [
-      "06-development/scoop.md"
-    ],
-    "bucket/pass-cli.json": [
-      "06-development/scoop.md"
-    ],
-    "scoop hash": [
-      "06-development/scoop.md"
-    ],
-    "scoop checkver pass-cli -u": [
-      "06-development/scoop.md"
-    ],
-    "scoop checkver pass-cli": [
-      "06-development/scoop.md"
-    ],
-    "pass-cli --help": [
-      "06-development/scoop.md"
-    ],
-    "pass-cli init --no-recovery": [
-      "README.md"
-    ],
-    "pass": [
       "README.md"
     ],
     "cross-platform": [
@@ -3004,6 +2293,38 @@
         "doc_file": "03-reference/command-reference.md"
       },
       {
+        "reference": "pass-cli doctor [flags]",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli doctor",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli doctor",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli doctor",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli tui",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli # Also launches TUI when no command specified",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli tui",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
         "reference": "pass-cli init",
         "doc_file": "03-reference/command-reference.md"
       },
@@ -3722,15 +3043,15 @@
         "doc_file": "03-reference/command-reference.md"
       },
       {
+        "reference": "no",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
         "reference": "vault-requiring",
         "doc_file": "03-reference/command-reference.md"
       },
       {
         "reference": "get",
-        "doc_file": "03-reference/command-reference.md"
-      },
-      {
-        "reference": "windows",
         "doc_file": "03-reference/command-reference.md"
       },
       {
@@ -3845,6 +3166,18 @@
       },
       {
         "reference": "EDITOR",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "Tab",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "Enter",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "Esc",
         "doc_file": "03-reference/command-reference.md"
       },
       {

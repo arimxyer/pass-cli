@@ -1,14 +1,18 @@
 {
+  "_meta": {
+    "generated_by": "doc-manager-mcp",
+    "tool_version": "1.2.2",
+    "warning": "AUTO-GENERATED FILE - Do not edit manually. Changes will be overwritten by doc-manager."
+  },
   "repo_name": "pass-cli",
   "description": "Repository for pass-cli",
   "language": "Go",
   "docs_exist": true,
-  "docs_path": "docs",
   "metadata": {
-    "git_commit": "69dae8f7b467ad433422703da464103450ae9696",
+    "git_commit": "5cf2e71082841e06103816c0707cc0886f0fbf27",
     "git_branch": "docs/review-with-doc-manager"
   },
-  "timestamp": "2025-12-03T23:03:25.562639",
+  "timestamp": "2025-12-04T22:36:50.237098",
   "version": "1.0.0",
   "file_count": 126,
   "files": {
@@ -76,7 +80,7 @@
     "docs/02-guides/tui-guide.md": "e5837f5368e3fad5a2ae359a071b8d6cee7bc6cc1950fc0d0d4060694d32c457",
     "docs/02-guides/usage-tracking.md": "4ba15ce03bc86f33db7e4e6f0613c3a7984f6a5ce247c7318acf26e6783e68ed",
     "docs/02-guides/_index.md": "c6dd48a1975eda4610622424ba76f710bf05f94fe0a6bebe418addab4313ab06",
-    "docs/03-reference/command-reference.md": "c620e1abf223d74b78d8212925e44c2e986bb7d8c5b375f9375a06e33e666256",
+    "docs/03-reference/command-reference.md": "692c71ab21df3bcb9bafe3c6041c187a70077fb56a2527a7f6da67627566deb5",
     "docs/03-reference/configuration.md": "c10573f971340d1c69730d09119b59fb6d7e95d376ac648cd407644288278b71",
     "docs/03-reference/known-limitations.md": "cf6fc6396a8fb23a71da49b3703010c1c1a1158c36d16377539c9aa51dda396e",
     "docs/03-reference/migration.md": "82ef6d02b767aa288c5ef586f81553af2e264aa2e3b463ba33d73e59565acb09",
