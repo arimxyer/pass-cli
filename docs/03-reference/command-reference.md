@@ -268,6 +268,7 @@ pass-cli get <service> [flags]
 For `--field` flag:
 - `username` - User's username
 - `password` - User's password
+- `category` - Credential category
 - `url` - Service URL
 - `notes` - Additional notes
 - `service` - Service name
@@ -346,9 +347,12 @@ pass-cli list [flags]
 
 | Flag | Type | Description |
 |------|------|-------------|
-| `--format` | string | Output format: table, json, simple (default: table) |
+| `--format`, `-f` | string | Output format: table, json, simple (default: table) |
 | `--unused` | bool | Show only unused credentials |
 | `--days` | int | Days threshold for unused (default: 30) |
+| `--by-project` | bool | Group credentials by git repository |
+| `--location` | string | Filter credentials by directory path |
+| `--recursive` | bool | Include subdirectories with --location |
 
 #### Examples
 
@@ -367,6 +371,21 @@ pass-cli list --unused
 
 # Show credentials not used in 90 days
 pass-cli list --unused --days 90
+
+# Group credentials by git repository
+pass-cli list --by-project
+
+# Group by project with JSON output
+pass-cli list --by-project --format json
+
+# Filter by location (current directory)
+pass-cli list --location .
+
+# Filter by location with subdirectories
+pass-cli list --location /home/user/projects --recursive
+
+# Combine location filter with project grouping
+pass-cli list --location ~/work --by-project --recursive
 ```
 
 #### Output Examples
@@ -490,6 +509,10 @@ Delete a credential from the vault.
 ```bash
 pass-cli delete <service> [flags]
 ```
+
+#### Aliases
+
+`rm`, `remove`
 
 #### Flags
 
@@ -724,43 +747,27 @@ Default character sets:
 
 ### version - Show Version
 
-Display version information.
+Display version information including build details.
 
 #### Synopsis
 
 ```bash
-pass-cli version [flags]
+pass-cli version
 ```
-
-#### Flags
-
-| Flag | Type | Description |
-|------|------|-------------|
-| `--verbose` | bool | Show detailed version info |
 
 #### Examples
 
 ```bash
 # Show version
 pass-cli version
-
-# Verbose version info
-pass-cli version --verbose
 ```
 
-#### Output Examples
+#### Output
 
-**Default:**
 ```text
-pass-cli version X.Y.Z
-```
-
-**Verbose:**
-```text
-pass-cli version X.Y.Z
+pass-cli X.Y.Z
   commit: abc123f
   built:  2025-01-20T10:30:00Z
-  go:     go1.25.1
 ```
 
 ---
@@ -1007,32 +1014,22 @@ Reset configuration to default values.
 
 **Synopsis:**
 ```bash
-pass-cli config reset [flags]
+pass-cli config reset
 ```
 
-**Flags:**
-| Flag | Type | Description |
-|------|------|-------------|
-| `--force`, `-f` | bool | Skip confirmation prompt |
-
 **Description:**
-Overwrites existing config file with defaults. Requires confirmation unless `--force` flag is used.
+Resets the configuration file to default values. Creates a backup of your current config at `<config-path>.backup` before overwriting.
 
 **Examples:**
 ```bash
-# Reset with confirmation
+# Reset config to defaults (creates backup automatically)
 pass-cli config reset
-
-# Reset without confirmation
-pass-cli config reset --force
 ```
 
 **Output:**
 ```text
-[WARNING]  This will overwrite your current configuration.
-Are you sure you want to reset to defaults? (y/n): y
-
-[OK] Configuration reset to defaults: /home/user/.pass-cli/config.yml
+Config file backed up to /home/user/.pass-cli/config.yml.backup
+Config file reset to defaults at /home/user/.pass-cli/config.yml
 ```
 
 #### See Also
@@ -1521,6 +1518,7 @@ Performs comprehensive health checks on your vault, configuration, keychain inte
 |------|------|-------------|
 | `--json` | bool | Output results as JSON |
 | `--quiet` | bool | Only show warnings and errors |
+| `--verbose`, `-v` | bool | Verbose output with detailed check execution |
 
 #### Examples
 
@@ -1533,6 +1531,9 @@ pass-cli doctor --json
 
 # Show only problems
 pass-cli doctor --quiet
+
+# Verbose mode (detailed check execution)
+pass-cli doctor --verbose
 ```
 
 #### Exit Codes
