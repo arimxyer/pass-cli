@@ -30,7 +30,7 @@ func TestInitWithRecoveryCreatesV2Vault(t *testing.T) {
 
 	// Initialize with recovery enabled
 	password := []byte("Test123!@#Password")
-	err = vs.InitializeWithRecovery(password, false, "", "", nil)
+	_, err = vs.InitializeWithRecovery(password, false, "", "", nil)
 	if err != nil {
 		t.Fatalf("InitializeWithRecovery() error = %v", err)
 	}

@@ -258,7 +258,7 @@ func TestV2VaultDoesNotTriggerMigration(t *testing.T) {
 	}
 
 	initPassword := []byte(passwordStr)
-	err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
+	_, err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
 	if err != nil {
 		t.Fatalf("InitializeWithRecovery() error = %v", err)
 	}

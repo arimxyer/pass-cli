@@ -31,7 +31,7 @@ func TestUnlockV2VaultWithCorrectPassword(t *testing.T) {
 
 	// Make a fresh copy for initialization (will be cleared)
 	initPassword := []byte(passwordStr)
-	err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
+	_, err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
 	if err != nil {
 		t.Fatalf("InitializeWithRecovery() error = %v", err)
 	}
@@ -90,7 +90,7 @@ func TestUnlockV2VaultWithWrongPassword(t *testing.T) {
 	}
 
 	initPassword := []byte("Test123!@#Password")
-	err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
+	_, err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
 	if err != nil {
 		t.Fatalf("InitializeWithRecovery() error = %v", err)
 	}
@@ -193,7 +193,7 @@ func TestUnlockV2VaultCorruptedMetadataFailsGracefully(t *testing.T) {
 	}
 
 	initPassword := []byte(passwordStr)
-	err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
+	_, err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
 	if err != nil {
 		t.Fatalf("InitializeWithRecovery() error = %v", err)
 	}
@@ -246,9 +246,9 @@ func TestV1AndV2VaultsCanManageCredentials(t *testing.T) {
 	passwordStr := "Test123!@#Password"
 
 	testCases := []struct {
-		name       string
-		initFunc   func(vs *vault.VaultService, password []byte) error
-		version    int
+		name     string
+		initFunc func(vs *vault.VaultService, password []byte) error
+		version  int
 	}{
 		{
 			name: "v1_vault",
@@ -260,7 +260,8 @@ func TestV1AndV2VaultsCanManageCredentials(t *testing.T) {
 		{
 			name: "v2_vault",
 			initFunc: func(vs *vault.VaultService, password []byte) error {
-				return vs.InitializeWithRecovery(password, false, "", "", nil)
+				_, err := vs.InitializeWithRecovery(password, false, "", "", nil)
+				return err
 			},
 			version: 2,
 		},

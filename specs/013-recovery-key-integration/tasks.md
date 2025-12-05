@@ -89,7 +89,7 @@ pass-cli/
 - [x] T020 [US2] Add InitializeVaultV2() for DEK-based vault creation in internal/storage/storage.go
 - [x] T021 [US2] Add SaveVaultWithDEK() for DEK-encrypted vault saves in internal/storage/storage.go
 - [x] T022 [US2] Add InitializeWithRecovery() for v2 vault creation in internal/vault/vault.go
-- [x] T023 [US2] (Deferred) cmd/init.go integration - method is callable, CLI flag integration pending
+- [x] T023 [US2] cmd/init.go integration - REMEDIATED: init now calls InitializeWithRecovery() by default
 - [x] T024 [US2] RecoveryMetadata.Version set to "2" in InitializeWithRecovery
 - [x] T025 [US2] Verify T015-T017 tests pass
 
@@ -171,8 +171,8 @@ pass-cli/
 - [x] T052 [US3] Implement MigrateToV2() method in internal/vault/vault.go
 - [x] T053 [US3] Generate new DEK and mnemonic during migration in internal/vault/vault.go
 - [x] T054 [US3] Implement atomic migration with backup in internal/storage/storage.go (MigrateToV2 method)
-- [x] T055 [US3] Add migration prompt UI in vault unlock commands in cmd/helpers.go (deferred - method is callable, CLI integration pending)
-- [x] T056 [US3] Display new recovery phrase for user to write down in cmd/helpers.go (deferred - MigrateToV2 returns mnemonic)
+- [x] T055 [US3] Add migration command - REMEDIATED: `pass-cli vault migrate` command added in cmd/vault_migrate.go
+- [x] T056 [US3] Display new recovery phrase for user to write down - REMEDIATED: vault migrate command displays and verifies mnemonic
 - [x] T057 [US3] Add audit logging for migration events in internal/vault/vault.go (logs migration_v1_to_v2)
 - [x] T058 [US3] Verify T046-T050 tests pass
 

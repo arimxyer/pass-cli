@@ -25,16 +25,17 @@ go build -o pass-cli .
 go test ./...
 ```
 
-## Key Files to Modify
+## Key Files Modified
 
 | File | Change Type | Purpose |
 |------|-------------|---------|
-| `internal/crypto/keywrap.go` | NEW | Key wrapping functions |
-| `internal/storage/storage.go` | MODIFY | Add WrappedDEK fields, version 2 support |
+| `internal/crypto/keywrap.go` | NEW | Key wrapping functions (GenerateDEK, WrapKey, UnwrapKey) |
+| `internal/storage/storage.go` | MODIFY | Add WrappedDEK fields, version 2 support, MigrateToV2 |
 | `internal/vault/metadata.go` | MODIFY | Update RecoveryMetadata version semantics |
-| `internal/vault/vault.go` | MODIFY | Use DEK for encryption, support both unlock paths |
-| `cmd/init.go` | MODIFY | Generate and wrap DEK during initialization |
+| `internal/vault/vault.go` | MODIFY | InitializeWithRecovery, RecoverWithMnemonic, MigrateToV2 |
+| `cmd/init.go` | MODIFY | Calls InitializeWithRecovery for v2 vaults (default) |
 | `cmd/change_password.go` | MODIFY | Unwrap DEK for recovery, re-wrap on password change |
+| `cmd/vault_migrate.go` | NEW | Migration command for v1 → v2 upgrade |
 
 ## Implementation Order
 
@@ -118,13 +119,21 @@ go test -v ./test/ -run TestMigration
 # Build fresh binary
 go build -o pass-cli .
 
-# Test new vault with recovery
+# Test new vault with recovery (v2 format - default)
 rm -rf ~/.pass-cli  # Clean slate
-./pass-cli init     # Create vault, note recovery phrase
+./pass-cli init     # Create vault, writes 24-word recovery phrase
+                    # Optionally add passphrase (25th word)
+                    # Verify backup by entering 3 words
 
 # Test recovery works
 ./pass-cli change-password --recover
-# Enter 6 challenge words → should succeed
+# Enter 6 challenge words → should succeed and prompt for new password
+
+# Test migration from v1 to v2
+rm -rf ~/.pass-cli
+./pass-cli init --no-recovery  # Create v1 vault (no recovery)
+./pass-cli vault migrate       # Migrate to v2, generates new recovery phrase
+./pass-cli change-password --recover  # Verify recovery works
 ```
 
 ## Debugging Tips
@@ -171,7 +180,9 @@ cat ~/.pass-cli/vault.enc | jq '.metadata.version'
 
 ### Version 1 Vault Not Migrating
 
-- Migration only offered after successful password unlock
+- Use `pass-cli vault migrate` command to migrate v1 vaults
+- Must unlock vault with current password first
+- Migration generates a new recovery phrase (write it down!)
 - Check `VaultMetadata.Version` in vault file
 
 ## Security Checklist

@@ -32,7 +32,7 @@ func TestFullRecoveryFlowSucceeds(t *testing.T) {
 	}
 
 	initPassword := []byte(originalPassword)
-	err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
+	_, err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
 	if err != nil {
 		t.Fatalf("InitializeWithRecovery() error = %v", err)
 	}
@@ -154,7 +154,7 @@ func TestRecoveryWithWrongWordsFails(t *testing.T) {
 	}
 
 	initPassword := []byte("Test123!@#Password")
-	err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
+	_, err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
 	if err != nil {
 		t.Fatalf("InitializeWithRecovery() error = %v", err)
 	}
@@ -208,7 +208,7 @@ func TestRecoveryWithWrongPassphraseFails(t *testing.T) {
 	}
 
 	initPassword := []byte("Test123!@#Password")
-	err = vs.InitializeWithRecovery(initPassword, false, "", "", correctPassphrase)
+	_, err = vs.InitializeWithRecovery(initPassword, false, "", "", correctPassphrase)
 	if err != nil {
 		t.Fatalf("InitializeWithRecovery() error = %v", err)
 	}
@@ -252,7 +252,7 @@ func TestPasswordChangeAfterRecoveryWorks(t *testing.T) {
 	}
 
 	initPassword := []byte(originalPassword)
-	err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
+	_, err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
 	if err != nil {
 		t.Fatalf("InitializeWithRecovery() error = %v", err)
 	}
@@ -332,7 +332,7 @@ func TestRecoveryErrorDoesNotLeakKeyMaterial(t *testing.T) {
 	}
 
 	initPassword := []byte("Test123!@#Password")
-	err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
+	_, err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
 	if err != nil {
 		t.Fatalf("InitializeWithRecovery() error = %v", err)
 	}
@@ -395,7 +395,7 @@ func TestRecoveryWrappedDEKPreservedAfterPasswordChange(t *testing.T) {
 	}
 
 	initPassword := []byte("Test123!@#Password")
-	err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
+	_, err = vs.InitializeWithRecovery(initPassword, false, "", "", nil)
 	if err != nil {
 		t.Fatalf("InitializeWithRecovery() error = %v", err)
 	}

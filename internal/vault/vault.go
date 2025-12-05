@@ -437,8 +437,8 @@ const (
 //   - vaultID: unique vault identifier for audit
 //   - passphrase: optional recovery passphrase (25th word)
 //
-// Returns: error
-func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain bool, auditLogPath, vaultID string, passphrase []byte) error {
+// Returns: mnemonic string (24 words) for user backup, error
+func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain bool, auditLogPath, vaultID string, passphrase []byte) (string, error) {
 	defer crypto.ClearBytes(masterPassword) // Ensure cleanup even on error
 	if passphrase != nil {
 		defer crypto.ClearBytes(passphrase)
@@ -454,45 +454,45 @@ func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain
 	}
 	if err := passwordPolicy.Validate(masterPassword); err != nil {
 		if rateLimitErr := v.rateLimiter.CheckAndRecordFailure(); rateLimitErr != nil {
-			return rateLimitErr
+			return "", rateLimitErr
 		}
-		return fmt.Errorf("password does not meet requirements: %w", err)
+		return "", fmt.Errorf("password does not meet requirements: %w", err)
 	}
 	v.rateLimiter.Reset()
 
 	// Check if vault already exists
 	if _, err := os.Stat(v.vaultPath); err == nil {
-		return errors.New("vault already exists")
+		return "", errors.New("vault already exists")
 	}
 
 	// 1. Generate salt for password KDF
 	salt, err := v.cryptoService.GenerateSalt()
 	if err != nil {
-		return fmt.Errorf("failed to generate salt: %w", err)
+		return "", fmt.Errorf("failed to generate salt: %w", err)
 	}
 
 	// 2. Derive password KEK
 	iterations := crypto.GetIterations()
 	passwordKEK, err := v.cryptoService.DeriveKey(masterPassword, salt, iterations)
 	if err != nil {
-		return fmt.Errorf("failed to derive password KEK: %w", err)
+		return "", fmt.Errorf("failed to derive password KEK: %w", err)
 	}
 	defer crypto.ClearBytes(passwordKEK)
 
 	// 3. Generate BIP39 mnemonic (256-bit entropy = 24 words)
 	entropy, err := bip39.NewEntropy(256)
 	if err != nil {
-		return fmt.Errorf("failed to generate entropy: %w", err)
+		return "", fmt.Errorf("failed to generate entropy: %w", err)
 	}
 	mnemonic, err := bip39.NewMnemonic(entropy)
 	if err != nil {
-		return fmt.Errorf("failed to generate mnemonic: %w", err)
+		return "", fmt.Errorf("failed to generate mnemonic: %w", err)
 	}
 
 	// 4. Generate recovery salt
 	recoverySalt := make([]byte, recoverySaltLen)
 	if _, err := rand.Read(recoverySalt); err != nil {
-		return fmt.Errorf("failed to generate recovery salt: %w", err)
+		return "", fmt.Errorf("failed to generate recovery salt: %w", err)
 	}
 
 	// 5. Derive recovery KEK from mnemonic using Argon2id
@@ -511,7 +511,7 @@ func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain
 	// 6. Generate and wrap DEK with both KEKs
 	keyWrapResult, err := crypto.GenerateAndWrapDEK(passwordKEK, recoveryKEK)
 	if err != nil {
-		return fmt.Errorf("failed to generate and wrap DEK: %w", err)
+		return "", fmt.Errorf("failed to generate and wrap DEK: %w", err)
 	}
 	defer crypto.ClearBytes(keyWrapResult.DEK)
 
@@ -523,7 +523,7 @@ func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain
 		salt,
 		iterations,
 	); err != nil {
-		return fmt.Errorf("failed to initialize v2 vault: %w", err)
+		return "", fmt.Errorf("failed to initialize v2 vault: %w", err)
 	}
 
 	// 8. Create vault data structure
@@ -550,12 +550,12 @@ func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain
 	// 9. Marshal and save vault data
 	data, err := json.Marshal(vaultData)
 	if err != nil {
-		return fmt.Errorf("failed to marshal vault data: %w", err)
+		return "", fmt.Errorf("failed to marshal vault data: %w", err)
 	}
 
 	// Save vault data encrypted with DEK
 	if err := v.storageService.SaveVaultWithDEK(data, keyWrapResult.DEK, v.createAuditCallback()); err != nil {
-		return fmt.Errorf("failed to save initial vault: %w", err)
+		return "", fmt.Errorf("failed to save initial vault: %w", err)
 	}
 
 	// 10. Store password in keychain if requested
@@ -597,18 +597,8 @@ func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain
 		fmt.Fprintf(os.Stderr, "Warning: failed to create metadata file: %v\n", err)
 	}
 
-	// 14. Display mnemonic to user
-	fmt.Println("\n=== RECOVERY PHRASE ===")
-	fmt.Println("Write down these 24 words in order. They are the ONLY way to recover your vault.")
-	fmt.Println()
-	words := strings.Fields(mnemonic)
-	for i, word := range words {
-		fmt.Printf("%2d. %s\n", i+1, word)
-	}
-	fmt.Println("\n========================")
-	fmt.Println("WARNING: Store this phrase in a safe place. Anyone with these words can access your vault.")
-
-	return nil
+	// Return mnemonic for CLI to display and verify
+	return mnemonic, nil
 }
 
 // Unlock opens the vault and loads credentials into memory
