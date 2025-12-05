@@ -22,7 +22,7 @@ This command helps you stay up-to-date with speckit framework improvements by ch
    - If contains `--help` or `-h`: Show usage information
 
 2. **List mode** (when `--list` or `-l` or no arguments provided):
-   - Run `.specify/scripts/powershell/check-updates.ps1 -Json -List` from repo root
+   - Run `.specify/scripts/powershell/check-updates.bash -Json -List` from repo root
    - Parse JSON output to get current installation details
    - Display in readable format:
      ```
@@ -44,12 +44,12 @@ This command helps you stay up-to-date with speckit framework improvements by ch
        - tasks-template.md: local
 
      Scripts:
-       - check-prerequisites.ps1: local
-       - common.ps1: local
-       - create-new-feature.ps1: local
-       - setup-plan.ps1: local
-       - update-agent-context.ps1: local
-       - archive-specs.ps1: local (custom)
+       - check-prerequisites.bash: local
+       - common.bash: local
+       - create-new-feature.bash: local
+       - setup-plan.bash: local
+       - update-agent-context.bash: local
+       - archive-specs.bash: local (custom)
 
      Commands:
        - speckit.analyze.md: local
@@ -63,11 +63,11 @@ This command helps you stay up-to-date with speckit framework improvements by ch
        - speckit.archive.md: local (custom)
 
      Notes:
-     Speckit installed manually. archive-specs.ps1 and speckit.archive.md are local customizations.
+     Speckit installed manually. archive-specs.bash and speckit.archive.md are local customizations.
      ```
 
 3. **Check mode** (when `--check` or `-c`):
-   - Run `.specify/scripts/powershell/check-updates.ps1 -Json -Check` from repo root
+   - Run `.specify/scripts/powershell/check-updates.bash -Json -Check` from repo root
    - Parse JSON output
    - **First time**: Initializes baseline to current latest commit
    - **Subsequent runs**: Compares baseline vs latest and shows changes
@@ -96,8 +96,8 @@ This command helps you stay up-to-date with speckit framework improvements by ch
      Changed files (8 total, 4 relevant):
 
      Scripts:
-       ✓ .specify/scripts/powershell/common.ps1
-       ✓ .specify/scripts/powershell/setup-plan.ps1
+       ✓ .specify/scripts/powershell/common.bash
+       ✓ .specify/scripts/powershell/setup-plan.bash
 
      Templates:
        ✓ .specify/templates/spec-template.md
@@ -144,7 +144,7 @@ This command helps you stay up-to-date with speckit framework improvements by ch
      ```
 
 4. **Set baseline mode** (when `--set-baseline`):
-   - Run `.specify/scripts/powershell/check-updates.ps1 -Json -SetBaseline` from repo root
+   - Run `.specify/scripts/powershell/check-updates.bash -Json -SetBaseline` from repo root
    - Updates baseline to current latest commit
    - Use after manually applying updates
    ```
@@ -159,7 +159,7 @@ This command helps you stay up-to-date with speckit framework improvements by ch
    ```
 
 5. **Diff mode** (when `--diff <component>`):
-   - Run `.specify/scripts/powershell/check-updates.ps1 -Json -Diff <component>` from repo root
+   - Run `.specify/scripts/powershell/check-updates.bash -Json -Diff <component>` from repo root
    - Shows file differences between your baseline and latest upstream
    - Provides GitHub compare URLs for each changed file
    - Component can be: `all`, `scripts`, `templates`, `commands`, or specific filename
@@ -170,7 +170,7 @@ This command helps you stay up-to-date with speckit framework improvements by ch
    Your version: ea90d02
    Latest version: f3a2b1c
 
-   File: .specify/scripts/powershell/common.ps1
+   File: .specify/scripts/powershell/common.bash
    View diff: https://github.com/github/spec-kit/compare/ea90d02...f3a2b1c#diff-...
 
    File: .specify/templates/spec-template.md
@@ -180,10 +180,10 @@ This command helps you stay up-to-date with speckit framework improvements by ch
    ```
 
 6. **Pull mode** (when `--pull <component>`):
-   - Run `.specify/scripts/powershell/check-updates.ps1 -Json -Pull <component> [-Force]` from repo root
+   - Run `.specify/scripts/powershell/check-updates.bash -Json -Pull <component> [-Force]` from repo root
    - Downloads and applies updates automatically
    - Creates backup before replacing files
-   - Skips custom files (archive-specs.ps1, speckit.archive.md, etc.)
+   - Skips custom files (archive-specs.bash, speckit.archive.md, etc.)
    - Updates baseline on success
    - Component can be: `all`, `scripts`, `templates`, `commands`, or specific filename
    ```
@@ -192,8 +192,8 @@ This command helps you stay up-to-date with speckit framework improvements by ch
 
    Files to update (4 files):
 
-     ✓ .specify/scripts/powershell/common.ps1
-     ✓ .specify/scripts/powershell/setup-plan.ps1
+     ✓ .specify/scripts/powershell/common.bash
+     ✓ .specify/scripts/powershell/setup-plan.bash
      ✓ .specify/templates/spec-template.md
      ✓ .claude/commands/speckit.plan.md
 
@@ -202,8 +202,8 @@ This command helps you stay up-to-date with speckit framework improvements by ch
    Proceed with update? (yes/no): yes
 
    Updating files...
-     Updating .specify/scripts/powershell/common.ps1... ✓
-     Updating .specify/scripts/powershell/setup-plan.ps1... ✓
+     Updating .specify/scripts/powershell/common.bash... ✓
+     Updating .specify/scripts/powershell/setup-plan.bash... ✓
      Updating .specify/templates/spec-template.md... ✓
      Updating .claude/commands/speckit.plan.md... ✓
 
@@ -239,12 +239,12 @@ This command helps you stay up-to-date with speckit framework improvements by ch
 /speckit.update --check
 
 # Show what changed in specific files
-/speckit.update --diff common.ps1
+/speckit.update --diff common.bash
 /speckit.update --diff scripts
 /speckit.update --diff all
 
 # Download and apply updates
-/speckit.update --pull common.ps1          # Update one file
+/speckit.update --pull common.bash          # Update one file
 /speckit.update --pull scripts             # Update all scripts
 /speckit.update --pull all                 # Update everything (except custom files)
 /speckit.update --pull all --force         # Skip confirmation
@@ -289,7 +289,7 @@ This command helps you stay up-to-date with speckit framework improvements by ch
 - Conflict resolution
 - Scheduled updates
 
-**Local customizations**: The VERSION file tracks which components are custom (like archive-specs.ps1 and speckit.archive.md) to prevent overwriting them during updates.
+**Local customizations**: The VERSION file tracks which components are custom (like archive-specs.bash and speckit.archive.md) to prevent overwriting them during updates.
 
 **Error handling**:
 - If VERSION file missing, create it with current state

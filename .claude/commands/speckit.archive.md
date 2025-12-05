@@ -42,7 +42,7 @@ This command archives completed or old spec directories to `specs/archive/` to k
    - If contains `--completed` or `-c`: Archive all completed specs (where all tasks are marked [X])
 
 3. **List mode** (when `--list` or `-l` or no arguments provided):
-   - Run `.specify/scripts/powershell/archive-specs.ps1 -Json -List` from repo root
+   - Run `.specify/scripts/powershell/archive-specs.bash -Json -List` from repo root
    - Parse JSON output to get list of all specs with their status
    - Display in a table format:
      ```
@@ -63,7 +63,7 @@ This command archives completed or old spec directories to `specs/archive/` to k
 
 4. **Archive specific specs**:
    - Extract spec numbers from arguments (e.g., `001`, `002`, `003`)
-   - Run `.specify/scripts/powershell/archive-specs.ps1 -Json [spec numbers]` from repo root
+   - Run `.specify/scripts/powershell/archive-specs.bash -Json [spec numbers]` from repo root
    - Parse JSON output to get archive results
    - Display what was archived:
      ```
