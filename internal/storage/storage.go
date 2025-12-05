@@ -33,11 +33,13 @@ var (
 type ProgressCallback func(event string, metadata ...string)
 
 type VaultMetadata struct {
-	Version    int       `json:"version"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
-	Salt       []byte    `json:"salt"`
-	Iterations int       `json:"iterations"` // PBKDF2 iteration count (FR-007)
+	Version         int       `json:"version"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	Salt            []byte    `json:"salt"`
+	Iterations      int       `json:"iterations"`                  // PBKDF2 iteration count (FR-007)
+	WrappedDEK      []byte    `json:"wrapped_dek,omitempty"`       // T018: DEK wrapped by password KEK (v2 only)
+	WrappedDEKNonce []byte    `json:"wrapped_dek_nonce,omitempty"` // T018: GCM nonce for DEK wrapping (v2 only)
 }
 
 type EncryptedVault struct {
@@ -115,13 +117,83 @@ func (s *StorageService) InitializeVault(password string) error {
 	return nil
 }
 
+// T020: InitializeVaultV2 creates a new v2 vault with DEK-based encryption
+// Parameters:
+//   - dek: 32-byte Data Encryption Key (caller must clear after use)
+//   - wrappedDEK: DEK wrapped with password-derived KEK
+//   - wrappedDEKNonce: GCM nonce for the wrapped DEK
+//   - salt: 32-byte salt for password KDF
+//   - iterations: PBKDF2 iteration count
+func (s *StorageService) InitializeVaultV2(dek, wrappedDEK, wrappedDEKNonce, salt []byte, iterations int) error {
+	// Check if vault already exists
+	if s.VaultExists() {
+		return errors.New("vault already exists")
+	}
+
+	// Validate inputs
+	if len(dek) != crypto.KeyLength {
+		return crypto.ErrInvalidKeyLength
+	}
+	if len(wrappedDEK) != crypto.KeyLength+16 { // 32 bytes + 16 byte GCM tag
+		return fmt.Errorf("invalid wrapped DEK length: expected %d, got %d", crypto.KeyLength+16, len(wrappedDEK))
+	}
+	if len(wrappedDEKNonce) != crypto.NonceLength {
+		return crypto.ErrInvalidNonceLength
+	}
+	if len(salt) != crypto.SaltLength {
+		return crypto.ErrInvalidSaltLength
+	}
+
+	// Create initial empty vault data
+	emptyVault := []byte("{}")
+
+	// T020: Create v2 metadata with wrapped DEK
+	metadata := VaultMetadata{
+		Version:         2, // Key-wrapped vault
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
+		Salt:            salt,
+		Iterations:      iterations,
+		WrappedDEK:      wrappedDEK,
+		WrappedDEKNonce: wrappedDEKNonce,
+	}
+
+	// Encrypt vault data with DEK (not password-derived key)
+	encryptedData, err := s.cryptoService.Encrypt(emptyVault, dek)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt vault data: %w", err)
+	}
+
+	// Create encrypted vault structure
+	encryptedVault := EncryptedVault{
+		Metadata: metadata,
+		Data:     encryptedData,
+	}
+
+	// Marshal to JSON
+	jsonData, err := json.Marshal(encryptedVault)
+	if err != nil {
+		return fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	// Atomic write
+	return s.atomicWrite(s.vaultPath, jsonData)
+}
+
 func (s *StorageService) LoadVault(password string) ([]byte, error) {
 	encryptedVault, err := s.loadEncryptedVault()
 	if err != nil {
 		return nil, err
 	}
 
-	// T031: Derive key from password and salt with iterations from metadata (FR-007)
+	// T029/T030/T031: Version-aware vault loading
+	// V1: password-derived key decrypts vault directly
+	// V2: password-derived KEK unwraps DEK, DEK decrypts vault
+	if encryptedVault.Metadata.Version == 2 {
+		return s.loadVaultV2(encryptedVault, password)
+	}
+
+	// V1 path: Derive key from password and salt with iterations from metadata (FR-007)
 	key, err := s.cryptoService.DeriveKey([]byte(password), encryptedVault.Metadata.Salt, encryptedVault.Metadata.Iterations)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive key: %w", err)
@@ -132,6 +204,45 @@ func (s *StorageService) LoadVault(password string) ([]byte, error) {
 	plaintext, err := s.cryptoService.Decrypt(encryptedVault.Data, key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt vault (invalid password?): %w", err)
+	}
+
+	return plaintext, nil
+}
+
+// loadVaultV2 handles v2 vault loading with key unwrapping
+// T030: Implement v2 unlock path: unwrap DEK → decrypt vault
+func (s *StorageService) loadVaultV2(encryptedVault *EncryptedVault, password string) ([]byte, error) {
+	// Validate v2 metadata has required fields
+	if len(encryptedVault.Metadata.WrappedDEK) != crypto.KeyLength+16 {
+		return nil, fmt.Errorf("invalid v2 vault: wrapped DEK length mismatch (expected %d, got %d)",
+			crypto.KeyLength+16, len(encryptedVault.Metadata.WrappedDEK))
+	}
+	if len(encryptedVault.Metadata.WrappedDEKNonce) != crypto.NonceLength {
+		return nil, fmt.Errorf("invalid v2 vault: nonce length mismatch")
+	}
+
+	// 1. Derive password KEK from password and salt
+	passwordKEK, err := s.cryptoService.DeriveKey([]byte(password), encryptedVault.Metadata.Salt, encryptedVault.Metadata.Iterations)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive key: %w", err)
+	}
+	defer s.cryptoService.ClearKey(passwordKEK)
+
+	// 2. Unwrap DEK using password KEK
+	wrappedKey := crypto.WrappedKey{
+		Ciphertext: encryptedVault.Metadata.WrappedDEK,
+		Nonce:      encryptedVault.Metadata.WrappedDEKNonce,
+	}
+	dek, err := crypto.UnwrapKey(wrappedKey, passwordKEK)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt vault (invalid password?): %w", err)
+	}
+	defer crypto.ClearBytes(dek)
+
+	// 3. Decrypt vault data with DEK
+	plaintext, err := s.cryptoService.Decrypt(encryptedVault.Data, dek)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt vault data: %w", err)
 	}
 
 	return plaintext, nil
@@ -171,10 +282,25 @@ func (s *StorageService) SaveVault(data []byte, password string, callback Progre
 	// Update metadata
 	encryptedVault.Metadata.UpdatedAt = time.Now()
 
-	// Prepare encrypted vault data
-	encryptedData, err := s.prepareEncryptedData(data, encryptedVault.Metadata, password)
-	if err != nil {
-		return actionableErrorMessage(err)
+	// T032: Version-aware vault saving
+	// V1: password-derived key encrypts vault directly
+	// V2: password-derived KEK unwraps DEK, DEK encrypts vault
+	var encryptedData []byte
+	var dek []byte // Only set for v2, used for verification
+
+	if encryptedVault.Metadata.Version == 2 {
+		// V2 path: Unwrap DEK and encrypt with it
+		encryptedData, dek, err = s.prepareEncryptedDataV2(data, encryptedVault.Metadata, password)
+		if err != nil {
+			return actionableErrorMessage(err)
+		}
+		defer crypto.ClearBytes(dek)
+	} else {
+		// V1 path: Encrypt with password-derived key
+		encryptedData, err = s.prepareEncryptedData(data, encryptedVault.Metadata, password)
+		if err != nil {
+			return actionableErrorMessage(err)
+		}
 	}
 
 	// T033: Step 0: Cleanup orphaned temp files from previous crashes (best-effort)
@@ -204,14 +330,21 @@ func (s *StorageService) SaveVault(data []byte, password string, callback Progre
 		callback("verification_started", tempPath)
 	}
 
-	if err := s.verifyTempFile(tempPath, password); err != nil {
+	// Version-aware verification
+	var verifyErr error
+	if encryptedVault.Metadata.Version == 2 {
+		verifyErr = s.verifyTempFileWithDEK(tempPath, dek)
+	} else {
+		verifyErr = s.verifyTempFile(tempPath, password)
+	}
+	if verifyErr != nil {
 		// FR-015: Log verification failure BEFORE cleanup
 		if callback != nil {
-			callback("verification_failed", tempPath, err.Error())
+			callback("verification_failed", tempPath, verifyErr.Error())
 		}
 		// Cleanup temp file on verification failure
 		_ = s.cleanupTempFile(tempPath)
-		return actionableErrorMessage(err)
+		return actionableErrorMessage(verifyErr)
 	}
 
 	if callback != nil {
@@ -253,6 +386,306 @@ func (s *StorageService) SaveVault(data []byte, password string, callback Progre
 	return nil
 }
 
+// SaveVaultWithDEK saves vault data encrypted with a DEK (for v2 vaults).
+// Used when saving vault data encrypted with the Data Encryption Key.
+// Parameters:
+//   - data: plaintext vault data to encrypt
+//   - dek: 32-byte Data Encryption Key
+//   - callback: optional progress callback for audit logging
+func (s *StorageService) SaveVaultWithDEK(data, dek []byte, callback ProgressCallback) error {
+	// Notify audit logger of save operation start
+	if callback != nil {
+		callback("atomic_save_started", s.vaultPath)
+	}
+
+	// Load existing vault to get metadata
+	encryptedVault, err := s.loadEncryptedVault()
+	if err != nil {
+		return err
+	}
+
+	// Update metadata timestamp
+	encryptedVault.Metadata.UpdatedAt = time.Now()
+
+	// Encrypt vault data with DEK
+	encryptedData, err := s.cryptoService.Encrypt(data, dek)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt vault data: %w", err)
+	}
+
+	// Create encrypted vault structure
+	newVault := EncryptedVault{
+		Metadata: encryptedVault.Metadata,
+		Data:     encryptedData,
+	}
+
+	// Marshal to JSON
+	jsonData, err := json.Marshal(newVault)
+	if err != nil {
+		return fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	// Cleanup orphaned temp files from previous crashes
+	s.cleanupOrphanedTempFiles("")
+
+	// Generate temp filename
+	tempPath := s.generateTempFileName()
+
+	// Write to temp file
+	if err := s.writeToTempFile(tempPath, jsonData); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// Notify after temp file created
+	if callback != nil {
+		callback("temp_file_created", tempPath)
+	}
+
+	// Ensure temp file cleanup on error
+	defer func() {
+		_ = s.cleanupTempFile(tempPath)
+	}()
+
+	// Verification: verify temp file is decryptable with DEK
+	if callback != nil {
+		callback("verification_started", tempPath)
+	}
+
+	if err := s.verifyTempFileWithDEK(tempPath, dek); err != nil {
+		if callback != nil {
+			callback("verification_failed", tempPath, err.Error())
+		}
+		_ = s.cleanupTempFile(tempPath)
+		return actionableErrorMessage(err)
+	}
+
+	if callback != nil {
+		callback("verification_passed", tempPath)
+	}
+
+	// Atomic rename (vault → backup)
+	backupPath := s.vaultPath + BackupSuffix
+	if callback != nil {
+		callback("atomic_rename_started", s.vaultPath, backupPath)
+	}
+
+	if err := s.atomicRename(s.vaultPath, backupPath); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// Atomic rename (temp → vault)
+	if callback != nil {
+		callback("atomic_rename_started", tempPath, s.vaultPath)
+	}
+
+	if err := s.atomicRename(tempPath, s.vaultPath); err != nil {
+		// CRITICAL ERROR: Try to restore backup
+		if callback != nil {
+			callback("rollback_started", backupPath, s.vaultPath)
+		}
+		_ = s.atomicRename(backupPath, s.vaultPath)
+		if callback != nil {
+			callback("rollback_completed", s.vaultPath)
+		}
+		return criticalErrorMessage(err)
+	}
+
+	// Notify completion
+	if callback != nil {
+		callback("atomic_save_completed", s.vaultPath)
+	}
+
+	return nil
+}
+
+// ChangePasswordV2 changes the password for a v2 vault by re-wrapping the DEK.
+// This method:
+// 1. Unwraps the DEK using the old password-derived KEK
+// 2. Re-wraps the DEK with the new password-derived KEK
+// 3. Updates the WrappedDEK in vault metadata
+// 4. Re-encrypts and saves the vault data
+// Parameters:
+//   - data: plaintext vault data to save
+//   - oldPassword: current password (for unwrapping DEK)
+//   - newPassword: new password (for re-wrapping DEK)
+//   - callback: optional progress callback for audit logging
+func (s *StorageService) ChangePasswordV2(data []byte, oldPassword, newPassword string, callback ProgressCallback) error {
+	// Notify audit logger of save operation start
+	if callback != nil {
+		callback("atomic_save_started", s.vaultPath)
+	}
+
+	// Load existing vault to get metadata
+	encryptedVault, err := s.loadEncryptedVault()
+	if err != nil {
+		return err
+	}
+
+	// Verify this is a v2 vault
+	if encryptedVault.Metadata.Version != 2 {
+		return fmt.Errorf("ChangePasswordV2 called on non-v2 vault")
+	}
+
+	// 1. Derive old password KEK
+	oldKEK, err := s.cryptoService.DeriveKey([]byte(oldPassword), encryptedVault.Metadata.Salt, encryptedVault.Metadata.Iterations)
+	if err != nil {
+		return fmt.Errorf("failed to derive old key: %w", err)
+	}
+	defer s.cryptoService.ClearKey(oldKEK)
+
+	// 2. Unwrap DEK using old KEK
+	wrappedKey := crypto.WrappedKey{
+		Ciphertext: encryptedVault.Metadata.WrappedDEK,
+		Nonce:      encryptedVault.Metadata.WrappedDEKNonce,
+	}
+	dek, err := crypto.UnwrapKey(wrappedKey, oldKEK)
+	if err != nil {
+		return fmt.Errorf("failed to unwrap DEK: %w", err)
+	}
+	defer crypto.ClearBytes(dek)
+
+	// 3. Generate new salt for new password
+	newSalt, err := s.cryptoService.GenerateSalt()
+	if err != nil {
+		return fmt.Errorf("failed to generate new salt: %w", err)
+	}
+
+	// 4. Derive new password KEK
+	newIterations := crypto.GetIterations()
+	newKEK, err := s.cryptoService.DeriveKey([]byte(newPassword), newSalt, newIterations)
+	if err != nil {
+		return fmt.Errorf("failed to derive new key: %w", err)
+	}
+	defer s.cryptoService.ClearKey(newKEK)
+
+	// 5. Re-wrap DEK with new KEK
+	newWrappedKey, err := crypto.WrapKey(dek, newKEK)
+	if err != nil {
+		return fmt.Errorf("failed to re-wrap DEK: %w", err)
+	}
+
+	// 6. Update metadata with new wrapped DEK
+	encryptedVault.Metadata.Salt = newSalt
+	encryptedVault.Metadata.Iterations = newIterations
+	encryptedVault.Metadata.WrappedDEK = newWrappedKey.Ciphertext
+	encryptedVault.Metadata.WrappedDEKNonce = newWrappedKey.Nonce
+	encryptedVault.Metadata.UpdatedAt = time.Now()
+
+	// 7. Encrypt vault data with DEK
+	encryptedData, err := s.cryptoService.Encrypt(data, dek)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt vault data: %w", err)
+	}
+
+	// 8. Create encrypted vault structure
+	newVault := EncryptedVault{
+		Metadata: encryptedVault.Metadata,
+		Data:     encryptedData,
+	}
+
+	// 9. Marshal to JSON
+	jsonData, err := json.Marshal(newVault)
+	if err != nil {
+		return fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	// Cleanup orphaned temp files from previous crashes
+	s.cleanupOrphanedTempFiles("")
+
+	// Generate temp filename
+	tempPath := s.generateTempFileName()
+
+	// Write to temp file
+	if err := s.writeToTempFile(tempPath, jsonData); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// Notify after temp file created
+	if callback != nil {
+		callback("temp_file_created", tempPath)
+	}
+
+	// Ensure temp file cleanup on error
+	defer func() {
+		_ = s.cleanupTempFile(tempPath)
+	}()
+
+	// Verification: verify temp file is decryptable with new password
+	// We need to verify using the new password since that's what's stored in metadata
+	if callback != nil {
+		callback("verification_started", tempPath)
+	}
+
+	if err := s.verifyTempFileWithDEK(tempPath, dek); err != nil {
+		if callback != nil {
+			callback("verification_failed", tempPath, err.Error())
+		}
+		_ = s.cleanupTempFile(tempPath)
+		return actionableErrorMessage(err)
+	}
+
+	if callback != nil {
+		callback("verification_passed", tempPath)
+	}
+
+	// Atomic rename (vault → backup)
+	backupPath := s.vaultPath + BackupSuffix
+	if callback != nil {
+		callback("atomic_rename_started", s.vaultPath, backupPath)
+	}
+
+	if err := s.atomicRename(s.vaultPath, backupPath); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// Atomic rename (temp → vault)
+	if callback != nil {
+		callback("atomic_rename_started", tempPath, s.vaultPath)
+	}
+
+	if err := s.atomicRename(tempPath, s.vaultPath); err != nil {
+		// CRITICAL ERROR: Try to restore backup
+		if callback != nil {
+			callback("rollback_started", backupPath, s.vaultPath)
+		}
+		_ = s.atomicRename(backupPath, s.vaultPath)
+		if callback != nil {
+			callback("rollback_completed", s.vaultPath)
+		}
+		return criticalErrorMessage(err)
+	}
+
+	// Notify completion
+	if callback != nil {
+		callback("atomic_save_completed", s.vaultPath)
+	}
+
+	return nil
+}
+
+// verifyTempFileWithDEK verifies a temp file can be decrypted with the DEK
+func (s *StorageService) verifyTempFileWithDEK(tempPath string, dek []byte) error {
+	// Read temp file
+	data, err := s.fs.ReadFile(tempPath)
+	if err != nil {
+		return fmt.Errorf("failed to read temp file for verification: %w", err)
+	}
+
+	// Parse JSON
+	var encryptedVault EncryptedVault
+	if err := json.Unmarshal(data, &encryptedVault); err != nil {
+		return fmt.Errorf("failed to parse temp vault: %w", err)
+	}
+
+	// Try to decrypt with DEK
+	_, err = s.cryptoService.Decrypt(encryptedVault.Data, dek)
+	if err != nil {
+		return fmt.Errorf("verification failed - cannot decrypt with DEK: %w", err)
+	}
+
+	return nil
+}
+
 // prepareEncryptedData encrypts vault data and returns JSON bytes ready to write
 func (s *StorageService) prepareEncryptedData(data []byte, metadata VaultMetadata, password string) ([]byte, error) {
 	// Derive key from password and salt
@@ -281,6 +714,57 @@ func (s *StorageService) prepareEncryptedData(data []byte, metadata VaultMetadat
 	}
 
 	return jsonData, nil
+}
+
+// prepareEncryptedDataV2 encrypts vault data for v2 vaults (DEK-based encryption)
+// Returns encrypted JSON bytes ready to write, and the DEK for verification
+func (s *StorageService) prepareEncryptedDataV2(data []byte, metadata VaultMetadata, password string) ([]byte, []byte, error) {
+	// 1. Derive password KEK from password and salt
+	passwordKEK, err := s.cryptoService.DeriveKey([]byte(password), metadata.Salt, metadata.Iterations)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to derive key: %w", err)
+	}
+	defer s.cryptoService.ClearKey(passwordKEK)
+
+	// 2. Unwrap DEK using password KEK
+	if len(metadata.WrappedDEK) != crypto.KeyLength+16 {
+		return nil, nil, fmt.Errorf("invalid v2 vault: wrapped DEK length mismatch")
+	}
+	if len(metadata.WrappedDEKNonce) != crypto.NonceLength {
+		return nil, nil, fmt.Errorf("invalid v2 vault: nonce length mismatch")
+	}
+
+	wrappedKey := crypto.WrappedKey{
+		Ciphertext: metadata.WrappedDEK,
+		Nonce:      metadata.WrappedDEKNonce,
+	}
+	dek, err := crypto.UnwrapKey(wrappedKey, passwordKEK)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to unwrap DEK: %w", err)
+	}
+
+	// 3. Encrypt vault data with DEK
+	encryptedData, err := s.cryptoService.Encrypt(data, dek)
+	if err != nil {
+		crypto.ClearBytes(dek)
+		return nil, nil, fmt.Errorf("failed to encrypt vault data: %w", err)
+	}
+
+	// Create encrypted vault structure
+	encryptedVault := EncryptedVault{
+		Metadata: metadata,
+		Data:     encryptedData,
+	}
+
+	// Marshal to JSON
+	jsonData, err := json.Marshal(encryptedVault)
+	if err != nil {
+		crypto.ClearBytes(dek)
+		return nil, nil, fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	// Return DEK for verification (caller must clear after use)
+	return jsonData, dek, nil
 }
 
 // SaveVaultWithIterations saves vault data with an updated iteration count.
@@ -363,6 +847,149 @@ func (s *StorageService) GetIterations() int {
 		return 0
 	}
 	return encryptedVault.Metadata.Iterations
+}
+
+// GetVersion returns the vault format version (1 or 2).
+// Returns 0 if vault doesn't exist or error occurs.
+func (s *StorageService) GetVersion() int {
+	encryptedVault, err := s.loadEncryptedVault()
+	if err != nil {
+		return 0
+	}
+	return encryptedVault.Metadata.Version
+}
+
+// MigrateToV2 atomically migrates a v1 vault to v2 format.
+// This method:
+// 1. Creates a backup of the current vault
+// 2. Re-encrypts vault data with DEK
+// 3. Updates metadata to v2 format with wrapped DEK
+// 4. Atomically replaces the vault file
+// Parameters:
+//   - data: plaintext vault data to save
+//   - dek: 32-byte Data Encryption Key
+//   - wrappedDEK: DEK wrapped by password KEK
+//   - wrappedDEKNonce: nonce used for DEK wrapping
+//   - salt: salt for password KDF
+//   - iterations: PBKDF2 iteration count
+//   - callback: optional progress callback for audit logging
+func (s *StorageService) MigrateToV2(data, dek, wrappedDEK, wrappedDEKNonce, salt []byte, iterations int, callback ProgressCallback) error {
+	// Notify audit logger of migration start
+	if callback != nil {
+		callback("atomic_save_started", s.vaultPath)
+	}
+
+	// Load existing vault to get current metadata
+	encryptedVault, err := s.loadEncryptedVault()
+	if err != nil {
+		return err
+	}
+
+	// Verify this is a v1 vault
+	if encryptedVault.Metadata.Version != 1 {
+		return fmt.Errorf("cannot migrate: vault is already version %d", encryptedVault.Metadata.Version)
+	}
+
+	// Encrypt vault data with DEK
+	encryptedData, err := s.cryptoService.Encrypt(data, dek)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt vault data: %w", err)
+	}
+
+	// Create v2 metadata
+	newMetadata := VaultMetadata{
+		Version:         2, // Upgrade to v2
+		CreatedAt:       encryptedVault.Metadata.CreatedAt,
+		UpdatedAt:       time.Now(),
+		Salt:            salt,
+		Iterations:      iterations,
+		WrappedDEK:      wrappedDEK,
+		WrappedDEKNonce: wrappedDEKNonce,
+	}
+
+	// Create encrypted vault structure
+	newVault := EncryptedVault{
+		Metadata: newMetadata,
+		Data:     encryptedData,
+	}
+
+	// Marshal to JSON
+	jsonData, err := json.Marshal(newVault)
+	if err != nil {
+		return fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	// Cleanup orphaned temp files from previous crashes
+	s.cleanupOrphanedTempFiles("")
+
+	// Generate temp filename
+	tempPath := s.generateTempFileName()
+
+	// Write to temp file
+	if err := s.writeToTempFile(tempPath, jsonData); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// Notify after temp file created
+	if callback != nil {
+		callback("temp_file_created", tempPath)
+	}
+
+	// Ensure temp file cleanup on error
+	defer func() {
+		_ = s.cleanupTempFile(tempPath)
+	}()
+
+	// Verification: verify temp file is decryptable with DEK
+	if callback != nil {
+		callback("verification_started", tempPath)
+	}
+
+	if err := s.verifyTempFileWithDEK(tempPath, dek); err != nil {
+		if callback != nil {
+			callback("verification_failed", tempPath, err.Error())
+		}
+		_ = s.cleanupTempFile(tempPath)
+		return actionableErrorMessage(err)
+	}
+
+	if callback != nil {
+		callback("verification_passed", tempPath)
+	}
+
+	// Atomic rename (vault → backup)
+	backupPath := s.vaultPath + BackupSuffix
+	if callback != nil {
+		callback("atomic_rename_started", s.vaultPath, backupPath)
+	}
+
+	if err := s.atomicRename(s.vaultPath, backupPath); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// Atomic rename (temp → vault)
+	if callback != nil {
+		callback("atomic_rename_started", tempPath, s.vaultPath)
+	}
+
+	if err := s.atomicRename(tempPath, s.vaultPath); err != nil {
+		// CRITICAL ERROR: Try to restore backup
+		if callback != nil {
+			callback("rollback_started", backupPath, s.vaultPath)
+		}
+		_ = s.atomicRename(backupPath, s.vaultPath)
+		if callback != nil {
+			callback("rollback_completed", s.vaultPath)
+		}
+		return criticalErrorMessage(err)
+	}
+
+	// Notify completion
+	if callback != nil {
+		callback("atomic_save_completed", s.vaultPath)
+	}
+
+	return nil
 }
 
 // SetIterations updates the PBKDF2 iteration count in vault metadata.
@@ -604,8 +1231,9 @@ func (s *StorageService) preflightChecks() error {
 	requiredSpace := vaultSize * 2
 
 	// Get disk usage info (platform-specific)
-	availableSpace, err := s.getAvailableDiskSpace(vaultDir)
-	if err != nil {
+	// Note: getAvailableDiskSpace may return error on unsupported platforms
+	availableSpace, err := s.getAvailableDiskSpace(vaultDir) //nolint:staticcheck // SA4023: always-error is intentional
+	if err != nil {                                          //nolint:staticcheck // SA4023: always-true is intentional for unimplemented platforms
 		// If we can't determine disk space, log warning but continue
 		fmt.Fprintf(os.Stderr, "Warning: unable to verify disk space: %v\n", err)
 	} else if availableSpace < requiredSpace {
@@ -626,6 +1254,8 @@ func (s *StorageService) preflightChecks() error {
 
 // getAvailableDiskSpace returns available disk space in bytes for the given path.
 // Platform-specific implementation.
+//
+//nolint:staticcheck // SA4023: always returns error on unsupported platforms - this is intentional
 func (s *StorageService) getAvailableDiskSpace(path string) (int64, error) {
 	// Platform-specific disk space check
 	// On Windows, syscall.Statfs_t is not available

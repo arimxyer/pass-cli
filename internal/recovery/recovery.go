@@ -253,6 +253,22 @@ func PerformRecovery(config *RecoveryConfig) ([]byte, error) {
 	return vaultRecoveryKey, nil
 }
 
+// DeriveRecoveryKey derives a 32-byte key from a BIP39 mnemonic and optional passphrase.
+// This is used to wrap/unwrap the DEK for v2 vaults.
+// Parameters:
+//   - mnemonic: full 24-word BIP39 mnemonic
+//   - passphrase: optional passphrase (25th word), can be nil
+//   - kdfParams: KDF parameters (must include SaltRecovery)
+// Returns: 32-byte recovery KEK
+func DeriveRecoveryKey(mnemonic string, passphrase []byte, kdfParams *vault.KDFParams) []byte {
+	// Generate BIP39 seed from mnemonic and passphrase
+	seed := bip39.NewSeed(mnemonic, string(passphrase))
+	defer crypto.ClearBytes(seed)
+
+	// Derive key using Argon2id with recovery salt
+	return deriveKey(seed, kdfParams.SaltRecovery, kdfParams)
+}
+
 // decryptData is a helper to decrypt arbitrary data with AES-256-GCM
 func decryptData(ciphertext, nonce, key []byte) ([]byte, error) {
 	// Create AES cipher

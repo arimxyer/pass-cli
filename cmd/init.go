@@ -101,11 +101,42 @@ func runInit(cmd *cobra.Command, args []string) error {
 	if string(password) != string(confirmPassword) {
 		return fmt.Errorf("passwords do not match")
 	}
+	crypto.ClearBytes(confirmPassword)
 
-	// T028-T030: Setup BIP39 recovery (unless --no-recovery flag set)
-	var recoveryResult *recovery.SetupResult
-	if !noRecovery {
-		// T048: Prompt for optional passphrase (25th word)
+	// Create vault service
+	vaultService, err := vault.New(vaultPath)
+	if err != nil {
+		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
+	}
+
+	// Prepare audit parameters if requested
+	var auditLogPath, vaultID string
+	if enableAudit {
+		auditLogPath = getAuditLogPath(vaultPath)
+		vaultID = getVaultID(vaultPath)
+	}
+
+	// Branch based on recovery mode
+	if noRecovery {
+		// V1 path: Initialize without recovery (password-only vault)
+		if err := vaultService.Initialize(password, useKeychain, auditLogPath, vaultID); err != nil {
+			return fmt.Errorf("failed to initialize vault at %s: %w", vaultPath, err)
+		}
+
+		// Save metadata for keychain/audit if needed
+		if useKeychain || enableAudit {
+			metadata := &vault.Metadata{
+				Version:         "1.0",
+				KeychainEnabled: useKeychain,
+				AuditEnabled:    enableAudit,
+			}
+			if err := vaultService.SaveMetadata(metadata); err != nil {
+				return fmt.Errorf("failed to save vault metadata: %w", err)
+			}
+		}
+	} else {
+		// V2 path: Initialize with recovery (key-wrapped vault)
+		// Prompt for optional passphrase (25th word)
 		var passphrase []byte
 		usePassphrase, err := promptYesNo("Advanced: Add passphrase protection (25th word)?", false)
 		if err != nil {
@@ -135,38 +166,28 @@ func runInit(cmd *cobra.Command, args []string) error {
 				crypto.ClearBytes(passphrase)
 				return fmt.Errorf("failed to read confirmation passphrase: %w", err)
 			}
-			defer crypto.ClearBytes(confirmPassphrase)
 			fmt.Println() // newline after password input
 
 			// Verify passphrases match
 			if string(passphrase) != string(confirmPassphrase) {
 				crypto.ClearBytes(passphrase)
+				crypto.ClearBytes(confirmPassphrase)
 				return fmt.Errorf("passphrases do not match")
 			}
-		}
-		defer func() {
-			if passphrase != nil {
-				crypto.ClearBytes(passphrase)
-			}
-		}()
-
-		// Setup recovery phrase
-		setupConfig := &recovery.SetupConfig{
-			Passphrase: passphrase,
-			KDFParams:  nil, // Use defaults
+			crypto.ClearBytes(confirmPassphrase)
 		}
 
-		result, err := recovery.SetupRecovery(setupConfig)
+		// Initialize v2 vault with recovery - returns mnemonic for display/verification
+		// Note: password and passphrase are cleared inside InitializeWithRecovery
+		mnemonic, err := vaultService.InitializeWithRecovery(password, useKeychain, auditLogPath, vaultID, passphrase)
 		if err != nil {
-			return fmt.Errorf("failed to setup recovery: %w", err)
+			return fmt.Errorf("failed to initialize vault at %s: %w", vaultPath, err)
 		}
-		recoveryResult = result
-		defer crypto.ClearBytes(recoveryResult.VaultRecoveryKey) // Clear key from memory
 
 		// Display mnemonic to user
-		displayMnemonic(result.Mnemonic)
+		displayMnemonic(mnemonic)
 
-		// T029: Prompt for backup verification
+		// Prompt for backup verification
 		verify, err := promptYesNo("Verify your backup?", true)
 		if err != nil {
 			return fmt.Errorf("failed to read verification response: %w", err)
@@ -198,7 +219,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 				// Verify backup
 				verifyConfig := &recovery.VerifyConfig{
-					Mnemonic:        result.Mnemonic,
+					Mnemonic:        mnemonic,
 					VerifyPositions: verifyPositions,
 					UserWords:       userWords,
 				}
@@ -215,54 +236,17 @@ func runInit(cmd *cobra.Command, args []string) error {
 				} else {
 					fmt.Println("✗ Verification failed after 3 attempts.")
 					fmt.Println("⚠  Please ensure you have written down all 24 words correctly.")
-					fmt.Println("   Continuing vault initialization...")
 				}
 			}
 
 			if !verified {
-				// User failed verification, but we still create the vault
+				// User failed verification, but vault is already created
 				// Recovery phrase is still valid, they just need to write it down correctly
 				fmt.Println()
 			}
 		} else {
 			// User declined verification
 			fmt.Println("⚠  Skipping verification. Please ensure you have written down all 24 words correctly!")
-		}
-	}
-
-	// Create vault service
-	vaultService, err := vault.New(vaultPath)
-	if err != nil {
-		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
-	}
-
-	// T073/DISC-013 fix: Prepare audit parameters if requested
-	var auditLogPath, vaultID string
-	if enableAudit {
-		auditLogPath = getAuditLogPath(vaultPath)
-		vaultID = getVaultID(vaultPath)
-	}
-
-	// Initialize vault (with audit config if requested)
-	if err := vaultService.Initialize(password, useKeychain, auditLogPath, vaultID); err != nil {
-		return fmt.Errorf("failed to initialize vault at %s: %w", vaultPath, err)
-	}
-
-	// T009a/T030: Save metadata when --use-keychain, --enable-audit, or recovery enabled
-	if useKeychain || enableAudit || recoveryResult != nil {
-		metadata := &vault.Metadata{
-			Version:         "1.0",
-			KeychainEnabled: useKeychain,
-			AuditEnabled:    enableAudit,
-		}
-
-		// T030: Add recovery metadata if recovery was setup
-		if recoveryResult != nil {
-			metadata.Recovery = recoveryResult.Metadata
-		}
-
-		if err := vaultService.SaveMetadata(metadata); err != nil {
-			return fmt.Errorf("failed to save vault metadata: %w", err)
 		}
 	}
 
@@ -277,8 +261,10 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	if useKeychain {
 		fmt.Println("🔑 Master password stored in system keychain")
-	} else {
+	} else if noRecovery {
 		fmt.Println("⚠️  Remember your master password - it cannot be recovered if lost!")
+	} else {
+		fmt.Println("🔑 You can recover your vault using the 24-word recovery phrase")
 	}
 
 	fmt.Println("\n💡 Next steps:")

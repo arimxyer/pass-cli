@@ -1,39 +1,37 @@
 <!--
 Sync Impact Report - Constitution Update
-═══════════════════════════════════════════════════════════════
+===============================================================
 
-Version Change: [Initial/Template] → 1.0.0
+Version Change: 1.1.0 → 1.2.0 (MINOR)
 
 Changes Summary:
-- Initial ratification of Pass-CLI constitution
-- Added 7 core principles specific to password manager development
-- Defined security-first architecture and testing requirements
-- Established governance and compliance framework
+- Added BIP39 recovery phrase system to Security Requirements
+- Updated Encryption Standards to document Argon2id for recovery KDF
+- Added Recovery Phrase Security section with specific constraints
+- Clarified dual-KDF architecture (PBKDF2 for vault, Argon2id for recovery)
 
 Modified Principles:
-- NEW: I. Security-First Development (NON-NEGOTIABLE)
-- NEW: II. Library-First Architecture
-- NEW: III. CLI Interface Standards
-- NEW: IV. Test-Driven Development (NON-NEGOTIABLE)
-- NEW: V. Cross-Platform Compatibility
-- NEW: VI. Observability & Auditability
-- NEW: VII. Simplicity & YAGNI
+- I. Security-First Development: Expanded to include recovery phrase handling
+- VI. Observability & Auditability: No changes (already covers audit.log)
 
 Added Sections:
-- Security Requirements (dedicated section for password manager constraints)
-- Development Workflow (quality gates and review process)
+- Recovery Phrase Security (under Security Requirements)
+- Key Derivation Functions documentation
+
+Removed Sections:
+- None
 
 Templates Requiring Updates:
-- ✅ plan-template.md: Constitution Check section references verified
-- ✅ spec-template.md: Requirements and acceptance criteria alignment verified
-- ✅ tasks-template.md: Task categorization aligns with principles
-- ⚠ Runtime guidance (CLAUDE.md): Already contains spec adherence rules - no changes needed
+- ✅ plan-template.md: Constitution Check section verified - no changes needed
+- ✅ spec-template.md: Requirements alignment verified - no changes needed
+- ✅ tasks-template.md: Task categorization verified - no changes needed
+- ✅ CLAUDE.md: Runtime guidance verified - no changes needed
 
 Follow-up TODOs:
-- None (all placeholders filled)
+- None (all sections complete)
 
-Last Updated: 2025-10-09
-═══════════════════════════════════════════════════════════════
+Last Updated: 2025-12-05
+===============================================================
 -->
 
 # Pass-CLI Constitution
@@ -44,11 +42,14 @@ Last Updated: 2025-10-09
 
 **All development decisions prioritize security over convenience, performance, or features.**
 
-- **Encryption Standards**: AES-256-GCM with PBKDF2-SHA256 (600,000 iterations minimum) MUST be used for all credential storage. No weaker algorithms permitted.
-- **No Secret Logging**: Passwords, master passwords, API keys, or any credential data MUST NEVER be logged, printed to stdout/stderr, or written to any file outside the encrypted vault.
+- **Encryption Standards**: AES-256-GCM MUST be used for all credential storage. Key derivation uses:
+  - **Vault encryption**: PBKDF2-SHA256 with 600,000 iterations minimum
+  - **Recovery system**: Argon2id (RFC 9106 compliant) with 64MB memory cost
+- **No Secret Logging**: Passwords, master passwords, recovery phrases, API keys, or any credential data MUST NEVER be logged, printed to stdout/stderr, or written to any file outside the encrypted vault.
 - **Zero-Trust Clipboard**: Clipboard operations MUST clear after 30 seconds maximum. Credentials MUST NOT be stored in clipboard history.
-- **Secure Memory Handling**: Sensitive data in memory MUST be zeroed after use. No credential caching in plaintext memory.
+- **Secure Memory Handling**: Sensitive data in memory MUST be zeroed after use via `crypto.ClearBytes()`. No credential caching in plaintext memory.
 - **System Keychain Integration**: Master passwords MUST be stored only in OS-provided secure storage (Windows Credential Manager, macOS Keychain, Linux Secret Service).
+- **Recovery Phrase Security**: BIP39 mnemonic phrases MUST be displayed only once during setup. Challenge words (6 of 24) MUST be stored encrypted, never in plaintext.
 - **Threat Modeling Required**: Any new feature touching credentials MUST include threat analysis before implementation.
 
 **Rationale**: As a password manager, Pass-CLI is a high-value target. A single security failure compromises all user credentials. This principle is non-negotiable because the entire value proposition relies on trustworthy security.
@@ -140,23 +141,47 @@ Last Updated: 2025-10-09
 
 The following operations are FORBIDDEN and MUST be blocked in code review:
 
-- ❌ Logging any variable named `password`, `masterPassword`, `apiKey`, `secret`, `credential`, `vault`, or similar
+- ❌ Logging any variable named `password`, `masterPassword`, `apiKey`, `secret`, `credential`, `vault`, `mnemonic`, `recoveryPhrase`, or similar
 - ❌ Writing credentials to temporary files (use in-memory buffers only)
 - ❌ Transmitting credentials over network (Pass-CLI is offline-first)
 - ❌ Storing credentials in environment variables (except user's own controlled `export` in scripts)
 - ❌ Using weak cryptography (MD5, SHA1 for hashing, DES, 3DES, RC4 for encryption)
-- ❌ Hardcoding encryption keys, salts, or IVs in source code
+- ❌ Hardcoding encryption keys, salts, IVs, or recovery phrases in source code
+- ❌ Storing full 24-word recovery phrases anywhere (only encrypted partial storage permitted)
+
+### Key Derivation Functions
+
+Pass-CLI uses two KDF systems for different security contexts:
+
+| Context | Algorithm | Parameters | Rationale |
+|---------|-----------|------------|-----------|
+| Vault encryption | PBKDF2-SHA256 | 600,000 iterations, 32-byte salt | OWASP 2023 recommendation, backward compatible |
+| Recovery system | Argon2id | 64MB memory, 1 iteration, 4 threads | RFC 9106 compliant, memory-hard defense against GPU attacks |
+
+Both KDFs MUST derive 256-bit (32-byte) keys for AES-256-GCM encryption.
+
+### Recovery Phrase Security
+
+The BIP39 mnemonic recovery system has specific security requirements:
+
+- **Display Once**: Full 24-word phrase shown only during initial vault setup
+- **Challenge-Based Recovery**: Only 6 words required for recovery (randomly selected positions)
+- **Encrypted Storage**: 18 stored words encrypted with challenge-word-derived key
+- **Passphrase Support**: Optional 25th word (passphrase) for additional security
+- **Verification Step**: User MUST verify backup by entering 3 random words before completing setup
+- **No Phrase Reconstruction**: System MUST NOT allow full phrase to be displayed after initial setup
 
 ### Security Review Checklist
 
 Before merging any PR touching cryptographic or credential-handling code:
 
 - [ ] No secrets logged or printed
-- [ ] Memory containing secrets zeroed after use
+- [ ] Memory containing secrets zeroed after use (`crypto.ClearBytes()`)
 - [ ] Error messages do not leak sensitive information
 - [ ] Clipboard auto-clears within 30 seconds
 - [ ] Vault file permissions restrict access to owner only (`0600` on Unix, equivalent ACLs on Windows)
-- [ ] All cryptographic operations use approved algorithms (AES-256-GCM, PBKDF2-SHA256)
+- [ ] All cryptographic operations use approved algorithms (AES-256-GCM, PBKDF2-SHA256, Argon2id)
+- [ ] Recovery phrases handled per Recovery Phrase Security requirements
 - [ ] Tests verify security guarantees (e.g., clipboard clearing, vault file permissions)
 
 ---
@@ -234,4 +259,4 @@ For day-to-day development workflow, communication standards, and detailed imple
 
 ---
 
-**Version**: 1.1.0 | **Ratified**: 2025-10-09 | **Last Amended**: 2025-10-11
+**Version**: 1.2.0 | **Ratified**: 2025-10-09 | **Last Amended**: 2025-12-05

@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"pass-cli/internal/vault"
-
 	"github.com/rivo/tview"
+	"github.com/stretchr/testify/require"
+
+	"pass-cli/internal/vault"
 )
 
 // MockVaultService is a mock implementation of VaultService for testing.
@@ -602,12 +603,8 @@ func TestSetSelectedCredential(t *testing.T) {
 
 	// Verify credential set
 	selected := state.GetSelectedCredential()
-	if selected == nil {
-		t.Fatal("Expected selected credential, got nil")
-	}
-	if selected.Service != "AWS" {
-		t.Errorf("Expected service 'AWS', got '%s'", selected.Service)
-	}
+	require.NotNil(t, selected, "Expected selected credential")
+	require.Equal(t, "AWS", selected.Service, "Expected service 'AWS'")
 }
 
 // TestComponentStorage verifies component storage and retrieval.

@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"pass-cli/cmd/tui/models"
 	"pass-cli/internal/vault"
 )
@@ -14,15 +16,10 @@ func TestNewCredentialTable(t *testing.T) {
 	state := models.NewAppState(mockVault)
 
 	table := NewCredentialTable(state)
-
-	if table == nil {
-		t.Fatal("NewCredentialTable returned nil")
-	}
+	require.NotNil(t, table, "NewCredentialTable returned nil")
 
 	// Verify header row exists (row 0 should be header)
-	if table.GetRowCount() < 1 {
-		t.Error("Expected at least header row, got 0 rows")
-	}
+	require.GreaterOrEqual(t, table.GetRowCount(), 1, "Expected at least header row")
 
 	// Verify header cells
 	serviceHeader := table.GetCell(0, 0)
@@ -113,9 +110,8 @@ func TestCredentialTableRefresh_CategoryFilter(t *testing.T) {
 	// Verify both rows are Work category
 	row1Service := table.GetCell(1, 0)
 	row2Service := table.GetCell(2, 0)
-	if row1Service == nil || row2Service == nil {
-		t.Fatal("Expected 2 credential rows")
-	}
+	require.NotNil(t, row1Service, "Expected credential row 1")
+	require.NotNil(t, row2Service, "Expected credential row 2")
 	// Both should be Work category credentials (aws-prod and aws-dev)
 	if (row1Service.Text != "aws-prod" && row1Service.Text != "aws-dev") ||
 		(row2Service.Text != "aws-prod" && row2Service.Text != "aws-dev") {
@@ -185,12 +181,8 @@ func TestCredentialTableSelection(t *testing.T) {
 
 	// Verify correct credential selected
 	selected := state.GetSelectedCredential()
-	if selected == nil {
-		t.Fatal("Expected selected credential, got nil")
-	}
-	if selected.Service != "AWS" {
-		t.Errorf("Expected selected service 'AWS', got '%s'", selected.Service)
-	}
+	require.NotNil(t, selected, "Expected selected credential")
+	require.Equal(t, "AWS", selected.Service, "Expected selected service 'AWS'")
 }
 
 // TestCredentialTableSelection_ShortCircuit verifies that reselecting the same credential doesn't trigger callback.
