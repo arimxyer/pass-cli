@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +15,9 @@ import (
 	"pass-cli/internal/keychain"
 	"pass-cli/internal/security"
 	"pass-cli/internal/storage"
+
+	"github.com/tyler-smith/go-bip39"
+	"golang.org/x/crypto/argon2"
 )
 
 // KeychainStatus represents the state of keychain integration.
@@ -410,6 +414,199 @@ func (v *VaultService) Initialize(masterPassword []byte, useKeychain bool, audit
 		// Log warning but don't fail initialization (graceful degradation)
 		fmt.Fprintf(os.Stderr, "Warning: failed to create metadata file: %v\n", err)
 	}
+
+	return nil
+}
+
+// Recovery constants for InitializeWithRecovery
+const (
+	recoveryArgon2Time    uint32 = 1     // Single pass
+	recoveryArgon2Memory  uint32 = 65536 // 64 MB
+	recoveryArgon2Threads uint8  = 4     // Parallelism
+	recoveryKeyLen        uint32 = 32    // AES-256
+	recoverySaltLen       int    = 32    // 256 bits
+)
+
+// T022: InitializeWithRecovery creates a new v2 vault with recovery phrase support
+// This method generates a DEK, wraps it with both password and recovery KEKs,
+// and stores the wrapped versions in the vault metadata.
+// Parameters:
+//   - masterPassword: master password for the vault
+//   - useKeychain: whether to store password in OS keychain
+//   - auditLogPath: path to audit log (empty to disable)
+//   - vaultID: unique vault identifier for audit
+//   - passphrase: optional recovery passphrase (25th word)
+//
+// Returns: error
+func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain bool, auditLogPath, vaultID string, passphrase []byte) error {
+	defer crypto.ClearBytes(masterPassword) // Ensure cleanup even on error
+	if passphrase != nil {
+		defer crypto.ClearBytes(passphrase)
+	}
+
+	// Validate master password against policy
+	passwordPolicy := &security.PasswordPolicy{
+		MinLength:        12,
+		RequireUppercase: true,
+		RequireLowercase: true,
+		RequireDigit:     true,
+		RequireSymbol:    true,
+	}
+	if err := passwordPolicy.Validate(masterPassword); err != nil {
+		if rateLimitErr := v.rateLimiter.CheckAndRecordFailure(); rateLimitErr != nil {
+			return rateLimitErr
+		}
+		return fmt.Errorf("password does not meet requirements: %w", err)
+	}
+	v.rateLimiter.Reset()
+
+	// Check if vault already exists
+	if _, err := os.Stat(v.vaultPath); err == nil {
+		return errors.New("vault already exists")
+	}
+
+	// 1. Generate salt for password KDF
+	salt, err := v.cryptoService.GenerateSalt()
+	if err != nil {
+		return fmt.Errorf("failed to generate salt: %w", err)
+	}
+
+	// 2. Derive password KEK
+	iterations := crypto.GetIterations()
+	passwordKEK, err := v.cryptoService.DeriveKey(masterPassword, salt, iterations)
+	if err != nil {
+		return fmt.Errorf("failed to derive password KEK: %w", err)
+	}
+	defer crypto.ClearBytes(passwordKEK)
+
+	// 3. Generate BIP39 mnemonic (256-bit entropy = 24 words)
+	entropy, err := bip39.NewEntropy(256)
+	if err != nil {
+		return fmt.Errorf("failed to generate entropy: %w", err)
+	}
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return fmt.Errorf("failed to generate mnemonic: %w", err)
+	}
+
+	// 4. Generate recovery salt
+	recoverySalt := make([]byte, recoverySaltLen)
+	if _, err := rand.Read(recoverySalt); err != nil {
+		return fmt.Errorf("failed to generate recovery salt: %w", err)
+	}
+
+	// 5. Derive recovery KEK from mnemonic using Argon2id
+	seed := bip39.NewSeed(mnemonic, string(passphrase))
+	defer crypto.ClearBytes(seed)
+	recoveryKEK := argon2.IDKey(
+		seed,
+		recoverySalt,
+		recoveryArgon2Time,
+		recoveryArgon2Memory,
+		recoveryArgon2Threads,
+		recoveryKeyLen,
+	)
+	defer crypto.ClearBytes(recoveryKEK)
+
+	// 6. Generate and wrap DEK with both KEKs
+	keyWrapResult, err := crypto.GenerateAndWrapDEK(passwordKEK, recoveryKEK)
+	if err != nil {
+		return fmt.Errorf("failed to generate and wrap DEK: %w", err)
+	}
+	defer crypto.ClearBytes(keyWrapResult.DEK)
+
+	// 7. Initialize v2 vault with DEK
+	if err := v.storageService.InitializeVaultV2(
+		keyWrapResult.DEK,
+		keyWrapResult.PasswordWrapped.Ciphertext,
+		keyWrapResult.PasswordWrapped.Nonce,
+		salt,
+		iterations,
+	); err != nil {
+		return fmt.Errorf("failed to initialize v2 vault: %w", err)
+	}
+
+	// 8. Create vault data structure
+	vaultData := &VaultData{
+		Credentials: make(map[string]Credential),
+		Version:     1, // Vault data version (not vault format version)
+	}
+
+	// Set audit configuration if provided
+	if auditLogPath != "" && vaultID != "" {
+		vaultData.AuditEnabled = true
+		vaultData.AuditLogPath = auditLogPath
+		vaultData.VaultID = vaultID
+
+		logger, err := security.NewAuditLogger(auditLogPath, vaultID)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to create audit logger: %v\n", err)
+		} else {
+			v.auditLogger = logger
+			v.auditEnabled = true
+		}
+	}
+
+	// 9. Marshal and save vault data
+	data, err := json.Marshal(vaultData)
+	if err != nil {
+		return fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	// Save vault data encrypted with DEK
+	if err := v.storageService.SaveVaultWithDEK(data, keyWrapResult.DEK, v.createAuditCallback()); err != nil {
+		return fmt.Errorf("failed to save initial vault: %w", err)
+	}
+
+	// 10. Store password in keychain if requested
+	if useKeychain && v.keychainService.IsAvailable() {
+		if err := v.keychainService.Store(string(masterPassword)); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to store password in keychain: %v\n", err)
+		}
+	}
+
+	// 11. Log vault creation
+	v.LogAudit(security.EventVaultUnlock, security.OutcomeSuccess, "")
+
+	// 12. Create recovery metadata
+	recoveryMetadata := &RecoveryMetadata{
+		Enabled:            true,
+		Version:            "2",
+		PassphraseRequired: len(passphrase) > 0,
+		KDFParams: KDFParams{
+			Algorithm:    "argon2id",
+			Time:         recoveryArgon2Time,
+			Memory:       recoveryArgon2Memory,
+			Threads:      recoveryArgon2Threads,
+			SaltRecovery: recoverySalt,
+		},
+		EncryptedRecoveryKey: keyWrapResult.RecoveryWrapped.Ciphertext,
+		NonceRecovery:        keyWrapResult.RecoveryWrapped.Nonce,
+	}
+
+	// 13. Create metadata file
+	metadata := &Metadata{
+		Version:         "1.0",
+		AuditEnabled:    vaultData.AuditEnabled,
+		KeychainEnabled: useKeychain && v.keychainService.IsAvailable(),
+		CreatedAt:       time.Now(),
+		LastModified:    time.Now(),
+		Recovery:        recoveryMetadata,
+	}
+	if err := SaveMetadata(v.vaultPath, metadata); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to create metadata file: %v\n", err)
+	}
+
+	// 14. Display mnemonic to user
+	fmt.Println("\n=== RECOVERY PHRASE ===")
+	fmt.Println("Write down these 24 words in order. They are the ONLY way to recover your vault.")
+	fmt.Println()
+	words := strings.Fields(mnemonic)
+	for i, word := range words {
+		fmt.Printf("%2d. %s\n", i+1, word)
+	}
+	fmt.Println("\n========================")
+	fmt.Println("WARNING: Store this phrase in a safe place. Anyone with these words can access your vault.")
 
 	return nil
 }
