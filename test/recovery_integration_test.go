@@ -19,7 +19,7 @@ func TestFullRecoveryFlowSucceeds(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	originalPassword := "Original123!@#"
@@ -143,7 +143,7 @@ func TestRecoveryWithWrongWordsFails(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 
@@ -196,7 +196,7 @@ func TestRecoveryWithWrongPassphraseFails(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	correctPassphrase := []byte("MySecretPassphrase")
@@ -239,7 +239,7 @@ func TestPasswordChangeAfterRecoveryWorks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	originalPassword := "Original123!@#"
@@ -321,7 +321,7 @@ func TestRecoveryErrorDoesNotLeakKeyMaterial(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 
@@ -384,7 +384,7 @@ func TestRecoveryWrappedDEKPreservedAfterPasswordChange(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 
