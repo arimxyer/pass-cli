@@ -33,7 +33,7 @@ pass-cli/
 
 **Purpose**: No new project setup needed - extending existing codebase
 
-- [ ] T001 Verify existing tests pass with `go test ./...` and record baseline timing for T064 comparison
+- [x] T001 Verify existing tests pass with `go test ./...` and record baseline timing for T064 comparison (48.042s)
 - [ ] T002 Create feature branch checkpoint commit for rollback safety
 
 ---
