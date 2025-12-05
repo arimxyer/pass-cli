@@ -194,11 +194,16 @@ func TestCLI_VaultMigrateUpgradesV1ToV2(t *testing.T) {
 	}
 
 	// Verify it's v1
-	vaultDataBefore, _ := os.ReadFile(vaultPath)
+	vaultDataBefore, err := os.ReadFile(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to read vault file: %v", err)
+	}
 	var vaultBefore struct {
 		Metadata storage.VaultMetadata `json:"metadata"`
 	}
-	json.Unmarshal(vaultDataBefore, &vaultBefore)
+	if err := json.Unmarshal(vaultDataBefore, &vaultBefore); err != nil {
+		t.Fatalf("Failed to unmarshal vault: %v", err)
+	}
 	if vaultBefore.Metadata.Version != 1 {
 		t.Fatalf("Expected v1 vault before migration, got v%d", vaultBefore.Metadata.Version)
 	}
