@@ -129,9 +129,20 @@ func TestClear(t *testing.T) {
 		t.Skip("Keychain not available in test environment")
 	}
 
+	// Clean up before test - ensure we start with a clean slate
+	_ = ks.Delete()
+
+	// Verify deletion worked - should get ErrPasswordNotFound
+	_, err := ks.Retrieve()
+	if err == nil {
+		t.Log("Warning: keychain entry still exists after delete - may be stale from previous test run")
+		// Try delete again
+		_ = ks.Delete()
+	}
+
 	// Store a password
 	testPassword := "test-password-to-clear"
-	err := ks.Store(testPassword)
+	err = ks.Store(testPassword)
 	if err != nil {
 		t.Fatalf("Store() failed: %v", err)
 	}
