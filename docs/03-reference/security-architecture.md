@@ -14,7 +14,7 @@ Pass-CLI is designed with security as the primary concern. All credentials are e
 ### Key Security Features
 
 - **AES-256-GCM Encryption**: Military-grade authenticated encryption
-- **PBKDF2 Key Derivation**: 600,000 iterations with SHA-256 (hardened, January 2025)
+- **PBKDF2 Key Derivation**: 600,000 iterations with SHA-256 (hardened)
 - **BIP39 Recovery Phrase**: 24-word mnemonic for vault password recovery (industry-standard)
 - **System Keychain Integration**: Secure master password storage
 - **Offline-First Design**: No network calls, no cloud dependencies
@@ -49,7 +49,7 @@ Pass-CLI is designed with security as the primary concern. All credentials are e
 
 - **Algorithm**: Password-Based Key Derivation Function 2
 - **Hash Function**: SHA-256
-- **Iterations**: 600,000 (increased from 100,000 in January 2025)
+- **Iterations**: 600,000 (hardened from 100,000)
 - **Salt Length**: 32 bytes (256 bits)
 - **Output Length**: 32 bytes (256 bits)
 - **Implementation**: `golang.org/x/crypto/pbkdf2`
@@ -188,7 +188,7 @@ Pass-CLI integrates with your operating system's secure credential storage to sa
 
 ### Master Password Requirements
 
-**Since January 2025** - Password policy enforced for both vault and credential passwords:
+Password policy enforced for both vault and credential passwords:
 
 - **Minimum Length**: 12 characters (enforced)
 - **Uppercase Letter**: At least one required
@@ -354,7 +354,7 @@ chmod 600 ~/backups/vault-*.enc
 
 ### Audit Logging (Optional)
 
-**Since January 2025** - Tamper-evident audit trail for vault operations:
+Tamper-evident audit trail for vault operations:
 
 - **Opt-In**: Disabled by default, enable with `--enable-audit` flag
 - **HMAC Signatures**: HMAC-SHA256 signatures for tamper detection

@@ -3,14 +3,14 @@ title: "Migration"
 weight: 5
 toc: true
 ---
-Guide for upgrading Pass-CLI vaults and adapting to security hardening changes (January 2025 release).
+Guide for upgrading Pass-CLI vaults and adapting to security hardening changes introduced in v0.3.0.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
 
 
 ## Overview
 
-The January 2025 security hardening release introduces several important changes:
+The v0.3.0 security hardening release introduces several important changes:
 
 1. **Vault Location Configuration**: `--vault` flag removed, use config file instead
 2. **Increased PBKDF2 Iterations**: 100,000 → 600,000 (6x stronger)
@@ -271,7 +271,7 @@ pass-cli get github
 
 ### Cross-Version Compatibility Matrix
 
-| Vault Type | Pass-CLI (Old) | Pass-CLI (Jan 2025) |
+| Vault Type | Pass-CLI < v0.3.0 | Pass-CLI v0.3.0+ |
 |------------|----------------|---------------------|
 | 100k iterations | [OK] Read/Write | [OK] Read/Write |
 | 600k iterations | [ERROR] Incompatible | [OK] Read/Write |

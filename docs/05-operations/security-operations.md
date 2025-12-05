@@ -273,7 +273,7 @@ pass-cli version
 
 ### PBKDF2 Parameters
 
-- **Iteration Count**: 600,000 (increased January 2025)
+- **Iteration Count**: 600,000 (hardened)
   - Provides ~50-100ms delay on modern CPUs (2023+)
   - Older hardware: 500-1000ms (acceptable per NIST recommendations)
   - Significantly increases brute-force cost

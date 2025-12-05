@@ -71,7 +71,7 @@ pass-cli init
 | `--use-keychain` | bool | Store master password in OS keychain |
 | `--no-recovery` | bool | Skip BIP39 recovery phrase generation |
 
-#### Password Policy (January 2025)
+#### Password Policy
 
 All master passwords must meet complexity requirements:
 - **Minimum Length**: 12 characters
