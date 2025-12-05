@@ -162,6 +162,40 @@ vault.enc (JSON):
    - Unit: Wrap/unwrap round-trip, invalid KEK rejection, nonce uniqueness
    - Integration: Full init→recover→change-password cycle
 
+## Threat Analysis
+
+### Critical Assets
+
+| Asset | Classification | Protection |
+|-------|----------------|------------|
+| DEK (unwrapped) | Most Critical | Memory-only, cleared immediately after use |
+| Password KEK | Critical | Derived on-demand, never stored, cleared after use |
+| Recovery KEK | Critical | Derived on-demand, never stored, cleared after use |
+| Wrapped DEK (password) | High | Stored in vault.enc, encrypted with AES-GCM |
+| Wrapped DEK (recovery) | High | Stored in .meta.json, encrypted with AES-GCM |
+| Vault data | High | Encrypted with DEK using AES-GCM |
+
+### Threat Vectors
+
+| Threat | Impact | Mitigation |
+|--------|--------|------------|
+| Memory dump during unlock | DEK exposure | Clear DEK with crypto.ClearBytes() immediately after use |
+| Offline brute-force (password) | Vault compromise | PBKDF2 with 600k iterations, rate limits DEK unwrapping |
+| Offline brute-force (recovery) | Vault compromise | Argon2id with 64MB memory, 24-word mnemonic = 256-bit entropy |
+| Nonce reuse in key wrapping | Key recovery possible | Fresh nonce per WrapKey() call via crypto/rand |
+| Timing oracle on unwrap | KEK recovery | AES-GCM constant-time auth tag verification |
+| Corrupted wrapper injection | Denial of service | GCM auth tag validates wrapper integrity |
+| Version downgrade attack | Recovery disabled | Version in signed vault metadata, not user-controllable |
+
+### Residual Risks
+
+| Risk | Likelihood | Impact | Acceptance |
+|------|------------|--------|------------|
+| Cold boot attack on DEK | Very Low | Critical | Acceptable - requires physical access + timing |
+| Weak user password | Medium | High | Mitigated by password strength guidance, not enforced |
+| Lost recovery phrase | Low | High | User responsibility - documented in user guide |
+| Swap file DEK leakage | Low | High | OS-level mitigation recommended (encrypted swap) |
+
 ## References
 
 - NIST SP 800-38F: Recommendation for Block Cipher Modes of Operation: Methods for Key Wrapping

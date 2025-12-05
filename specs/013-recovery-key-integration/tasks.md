@@ -33,7 +33,7 @@ pass-cli/
 
 **Purpose**: No new project setup needed - extending existing codebase
 
-- [ ] T001 Verify existing tests pass with `go test ./...` before making changes
+- [ ] T001 Verify existing tests pass with `go test ./...` and record baseline timing for T064 comparison
 - [ ] T002 Create feature branch checkpoint commit for rollback safety
 
 ---
@@ -53,6 +53,8 @@ pass-cli/
 - [ ] T005 [P] Unit test for UnwrapKey() with wrong KEK in test/unit/keywrap_test.go
 - [ ] T006 [P] Unit test for nonce uniqueness in test/unit/keywrap_test.go
 - [ ] T007 [P] Unit test for GenerateAndWrapDEK() in test/unit/keywrap_test.go
+- [ ] T007.1 [P] Contract test: verify WrapKey preconditions (32-byte dek/kek) in test/unit/keywrap_test.go
+- [ ] T007.2 [P] Contract test: verify UnwrapKey postconditions (32-byte output) in test/unit/keywrap_test.go
 
 ### Implementation for Foundational Layer
 
@@ -106,6 +108,7 @@ pass-cli/
 - [ ] T026 [P] [US4] Integration test: unlock v2 vault with correct password in test/vault_unlock_test.go
 - [ ] T027 [P] [US4] Integration test: unlock v2 vault with wrong password fails in test/vault_unlock_test.go
 - [ ] T028 [P] [US4] Integration test: unlock v1 vault still works (backward compat) in test/vault_unlock_test.go
+- [ ] T028.1 [P] [US4] Integration test: unlock with corrupted/missing WrappedDEK metadata fails gracefully in test/vault_unlock_test.go
 
 ### Implementation for User Story 4
 
@@ -132,6 +135,7 @@ pass-cli/
 - [ ] T036 [P] [US1] Integration test: recovery with wrong words fails in test/recovery_integration_test.go
 - [ ] T037 [P] [US1] Integration test: recovery with wrong passphrase fails in test/recovery_integration_test.go
 - [ ] T038 [P] [US1] Integration test: password change after recovery works in test/recovery_integration_test.go
+- [ ] T038.1 [P] [US1] Integration test: verify error message does not leak key material (FR-024) in test/recovery_integration_test.go
 
 ### Implementation for User Story 1
 
@@ -182,10 +186,12 @@ pass-cli/
 
 - [ ] T059 Run full test suite: `go test ./...`
 - [ ] T060 Run linter: `golangci-lint run`
+- [ ] T060.1 Run coverage report: `go test -coverprofile=coverage.out ./internal/crypto/...` verify keywrap.go >80% coverage
 - [ ] T061 Run security scan: `gosec ./...`
 - [ ] T062 [P] Update quickstart.md with final testing instructions
 - [ ] T063 Verify memory clearing for all DEK/KEK variables with code review
-- [ ] T064 Test performance: verify unlock within 10% of previous timing
+- [ ] T064 Test performance: verify unlock within 10% of previous timing (compare to T001 baseline)
+- [ ] T064.1 Test recovery timing: verify recovery completes within 5 seconds (SC-002)
 - [ ] T065 Manual end-to-end test: init → add credentials → recover → verify data intact
 
 ---
