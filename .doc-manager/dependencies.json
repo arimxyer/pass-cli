@@ -1,10 +1,10 @@
 {
   "_meta": {
     "generated_by": "doc-manager-mcp",
-    "tool_version": "1.2.2",
+    "tool_version": "1.2.3",
     "warning": "AUTO-GENERATED FILE - Do not edit manually. Changes will be overwritten by doc-manager."
   },
-  "generated_at": "2025-12-04T22:36:51.415742",
+  "generated_at": "2025-12-04T23:31:38.303997",
   "doc_to_code": {
     "01-getting-started/manual-install.md": [
       "cmd/init.go",
@@ -189,7 +189,6 @@
       "cmd/init.go",
       "cmd/root.go"
     ],
-    "06-development/documentation-lifecycle.md": [],
     "06-development/homebrew.md": [
       "cmd/version.go"
     ],
@@ -755,9 +754,6 @@
     "pass-cli generate [flags]": [
       "03-reference/command-reference.md"
     ],
-    "pass-cli version [flags]": [
-      "03-reference/command-reference.md"
-    ],
     "pass-cli usage <service> [flags]": [
       "03-reference/command-reference.md"
     ],
@@ -787,9 +783,6 @@
     "pass-cli config validate": [
       "03-reference/command-reference.md",
       "03-reference/configuration.md"
-    ],
-    "pass-cli config reset [flags]": [
-      "03-reference/command-reference.md"
     ],
     "pass-cli config reset": [
       "03-reference/command-reference.md",
@@ -956,9 +949,6 @@
     ],
     "cobra": [
       "06-development/contributing.md"
-    ],
-    "docs": [
-      "06-development/documentation-lifecycle.md"
     ],
     "pass-cli --help": [
       "06-development/scoop.md"
@@ -1137,14 +1127,6 @@
       {
         "reference": "packages",
         "doc_file": "06-development/ci-cd.md"
-      },
-      {
-        "reference": "docs",
-        "doc_file": "06-development/documentation-lifecycle.md"
-      },
-      {
-        "reference": "docs",
-        "doc_file": "06-development/documentation-lifecycle.md"
       },
       {
         "reference": "checksums.txt",
@@ -1761,6 +1743,10 @@
         "doc_file": "03-reference/command-reference.md"
       },
       {
+        "reference": "category",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
         "reference": "url",
         "doc_file": "03-reference/command-reference.md"
       },
@@ -1782,6 +1768,14 @@
       },
       {
         "reference": "accessed",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "rm",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "remove",
         "doc_file": "03-reference/command-reference.md"
       },
       {
@@ -2013,6 +2007,26 @@
         "doc_file": "03-reference/command-reference.md"
       },
       {
+        "reference": "pass-cli list",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli list",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli list",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli list",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli list",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
         "reference": "pass-cli update <service> [flags]",
         "doc_file": "03-reference/command-reference.md"
       },
@@ -2113,10 +2127,6 @@
         "doc_file": "03-reference/command-reference.md"
       },
       {
-        "reference": "pass-cli version [flags]",
-        "doc_file": "03-reference/command-reference.md"
-      },
-      {
         "reference": "pass-cli version",
         "doc_file": "03-reference/command-reference.md"
       },
@@ -2174,10 +2184,6 @@
       },
       {
         "reference": "pass-cli config validate",
-        "doc_file": "03-reference/command-reference.md"
-      },
-      {
-        "reference": "pass-cli config reset [flags]",
         "doc_file": "03-reference/command-reference.md"
       },
       {
@@ -2294,6 +2300,10 @@
       },
       {
         "reference": "pass-cli doctor [flags]",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli doctor",
         "doc_file": "03-reference/command-reference.md"
       },
       {
@@ -2813,10 +2823,6 @@
         "doc_file": "06-development/contributing.md"
       },
       {
-        "reference": "git log --follow",
-        "doc_file": "06-development/documentation-lifecycle.md"
-      },
-      {
         "reference": "latest",
         "doc_file": "06-development/homebrew.md"
       },
@@ -3108,7 +3114,7 @@
       },
       {
         "reference": "complete",
-        "doc_file": "README.md"
+        "doc_file": "_index.md"
       },
       {
         "reference": "cross-platform",
@@ -3282,7 +3288,6 @@
       "06-development/branch-workflow.md",
       "06-development/ci-cd.md",
       "06-development/contributing.md",
-      "06-development/documentation-lifecycle.md",
       "06-development/homebrew.md",
       "06-development/release.md",
       "06-development/scoop.md",
@@ -3302,12 +3307,10 @@
       "06-development/branch-workflow.md",
       "06-development/ci-cd.md",
       "06-development/contributing.md",
-      "06-development/documentation-lifecycle.md",
       "06-development/homebrew.md",
       "06-development/release.md",
       "06-development/scoop.md",
-      "_index.md",
-      "README.md"
+      "_index.md"
     ],
     "https://img.shields.io/github/last-commit/ari1110/pass-cli?label=Last%20Updated": [
       "README.md"
