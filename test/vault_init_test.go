@@ -18,7 +18,7 @@ func TestInitWithRecoveryCreatesV2Vault(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 
@@ -81,7 +81,7 @@ func TestInitWithNoRecoveryCreatesV1Vault(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 

@@ -3,6 +3,8 @@ package config
 import (
 	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 // Placeholder for config package unit tests
@@ -10,14 +12,10 @@ import (
 
 func TestGetDefaults(t *testing.T) {
 	cfg := GetDefaults()
-	if cfg == nil {
-		t.Fatal("GetDefaults() returned nil")
-	}
+	require.NotNil(t, cfg, "GetDefaults() returned nil")
 
 	// Verify terminal defaults
-	if cfg.Terminal.WarningEnabled != true {
-		t.Errorf("expected WarningEnabled=true, got %v", cfg.Terminal.WarningEnabled)
-	}
+	require.True(t, cfg.Terminal.WarningEnabled, "expected WarningEnabled=true")
 	if cfg.Terminal.MinWidth != 60 {
 		t.Errorf("expected MinWidth=60, got %d", cfg.Terminal.MinWidth)
 	}

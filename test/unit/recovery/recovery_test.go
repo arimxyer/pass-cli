@@ -4,10 +4,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+	"github.com/tyler-smith/go-bip39"
+
 	"pass-cli/internal/recovery"
 	"pass-cli/internal/vault"
-
-	"github.com/tyler-smith/go-bip39"
 )
 
 // T015: Unit test for VerifyBackup()
@@ -153,19 +154,13 @@ func TestSetupRecovery(t *testing.T) {
 		}
 
 		metadata := result.Metadata
-		if metadata == nil {
-			t.Fatal("Metadata is nil")
-		}
+		require.NotNil(t, metadata, "Metadata is nil")
 
 		// Verify enabled flag
-		if !metadata.Enabled {
-			t.Error("Metadata.Enabled should be true")
-		}
+		require.True(t, metadata.Enabled, "Metadata.Enabled should be true")
 
 		// Verify challenge positions (should be 6)
-		if len(metadata.ChallengePositions) != 6 {
-			t.Errorf("Expected 6 challenge positions, got %d", len(metadata.ChallengePositions))
-		}
+		require.Len(t, metadata.ChallengePositions, 6, "Expected 6 challenge positions")
 
 		// Verify positions are unique and within range
 		seen := make(map[int]bool)

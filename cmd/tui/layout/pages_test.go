@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/rivo/tview"
+	"github.com/stretchr/testify/require"
 )
 
 // TestNewPageManager verifies PageManager initialization
@@ -11,17 +12,9 @@ func TestNewPageManager(t *testing.T) {
 	app := tview.NewApplication()
 	pm := NewPageManager(app)
 
-	if pm == nil {
-		t.Fatal("NewPageManager returned nil")
-	}
-
-	if pm.Pages == nil {
-		t.Error("Pages not initialized")
-	}
-
-	if pm.app != app {
-		t.Error("Application reference not set")
-	}
+	require.NotNil(t, pm, "NewPageManager returned nil")
+	require.NotNil(t, pm.Pages, "Pages not initialized")
+	require.Equal(t, app, pm.app, "Application reference not set")
 
 	if pm.modalStack == nil {
 		t.Error("Modal stack not initialized")

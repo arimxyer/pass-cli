@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"pass-cli/cmd/tui/models"
 	"pass-cli/internal/vault"
 )
@@ -101,19 +103,9 @@ func TestNewSidebar(t *testing.T) {
 
 	sidebar := NewSidebar(state)
 
-	if sidebar == nil {
-		t.Fatal("NewSidebar returned nil")
-	}
-
-	// Verify root node exists
-	if sidebar.rootNode == nil {
-		t.Error("Root node is nil")
-	}
-
-	// Verify root node text
-	if sidebar.rootNode.GetText() != "All Credentials" {
-		t.Errorf("Expected root text 'All Credentials', got '%s'", sidebar.rootNode.GetText())
-	}
+	require.NotNil(t, sidebar, "NewSidebar returned nil")
+	require.NotNil(t, sidebar.rootNode, "Root node is nil")
+	require.Equal(t, "All Credentials", sidebar.rootNode.GetText(), "Expected root text 'All Credentials'")
 
 	// Verify root is expanded
 	if !sidebar.rootNode.IsExpanded() {
@@ -320,12 +312,8 @@ func TestSidebarSelection_CredentialNode(t *testing.T) {
 
 	// Verify selected credential updated in state
 	selectedCred := state.GetSelectedCredential()
-	if selectedCred == nil {
-		t.Fatal("Expected selected credential, got nil")
-	}
-	if selectedCred.Service != "AWS" {
-		t.Errorf("Expected selected credential service 'AWS', got '%s'", selectedCred.Service)
-	}
+	require.NotNil(t, selectedCred, "Expected selected credential")
+	require.Equal(t, "AWS", selectedCred.Service, "Expected selected credential service 'AWS'")
 }
 
 // TestSidebarSelection_UpdatesAppState verifies AppState is updated on selection.

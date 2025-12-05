@@ -18,7 +18,7 @@ func TestUnlockV2VaultWithCorrectPassword(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	passwordStr := "Test123!@#Password"
@@ -79,7 +79,7 @@ func TestUnlockV2VaultWithWrongPassword(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 
@@ -121,7 +121,7 @@ func TestUnlockV1VaultBackwardCompatibility(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	passwordStr := "Test123!@#Password"
@@ -181,7 +181,7 @@ func TestUnlockV2VaultCorruptedMetadataFailsGracefully(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	passwordStr := "Test123!@#Password"
@@ -274,7 +274,7 @@ func TestV1AndV2VaultsCanManageCredentials(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to create temp dir: %v", err)
 			}
-			defer os.RemoveAll(tempDir)
+			defer func() { _ = os.RemoveAll(tempDir) }()
 
 			vaultPath := filepath.Join(tempDir, "vault.enc")
 
