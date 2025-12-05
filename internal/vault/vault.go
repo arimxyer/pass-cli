@@ -1279,6 +1279,7 @@ func (v *VaultService) GetUsageStats(service string) (map[string]UsageRecord, er
 // ChangePassword changes the vault master password
 // T012: Updated signature to accept []byte, T016: Added deferred cleanup
 // T046: Added password policy validation (FR-016)
+// T041: Updated to handle v2 vaults with DEK re-wrapping
 func (v *VaultService) ChangePassword(newPassword []byte) error {
 	defer crypto.ClearBytes(newPassword) // T016: Ensure cleanup even on error
 
@@ -1305,43 +1306,53 @@ func (v *VaultService) ChangePassword(newPassword []byte) error {
 	// T051a: Reset rate limiter on successful validation
 	v.rateLimiter.Reset()
 
-	// T033/T034: Check if iteration count needs upgrading
-	// Use configurable iterations from env var if set (T034)
-	targetIterations := crypto.GetIterations()
-	currentIterations := v.storageService.GetIterations()
-
-	needsMigration := currentIterations < targetIterations
-	if needsMigration {
-		// Migration opportunity: upgrade to stronger KDF
-		fmt.Fprintf(os.Stderr, "Upgrading PBKDF2 iterations from %d to %d for improved security...\n",
-			currentIterations, targetIterations)
-	}
-
-	// Clear old password
-	crypto.ClearBytes(v.masterPassword)
-
-	// Update master password (make a copy since we're clearing the parameter)
-	v.masterPassword = make([]byte, len(newPassword))
-	copy(v.masterPassword, newPassword)
-
 	// Marshal vault data
 	data, err := json.Marshal(v.vaultData)
 	if err != nil {
 		return fmt.Errorf("failed to marshal vault data: %w", err)
 	}
 
-	// Re-save vault with new password and potentially upgraded iterations
+	// Check vault version to determine how to handle password change
+	vaultVersion := v.storageService.GetVersion()
 	newPasswordStr := string(newPassword)
-	if needsMigration {
-		if err := v.storageService.SaveVaultWithIterations(data, newPasswordStr, targetIterations); err != nil {
+
+	if vaultVersion == 2 {
+		// T041: V2 vault - use ChangePasswordV2 to re-wrap DEK
+		// V2 vaults require the old password to unwrap the DEK
+		if v.masterPassword == nil {
+			return errors.New("cannot change password: vault was unlocked via recovery, set a new password first")
+		}
+		oldPasswordStr := string(v.masterPassword)
+
+		if err := v.storageService.ChangePasswordV2(data, oldPasswordStr, newPasswordStr, v.createAuditCallback()); err != nil {
 			return fmt.Errorf("failed to save vault with new password: %w", err)
 		}
 	} else {
-		// T034: Pass audit callback for atomic save logging
-		if err := v.storageService.SaveVault(data, newPasswordStr, v.createAuditCallback()); err != nil {
-			return fmt.Errorf("failed to save vault with new password: %w", err)
+		// V1 vault - traditional password change
+		// T033/T034: Check if iteration count needs upgrading
+		targetIterations := crypto.GetIterations()
+		currentIterations := v.storageService.GetIterations()
+
+		needsMigration := currentIterations < targetIterations
+		if needsMigration {
+			// Migration opportunity: upgrade to stronger KDF
+			fmt.Fprintf(os.Stderr, "Upgrading PBKDF2 iterations from %d to %d for improved security...\n",
+				currentIterations, targetIterations)
+			if err := v.storageService.SaveVaultWithIterations(data, newPasswordStr, targetIterations); err != nil {
+				return fmt.Errorf("failed to save vault with new password: %w", err)
+			}
+		} else {
+			// T034: Pass audit callback for atomic save logging
+			if err := v.storageService.SaveVault(data, newPasswordStr, v.createAuditCallback()); err != nil {
+				return fmt.Errorf("failed to save vault with new password: %w", err)
+			}
 		}
 	}
+
+	// Clear old password and update master password
+	crypto.ClearBytes(v.masterPassword)
+	v.masterPassword = make([]byte, len(newPassword))
+	copy(v.masterPassword, newPassword)
 
 	// Update keychain if available
 	if v.keychainService.IsAvailable() {
@@ -1547,4 +1558,101 @@ func (v *VaultService) DeleteMetadata() error {
 // PingKeychain checks if the keychain is available and responsive.
 func (v *VaultService) PingKeychain() error {
 	return v.keychainService.Ping()
+}
+
+// RecoverWithMnemonic recovers vault access using a BIP39 mnemonic phrase.
+// This is for v2 vaults that use the DEK architecture.
+// Parameters:
+//   - mnemonic: full 24-word BIP39 recovery phrase
+//   - passphrase: optional passphrase (25th word), can be nil
+//
+// Returns: error
+func (v *VaultService) RecoverWithMnemonic(mnemonic string, passphrase []byte) error {
+	if passphrase != nil {
+		defer crypto.ClearBytes(passphrase)
+	}
+
+	if v.unlocked {
+		return nil // Already unlocked
+	}
+
+	// 1. Validate mnemonic
+	if !bip39.IsMnemonicValid(mnemonic) {
+		return errors.New("invalid recovery phrase")
+	}
+
+	// 2. Load recovery metadata from vault
+	meta, err := LoadMetadata(v.vaultPath)
+	if err != nil {
+		return fmt.Errorf("failed to load vault metadata: %w", err)
+	}
+
+	if meta.Recovery == nil || !meta.Recovery.Enabled {
+		return errors.New("recovery not enabled for this vault")
+	}
+
+	// 3. Check vault version - must be v2
+	if meta.Recovery.Version != "2" {
+		return errors.New("recovery with mnemonic only supported for v2 vaults")
+	}
+
+	// 4. Verify passphrase requirement
+	if meta.Recovery.PassphraseRequired && len(passphrase) == 0 {
+		return errors.New("passphrase required for recovery")
+	}
+
+	// 5. Derive recovery KEK from mnemonic
+	seed := bip39.NewSeed(mnemonic, string(passphrase))
+	defer crypto.ClearBytes(seed)
+
+	recoveryKEK := argon2.IDKey(
+		seed,
+		meta.Recovery.KDFParams.SaltRecovery,
+		meta.Recovery.KDFParams.Time,
+		meta.Recovery.KDFParams.Memory,
+		meta.Recovery.KDFParams.Threads,
+		recoveryKeyLen,
+	)
+	defer crypto.ClearBytes(recoveryKEK)
+
+	// 6. Unwrap DEK using recovery KEK
+	wrappedKey := crypto.WrappedKey{
+		Ciphertext: meta.Recovery.EncryptedRecoveryKey,
+		Nonce:      meta.Recovery.NonceRecovery,
+	}
+
+	dek, err := crypto.UnwrapKey(wrappedKey, recoveryKEK)
+	if err != nil {
+		return errors.New("recovery failed: invalid phrase or passphrase")
+	}
+	defer crypto.ClearBytes(dek)
+
+	// 7. Load vault data using the DEK
+	data, err := v.storageService.LoadVaultWithKey(dek)
+	if err != nil {
+		return fmt.Errorf("failed to decrypt vault: %w", err)
+	}
+
+	// 8. Unmarshal vault data
+	var vaultData VaultData
+	if err := json.Unmarshal(data, &vaultData); err != nil {
+		return fmt.Errorf("failed to parse vault data: %w", err)
+	}
+
+	// 9. Store in memory (no master password for recovery unlock)
+	v.unlocked = true
+	v.masterPassword = nil // Recovery unlock doesn't have a password yet
+	v.vaultData = &vaultData
+
+	// 10. Restore audit logging if enabled
+	if vaultData.AuditEnabled && vaultData.AuditLogPath != "" && vaultData.VaultID != "" {
+		if err := v.EnableAudit(vaultData.AuditLogPath, vaultData.VaultID); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to restore audit logging: %v\n", err)
+		}
+	}
+
+	// 11. Log recovery success
+	v.LogAudit(security.EventVaultUnlock, security.OutcomeSuccess, "recovery")
+
+	return nil
 }

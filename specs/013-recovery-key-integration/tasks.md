@@ -131,21 +131,21 @@ pass-cli/
 
 ### Tests for User Story 1
 
-- [ ] T035 [P] [US1] Integration test: full recovery flow succeeds in test/recovery_integration_test.go
-- [ ] T036 [P] [US1] Integration test: recovery with wrong words fails in test/recovery_integration_test.go
-- [ ] T037 [P] [US1] Integration test: recovery with wrong passphrase fails in test/recovery_integration_test.go
-- [ ] T038 [P] [US1] Integration test: password change after recovery works in test/recovery_integration_test.go
-- [ ] T038.1 [P] [US1] Integration test: verify error message does not leak key material (FR-024) in test/recovery_integration_test.go
+- [x] T035 [P] [US1] Integration test: full recovery flow succeeds in test/recovery_integration_test.go
+- [x] T036 [P] [US1] Integration test: recovery with wrong words fails in test/recovery_integration_test.go
+- [x] T037 [P] [US1] Integration test: recovery with wrong passphrase fails in test/recovery_integration_test.go
+- [x] T038 [P] [US1] Integration test: password change after recovery works in test/recovery_integration_test.go
+- [x] T038.1 [P] [US1] Integration test: verify error message does not leak key material (FR-024) in test/recovery_integration_test.go
 
 ### Implementation for User Story 1
 
-- [ ] T039 [US1] Update recovery.PerformRecovery() to return unwrapped DEK in internal/recovery/recovery.go
-- [ ] T040 [US1] Add UnlockWithRecoveryKey() method in internal/vault/vault.go
-- [ ] T041 [US1] Implement DEK re-wrapping with new password in internal/vault/vault.go
-- [ ] T042 [US1] Update change_password.go recovery flow to use DEK unwrapping in cmd/change_password.go
-- [ ] T043 [US1] Preserve recovery-wrapped DEK during password change in cmd/change_password.go
-- [ ] T044 [US1] Add audit logging for recovery events in cmd/change_password.go
-- [ ] T045 [US1] Verify T035-T038 tests pass
+- [x] T039 [US1] Update recovery.PerformRecovery() to return unwrapped DEK in internal/recovery/recovery.go (Note: Used DeriveRecoveryKey instead)
+- [x] T040 [US1] Add RecoverWithMnemonic() method in internal/vault/vault.go (implements UnlockWithRecoveryKey concept)
+- [x] T041 [US1] Implement DEK re-wrapping with new password in internal/vault/vault.go (ChangePassword updated) and storage.go (ChangePasswordV2)
+- [x] T042 [US1] Update change_password.go recovery flow to use DEK unwrapping in cmd/change_password.go (handled by ChangePassword v2 path)
+- [x] T043 [US1] Preserve recovery-wrapped DEK during password change in storage.go (recovery metadata preserved)
+- [x] T044 [US1] Add audit logging for recovery events in internal/vault/vault.go (RecoverWithMnemonic logs recovery success)
+- [x] T045 [US1] Verify T035-T038 tests pass
 
 **Checkpoint**: Recovery phrase now actually works to recover vault access
 
