@@ -14,7 +14,7 @@ Pass-CLI is designed with security as the primary concern. All credentials are e
 ### Key Security Features
 
 - **AES-256-GCM Encryption**: Military-grade authenticated encryption
-- **PBKDF2 Key Derivation**: 600,000 iterations with SHA-256 (hardened, January 2025)
+- **PBKDF2 Key Derivation**: 600,000 iterations with SHA-256 (hardened)
 - **BIP39 Recovery Phrase**: 24-word mnemonic for vault password recovery (industry-standard)
 - **System Keychain Integration**: Secure master password storage
 - **Offline-First Design**: No network calls, no cloud dependencies
@@ -49,7 +49,7 @@ Pass-CLI is designed with security as the primary concern. All credentials are e
 
 - **Algorithm**: Password-Based Key Derivation Function 2
 - **Hash Function**: SHA-256
-- **Iterations**: 600,000 (increased from 100,000 in January 2025)
+- **Iterations**: 600,000 (hardened from 100,000)
 - **Salt Length**: 32 bytes (256 bits)
 - **Output Length**: 32 bytes (256 bits)
 - **Implementation**: `golang.org/x/crypto/pbkdf2`
@@ -57,7 +57,7 @@ Pass-CLI is designed with security as the primary concern. All credentials are e
 
 #### Key Derivation Process
 
-```
+```text
 Master Key = PBKDF2(
     password = user's master password,
     salt = unique 32-byte random salt,
@@ -74,7 +74,7 @@ Master Key = PBKDF2(
 3. **Standard**: NIST recommended for password-based cryptography
 4. **Deterministic**: Same password + salt = same key
 
-#### Migration from 100k to 600k Iterations
+#### Migration From 100k to 600k Iterations
 
 - **Backward Compatibility**: Vaults with 100k iterations continue to work
 - **Automatic Detection**: Iteration count stored in vault metadata
@@ -86,22 +86,22 @@ Master Key = PBKDF2(
 #### Encrypting Credentials
 
 1. **Generate Salt** (first time only)
-   ```
+   ```text
    salt = crypto/rand.Read(32 bytes)
    ```
 
 2. **Derive Encryption Key**
-   ```
+   ```text
    key = PBKDF2(master_password, salt, 600000, SHA256, 32)
    ```
 
 3. **Generate Nonce**
-   ```
+   ```text
    nonce = crypto/rand.Read(12 bytes)  // Per-encryption unique
    ```
 
 4. **Encrypt Data**
-   ```
+   ```text
    ciphertext = AES-256-GCM.Encrypt(
        plaintext = JSON(credentials),
        key = derived_key,
@@ -111,7 +111,7 @@ Master Key = PBKDF2(
    ```
 
 5. **Combine Components**
-   ```
+   ```text
    vault_file = nonce || ciphertext || auth_tag
    ```
 
@@ -121,7 +121,7 @@ Master Key = PBKDF2(
 2. **Read Vault File** and extract salt, nonce, ciphertext
 3. **Derive Key** using PBKDF2 with stored salt
 4. **Decrypt and Verify**
-   ```
+   ```text
    plaintext = AES-256-GCM.Decrypt(
        ciphertext,
        key,
@@ -188,7 +188,7 @@ Pass-CLI integrates with your operating system's secure credential storage to sa
 
 ### Master Password Requirements
 
-**Since January 2025** - Password policy enforced for both vault and credential passwords:
+Password policy enforced for both vault and credential passwords:
 
 - **Minimum Length**: 12 characters (enforced)
 - **Uppercase Letter**: At least one required
@@ -201,18 +201,18 @@ Pass-CLI integrates with your operating system's secure credential storage to sa
 ### Master Password Security
 
 **What Pass-CLI Does:**
-- ✅ Stores master password in system keychain
-- ✅ Clears password from memory after use
-- ✅ Never writes password to disk in plaintext
-- ✅ Never logs password
+- [OK] Stores master password in system keychain
+- [OK] Clears password from memory after use
+- [OK] Never writes password to disk in plaintext
+- [OK] Never logs password
 
 **What You Should Do:**
-- ✅ Use a unique master password (not reused elsewhere)
-- ✅ Make it strong (20+ characters or passphrase)
-- ✅ Store backup securely (password manager, safe place)
-- ✅ Save your BIP39 recovery phrase offline (paper, safe)
-- ❌ Don't share your master password
-- ❌ Don't write it in plaintext files
+- [OK] Use a unique master password (not reused elsewhere)
+- [OK] Make it strong (20+ characters or passphrase)
+- [OK] Store backup securely (password manager, safe place)
+- [OK] Save your BIP39 recovery phrase offline (paper, safe)
+- [ERROR] Don't share your master password
+- [ERROR] Don't write it in plaintext files
 
 ### BIP39 Recovery Phrase
 
@@ -257,21 +257,21 @@ pass-cli change-password --recover
 #### Storage Recommendations
 
 **Secure Storage** (Recommended):
-- ✅ Write on paper and store in physical safe
-- ✅ Safety deposit box
-- ✅ Fireproof/waterproof document safe
-- ✅ Split across multiple secure locations (advanced)
+- [OK] Write on paper and store in physical safe
+- [OK] Safety deposit box
+- [OK] Fireproof/waterproof document safe
+- [OK] Split across multiple secure locations (advanced)
 
 **Insecure Storage** (Avoid):
-- ❌ Digital notes apps
-- ❌ Cloud storage (Dropbox, Google Drive)
-- ❌ Email or messaging apps
-- ❌ Screenshots or photos
-- ❌ Password managers (defeats the purpose)
+- [ERROR] Digital notes apps
+- [ERROR] Cloud storage (Dropbox, Google Drive)
+- [ERROR] Email or messaging apps
+- [ERROR] Screenshots or photos
+- [ERROR] Password managers (defeats the purpose)
 
 **Important**: Anyone with your 24-word phrase can access your vault. Protect it as carefully as your master password.
 
-For detailed recovery procedures, see [Recovery Phrase Guide](../../02-guides/recovery-phrase.md).
+For detailed recovery procedures, see [Recovery Phrase Guide](../02-guides/recovery-phrase.md).
 
 ## Data Storage Security
 
@@ -289,7 +289,7 @@ Vault files are created with restricted permissions:
 
 ### Vault File Structure
 
-```
+```text
 +------------------+
 | Salt (32 bytes)  |  ← PBKDF2 salt
 +------------------+
@@ -328,11 +328,11 @@ Before each vault save operation, pass-cli creates an N-1 backup:
 
 **Security Implications**:
 
-- ⚠️ **Backup files contain unencrypted vault structure**: `vault.enc.backup` is AES-256-GCM encrypted (same as vault), but still sensitive
-- ✅ **File permissions**: Backup automatically inherits vault permissions (0600 - owner read/write only)
-- ⚠️ **Temporary files**: `vault.enc.tmp.*` files may remain if process crashes (cleaned up automatically on next save)
-- ✅ **Automatic cleanup**: Backup removed after successful unlock, minimizing exposure window
-- ⚠️ **Contains N-1 state**: Backup has previous vault version (not current), may contain deleted credentials
+- [WARNING] **Backup files contain unencrypted vault structure**: `vault.enc.backup` is AES-256-GCM encrypted (same as vault), but still sensitive
+- [OK] **File permissions**: Backup automatically inherits vault permissions (0600 - owner read/write only)
+- [WARNING] **Temporary files**: `vault.enc.tmp.*` files may remain if process crashes (cleaned up automatically on next save)
+- [OK] **Automatic cleanup**: Backup removed after successful unlock, minimizing exposure window
+- [WARNING] **Contains N-1 state**: Backup has previous vault version (not current), may contain deleted credentials
 
 **Manual Backup Recommendations**:
 
@@ -354,7 +354,7 @@ chmod 600 ~/backups/vault-*.enc
 
 ### Audit Logging (Optional)
 
-**Since January 2025** - Tamper-evident audit trail for vault operations:
+Tamper-evident audit trail for vault operations:
 
 - **Opt-In**: Disabled by default, enable with `--enable-audit` flag
 - **HMAC Signatures**: HMAC-SHA256 signatures for tamper detection
@@ -393,51 +393,51 @@ pass-cli verify-audit
 
 ### What Pass-CLI Protects Against
 
-✅ **Offline Attacks**
+[OK] **Offline Attacks**
 - Vault file encryption protects against offline brute-force
 - PBKDF2 slows down password cracking (600,000 iterations)
 - No plaintext credentials stored anywhere
 
-✅ **File System Compromise**
+[OK] **File System Compromise**
 - Encrypted vault remains secure even if file is stolen
 - File permissions prevent unauthorized local access
 
-✅ **Process Memory Dumps**
+[OK] **Process Memory Dumps**
 - Sensitive data cleared from memory after use
 - Master password not kept in memory permanently
 
-✅ **Accidental Disclosure**
+[OK] **Accidental Disclosure**
 - No cloud storage = no cloud breach risk
 - No network calls = no network interception
 
-✅ **Unauthorized Local Access**
+[OK] **Unauthorized Local Access**
 - System keychain protects master password
 - File permissions restrict vault access
 
 ### What Pass-CLI Does NOT Protect Against
 
-❌ **Malware on Your Machine**
+[ERROR] **Malware on Your Machine**
 - Keyloggers can capture master password when entered
 - Memory scrapers can extract decrypted credentials
 - Root/admin access bypasses file permissions
 
-❌ **Physical Access Attacks**
+[ERROR] **Physical Access Attacks**
 - Attacker with physical access can copy vault file
 - Vault encryption is only protection (strong password essential)
 
-❌ **Side-Channel Attacks**
+[ERROR] **Side-Channel Attacks**
 - Timing attacks, power analysis not mitigated
 - Not designed for hostile multi-user systems
 
-❌ **Weak Master Passwords**
+[ERROR] **Weak Master Passwords**
 - PBKDF2 slows attacks but doesn't prevent them
 - Short/common passwords can be brute-forced
 
-❌ **Social Engineering**
+[ERROR] **Social Engineering**
 - Cannot protect against phishing for master password
 - User education essential
 
-❌ **TUI Display Security (Interactive Mode)**
+[ERROR] **TUI Display Security (Interactive Mode)**
 - Shoulder surfing: Credentials visible on screen in TUI mode
 - Screen recording: TUI displays service names and details
 - Password visibility toggle: `Ctrl+P` shows plaintext passwords
@@ -486,9 +486,9 @@ pass-cli verify-audit
 
 ### Out of Scope
 
-- ✗ Cloud synchronization
-- ✗ Multi-user support
-- ✗ Hardware security module (HSM) integration
-- ✗ Biometric authentication
-- ✗ Two-factor authentication for master password
+- [FAIL] Cloud synchronization
+- [FAIL] Multi-user support
+- [FAIL] Hardware security module (HSM) integration
+- [FAIL] Biometric authentication
+- [FAIL] Two-factor authentication for master password
 

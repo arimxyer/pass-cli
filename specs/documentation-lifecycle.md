@@ -137,7 +137,7 @@ Documentation should be archived/removed when ANY of these conditions occur:
 7. **PR**: Submit as atomic change (one doc per PR when possible)
 
 **Commit Message Format**:
-```
+```text
 docs: archive <filename> - <rationale>
 
 Rationale: <detailed explanation>
@@ -153,7 +153,7 @@ Accessible via git history at commit <sha> if recovery needed.
 **Default**: DO NOT archive specs (Rule 1: indefinite retention)
 
 **Exception**: If spec created in error:
-```
+```text
 docs: remove incorrect spec 042 - created in wrong repository
 
 Rationale: Spec 042 documented feature for pass-cli-gui project,
@@ -172,7 +172,7 @@ Correct spec exists at pass-cli-gui repo.
 7. **Commit**: One commit per consolidated topic
 
 **Commit Message Format**:
-```
+```text
 docs: consolidate <topic> documentation into <canonical file>
 
 - Merged content from <file1>, <file2>, <file3>
@@ -191,7 +191,7 @@ Reduces duplicate maintenance and improves search clarity.
 4. **Document**: Note link fixes in commit message
 
 **Commit Message Format**:
-```
+```text
 docs: fix broken links in <file>
 
 - Updated <N> internal links (file moves)

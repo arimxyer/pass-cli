@@ -1,5 +1,5 @@
 ---
-title: "pass-cli Documentation"
+title: "Pass-CLI Documentation"
 cascade:
   type: docs
 ---
@@ -10,13 +10,13 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 
 ## Quick Links
 
-- [Quick Start]({{< relref "01-getting-started/quick-start" >}}) - First-time setup and initialization (5 minutes)
-- [Quick Install]({{< relref "01-getting-started/quick-install" >}}) - Installation instructions for all platforms
-- [Command Reference]({{< relref "03-reference/command-reference" >}}) - Complete command reference
-- [Recovery Phrase]({{< relref "02-guides/recovery-phrase" >}}) - BIP39 recovery phrase setup and usage
-- [Backup & Restore Guide]({{< relref "02-guides/backup-restore" >}}) - Manual vault backup management
-- [Security Architecture]({{< relref "03-reference/security-architecture" >}}) - Security features and cryptography
-- [Troubleshooting]({{< relref "04-troubleshooting/_index" >}}) - Common issues and solutions by category
+- [Quick Start](01-getting-started/quick-start) - First-time setup and initialization (5 minutes)
+- [Quick Install](01-getting-started/quick-install) - Installation instructions for all platforms
+- [Command Reference](03-reference/command-reference) - Complete command reference
+- [Recovery Phrase](02-guides/recovery-phrase) - BIP39 recovery phrase setup and usage
+- [Backup & Restore Guide](02-guides/backup-restore) - Manual vault backup management
+- [Security Architecture](03-reference/security-architecture) - Security features and cryptography
+- [Troubleshooting](04-troubleshooting/_index) - Common issues and solutions by category
 
 ## Features
 
@@ -38,4 +38,4 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 
 ## Contributing
 
-See [Contributing Guide]({{< relref "06-development/contributing" >}}) for developer documentation and contribution guidelines.
+See [Contributing Guide](06-development/contributing) for developer documentation and contribution guidelines.

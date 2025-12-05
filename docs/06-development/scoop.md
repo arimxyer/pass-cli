@@ -240,7 +240,7 @@ checksum:
 ### Prerequisites
 
 1. **Stable Release**: Must have a stable version with release artifacts
-2. **Open Source**: Must have an OSI-approved license (MIT ✓)
+2. **Open Source**: Must have an OSI-approved license (MIT [PASS])
 3. **Windows Binary**: Must provide Windows executables
 4. **Documentation**: README and LICENSE required
 
@@ -248,7 +248,7 @@ checksum:
 
 - **Main Bucket**: Command-line tools that don't require GUI
   - Repository: [ScoopInstaller/Main](https://github.com/ScoopInstaller/Main)
-  - Best fit for Pass-CLI ✓
+  - Best fit for Pass-CLI [PASS]
 
 - **Extras Bucket**: GUI apps and less common tools
   - Repository: [ScoopInstaller/Extras](https://github.com/ScoopInstaller/Extras)
@@ -338,7 +338,7 @@ When releasing a new version:
    git commit -am "pass-cli: Update to version 1.1.0"
    ```
 
-### Automatic Update (with checkver)
+### Automatic Update (With Checkver)
 
 If autoupdate is configured correctly, maintainers can update automatically:
 
@@ -396,22 +396,22 @@ Usage:
 ## Manifest Best Practices
 
 ### Do's
-- ✅ Use stable release URLs (not `latest`)
-- ✅ Include accurate SHA256 hashes
-- ✅ Support all relevant architectures
-- ✅ Configure autoupdate correctly
-- ✅ Provide helpful post-install messages
-- ✅ Use proper JSON formatting
-- ✅ Test on all supported architectures
-- ✅ Follow Scoop manifest conventions
+- [OK] Use stable release URLs (not `latest`)
+- [OK] Include accurate SHA256 hashes
+- [OK] Support all relevant architectures
+- [OK] Configure autoupdate correctly
+- [OK] Provide helpful post-install messages
+- [OK] Use proper JSON formatting
+- [OK] Test on all supported architectures
+- [OK] Follow Scoop manifest conventions
 
 ### Don'ts
-- ❌ Don't use `latest` tag in URLs
-- ❌ Don't skip hash validation
-- ❌ Don't hardcode version numbers in autoupdate URLs
-- ❌ Don't include unnecessary dependencies
-- ❌ Don't use deprecated manifest features
-- ❌ Don't forget to update checksums.txt
+- [ERROR] Don't use `latest` tag in URLs
+- [ERROR] Don't skip hash validation
+- [ERROR] Don't hardcode version numbers in autoupdate URLs
+- [ERROR] Don't include unnecessary dependencies
+- [ERROR] Don't use deprecated manifest features
+- [ERROR] Don't forget to update checksums.txt
 
 ## Troubleshooting
 
@@ -495,7 +495,7 @@ For maintainers updating the manifest:
 - [ ] Tag release in pass-cli repository
 - [ ] Update release notes
 
-## Integration with CI/CD
+## Integration With CI/CD
 
 Add to your release workflow:
 

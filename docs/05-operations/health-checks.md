@@ -36,15 +36,15 @@ pass-cli doctor
 
 Produces formatted output with status indicators:
 
-```
+```text
 Health Check Results
 ====================
 
-✓ Version: v1.2.3 (up to date)
-✓ Vault: vault.enc accessible (600 permissions)
-✓ Config: Valid configuration
-✓ Keychain: Integration active
-✓ Backup: 3 backup files found
+[PASS] Version: v1.2.3 (up to date)
+[PASS] Vault: vault.enc accessible (600 permissions)
+[PASS] Config: Valid configuration
+[PASS] Keychain: Integration active
+[PASS] Backup: 3 backup files found
 
 Overall Status: HEALTHY
 ```
@@ -141,18 +141,18 @@ esac
 #### Update Available (Warning)
 
 **Symptom**:
-```
+```text
 ⚠ Version: Update available: v1.2.3 → v1.2.4
   Recommendation: Update to latest version: https://github.com/ari1110/pass-cli/releases/tag/v1.2.4
 ```
 
 **Solution**: Update pass-cli to the latest version using your package manager or download from GitHub.
 
-#### Network Timeout (Pass with Error)
+#### Network Timeout (Pass With Error)
 
 **Symptom**:
-```
-✓ Version: Current version: v1.2.3 (unable to check for updates: offline)
+```text
+[PASS] Version: Current version: v1.2.3 (unable to check for updates: offline)
 ```
 
 **Details**: The check gracefully falls back when offline. This is not an error - it just means the version check couldn't reach GitHub. Your current version information is still displayed.
@@ -162,8 +162,8 @@ esac
 #### Vault Not Found (Error)
 
 **Symptom**:
-```
-✗ Vault: Vault file not found
+```text
+[FAIL] Vault: Vault file not found
   Recommendation: Run 'pass-cli init' to create a new vault
 ```
 
@@ -172,8 +172,8 @@ esac
 #### Permission Issues (Error)
 
 **Symptom**:
-```
-✗ Vault: Vault file has insecure permissions (644)
+```text
+[FAIL] Vault: Vault file has insecure permissions (644)
   Recommendation: Run 'chmod 600 /home/user/.pass-cli/vault.enc'
 ```
 
@@ -188,8 +188,8 @@ On Windows, ensure only your user account has read/write access.
 #### Vault Corrupted (Error)
 
 **Symptom**:
-```
-✗ Vault: Vault file is corrupted or tampered
+```text
+[FAIL] Vault: Vault file is corrupted or tampered
   Recommendation: Restore from backup or reinitialize vault
 ```
 
@@ -203,8 +203,8 @@ On Windows, ensure only your user account has read/write access.
 #### Invalid Configuration (Error)
 
 **Symptom**:
-```
-✗ Config: Invalid YAML syntax at line 5
+```text
+[FAIL] Config: Invalid YAML syntax at line 5
   Recommendation: Fix configuration syntax or delete to use defaults
 ```
 
@@ -213,8 +213,8 @@ On Windows, ensure only your user account has read/write access.
 #### Missing Configuration (Pass)
 
 **Symptom**:
-```
-✓ Config: Using default configuration
+```text
+[PASS] Config: Using default configuration
 ```
 
 **Details**: This is normal if you haven't customized your configuration. The system uses sensible defaults.
@@ -224,7 +224,7 @@ On Windows, ensure only your user account has read/write access.
 #### Keychain Unavailable (Warning)
 
 **Symptom**:
-```
+```text
 ⚠ Keychain: OS keychain not available (running in SSH session)
   Recommendation: Use local environment or enable keychain access
 ```
@@ -238,8 +238,8 @@ On Windows, ensure only your user account has read/write access.
 #### Permission Denied (Error)
 
 **Symptom**:
-```
-✗ Keychain: Access denied by OS
+```text
+[FAIL] Keychain: Access denied by OS
   Recommendation: Grant keychain access in system settings
 ```
 
@@ -253,7 +253,7 @@ On Windows, ensure only your user account has read/write access.
 #### No Backups Found (Warning)
 
 **Symptom**:
-```
+```text
 ⚠ Backup: No backup files found
   Recommendation: Backups are created automatically after modifications
 ```
@@ -263,7 +263,7 @@ On Windows, ensure only your user account has read/write access.
 #### Backup Integrity Issue (Warning)
 
 **Symptom**:
-```
+```text
 ⚠ Backup: Backup file corrupted: vault.enc.backup.2
   Recommendation: Remove corrupted backup or restore from valid backup
 ```
@@ -357,7 +357,7 @@ echo "pass_cli_health_status $metric" >> /var/lib/prometheus/node_exporter/pass_
 
 ## Troubleshooting Tips
 
-### Run with Verbose Logging
+### Run With Verbose Logging
 
 For detailed diagnostic information:
 
@@ -388,7 +388,7 @@ If you run `doctor` on a fresh installation:
 ```bash
 $ pass-cli doctor
 
-✗ Vault: Vault file not found
+[FAIL] Vault: Vault file not found
   Recommendation: Run 'pass-cli init' to create a new vault
 
 Overall Status: ERROR (exit code 2)
@@ -398,8 +398,8 @@ This is expected. Run `pass-cli init` to create your vault, then `doctor` will s
 
 ## See Also
 
-- [Quick Start Guide]({{< relref "../01-getting-started/quick-start" >}}) - First-time setup and initialization
-- [Troubleshooting]({{< relref "../04-troubleshooting/_index" >}}) - Common issues and solutions
-- [Security Operations]({{< relref "security-operations" >}}) - Security best practices
-- [Command Reference]({{< relref "../03-reference/command-reference" >}}) - Complete command reference
+- [Quick Start Guide](../01-getting-started/quick-start) - First-time setup and initialization
+- [Troubleshooting](../04-troubleshooting/_index) - Common issues and solutions
+- [Security Operations](security-operations) - Security best practices
+- [Command Reference](../03-reference/command-reference) - Complete command reference
 

@@ -60,8 +60,8 @@ password := passwordField.GetText()  // Returns string (immutable)
 | Aspect | CLI Mode | TUI Mode |
 |--------|----------|----------|
 | **Password Input** | `term.ReadPassword()` → `[]byte` | `InputField.GetText()` → `string` |
-| **Memory Clearing** | ✅ Immediate (deferred) | ⚠️ Relies on Go GC |
-| **String Conversion** | ❌ Never converted | ⚠️ Converted once for vault ops |
+| **Memory Clearing** | [OK] Immediate (deferred) | [WARNING] Relies on Go GC |
+| **String Conversion** | [ERROR] Never converted | [WARNING] Converted once for vault ops |
 | **Security Level** | High | Medium-High |
 | **Usability** | Low (no visual feedback) | High (strength indicator, edit, etc.) |
 
@@ -106,9 +106,9 @@ defer crypto.ClearBytes(passwordBytes)
 ```
 
 **What We Don't Do**:
-- ❌ Clear the original string (impossible in Go)
-- ❌ Avoid string conversion (tview API limitation)
-- ❌ Use custom input widget (out of scope for current release)
+- [ERROR] Clear the original string (impossible in Go)
+- [ERROR] Avoid string conversion (tview API limitation)
+- [ERROR] Use custom input widget (out of scope for current release)
 
 ### Test Verification
 
@@ -123,8 +123,8 @@ go test -v ./tests/security -run TestTerminalInputSecurity
 ```
 
 **Expected Results**:
-- ✅ CLI mode: passwords cleared immediately
-- ⚠️ TUI mode: string lingers until GC (documented limitation)
+- [OK] CLI mode: passwords cleared immediately
+- [WARNING] TUI mode: string lingers until GC (documented limitation)
 
 ### Related Issues
 

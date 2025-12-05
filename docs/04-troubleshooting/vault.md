@@ -144,7 +144,7 @@ Set-Acl "$env:USERPROFILE\.pass-cli\vault.enc" $acl
    3. If verification succeeds, you can set a new master password
    4. Vault is re-encrypted with new password
    
-   For detailed recovery instructions, see [Recovery Phrase Guide](../../02-guides/recovery-phrase.md).
+   For detailed recovery instructions, see [Recovery Phrase Guide](../02-guides/recovery-phrase.md).
 
 2. **Check keychain** (if still accessible)
    - macOS: Keychain Access → search "pass-cli"
@@ -166,11 +166,11 @@ Set-Acl "$env:USERPROFILE\.pass-cli\vault.enc" $acl
    ```
 
 **Prevention**:
-- ✅ Enable recovery phrase during init (it's enabled by default)
-- ✅ Write recovery phrase on paper and store in safe
-- ✅ Write master password in secure location
-- ✅ Store master password in another password manager
-- ✅ Keep backup of master password
+- [OK] Enable recovery phrase during init (it's enabled by default)
+- [OK] Write recovery phrase on paper and store in safe
+- [OK] Write master password in secure location
+- [OK] Store master password in another password manager
+- [OK] Keep backup of master password
 
 ---
 

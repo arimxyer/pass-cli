@@ -11,11 +11,11 @@ Best practices, security checklist, incident response procedures, and security a
 ### Password Management
 
 1. **Strong Master Password**
-   ```
-   ✅ Good: "correct-horse-battery-staple-29!" (33 chars)
-   ✅ Good: "MyD0g!sN@med$potAnd1L0veH1m" (29 chars)
-   ❌ Bad:  "password123" (11 chars, common)
-   ❌ Bad:  "MyPassword1" (11 chars, predictable)
+   ```text
+   [OK] Good: "correct-horse-battery-staple-29!" (33 chars)
+   [OK] Good: "MyD0g!sN@med$potAnd1L0veH1m" (29 chars)
+   [ERROR] Bad:  "password123" (11 chars, common)
+   [ERROR] Bad:  "MyPassword1" (11 chars, predictable)
    ```
 
 2. **Password Storage**
@@ -45,10 +45,10 @@ Best practices, security checklist, incident response procedures, and security a
 
 3. **Script Security**
    ```bash
-   # ✅ Good: Use quiet mode to avoid logging
+   # [OK] Good: Use quiet mode to avoid logging
    export API_KEY=$(pass-cli get service --quiet)
 
-   # ❌ Bad: Full output might be logged
+   # [ERROR] Bad: Full output might be logged
    export API_KEY=$(pass-cli get service)
    ```
 
@@ -64,7 +64,7 @@ Best practices, security checklist, incident response procedures, and security a
 ### TUI-Specific Security
 
 1. **Screen Privacy**
-   - ⚠️ **Shoulder Surfing Risk**: TUI displays credential list on screen
+   - [WARNING] **Shoulder Surfing Risk**: TUI displays credential list on screen
    - Use privacy screen protector in public spaces
    - Be aware of people nearby when using TUI
    - Consider using CLI mode for sensitive environments
@@ -110,7 +110,7 @@ Best practices, security checklist, incident response procedures, and security a
 2. **File System Security**
    - Don't commit vault to version control
    - Add to `.gitignore`:
-     ```
+     ```ini
      .pass-cli/
      *.enc
      ```
@@ -273,7 +273,7 @@ pass-cli version
 
 ### PBKDF2 Parameters
 
-- **Iteration Count**: 600,000 (increased January 2025)
+- **Iteration Count**: 600,000 (hardened)
   - Provides ~50-100ms delay on modern CPUs (2023+)
   - Older hardware: 500-1000ms (acceptable per NIST recommendations)
   - Significantly increases brute-force cost

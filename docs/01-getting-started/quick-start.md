@@ -10,7 +10,7 @@ This 5-minute guide will walk you through initializing your vault and storing yo
 
 ## Installation
 
-See [Quick Install]({{< relref "quick-install" >}}) for platform-specific installation instructions (Homebrew, Scoop) or [Manual Installation]({{< relref "manual-install" >}}) for binary download.
+See [Quick Install](quick-install) for platform-specific installation instructions (Homebrew, Scoop) or [Manual Installation](manual-install) for binary download.
 
 After installation, verify pass-cli is available:
 
@@ -56,7 +56,7 @@ Password Requirements:
 Enter master password: ••••••••••••••
 Confirm master password: ••••••••••••••
 
-✓ Password meets all requirements
+[PASS] Password meets all requirements
 
 ┌────────────────────────────────────────────────────────────┐
 │ Step 2: Keychain Integration                               │
@@ -66,13 +66,13 @@ Store your master password in OS keychain for convenience?
 (Windows Credential Manager, macOS Keychain, Linux Secret Service)
 
 Benefits:
-  ✓ No need to type password for every operation
-  ✓ Secure OS-level storage
-  ✓ Can be disabled later via OS credential manager
+  [PASS] No need to type password for every operation
+  [PASS] Secure OS-level storage
+  [PASS] Can be disabled later via OS credential manager
 
 Enable keychain storage? (y/n): y
 
-✓ Master password stored in keychain
+[PASS] Master password stored in keychain
 
 ┌────────────────────────────────────────────────────────────┐
 │ Step 3: Audit Logging                                      │
@@ -81,13 +81,13 @@ Enable keychain storage? (y/n): y
 Enable audit logging to track all vault operations?
 
 Benefits:
-  ✓ Security audit trail
-  ✓ Tamper-evident with HMAC signatures
-  ✓ Track all add/get/update/delete operations
+  [PASS] Security audit trail
+  [PASS] Tamper-evident with HMAC signatures
+  [PASS] Track all add/get/update/delete operations
 
 Enable audit logging? (y/n): y
 
-✓ Audit logging enabled
+[PASS] Audit logging enabled
 
 ┌────────────────────────────────────────────────────────────┐
 │ Setup Complete!                                            │
@@ -189,5 +189,5 @@ Enter username: your-github-username
 Enter password: ••••••••••••
 Confirm password: ••••••••••••
 
-✓ Credential 'github' added successfully
+[PASS] Credential 'github' added successfully
 ```

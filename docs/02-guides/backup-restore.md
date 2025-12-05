@@ -64,7 +64,7 @@ Manual backups create timestamped copies of your vault that persist alongside au
 pass-cli vault backup create
 
 # Output:
-# ✅ Backup created successfully
+# [OK] Backup created successfully
 #
 # Backup: /home/user/.pass-cli/vault.enc.20251111-143022.manual.backup
 # Size: 2.5 KB
@@ -96,7 +96,7 @@ pass-cli vault backup create --verbose
 - **Before system changes**: OS upgrades, migrations, or hardware changes
 - **Before major updates**: Upgrading pass-cli to a new version
 
-## Restoring from Backup
+## Restoring From Backup
 
 The restore command automatically selects the newest valid backup (manual or automatic) and replaces your current vault.
 
@@ -107,7 +107,7 @@ The restore command automatically selects the newest valid backup (manual or aut
 pass-cli vault backup restore
 
 # Output:
-# ⚠️  Warning: This will overwrite your current vault with the backup.
+# [WARNING]  Warning: This will overwrite your current vault with the backup.
 #
 # Backup to restore:
 #   File: /home/user/.pass-cli/vault.enc.20251111-143022.manual.backup
@@ -124,7 +124,7 @@ pass-cli vault backup restore
 pass-cli vault backup restore --force
 
 # Output:
-# ✅ Vault restored successfully from backup
+# [OK] Vault restored successfully from backup
 #
 # Restored from: /home/user/.pass-cli/vault.enc.20251111-143022.manual.backup
 # Backup type: manual
@@ -183,17 +183,17 @@ pass-cli vault backup info
 # 📦 Vault Backup Status
 #
 # Automatic Backup:
-# ✓ 2 hours ago, 2.5 KB
+# [PASS] 2 hours ago, 2.5 KB
 #
 # Manual Backups (3 total):
 #
-# 1. ✓ 2 hours ago, 2.5 KB
-# 2. ✓ 1 day ago, 2.4 KB
-# 3. ✓ 1 week ago, 2.3 KB
+# 1. [PASS] 2 hours ago, 2.5 KB
+# 2. [PASS] 1 day ago, 2.4 KB
+# 3. [PASS] 1 week ago, 2.3 KB
 #
 # Total backup size: 7.2 KB
 #
-# ✓ Restore priority: manual backup (2 hours ago)
+# [PASS] Restore priority: manual backup (2 hours ago)
 ```
 
 ### Info with Verbose Output
@@ -205,13 +205,13 @@ pass-cli vault backup info --verbose
 # 📦 Vault Backup Status
 #
 # Automatic Backup:
-# ✓ 2 hours ago, 2.5 KB
+# [PASS] 2 hours ago, 2.5 KB
 #    Path: /home/user/.pass-cli/vault.enc.backup
 #    Modified: 2025-11-11 14:30:22
 #
 # Manual Backups (3 total):
 #
-# 1. ✓ 2 hours ago, 2.5 KB
+# 1. [PASS] 2 hours ago, 2.5 KB
 #    Path: /home/user/.pass-cli/vault.enc.20251111-143022.manual.backup
 #    Modified: 2025-11-11 14:30:22
 # ...
@@ -219,8 +219,8 @@ pass-cli vault backup info --verbose
 
 ### Understanding Info Output
 
-- **✓** = Backup passed integrity verification
-- **⚠️** = Backup is corrupted or invalid
+- **[PASS]** = Backup passed integrity verification
+- **[WARNING]** = Backup is corrupted or invalid
 - **Restore priority** = Which backup will be used for restore
 - **Total backup size** = Combined size of all backups
 
@@ -228,10 +228,10 @@ pass-cli vault backup info --verbose
 
 ```bash
 # Old backup warning (>30 days)
-⚠️  Warning: Backup is 45 days old. Consider creating a fresh backup.
+[WARNING]  Warning: Backup is 45 days old. Consider creating a fresh backup.
 
 # Too many manual backups (>5)
-⚠️  Warning: 12 manual backups found. Consider removing old backups to free disk space.
+[WARNING]  Warning: 12 manual backups found. Consider removing old backups to free disk space.
 ```
 
 ## Best Practices
@@ -288,8 +288,8 @@ Verify backups are valid before relying on them:
 pass-cli vault backup info
 
 # Look for:
-# - ✓ (checkmark) = valid backup
-# - ⚠️ (warning) = corrupted backup
+# - [PASS] (checkmark) = valid backup
+# - [WARNING] (warning) = corrupted backup
 
 # Test restore (dry run)
 pass-cli vault backup restore --dry-run
@@ -314,7 +314,7 @@ pass-cli vault backup create
 
 ```bash
 # Info shows corrupted backup
-⚠️ 2 hours ago, 2.5 KB
+[WARNING] 2 hours ago, 2.5 KB
 ```
 
 **Causes**:
@@ -389,9 +389,9 @@ pass-cli vault backup restore --force
 
 # Create daily backup with error handling
 if pass-cli vault backup create &>/dev/null; then
-    echo "✓ Backup created: $(date)"
+    echo "[PASS] Backup created: $(date)"
 else
-    echo "✗ Backup failed: $(date)" >&2
+    echo "[FAIL] Backup failed: $(date)" >&2
     exit 1
 fi
 
@@ -466,12 +466,12 @@ Monitor backup health with cron:
 
 ```bash
 # Add to crontab: check backup health daily
-0 2 * * * pass-cli vault backup info | grep -q "⚠️" && echo "Warning: Backup issue detected" | mail -s "pass-cli backup alert" admin@example.com
+0 2 * * * pass-cli vault backup info | grep -q "[WARNING]" && echo "Warning: Backup issue detected" | mail -s "pass-cli backup alert" admin@example.com
 ```
 
 ## See Also
 
-- [Security Architecture]({{< relref "../03-reference/security-architecture" >}}) - Encryption details and security best practices
-- [Troubleshooting]({{< relref "../04-troubleshooting/_index" >}}) - General troubleshooting for pass-cli
-- [Health Checks]({{< relref "../05-operations/health-checks" >}}) - Vault health checks and diagnostics
-- [Quick Start]({{< relref "../01-getting-started/quick-start" >}}) - First-time setup and basic workflows
+- [Security Architecture](../03-reference/security-architecture) - Encryption details and security best practices
+- [Troubleshooting](../04-troubleshooting/_index) - General troubleshooting for pass-cli
+- [Health Checks](../05-operations/health-checks) - Vault health checks and diagnostics
+- [Quick Start](../01-getting-started/quick-start) - First-time setup and basic workflows
