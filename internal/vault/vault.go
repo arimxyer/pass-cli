@@ -1560,6 +1560,147 @@ func (v *VaultService) PingKeychain() error {
 	return v.keychainService.Ping()
 }
 
+// NeedsMigration checks if the vault is v1 and needs migration to v2.
+// Returns true if the vault is v1 format and would benefit from migration.
+func (v *VaultService) NeedsMigration() (bool, error) {
+	version := v.storageService.GetVersion()
+	if version == 0 {
+		return false, errors.New("vault does not exist or cannot be read")
+	}
+	return version == 1, nil
+}
+
+// MigrateToV2 migrates a v1 vault to v2 format with DEK-based encryption.
+// The vault must be unlocked before calling this method.
+// Parameters:
+//   - passphrase: optional recovery passphrase (25th word), can be nil
+//
+// Returns: mnemonic string (24 words) for user to write down, error
+func (v *VaultService) MigrateToV2(passphrase []byte) (string, error) {
+	if passphrase != nil {
+		defer crypto.ClearBytes(passphrase)
+	}
+
+	if !v.unlocked {
+		return "", ErrVaultLocked
+	}
+
+	// Verify vault is v1
+	version := v.storageService.GetVersion()
+	if version != 1 {
+		return "", errors.New("vault is already v2 or newer")
+	}
+
+	// 1. Generate BIP39 mnemonic (256-bit entropy = 24 words)
+	entropy, err := bip39.NewEntropy(256)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate entropy: %w", err)
+	}
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate mnemonic: %w", err)
+	}
+
+	// 2. Generate recovery salt
+	recoverySalt := make([]byte, recoverySaltLen)
+	if _, err := rand.Read(recoverySalt); err != nil {
+		return "", fmt.Errorf("failed to generate recovery salt: %w", err)
+	}
+
+	// 3. Derive recovery KEK from mnemonic using Argon2id
+	seed := bip39.NewSeed(mnemonic, string(passphrase))
+	defer crypto.ClearBytes(seed)
+	recoveryKEK := argon2.IDKey(
+		seed,
+		recoverySalt,
+		recoveryArgon2Time,
+		recoveryArgon2Memory,
+		recoveryArgon2Threads,
+		recoveryKeyLen,
+	)
+	defer crypto.ClearBytes(recoveryKEK)
+
+	// 4. Generate new salt for password KEK
+	salt, err := v.cryptoService.GenerateSalt()
+	if err != nil {
+		return "", fmt.Errorf("failed to generate salt: %w", err)
+	}
+
+	// 5. Derive password KEK from current password
+	iterations := crypto.GetIterations()
+	passwordKEK, err := v.cryptoService.DeriveKey(v.masterPassword, salt, iterations)
+	if err != nil {
+		return "", fmt.Errorf("failed to derive password KEK: %w", err)
+	}
+	defer crypto.ClearBytes(passwordKEK)
+
+	// 6. Generate and wrap DEK with both KEKs
+	keyWrapResult, err := crypto.GenerateAndWrapDEK(passwordKEK, recoveryKEK)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate and wrap DEK: %w", err)
+	}
+	defer crypto.ClearBytes(keyWrapResult.DEK)
+
+	// 7. Marshal current vault data
+	data, err := json.Marshal(v.vaultData)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	// 8. Perform atomic migration using storage service
+	err = v.storageService.MigrateToV2(
+		data,
+		keyWrapResult.DEK,
+		keyWrapResult.PasswordWrapped.Ciphertext,
+		keyWrapResult.PasswordWrapped.Nonce,
+		salt,
+		iterations,
+		v.createAuditCallback(),
+	)
+	if err != nil {
+		return "", fmt.Errorf("migration failed: %w", err)
+	}
+
+	// 9. Create/update recovery metadata
+	recoveryMetadata := &RecoveryMetadata{
+		Enabled:            true,
+		Version:            "2",
+		PassphraseRequired: len(passphrase) > 0,
+		KDFParams: KDFParams{
+			Algorithm:    "argon2id",
+			Time:         recoveryArgon2Time,
+			Memory:       recoveryArgon2Memory,
+			Threads:      recoveryArgon2Threads,
+			SaltRecovery: recoverySalt,
+		},
+		EncryptedRecoveryKey: keyWrapResult.RecoveryWrapped.Ciphertext,
+		NonceRecovery:        keyWrapResult.RecoveryWrapped.Nonce,
+	}
+
+	// 10. Update metadata file
+	meta, err := LoadMetadata(v.vaultPath)
+	if err != nil {
+		// Create new metadata if it doesn't exist
+		meta = &Metadata{
+			Version:      "1.0",
+			AuditEnabled: v.auditEnabled,
+			CreatedAt:    time.Now(),
+		}
+	}
+	meta.Recovery = recoveryMetadata
+	meta.LastModified = time.Now()
+
+	if err := SaveMetadata(v.vaultPath, meta); err != nil {
+		// Log warning but don't fail migration - vault is already migrated
+		fmt.Fprintf(os.Stderr, "Warning: failed to save metadata: %v\n", err)
+	}
+
+	// 11. Log migration event
+	v.LogAudit(security.EventVaultPasswordChange, security.OutcomeSuccess, "migration_v1_to_v2")
+
+	return mnemonic, nil
+}
+
 // RecoverWithMnemonic recovers vault access using a BIP39 mnemonic phrase.
 // This is for v2 vaults that use the DEK architecture.
 // Parameters:

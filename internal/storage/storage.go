@@ -859,6 +859,139 @@ func (s *StorageService) GetVersion() int {
 	return encryptedVault.Metadata.Version
 }
 
+// MigrateToV2 atomically migrates a v1 vault to v2 format.
+// This method:
+// 1. Creates a backup of the current vault
+// 2. Re-encrypts vault data with DEK
+// 3. Updates metadata to v2 format with wrapped DEK
+// 4. Atomically replaces the vault file
+// Parameters:
+//   - data: plaintext vault data to save
+//   - dek: 32-byte Data Encryption Key
+//   - wrappedDEK: DEK wrapped by password KEK
+//   - wrappedDEKNonce: nonce used for DEK wrapping
+//   - salt: salt for password KDF
+//   - iterations: PBKDF2 iteration count
+//   - callback: optional progress callback for audit logging
+func (s *StorageService) MigrateToV2(data, dek, wrappedDEK, wrappedDEKNonce, salt []byte, iterations int, callback ProgressCallback) error {
+	// Notify audit logger of migration start
+	if callback != nil {
+		callback("atomic_save_started", s.vaultPath)
+	}
+
+	// Load existing vault to get current metadata
+	encryptedVault, err := s.loadEncryptedVault()
+	if err != nil {
+		return err
+	}
+
+	// Verify this is a v1 vault
+	if encryptedVault.Metadata.Version != 1 {
+		return fmt.Errorf("cannot migrate: vault is already version %d", encryptedVault.Metadata.Version)
+	}
+
+	// Encrypt vault data with DEK
+	encryptedData, err := s.cryptoService.Encrypt(data, dek)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt vault data: %w", err)
+	}
+
+	// Create v2 metadata
+	newMetadata := VaultMetadata{
+		Version:         2, // Upgrade to v2
+		CreatedAt:       encryptedVault.Metadata.CreatedAt,
+		UpdatedAt:       time.Now(),
+		Salt:            salt,
+		Iterations:      iterations,
+		WrappedDEK:      wrappedDEK,
+		WrappedDEKNonce: wrappedDEKNonce,
+	}
+
+	// Create encrypted vault structure
+	newVault := EncryptedVault{
+		Metadata: newMetadata,
+		Data:     encryptedData,
+	}
+
+	// Marshal to JSON
+	jsonData, err := json.Marshal(newVault)
+	if err != nil {
+		return fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	// Cleanup orphaned temp files from previous crashes
+	s.cleanupOrphanedTempFiles("")
+
+	// Generate temp filename
+	tempPath := s.generateTempFileName()
+
+	// Write to temp file
+	if err := s.writeToTempFile(tempPath, jsonData); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// Notify after temp file created
+	if callback != nil {
+		callback("temp_file_created", tempPath)
+	}
+
+	// Ensure temp file cleanup on error
+	defer func() {
+		_ = s.cleanupTempFile(tempPath)
+	}()
+
+	// Verification: verify temp file is decryptable with DEK
+	if callback != nil {
+		callback("verification_started", tempPath)
+	}
+
+	if err := s.verifyTempFileWithDEK(tempPath, dek); err != nil {
+		if callback != nil {
+			callback("verification_failed", tempPath, err.Error())
+		}
+		_ = s.cleanupTempFile(tempPath)
+		return actionableErrorMessage(err)
+	}
+
+	if callback != nil {
+		callback("verification_passed", tempPath)
+	}
+
+	// Atomic rename (vault → backup)
+	backupPath := s.vaultPath + BackupSuffix
+	if callback != nil {
+		callback("atomic_rename_started", s.vaultPath, backupPath)
+	}
+
+	if err := s.atomicRename(s.vaultPath, backupPath); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// Atomic rename (temp → vault)
+	if callback != nil {
+		callback("atomic_rename_started", tempPath, s.vaultPath)
+	}
+
+	if err := s.atomicRename(tempPath, s.vaultPath); err != nil {
+		// CRITICAL ERROR: Try to restore backup
+		if callback != nil {
+			callback("rollback_started", backupPath, s.vaultPath)
+		}
+		_ = s.atomicRename(backupPath, s.vaultPath)
+		if callback != nil {
+			callback("rollback_completed", s.vaultPath)
+		}
+		return criticalErrorMessage(err)
+	}
+
+	// Notify completion
+	if callback != nil {
+		callback("atomic_save_completed", s.vaultPath)
+	}
+
+	return nil
+}
+
 // SetIterations updates the PBKDF2 iteration count in vault metadata.
 // This will take effect on the next SaveVault call.
 // Used for migration from legacy iteration counts (T033).
