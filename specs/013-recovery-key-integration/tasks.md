@@ -34,7 +34,7 @@ pass-cli/
 **Purpose**: No new project setup needed - extending existing codebase
 
 - [x] T001 Verify existing tests pass with `go test ./...` and record baseline timing for T064 comparison (48.042s)
-- [ ] T002 Create feature branch checkpoint commit for rollback safety
+- [x] T002 Create feature branch checkpoint commit for rollback safety
 
 ---
 
@@ -48,23 +48,23 @@ pass-cli/
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation (TDD)**
 
-- [ ] T003 [P] Unit test for GenerateDEK() in test/unit/keywrap_test.go
-- [ ] T004 [P] Unit test for WrapKey() round-trip in test/unit/keywrap_test.go
-- [ ] T005 [P] Unit test for UnwrapKey() with wrong KEK in test/unit/keywrap_test.go
-- [ ] T006 [P] Unit test for nonce uniqueness in test/unit/keywrap_test.go
-- [ ] T007 [P] Unit test for GenerateAndWrapDEK() in test/unit/keywrap_test.go
-- [ ] T007.1 [P] Contract test: verify WrapKey preconditions (32-byte dek/kek) in test/unit/keywrap_test.go
-- [ ] T007.2 [P] Contract test: verify UnwrapKey postconditions (32-byte output) in test/unit/keywrap_test.go
+- [x] T003 [P] Unit test for GenerateDEK() in test/unit/keywrap_test.go
+- [x] T004 [P] Unit test for WrapKey() round-trip in test/unit/keywrap_test.go
+- [x] T005 [P] Unit test for UnwrapKey() with wrong KEK in test/unit/keywrap_test.go
+- [x] T006 [P] Unit test for nonce uniqueness in test/unit/keywrap_test.go
+- [x] T007 [P] Unit test for GenerateAndWrapDEK() in test/unit/keywrap_test.go
+- [x] T007.1 [P] Contract test: verify WrapKey preconditions (32-byte dek/kek) in test/unit/keywrap_test.go
+- [x] T007.2 [P] Contract test: verify UnwrapKey postconditions (32-byte output) in test/unit/keywrap_test.go
 
 ### Implementation for Foundational Layer
 
-- [ ] T008 Create WrappedKey and KeyWrapResult types in internal/crypto/keywrap.go
-- [ ] T009 Implement GenerateDEK() in internal/crypto/keywrap.go
-- [ ] T010 Implement WrapKey() using AES-256-GCM in internal/crypto/keywrap.go
-- [ ] T011 Implement UnwrapKey() in internal/crypto/keywrap.go
-- [ ] T012 Implement GenerateAndWrapDEK() in internal/crypto/keywrap.go
-- [ ] T013 Add key wrapping error types (ErrInvalidKeyLength, etc.) in internal/crypto/keywrap.go
-- [ ] T014 Verify all T003-T007 tests pass
+- [x] T008 Create WrappedKey and KeyWrapResult types in internal/crypto/keywrap.go
+- [x] T009 Implement GenerateDEK() in internal/crypto/keywrap.go
+- [x] T010 Implement WrapKey() using AES-256-GCM in internal/crypto/keywrap.go
+- [x] T011 Implement UnwrapKey() in internal/crypto/keywrap.go
+- [x] T012 Implement GenerateAndWrapDEK() in internal/crypto/keywrap.go
+- [x] T013 Add key wrapping error types (ErrInvalidKeyLength, etc.) in internal/crypto/keywrap.go
+- [x] T014 Verify all T003-T007 tests pass
 
 **Checkpoint**: Key wrapping crypto ready - user story implementation can now begin
 
