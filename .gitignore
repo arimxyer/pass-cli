@@ -45,7 +45,8 @@ Thumbs.db
 *.log
 
 # Tool directories (keep local only)
-.claude/
+.claude/skills
+.claude/settings.local.json
 .serena/
 .specify/
 .mcp.json
