@@ -49,6 +49,7 @@ Thumbs.db
 .claude/settings.local.json
 .serena/
 .mcp.json
+.opencode/
 .spec-workflow/approvals/
 .github/prompts/
 .spec-workflow/
