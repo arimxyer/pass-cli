@@ -217,7 +217,7 @@ The detail panel shows where each credential has been accessed.
 - **Line number** (if available): File path with line number (e.g., `/path/file.go:42`)
 
 **Display Format**:
-```
+```text
 Usage Locations:
   /home/user/projects/web-app
     Accessed: 12 times

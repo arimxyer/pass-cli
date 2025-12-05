@@ -98,20 +98,6 @@ This document describes the automated CI/CD pipeline for Pass-CLI.
 - Release artifacts retained for 30 days
 - Coverage reports uploaded to Codecov
 
-### GitHub Actions Versions
-
-Current action versions in use:
-
-- **actions/checkout**: v5
-- **actions/setup-go**: v6
-- **actions/upload-artifact**: v4
-- **actions/download-artifact**: v5
-- **codecov/codecov-action**: v5
-- **golangci/golangci-lint-action**: v8 (with golangci-lint v2.5)
-- **securego/gosec**: master
-- **github/codeql-action/upload-sarif**: v3
-- **goreleaser/goreleaser-action**: v6
-
 ## Dependabot Integration
 
 **Configuration**: `.github/dependabot.yml`
@@ -335,20 +321,9 @@ Add to README.md:
 - Don't commit secrets to repository
 - Use GitHub Secrets for sensitive data
 
-## Future Enhancements
-
-Potential workflow improvements:
-
-- Docker image builds and publishing
-- Performance regression testing
-- Automated changelog generation
-- Slack/Discord notifications
-- Deployment to package registries
-- Automated documentation deployment
-
 ## See Also
 
 - [GoReleaser Documentation](https://goreleaser.com)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [Release Process]({{< relref "release" >}})
-- [Branch Workflow]({{< relref "branch-workflow" >}})
+- [Release Process](release)
+- [Branch Workflow](branch-workflow)

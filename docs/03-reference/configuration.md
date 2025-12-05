@@ -6,7 +6,7 @@ toc: true
 
 Complete configuration options for pass-cli including vault location, clipboard settings, TUI theme, and keyboard shortcuts.
 
-**Configuration Location** (added January 2025):
+**Configuration Location**:
 - **All platforms**: `~/.pass-cli/config.yml`
 
 **Management Commands**:

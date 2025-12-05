@@ -13,10 +13,10 @@ Complete guide to using BIP39 recovery phrases to recover vault access if you fo
 Pass-CLI's BIP39 recovery feature generates a 24-word recovery phrase when you create your vault. If you ever forget your master password, you can reset it using just 6 words from your recovery phrase.
 
 **Key Benefits**:
-- ✅ **Industry Standard**: Uses BIP39 (same as hardware wallets)
-- ✅ **Secure**: 6 words = 73.8 quintillion combinations
-- ✅ **Fast**: Recover in under 30 seconds
-- ✅ **Optional**: Can skip with `--no-recovery` flag if you use keychain integration
+- [OK] **Industry Standard**: Uses BIP39 (same as hardware wallets)
+- [OK] **Secure**: 6 words = 73.8 quintillion combinations
+- [OK] **Fast**: Recover in under 30 seconds
+- [OK] **Optional**: Can skip with `--no-recovery` flag if you use keychain integration
 
 ## Setting Up Recovery
 
@@ -29,7 +29,7 @@ $ pass-cli init
 Enter master password: ****
 Confirm master password: ****
 
-✓ Vault created
+[PASS] Vault created
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Recovery Phrase Setup
@@ -53,16 +53,16 @@ Advanced: Add passphrase protection? (y/N): n
 Verify your backup? (Y/n): y
 
 Enter word #7: device
-✓ (1/3)
+[PASS] (1/3)
 
 Enter word #18: identify
-✓ (2/3)
+[PASS] (2/3)
 
 Enter word #22: spin
-✓ (3/3)
+[PASS] (3/3)
 
-✓ Recovery phrase verified
-✓ Vault initialized successfully
+[PASS] Recovery phrase verified
+[PASS] Vault initialized successfully
 ```
 
 ### Skipping Recovery Phrase
@@ -81,17 +81,17 @@ pass-cli init --no-recovery
 **CRITICAL**: Write down your 24-word phrase **on paper** (not digitally). Store it securely:
 
 **Secure Storage** (Recommended):
-- ✅ Physical safe or lockbox
-- ✅ Safety deposit box at bank
-- ✅ Fireproof/waterproof document safe at home
-- ✅ Split across multiple secure locations (advanced)
+- [OK] Physical safe or lockbox
+- [OK] Safety deposit box at bank
+- [OK] Fireproof/waterproof document safe at home
+- [OK] Split across multiple secure locations (advanced)
 
 **Insecure Storage** (Avoid):
-- ❌ Digital notes apps (Apple Notes, Google Keep, etc.)
-- ❌ Cloud storage (Dropbox, Google Drive, iCloud)
-- ❌ Email or messaging apps
-- ❌ Screenshots or photos on phone
-- ❌ Password managers (defeats the purpose)
+- [ERROR] Digital notes apps (Apple Notes, Google Keep, etc.)
+- [ERROR] Cloud storage (Dropbox, Google Drive, iCloud)
+- [ERROR] Email or messaging apps
+- [ERROR] Screenshots or photos on phone
+- [ERROR] Password managers (defeats the purpose)
 
 **Keep your phrase offline**. If someone gets your phrase, they can access your vault.
 
@@ -100,9 +100,9 @@ pass-cli init --no-recovery
 ### When to Use Recovery
 
 Use recovery if:
-- ✅ You forgot your master password
-- ✅ You have your 24-word recovery phrase
-- ✅ Recovery was enabled during `pass-cli init`
+- [OK] You forgot your master password
+- [OK] You have your 24-word recovery phrase
+- [OK] Recovery was enabled during `pass-cli init`
 
 **Note**: If keychain is enabled and accessible, you don't need recovery. Your master password is stored securely in your OS keychain.
 
@@ -125,25 +125,25 @@ You will be asked for 6 words from your 24-word phrase.
 Have your recovery phrase ready.
 
 Enter word #18: identify
-✓ (1/6)
+[PASS] (1/6)
 
 Enter word #3: about
-✓ (2/6)
+[PASS] (2/6)
 
 Enter word #22: spin
-✓ (3/6)
+[PASS] (3/6)
 
 Enter word #7: device
-✓ (4/6)
+[PASS] (4/6)
 
 Enter word #11: diary
-✓ (5/6)
+[PASS] (5/6)
 
 Enter word #15: hybrid
-✓ (6/6)
+[PASS] (6/6)
 
-✓ Recovery phrase verified
-✓ Vault unlocked
+[PASS] Recovery phrase verified
+[PASS] Vault unlocked
 ```
 
 #### Step 3: Set New Master Password
@@ -152,7 +152,7 @@ Enter word #15: hybrid
 Enter new master password: ****
 Confirm new master password: ****
 
-✓ Master password changed successfully
+[PASS] Master password changed successfully
 Your vault has been re-encrypted with the new password.
 ```
 
@@ -191,22 +191,22 @@ Your vault is now accessible with your new master password. If keychain integrat
 ### What Never to Do
 
 **Never Store Digitally**:
-- ❌ Photos or screenshots
-- ❌ Cloud storage services
-- ❌ Email or messaging apps
-- ❌ Password managers
-- ❌ Digital note-taking apps
+- [ERROR] Photos or screenshots
+- [ERROR] Cloud storage services
+- [ERROR] Email or messaging apps
+- [ERROR] Password managers
+- [ERROR] Digital note-taking apps
 
 **Never Share**:
-- ❌ Don't tell anyone your recovery phrase
-- ❌ Pass-CLI will never ask for your full phrase
-- ❌ No support person needs your recovery phrase
-- ❌ Recovery phrase = full vault access
+- [ERROR] Don't tell anyone your recovery phrase
+- [ERROR] Pass-CLI will never ask for your full phrase
+- [ERROR] No support person needs your recovery phrase
+- [ERROR] Recovery phrase = full vault access
 
 **Never Memorize Only**:
-- ❌ Human memory is fallible
-- ❌ Always have physical backup
-- ❌ Don't rely on memory alone
+- [ERROR] Human memory is fallible
+- [ERROR] Always have physical backup
+- [ERROR] Don't rely on memory alone
 
 ### Testing Your Backup
 
@@ -216,14 +216,19 @@ After writing down your recovery phrase:
 2. **Store phrase securely** before testing recovery
 3. **Optional**: Test recovery in safe environment:
    ```bash
-   # Create test vault
-   pass-cli init --config /tmp/test-config.yaml
-   
-   # Test recovery
-   pass-cli change-password --recover --config /tmp/test-config.yaml
-   
-   # Clean up test vault
-   rm -rf /tmp/test-config.yaml ~/.pass-cli/vault.enc
+   # Backup existing config (if any)
+   cp ~/.pass-cli/config.yml ~/.pass-cli/config.yml.backup 2>/dev/null
+
+   # Point to temporary test vault
+   echo "vault_path: /tmp/test-vault.enc" > ~/.pass-cli/config.yml
+
+   # Create test vault and test recovery
+   pass-cli init
+   pass-cli change-password --recover
+
+   # Restore original config and clean up
+   mv ~/.pass-cli/config.yml.backup ~/.pass-cli/config.yml 2>/dev/null || rm ~/.pass-cli/config.yml
+   rm -f /tmp/test-vault.enc
    ```
 
 ## Advanced: Passphrase Protection
@@ -242,20 +247,20 @@ Advanced: Add passphrase protection? (y/N): y
 Enter passphrase (optional 25th word): ****
 Confirm passphrase: ****
 
-✓ Passphrase protection enabled
+[PASS] Passphrase protection enabled
 ```
 
 ### Security Trade-offs
 
 **Benefits**:
-- ✅ Even if someone finds your 24 words, they still need the passphrase
-- ✅ Plausible deniability (can have multiple vaults with same phrase + different passphrases)
-- ✅ Extra layer of security
+- [OK] Even if someone finds your 24 words, they still need the passphrase
+- [OK] Plausible deniability (can have multiple vaults with same phrase + different passphrases)
+- [OK] Extra layer of security
 
 **Risks**:
-- ❌ If you lose the passphrase, you **cannot** recover your vault
-- ❌ Must remember/store passphrase separately from 24-word phrase
-- ❌ More complex recovery process
+- [ERROR] If you lose the passphrase, you **cannot** recover your vault
+- [ERROR] Must remember/store passphrase separately from 24-word phrase
+- [ERROR] More complex recovery process
 
 **Recommendation**: Only use passphrase protection if you:
 - Understand the risks

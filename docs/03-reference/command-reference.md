@@ -71,7 +71,7 @@ pass-cli init
 | `--use-keychain` | bool | Store master password in OS keychain |
 | `--no-recovery` | bool | Skip BIP39 recovery phrase generation |
 
-#### Password Policy (January 2025)
+#### Password Policy
 
 All master passwords must meet complexity requirements:
 - **Minimum Length**: 12 characters
@@ -81,10 +81,10 @@ All master passwords must meet complexity requirements:
 - **Symbol**: At least one special symbol (!@#$%^&*()-_=+[]{}|;:,.<>?)
 
 **Examples**:
-- ✅ `MySecureP@ssw0rd2025!` (meets all requirements)
-- ✅ `Correct-Horse-Battery-29!` (meets all requirements)
-- ❌ `password123` (too short, no uppercase, no symbol)
-- ❌ `MyPassword` (no digit, no symbol)
+- [OK] `MySecureP@ssw0rd2025!` (meets all requirements)
+- [OK] `Correct-Horse-Battery-29!` (meets all requirements)
+- [ERROR] `password123` (too short, no uppercase, no symbol)
+- [ERROR] `MyPassword` (no digit, no symbol)
 
 #### Audit Logging (Optional)
 
@@ -140,7 +140,7 @@ pass-cli init --no-recovery
 - You keep master password in another password manager
 - You prefer single point of failure (master password only)
 
-For detailed recovery procedures, see [Recovery Phrase Guide](../../02-guides/recovery-phrase.md) and [Security Architecture](security-architecture.md#bip39-recovery-phrase).
+For detailed recovery procedures, see [Recovery Phrase Guide](../02-guides/recovery-phrase.md) and [Security Architecture](security-architecture.md#bip39-recovery-phrase).
 
 #### Notes
 
@@ -220,7 +220,7 @@ pass-cli add github \
 
 When not using flags, you'll be prompted:
 
-```
+```text
 Enter username: user@example.com
 Enter password: ******* (hidden input)
 Enter URL (optional): https://github.com
@@ -268,6 +268,7 @@ pass-cli get <service> [flags]
 For `--field` flag:
 - `username` - User's username
 - `password` - User's password
+- `category` - Credential category
 - `url` - Service URL
 - `notes` - Additional notes
 - `service` - Service name
@@ -302,14 +303,14 @@ pass-cli get github --masked
 #### Output Examples
 
 **Default output:**
-```
+```text
 Service:  github
 Username: user@example.com
 Password: mySecretPassword123!
 URL:      https://github.com
 Notes:    Personal account
 
-✓ Password copied to clipboard (will clear in 5 seconds)
+[PASS] Password copied to clipboard (will clear in 5 seconds)
 ```
 
 **Quiet mode:**
@@ -346,9 +347,12 @@ pass-cli list [flags]
 
 | Flag | Type | Description |
 |------|------|-------------|
-| `--format` | string | Output format: table, json, simple (default: table) |
+| `--format`, `-f` | string | Output format: table, json, simple (default: table) |
 | `--unused` | bool | Show only unused credentials |
 | `--days` | int | Days threshold for unused (default: 30) |
+| `--by-project` | bool | Group credentials by git repository |
+| `--location` | string | Filter credentials by directory path |
+| `--recursive` | bool | Include subdirectories with --location |
 
 #### Examples
 
@@ -367,12 +371,27 @@ pass-cli list --unused
 
 # Show credentials not used in 90 days
 pass-cli list --unused --days 90
+
+# Group credentials by git repository
+pass-cli list --by-project
+
+# Group by project with JSON output
+pass-cli list --by-project --format json
+
+# Filter by location (current directory)
+pass-cli list --location .
+
+# Filter by location with subdirectories
+pass-cli list --location /home/user/projects --recursive
+
+# Combine location filter with project grouping
+pass-cli list --location ~/work --by-project --recursive
 ```
 
 #### Output Examples
 
 **Table format (default):**
-```
+```text
 +----------+----------------------+---------------------+
 | SERVICE  | USERNAME             | LAST ACCESSED       |
 +----------+----------------------+---------------------+
@@ -383,7 +402,7 @@ pass-cli list --unused --days 90
 ```
 
 **Simple format:**
-```
+```text
 github
 aws-prod
 database
@@ -468,7 +487,7 @@ pass-cli update github \
 
 If no flags provided, prompts for password:
 
-```
+```text
 Enter new password (leave blank to keep current): *******
 Password updated successfully!
 ```
@@ -491,6 +510,10 @@ Delete a credential from the vault.
 pass-cli delete <service> [flags]
 ```
 
+#### Aliases
+
+`rm`, `remove`
+
 #### Flags
 
 | Flag | Short | Type | Description |
@@ -512,7 +535,7 @@ pass-cli delete github -f
 
 Without `--force`:
 
-```
+```text
 Are you sure you want to delete 'github'? (yes/no): yes
 Credential 'github' deleted successfully!
 ```
@@ -567,7 +590,7 @@ pass-cli change-password --recover
 #### Interactive Flow
 
 **Normal password change:**
-```
+```text
 🔐 Change Master Password
 📁 Vault location: /home/user/.pass-cli/vault.enc
 
@@ -575,20 +598,20 @@ Enter current master password: ********
 
 Enter new master password (min 12 characters with uppercase, lowercase, digit, symbol): ********
 
-Password strength: Strong ✅
-- Length: 16 characters ✅
-- Uppercase: Yes ✅
-- Lowercase: Yes ✅
-- Digits: Yes ✅
-- Symbols: Yes ✅
+Password strength: Strong [OK]
+- Length: 16 characters [OK]
+- Uppercase: Yes [OK]
+- Lowercase: Yes [OK]
+- Digits: Yes [OK]
+- Symbols: Yes [OK]
 
 Confirm new master password: ********
 
-✅ Master password changed successfully!
+[OK] Master password changed successfully!
 ```
 
 **Recovery flow with BIP39 phrase:**
-```
+```text
 🔐 Recover Vault Access
 📁 Vault location: /home/user/.pass-cli/vault.enc
 
@@ -599,29 +622,29 @@ BIP39 Recovery Phrase Challenge
 You will be asked to provide 6 words from your 24-word recovery phrase.
 
 Enter word #7: device
-✓ (1/6)
+[PASS] (1/6)
 
 Enter word #12: diesel
-✓ (2/6)
+[PASS] (2/6)
 
 Enter word #18: identify
-✓ (3/6)
+[PASS] (3/6)
 
 Enter word #3: about
-✓ (4/6)
+[PASS] (4/6)
 
 Enter word #22: spin
-✓ (5/6)
+[PASS] (5/6)
 
 Enter word #15: hybrid
-✓ (6/6)
+[PASS] (6/6)
 
-✅ Recovery phrase verified successfully!
+[OK] Recovery phrase verified successfully!
 
 Enter new master password: ********
 Confirm new master password: ********
 
-✅ Master password changed successfully!
+[OK] Master password changed successfully!
 Your vault has been re-encrypted with the new password.
 ```
 
@@ -650,10 +673,10 @@ If you used `--no-recovery` during initialization, the `--recover` flag will not
 
 #### See Also
 
-- [Password Policy]({{< relref "security-architecture#password-policy" >}}) - Password policy details
-- [BIP39 Recovery]({{< relref "security-architecture#bip39-recovery-phrase" >}}) - Recovery phrase details
-- [Recovery Guide]({{< relref "../02-guides/recovery-phrase" >}}) - Detailed recovery procedures
-- [Keychain Setup]({{< relref "../02-guides/keychain-setup" >}}) - Keychain integration
+- [Password Policy](security-architecture#password-policy) - Password policy details
+- [BIP39 Recovery](security-architecture#bip39-recovery-phrase) - Recovery phrase details
+- [Recovery Guide](../02-guides/recovery-phrase) - Detailed recovery procedures
+- [Keychain Setup](../02-guides/keychain-setup) - Keychain integration
 
 ---
 
@@ -724,43 +747,27 @@ Default character sets:
 
 ### version - Show Version
 
-Display version information.
+Display version information including build details.
 
 #### Synopsis
 
 ```bash
-pass-cli version [flags]
+pass-cli version
 ```
-
-#### Flags
-
-| Flag | Type | Description |
-|------|------|-------------|
-| `--verbose` | bool | Show detailed version info |
 
 #### Examples
 
 ```bash
 # Show version
 pass-cli version
-
-# Verbose version info
-pass-cli version --verbose
 ```
 
-#### Output Examples
+#### Output
 
-**Default:**
-```
-pass-cli version X.Y.Z
-```
-
-**Verbose:**
-```
-pass-cli version X.Y.Z
+```text
+pass-cli X.Y.Z
   commit: abc123f
   built:  2025-01-20T10:30:00Z
-  go:     go1.25.1
 ```
 
 ---
@@ -820,14 +827,14 @@ pass-cli usage redis --format simple
 
 #### Output (Table Format)
 
-```
+```text
 Usage History for 'github':
 
 Location                                    Git Repo             Last Access          Count  Fields
 ──────────────────────────────────────────────────────────────────────────────────────────────────
-/home/user/projects/webapp                  ✓ webapp             2025-11-12 14:30     12     password(8), username(4)
-/home/user/projects/api-service             ✓ api-service        2025-11-10 09:15     5      password(5)
-/home/user/scripts                          ✗ (not a git repo)   2025-11-08 16:45     3      password(2), url(1)
+/home/user/projects/webapp                  [PASS] webapp             2025-11-12 14:30     12     password(8), username(4)
+/home/user/projects/api-service             [PASS] api-service        2025-11-10 09:15     5      password(5)
+/home/user/scripts                          [FAIL] (not a git repo)   2025-11-08 16:45     3      password(2), url(1)
 
 Total locations: 3
 Total accesses: 20
@@ -858,7 +865,7 @@ Total accesses: 20
 
 #### Output (Simple Format)
 
-```
+```text
 /home/user/projects/webapp
 /home/user/projects/api-service
 /home/user/scripts
@@ -866,7 +873,7 @@ Total accesses: 20
 
 #### Notes
 
-- **Path Validation**: Shows ✓ if location path still exists, ✗ if deleted
+- **Path Validation**: Shows [PASS] if location path still exists, [FAIL] if deleted
 - **Git Integration**: Detects git repositories and shows repo name
 - **Field Tracking**: Counts which credential fields were accessed
 - **Automatic**: Usage tracked automatically on every `get` command
@@ -874,7 +881,7 @@ Total accesses: 20
 
 #### See Also
 
-- [Usage Tracking Guide]({{< relref "../02-guides/usage-tracking" >}}) - Comprehensive usage tracking guide
+- [Usage Tracking Guide](../02-guides/usage-tracking) - Comprehensive usage tracking guide
 
 ---
 
@@ -900,7 +907,7 @@ Manages settings for:
 
 #### Subcommands
 
-##### config init
+##### Config Init
 
 Create configuration file with commented examples.
 
@@ -919,8 +926,8 @@ pass-cli config init
 ```
 
 **Output:**
-```
-✅ Configuration file created: /home/user/.pass-cli/config.yml
+```text
+[OK] Configuration file created: /home/user/.pass-cli/config.yml
 
 Edit the file to customize your settings:
 - Terminal warnings
@@ -928,7 +935,7 @@ Edit the file to customize your settings:
 - Vault location
 ```
 
-##### config edit
+##### Config Edit
 
 Open configuration file in your default editor.
 
@@ -953,7 +960,7 @@ pass-cli config edit
 EDITOR=vim pass-cli config edit
 ```
 
-##### config validate
+##### Config Validate
 
 Validate configuration file syntax and settings.
 
@@ -981,8 +988,8 @@ pass-cli config validate
 ```
 
 **Output (Valid):**
-```
-✅ Configuration is valid
+```text
+[OK] Configuration is valid
 
 Settings:
   Vault path: ~/.pass-cli/vault.enc
@@ -991,8 +998,8 @@ Settings:
 ```
 
 **Output (Invalid):**
-```
-❌ Configuration has errors:
+```text
+[ERROR] Configuration has errors:
 
 Line 12: Invalid terminal width: 0 (must be between 1-10000)
 Line 25: Duplicate keybinding: Ctrl+S assigned to both 'save' and 'search'
@@ -1001,43 +1008,33 @@ Line 34: Unknown action: 'invalid_action'
 Fix these errors and run 'config validate' again.
 ```
 
-##### config reset
+##### Config Reset
 
 Reset configuration to default values.
 
 **Synopsis:**
 ```bash
-pass-cli config reset [flags]
+pass-cli config reset
 ```
 
-**Flags:**
-| Flag | Type | Description |
-|------|------|-------------|
-| `--force`, `-f` | bool | Skip confirmation prompt |
-
 **Description:**
-Overwrites existing config file with defaults. Requires confirmation unless `--force` flag is used.
+Resets the configuration file to default values. Creates a backup of your current config at `<config-path>.backup` before overwriting.
 
 **Examples:**
 ```bash
-# Reset with confirmation
+# Reset config to defaults (creates backup automatically)
 pass-cli config reset
-
-# Reset without confirmation
-pass-cli config reset --force
 ```
 
 **Output:**
-```
-⚠️  This will overwrite your current configuration.
-Are you sure you want to reset to defaults? (y/n): y
-
-✅ Configuration reset to defaults: /home/user/.pass-cli/config.yml
+```text
+Config file backed up to /home/user/.pass-cli/config.yml.backup
+Config file reset to defaults at /home/user/.pass-cli/config.yml
 ```
 
 #### See Also
 
-- [Configuration Reference]({{< relref "configuration" >}}) - Configuration file reference
+- [Configuration Reference](configuration) - Configuration file reference
 
 ---
 
@@ -1053,7 +1050,7 @@ pass-cli keychain <subcommand>
 
 #### Subcommands
 
-##### keychain enable
+##### Keychain Enable
 
 Enable keychain integration for an existing vault by storing the master password in the system keychain.
 
@@ -1083,15 +1080,15 @@ pass-cli keychain enable --force
 ```
 
 **Output:**
-```
+```text
 Master password: ********
 
-✅ Keychain integration enabled for vault at /home/user/.pass-cli/vault.enc
+[OK] Keychain integration enabled for vault at /home/user/.pass-cli/vault.enc
 
 Future commands will not prompt for password when keychain is available.
 ```
 
-##### keychain status
+##### Keychain Status
 
 Display keychain integration status for the current vault.
 
@@ -1114,34 +1111,34 @@ pass-cli keychain status
 **Output Examples:**
 
 **When keychain is enabled:**
-```
+```text
 Keychain Status for /home/user/.pass-cli/vault.enc:
 
-✓ System Keychain:        Available (keychain)
-✓ Password Stored:        Yes
-✓ Backend:                keychain
+[PASS] System Keychain:        Available (keychain)
+[PASS] Password Stored:        Yes
+[PASS] Backend:                keychain
 
 Your vault password is securely stored in the system keychain.
 Future commands will not prompt for password.
 ```
 
 **When keychain is available but not enabled:**
-```
+```text
 Keychain Status for /home/user/.pass-cli/vault.enc:
 
-✓ System Keychain:        Available (wincred)
-✗ Password Stored:        No
+[PASS] System Keychain:        Available (wincred)
+[FAIL] Password Stored:        No
 
 The system keychain is available but no password is stored for this vault.
 Run 'pass-cli keychain enable' to store your password and skip future prompts.
 ```
 
 **When keychain is not available:**
-```
+```text
 Keychain Status for /home/user/.pass-cli/vault.enc:
 
-✗ System Keychain:        Not available on this platform
-✗ Password Stored:        N/A
+[FAIL] System Keychain:        Not available on this platform
+[FAIL] Password Stored:        N/A
 
 System keychain is not accessible. You will be prompted for password on each command.
 ```
@@ -1166,7 +1163,7 @@ pass-cli vault <subcommand>
 
 #### Subcommands
 
-##### vault remove
+##### Vault Remove
 
 Permanently delete a vault file and its associated keychain entry.
 
@@ -1181,7 +1178,7 @@ Permanently deletes:
 2. The master password from the system keychain
 3. Any orphaned keychain entries
 
-**⚠️ WARNING:** This operation is irreversible. All stored credentials will be lost. Ensure you have backups before proceeding.
+**[WARNING] WARNING:** This operation is irreversible. All stored credentials will be lost. Ensure you have backups before proceeding.
 
 **Arguments:**
 
@@ -1209,17 +1206,17 @@ pass-cli vault remove /path/to/vault.enc --force
 ```
 
 **Output:**
-```
-⚠️  WARNING: This will permanently delete the vault and all stored credentials.
+```text
+[WARNING]  WARNING: This will permanently delete the vault and all stored credentials.
 Are you sure you want to remove /home/user/.pass-cli/vault.enc? (y/n): y
 
-✅ Vault removed successfully:
+[OK] Vault removed successfully:
    • Vault file deleted
    • Keychain entry removed
    • Orphaned entries cleaned up
 ```
 
-##### vault backup
+##### Vault Backup
 
 Manage vault backups for disaster recovery.
 
@@ -1228,7 +1225,7 @@ Manage vault backups for disaster recovery.
 pass-cli vault backup <subcommand>
 ```
 
-###### vault backup create
+###### Vault Backup Create
 
 Create a timestamped manual backup of the vault.
 
@@ -1256,13 +1253,13 @@ pass-cli vault backup create --verbose
 ```
 
 **Output:**
-```
-✅ Manual backup created successfully:
+```text
+[OK] Manual backup created successfully:
    /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
    Size: 2.45 MB
 ```
 
-###### vault backup restore
+###### Vault Backup Restore
 
 Restore vault from the most recent backup.
 
@@ -1274,7 +1271,7 @@ pass-cli vault backup restore [flags]
 **Description:**
 Automatically selects the newest valid backup (automatic or manual) and restores it. Considers both `vault.enc.backup` (automatic) and `vault.enc.*.manual.backup` files.
 
-**⚠️ WARNING:** This command overwrites your current vault file with the backup.
+**[WARNING] WARNING:** This command overwrites your current vault file with the backup.
 
 **Flags:**
 
@@ -1300,18 +1297,18 @@ pass-cli vault backup restore --verbose
 ```
 
 **Output:**
-```
+```text
 Found backup: /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
 Backup age: 2 hours ago
 Size: 2.45 MB
 
-⚠️  This will overwrite your current vault file.
+[WARNING]  This will overwrite your current vault file.
 Are you sure you want to restore from this backup? (y/n): y
 
-✅ Vault restored successfully from backup
+[OK] Vault restored successfully from backup
 ```
 
-###### vault backup info
+###### Vault Backup Info
 
 View backup status and information.
 
@@ -1344,20 +1341,20 @@ pass-cli vault backup info --verbose
 ```
 
 **Output:**
-```
+```text
 📦 Backup Status for: /home/user/.pass-cli/vault.enc
 
 Automatic Backup:
-  ✅ vault.enc.backup
+  [OK] vault.enc.backup
      Size: 2.45 MB
      Created: 1 day ago (2025-11-11 14:30:22)
 
 Manual Backups:
-  ✅ vault.enc.20251112-143022.manual.backup ← Would be used for restore
+  [OK] vault.enc.20251112-143022.manual.backup ← Would be used for restore
      Size: 2.45 MB
      Created: 2 hours ago (2025-11-12 14:30:22)
 
-  ✅ vault.enc.20251110-091545.manual.backup
+  [OK] vault.enc.20251110-091545.manual.backup
      Size: 2.40 MB
      Created: 2 days ago (2025-11-10 09:15:45)
 
@@ -1366,7 +1363,7 @@ Total disk space: 7.30 MB
 ```
 
 **See Also:**
-- [Backup & Restore Guide]({{< relref "../02-guides/backup-restore" >}}) - Comprehensive backup guide
+- [Backup & Restore Guide](../02-guides/backup-restore) - Comprehensive backup guide
 
 ---
 
@@ -1421,24 +1418,24 @@ PASS_AUDIT_LOG=/custom/audit.log pass-cli verify-audit
 
 #### Output (All Valid)
 
-```
+```text
 🔍 Verifying audit log: /home/user/.pass-cli/audit.log
 
-✅ Audit log verification complete:
+[OK] Audit log verification complete:
    Total entries: 127
    Valid entries: 127
    Invalid entries: 0
    Tampered entries: 0
 
-Audit log integrity: VERIFIED ✅
+Audit log integrity: VERIFIED [OK]
 ```
 
 #### Output (Tampered Detected)
 
-```
+```text
 🔍 Verifying audit log: /home/user/.pass-cli/audit.log
 
-⚠️  Audit log verification failed:
+[WARNING]  Audit log verification failed:
    Total entries: 127
    Valid entries: 123
    Invalid entries: 4
@@ -1450,7 +1447,7 @@ Invalid entries detected:
   Line 89: Invalid JSON structure
   Line 102: Missing required fields
 
-Audit log integrity: FAILED ❌
+Audit log integrity: FAILED [ERROR]
 
 CRITICAL: Audit log may have been tampered with or corrupted.
 Review the log file and investigate the flagged entries.
@@ -1489,39 +1486,130 @@ Review the log file and investigate the flagged entries.
 
 #### See Also
 
-- [Audit Logging]({{< relref "security-architecture#audit-logging" >}}) - Audit logging architecture
-- [Security Operations]({{< relref "../05-operations/security-operations" >}}) - Security best practices
+- [Audit Logging](security-architecture#audit-logging) - Audit logging architecture
+- [Security Operations](../05-operations/security-operations) - Security best practices
 
 ---
 
-**Use Cases:**
-- Decommissioning a vault that's no longer needed
+### doctor - System Health Check
+
+Run diagnostic checks on your pass-cli installation.
+
+#### Synopsis
+
+```bash
+pass-cli doctor [flags]
+```
+
+#### Description
+
+Performs comprehensive health checks on your vault, configuration, keychain integration, and backups. Useful for troubleshooting issues or verifying system state.
+
+**Checks Performed:**
+1. **Version Check**: Compares installed version against latest release
+2. **Vault Check**: Verifies vault file exists and has correct permissions
 3. **Config Check**: Validates configuration syntax and settings
 4. **Keychain Check**: Tests OS keychain integration status
 5. **Backup Check**: Verifies backup files exist and are accessible
 
-**Exit Codes**:
-- `0` = All checks passed (HEALTHY)
-- `1` = Warnings detected (review recommended)
-- `2` = Errors detected (action required)
+#### Flags
 
-**Example Output**:
+| Flag | Type | Description |
+|------|------|-------------|
+| `--json` | bool | Output results as JSON |
+| `--quiet` | bool | Only show warnings and errors |
+| `--verbose`, `-v` | bool | Verbose output with detailed check execution |
+
+#### Examples
+
+```bash
+# Run all health checks
+pass-cli doctor
+
+# Output as JSON (for scripts)
+pass-cli doctor --json
+
+# Show only problems
+pass-cli doctor --quiet
+
+# Verbose mode (detailed check execution)
+pass-cli doctor --verbose
 ```
-Health Check Results
-====================
 
-✓ Version: v1.2.3 (up to date)
-✓ Vault: vault.enc accessible (600 permissions)
-✓ Config: Valid configuration
-✓ Keychain: Integration active
-✓ Backup: 3 backup files found
+#### Exit Codes
 
-Overall Status: HEALTHY
+| Code | Meaning |
+|------|---------|
+| 0 | All checks passed (HEALTHY) |
+| 1 | Warnings detected (review recommended) |
+| 2 | Errors detected (action required) |
+
+#### See Also
+
+- [Health Checks Guide](../05-operations/health-checks) - Detailed documentation and troubleshooting
+
+---
+
+### tui - Interactive Terminal Interface
+
+Launch the interactive terminal user interface.
+
+#### Synopsis
+
+```bash
+pass-cli tui
+pass-cli        # Also launches TUI when no command specified
 ```
 
-See [Health Checks]({{< relref "../05-operations/health-checks" >}}) for detailed documentation and troubleshooting.
+#### Description
 
-#### Why does doctor report orphaned keychain entries?
+Opens an interactive terminal interface for browsing and managing credentials. The TUI provides keyboard-driven navigation, search, and credential operations without memorizing CLI commands.
+
+**Features:**
+- Sidebar navigation with credential tree
+- Detail panel with credential information
+- Search and filter credentials
+- Add, edit, and delete credentials
+- Copy passwords to clipboard
+- Usage statistics display
+
+#### Flags
+
+None.
+
+#### Examples
+
+```bash
+# Launch TUI explicitly
+pass-cli tui
+
+# Launch TUI (default when no command given)
+pass-cli
+```
+
+#### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `Tab` | Switch between panels |
+| `Enter` | Select/expand item |
+| `Esc` | Cancel/go back |
+| `/` | Search |
+| `a` | Add credential |
+| `e` | Edit credential |
+| `d` | Delete credential |
+| `c` | Copy password |
+| `q` | Quit |
+
+#### See Also
+
+- [TUI Guide](../02-guides/tui-guide) - Complete TUI documentation and customization
+
+---
+
+### Troubleshooting
+
+#### Why Does Doctor Report Orphaned Keychain Entries?
 
 **Symptom**: Doctor reports "⚠ Keychain: Orphaned entry detected"
 
@@ -1530,51 +1618,27 @@ See [Health Checks]({{< relref "../05-operations/health-checks" >}}) for detaile
 - Vault path changed but old keychain entry wasn't cleaned up
 - Multiple vaults were created and old entries weren't removed
 
-**Impact**: Low - orphaned entries don't affect current vault operations, but clutter the keychain
-
 **Solutions**:
 
-**Option 1: Clean up manually** (macOS):
+**macOS**:
 ```bash
-# Open Keychain Access
 open -a "Keychain Access"
-
-# Search for "pass-cli"
-# Delete old/orphaned entries
+# Search for "pass-cli" and delete old entries
 ```
 
-**Option 2: Clean up manually** (Windows):
+**Windows**:
 ```powershell
-# Open Credential Manager
 control /name Microsoft.CredentialManager
-
-# Navigate to "Windows Credentials"
-# Remove old "pass-cli" entries
+# Navigate to "Windows Credentials" and remove old "pass-cli" entries
 ```
 
-**Option 3: Clean up manually** (Linux):
+**Linux**:
 ```bash
-# List all pass-cli keychain entries
 secret-tool search service pass-cli
-
-# Delete specific entry
 secret-tool clear service pass-cli vault /old/path/vault.enc
 ```
 
-**Prevention**: When deleting or moving vaults, remove the keychain entry first using your OS credential manager:
-
-```bash
-# Windows
-cmdkey /delete:pass-cli
-
-# macOS
-security delete-generic-password -s "pass-cli" -a "$USER"
-
-# Linux
-secret-tool clear service pass-cli vault /old/path/vault.enc
-```
-
-#### What if first-run detection doesn't trigger?
+#### What If First-Run Detection Doesn't Trigger?
 
 **Expected Behavior**: When running vault-requiring commands (`add`, `get`, `list`, `update`, `delete`) for the first time without an existing vault, pass-cli offers guided initialization.
 
@@ -1633,12 +1697,12 @@ tty  # Should show /dev/pts/X or similar, not "not a tty"
 pass-cli init
 ```
 
-See [Quick Start Guide]({{< relref "../01-getting-started/quick-start" >}}) for complete first-run documentation.
+See [Quick Start Guide](../01-getting-started/quick-start) for complete first-run documentation.
 
 ## Getting Help
 
 - Run any command with `--help` flag
 - See [pass-cli Documentation](https://ari1110.github.io/pass-cli/) for overview
-- Check [Troubleshooting]({{< relref "../04-troubleshooting/_index" >}}) for common issues
+- Check [Troubleshooting](../04-troubleshooting/_index) for common issues
 - Visit [GitHub Issues](https://github.com/ari1110/pass-cli/issues)
 

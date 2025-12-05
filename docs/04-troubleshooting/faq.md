@@ -78,10 +78,10 @@ You'll be prompted to enter 6 words from your 24-word recovery phrase to verify 
 **Q: Is my data sent to the cloud?**
 
 A: No. Pass-CLI:
-- ✅ Works completely offline
-- ✅ Never makes network calls
-- ✅ Stores everything locally
-- ✅ No telemetry or tracking
+- [OK] Works completely offline
+- [OK] Never makes network calls
+- [OK] Stores everything locally
+- [OK] No telemetry or tracking
 
 ---
 
@@ -114,7 +114,7 @@ pass-cli list --format json | jq '.[] | .service'
 
 **Q: How secure is Pass-CLI?**
 
-A: See [Security Architecture]({{< relref "../03-reference/security-architecture" >}}) for full details:
+A: See [Security Architecture](../03-reference/security-architecture) for full details:
 - AES-256-GCM encryption
 - PBKDF2 key derivation (600,000 iterations as of January 2025)
 - System keychain integration

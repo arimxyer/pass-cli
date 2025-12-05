@@ -3,14 +3,14 @@ title: "Migration"
 weight: 5
 toc: true
 ---
-Guide for upgrading Pass-CLI vaults and adapting to security hardening changes (January 2025 release).
+Guide for upgrading Pass-CLI vaults and adapting to security hardening changes introduced in v0.3.0.
 
 ![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
 
 
 ## Overview
 
-The January 2025 security hardening release introduces several important changes:
+The v0.3.0 security hardening release introduces several important changes:
 
 1. **Vault Location Configuration**: `--vault` flag removed, use config file instead
 2. **Increased PBKDF2 Iterations**: 100,000 → 600,000 (6x stronger)
@@ -198,26 +198,9 @@ pass-cli get github
 
 **Time Required**: ~5-10 minutes for 20 credentials.
 
-### Option B: In-Place Migration (Future Feature)
+### Option B: In-Place Migration (Planned)
 
-> **⚠️ WARNING**: This feature is **NOT YET IMPLEMENTED**. The `pass-cli migrate` command does not currently exist. Use Option A (Manual Migration) instead.
-
-**Status**: Not yet implemented. Planned for future release.
-
-**Planned Command** (for future reference only):
-```bash
-# Future: Migrate vault to 600k iterations in-place
-pass-cli migrate --iterations 600000
-
-# Future: Migrate with audit logging enabled
-pass-cli migrate --iterations 600000 --enable-audit
-```
-
-**Expected Behavior**:
-- Reads existing vault with current iteration count
-- Re-encrypts all credentials with 600k iterations
-- Creates backup automatically
-- Atomic operation (rollback on failure)
+> **Note**: An automated `pass-cli migrate` command is planned for a future release. Until then, use Option A (Fresh Vault) or Option C (Hybrid Approach).
 
 ### Option C: Hybrid Approach (Keep Old Vault)
 
@@ -225,37 +208,38 @@ pass-cli migrate --iterations 600000 --enable-audit
 
 **Steps**:
 
-1. **Create new vault in custom location**:
+1. **Create new vault in separate location**:
    ```bash
-   # Create config for new vault
-   mkdir -p ~/.pass-cli
-   echo "vault_path: ~/.pass-cli/vault-new.enc" > ~/.pass-cli/config-new.yml
+   # Backup current config
+   cp ~/.pass-cli/config.yml ~/.pass-cli/config.yml.backup
 
-   # Initialize new vault
-   pass-cli --config ~/.pass-cli/config-new.yml init --enable-audit
+   # Point config to new vault location
+   echo "vault_path: ~/.pass-cli/vault-new.enc" > ~/.pass-cli/config.yml
+
+   # Initialize new vault (uses 600k iterations)
+   pass-cli init --enable-audit
    ```
 
 2. **Add new credentials to new vault**:
    ```bash
-   pass-cli --config ~/.pass-cli/config-new.yml add newservice
+   pass-cli add newservice
    ```
 
-3. **Keep old vault for existing credentials**:
+3. **Switch back to old vault when needed**:
    ```bash
-   # Use default config (points to ~/.pass-cli/vault.enc)
+   # Restore original config to access old vault
+   cp ~/.pass-cli/config.yml.backup ~/.pass-cli/config.yml
    pass-cli get oldservice
    ```
 
-4. **Switch to new vault when ready**:
+4. **Promote new vault when ready**:
    ```bash
-   # Backup old vault
-   mv ~/.pass-cli/vault.enc ~/.pass-cli/vault-old-backup.enc
+   # Point config back to new vault
+   echo "vault_path: ~/.pass-cli/vault-new.enc" > ~/.pass-cli/config.yml
 
-   # Promote new vault to default
+   # Or rename new vault to default location
    mv ~/.pass-cli/vault-new.enc ~/.pass-cli/vault.enc
-
-   # Update default config (or remove custom config file)
-   rm ~/.pass-cli/config-new.yml
+   rm ~/.pass-cli/config.yml  # Use default location
    ```
 
 ## Backward Compatibility
@@ -263,39 +247,39 @@ pass-cli migrate --iterations 600000 --enable-audit
 ### Vault File Format
 
 **100k Iteration Vaults**:
-- ✅ Fully supported
-- ✅ Auto-detected by iteration count in metadata
-- ✅ No performance degradation
-- ✅ Can be used alongside 600k vaults
+- [OK] Fully supported
+- [OK] Auto-detected by iteration count in metadata
+- [OK] No performance degradation
+- [OK] Can be used alongside 600k vaults
 
 **600k Iteration Vaults**:
-- ⚠️ **Not compatible with older Pass-CLI versions** (pre-January 2025)
-- ✅ Auto-detected by iteration count in metadata
-- ✅ Future-proof format
+- [WARNING] **Not compatible with Pass-CLI versions before v0.3.0**
+- [OK] Auto-detected by iteration count in metadata
+- [OK] Future-proof format
 
 ### Password Policy
 
 **Existing Credentials**:
-- ✅ Old passwords (not meeting policy) remain valid
-- ⚠️ Policy enforced only when creating/updating credentials
-- ✅ No forced password changes
+- [OK] Old passwords (not meeting policy) remain valid
+- [WARNING] Policy enforced only when creating/updating credentials
+- [OK] No forced password changes
 
 **New/Updated Credentials**:
-- ⚠️ Must meet new policy requirements
-- ✅ Real-time validation with helpful error messages
-- ✅ TUI shows password strength indicator
+- [WARNING] Must meet new policy requirements
+- [OK] Real-time validation with helpful error messages
+- [OK] TUI shows password strength indicator
 
 ### Cross-Version Compatibility Matrix
 
-| Vault Type | Pass-CLI (Old) | Pass-CLI (Jan 2025) |
+| Vault Type | Pass-CLI < v0.3.0 | Pass-CLI v0.3.0+ |
 |------------|----------------|---------------------|
-| 100k iterations | ✅ Read/Write | ✅ Read/Write |
-| 600k iterations | ❌ Incompatible | ✅ Read/Write |
-| With audit logging | ❌ Incompatible | ✅ Read/Write |
+| 100k iterations | [OK] Read/Write | [OK] Read/Write |
+| 600k iterations | [ERROR] Incompatible | [OK] Read/Write |
+| With audit logging | [ERROR] Incompatible | [OK] Read/Write |
 
 ## Troubleshooting
 
-### Problem: "Password does not meet requirements"
+### Problem: "Password Does Not Meet Requirements"
 
 **Symptom**: Error when creating/updating credentials.
 
@@ -314,7 +298,7 @@ Admin#2025$Password
 pass-cli generate  # Automatically meets policy requirements
 ```
 
-### Problem: Vault unlock is slower after upgrade
+### Problem: Vault Unlock Is Slower After Upgrade
 
 **Symptom**: Vault unlock takes 50-100ms instead of 15-20ms.
 
@@ -327,7 +311,7 @@ pass-cli generate  # Automatically meets policy requirements
 - Mid-range CPU (2018-2022): 200-500ms
 - Older CPU (2015-2017): 500-1000ms
 
-### Problem: Cannot downgrade to older Pass-CLI version
+### Problem: Cannot Downgrade to Older Pass-CLI Version
 
 **Symptom**: "Invalid vault format" error when using old Pass-CLI with new vault.
 
@@ -336,7 +320,7 @@ pass-cli generate  # Automatically meets policy requirements
 2. Or create new vault with old Pass-CLI version
 3. Or upgrade to latest Pass-CLI version
 
-### Problem: Audit log verification fails
+### Problem: Audit Log Verification Fails
 
 **Symptom**: `pass-cli verify-audit` reports HMAC verification failures.
 
@@ -357,7 +341,7 @@ mv ~/.pass-cli/audit.log ~/.pass-cli/audit.log.corrupted
 pass-cli init --enable-audit
 ```
 
-### Problem: "Vault file corrupted" after migration
+### Problem: "Vault File Corrupted" After Migration
 
 **Symptom**: Cannot unlock vault after re-initialization.
 
@@ -374,15 +358,15 @@ pass-cli list
 
 ## FAQ
 
-### Q: Do I have to migrate?
+### Q: Do I Have to Migrate?
 
 **A**: No. Existing vaults with 100k iterations continue to work indefinitely. Migration is optional for users wanting stronger security.
 
-### Q: Will migration delete my credentials?
+### Q: Will Migration Delete My Credentials?
 
 **A**: No. Migration is non-destructive. Always creates backup before changes. Credentials are preserved.
 
-### Q: How long does migration take?
+### Q: How Long Does Migration Take?
 
 **A**: Depends on vault size:
 - Small vault (< 20 credentials): 5-10 minutes
@@ -391,31 +375,31 @@ pass-cli list
 
 Time includes manual re-entry of credentials. Future in-place migration will be automatic (seconds).
 
-### Q: Can I migrate back to 100k iterations?
+### Q: Can I Migrate Back to 100k Iterations?
 
 **A**: Technically yes (create new vault), but not recommended. Forward migration only makes sense for security.
 
-### Q: Does audit logging slow down vault operations?
+### Q: Does Audit Logging Slow Down Vault Operations?
 
 **A**: Minimal impact (~1-2ms per operation). Audit logging uses asynchronous writes and graceful degradation.
 
-### Q: What if I forget my master password after migration?
+### Q: What If I Forget My Master Password After Migration?
 
 **A**: If you enabled BIP39 recovery during `pass-cli init`, you can recover using `pass-cli change-password --recover` and your 24-word recovery phrase. If you used `--no-recovery` or are on an older vault without recovery, the vault is unrecoverable. Keep master password and recovery phrase backups secure.
 
-### Q: Are audit logs encrypted?
+### Q: Are Audit Logs Encrypted?
 
 **A**: Audit logs are **not encrypted** (they contain service names, not passwords). Logs are **tamper-evident** via HMAC signatures. If encryption is required, use full-disk encryption.
 
-### Q: Can I disable audit logging after enabling?
+### Q: Can I Disable Audit Logging After Enabling?
 
 **A**: Yes, but audit logs remain on disk. You can manually delete old logs. Future releases may add a command to disable audit logging cleanly.
 
-### Q: Will old Pass-CLI versions work with migrated vaults?
+### Q: Will Old Pass-CLI Versions Work With Migrated Vaults?
 
-**A**: No. 600k iteration vaults require January 2025+ Pass-CLI versions. Keep old vault backup if you need old version compatibility.
+**A**: No. 600k iteration vaults require Pass-CLI v0.3.0 or later. Keep old vault backup if you need compatibility with older versions.
 
-### Q: Is there a tool to convert vault format?
+### Q: Is There a Tool to Convert Vault Format?
 
 **A**: Not yet. Currently requires manual re-initialization. In-place migration planned for future release.
 
@@ -423,28 +407,28 @@ Time includes manual re-entry of credentials. Future in-place migration will be 
 
 ### Before Migration
 
-1. ✅ Backup vault file: `cp ~/.pass-cli/vault.enc ~/backup/`
-2. ✅ Export credentials: `pass-cli list --format json > backup.json`
-3. ✅ Test new Pass-CLI version with test vault first
-4. ✅ Read this migration guide completely
+1. [OK] Backup vault file: `cp ~/.pass-cli/vault.enc ~/backup/`
+2. [OK] Export credentials: `pass-cli list --format json > backup.json`
+3. [OK] Test new Pass-CLI version with test vault first
+4. [OK] Read this migration guide completely
 
 ### During Migration
 
-1. ✅ Use `pass-cli generate` command for policy-compliant passwords
-2. ✅ Verify each credential after adding
-3. ✅ Test vault unlock multiple times
-4. ✅ Enable audit logging for compliance needs
+1. [OK] Use `pass-cli generate` command for policy-compliant passwords
+2. [OK] Verify each credential after adding
+3. [OK] Test vault unlock multiple times
+4. [OK] Enable audit logging for compliance needs
 
 ### After Migration
 
-1. ✅ Verify all credentials accessible
-2. ✅ Test credential retrieval in scripts
-3. ✅ Update documentation/runbooks with new requirements
-4. ✅ Delete old vault backup after 30-day grace period
-5. ✅ Run `pass-cli verify-audit` monthly (if audit logging enabled)
+1. [OK] Verify all credentials accessible
+2. [OK] Test credential retrieval in scripts
+3. [OK] Update documentation/runbooks with new requirements
+4. [OK] Delete old vault backup after 30-day grace period
+5. [OK] Run `pass-cli verify-audit` monthly (if audit logging enabled)
 
 ## Support
 
-- **Documentation**: [Security Architecture]({{< relref "security-architecture" >}}), [Command Reference]({{< relref "command-reference" >}})
+- **Documentation**: [Security Architecture](security-architecture), [Command Reference](command-reference)
 - **Issues**: [GitHub Issues](https://github.com/ari1110/pass-cli/issues)
 
