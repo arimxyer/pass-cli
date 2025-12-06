@@ -1,9 +1,6 @@
 package vault
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,6 +12,7 @@ import (
 
 	"pass-cli/internal/crypto"
 	"pass-cli/internal/keychain"
+	"pass-cli/internal/recovery"
 	"pass-cli/internal/security"
 	"pass-cli/internal/storage"
 
@@ -420,207 +418,6 @@ func (v *VaultService) Initialize(masterPassword []byte, useKeychain bool, audit
 	return nil
 }
 
-// Recovery constants for InitializeWithRecovery
-const (
-	recoveryArgon2Time    uint32 = 1     // Single pass
-	recoveryArgon2Memory  uint32 = 65536 // 64 MB
-	recoveryArgon2Threads uint8  = 4     // Parallelism
-	recoveryKeyLen        uint32 = 32    // AES-256
-	recoverySaltLen       int    = 32    // 256 bits
-	challengeCount        int    = 6     // Number of challenge words
-	mnemonicWords         int    = 24    // Total words in mnemonic
-	gcmNonceSize          int    = 12    // GCM nonce size
-)
-
-// challengeSetupResult contains the result of challenge-based recovery setup
-type challengeSetupResult struct {
-	Mnemonic    string            // 24-word mnemonic to display to user
-	RecoveryKEK []byte            // Recovery KEK for wrapping DEK (caller must clear)
-	Metadata    *RecoveryMetadata // Recovery metadata with challenge fields
-}
-
-// setupChallengeRecovery generates mnemonic and challenge data for v2 vault recovery.
-// This is an internal helper that sets up the 6-word challenge system.
-func setupChallengeRecovery(passphrase []byte) (*challengeSetupResult, error) {
-	// 1. Generate 24-word mnemonic
-	entropy, err := bip39.NewEntropy(256)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate entropy: %w", err)
-	}
-	mnemonic, err := bip39.NewMnemonic(entropy)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate mnemonic: %w", err)
-	}
-
-	// 2. Generate BIP39 seed from mnemonic (with optional passphrase)
-	seed := bip39.NewSeed(mnemonic, string(passphrase))
-	defer crypto.ClearBytes(seed)
-
-	// 3. Select 6 challenge positions (crypto-secure random)
-	challengePositions, err := selectChallengePositions(mnemonicWords, challengeCount)
-	if err != nil {
-		return nil, fmt.Errorf("failed to select challenge positions: %w", err)
-	}
-
-	// 4. Split mnemonic into challenge words (6) and stored words (18)
-	challengeWords, storedWords := splitMnemonicWords(mnemonic, challengePositions)
-
-	// 5. Generate KDF parameters with random salts
-	saltChallenge := make([]byte, recoverySaltLen)
-	saltRecovery := make([]byte, recoverySaltLen)
-	if _, err := rand.Read(saltChallenge); err != nil {
-		return nil, fmt.Errorf("failed to generate challenge salt: %w", err)
-	}
-	if _, err := rand.Read(saltRecovery); err != nil {
-		return nil, fmt.Errorf("failed to generate recovery salt: %w", err)
-	}
-
-	kdfParams := KDFParams{
-		Algorithm:     "argon2id",
-		Time:          recoveryArgon2Time,
-		Memory:        recoveryArgon2Memory,
-		Threads:       recoveryArgon2Threads,
-		SaltChallenge: saltChallenge,
-		SaltRecovery:  saltRecovery,
-	}
-
-	// 6. Derive challenge key from challenge words only
-	challengeMnemonic := strings.Join(challengeWords, " ")
-	challengeSeed := bip39.NewSeed(challengeMnemonic, string(passphrase))
-	defer crypto.ClearBytes(challengeSeed)
-	challengeKey := argon2.IDKey(
-		challengeSeed,
-		kdfParams.SaltChallenge,
-		kdfParams.Time,
-		kdfParams.Memory,
-		kdfParams.Threads,
-		recoveryKeyLen,
-	)
-	defer crypto.ClearBytes(challengeKey)
-
-	// 7. Encrypt stored words (18) with challenge key
-	encryptedStoredWords, nonceStored, err := encryptStoredWords(storedWords, challengeKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to encrypt stored words: %w", err)
-	}
-
-	// 8. Derive recovery KEK from full mnemonic seed
-	recoveryKEK := argon2.IDKey(
-		seed,
-		kdfParams.SaltRecovery,
-		kdfParams.Time,
-		kdfParams.Memory,
-		kdfParams.Threads,
-		recoveryKeyLen,
-	)
-	// Note: caller is responsible for clearing recoveryKEK
-
-	// 9. Build recovery metadata
-	metadata := &RecoveryMetadata{
-		Enabled:              true,
-		Version:              "2",
-		PassphraseRequired:   len(passphrase) > 0,
-		ChallengePositions:   challengePositions,
-		KDFParams:            kdfParams,
-		EncryptedStoredWords: encryptedStoredWords,
-		NonceStored:          nonceStored,
-		// EncryptedRecoveryKey and NonceRecovery set by caller
-	}
-
-	return &challengeSetupResult{
-		Mnemonic:    mnemonic,
-		RecoveryKEK: recoveryKEK,
-		Metadata:    metadata,
-	}, nil
-}
-
-// selectChallengePositions generates crypto-secure random unique positions
-func selectChallengePositions(totalWords, count int) ([]int, error) {
-	positions := make([]int, 0, count)
-	seen := make(map[int]bool)
-
-	for len(positions) < count {
-		// Generate random bytes
-		var buf [1]byte
-		if _, err := rand.Read(buf[:]); err != nil {
-			return nil, err
-		}
-		pos := int(buf[0]) % totalWords
-
-		if !seen[pos] {
-			positions = append(positions, pos)
-			seen[pos] = true
-		}
-	}
-
-	// Sort positions
-	for i := 0; i < len(positions); i++ {
-		for j := i + 1; j < len(positions); j++ {
-			if positions[i] > positions[j] {
-				positions[i], positions[j] = positions[j], positions[i]
-			}
-		}
-	}
-
-	return positions, nil
-}
-
-// splitMnemonicWords splits 24-word mnemonic into challenge words and stored words
-func splitMnemonicWords(mnemonic string, challengePos []int) (challenge, stored []string) {
-	words := strings.Fields(mnemonic)
-
-	challengeMap := make(map[int]bool)
-	for _, pos := range challengePos {
-		challengeMap[pos] = true
-	}
-
-	challenge = make([]string, 0, len(challengePos))
-	stored = make([]string, 0, len(words)-len(challengePos))
-
-	for i, word := range words {
-		if challengeMap[i] {
-			challenge = append(challenge, word)
-		} else {
-			stored = append(stored, word)
-		}
-	}
-
-	return challenge, stored
-}
-
-// encryptStoredWords encrypts 18 stored words with AES-256-GCM
-func encryptStoredWords(words []string, key []byte) (ciphertext, nonce []byte, err error) {
-	// Serialize words to JSON
-	plaintext, err := json.Marshal(words)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Create AES cipher
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Create GCM mode
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Generate random nonce
-	nonce = make([]byte, gcmNonceSize)
-	if _, err := rand.Read(nonce); err != nil {
-		return nil, nil, err
-	}
-
-	// Encrypt
-	// #nosec G407 - nonce is cryptographically generated above
-	ciphertext = gcm.Seal(nil, nonce, plaintext, nil)
-
-	return ciphertext, nonce, nil
-}
-
 // T022: InitializeWithRecovery creates a new v2 vault with recovery phrase support
 // This method generates a DEK, wraps it with both password and recovery KEKs,
 // and stores the wrapped versions in the vault metadata.
@@ -674,7 +471,9 @@ func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain
 	defer crypto.ClearBytes(passwordKEK)
 
 	// 3. Setup challenge-based recovery (generates mnemonic and challenge data)
-	challengeSetup, err := setupChallengeRecovery(passphrase)
+	challengeSetup, err := recovery.SetupChallengeRecovery(&recovery.ChallengeSetupConfig{
+		Passphrase: passphrase,
+	})
 	if err != nil {
 		return "", fmt.Errorf("failed to setup recovery: %w", err)
 	}
@@ -1773,7 +1572,9 @@ func (v *VaultService) MigrateToV2(passphrase []byte) (string, error) {
 	}
 
 	// 1. Setup challenge-based recovery (generates mnemonic and challenge data)
-	challengeSetup, err := setupChallengeRecovery(passphrase)
+	challengeSetup, err := recovery.SetupChallengeRecovery(&recovery.ChallengeSetupConfig{
+		Passphrase: passphrase,
+	})
 	if err != nil {
 		return "", fmt.Errorf("failed to setup recovery: %w", err)
 	}
@@ -1914,7 +1715,7 @@ func (v *VaultService) RecoverWithMnemonic(mnemonic string, passphrase []byte) e
 		meta.Recovery.KDFParams.Time,
 		meta.Recovery.KDFParams.Memory,
 		meta.Recovery.KDFParams.Threads,
-		recoveryKeyLen,
+		recovery.DefaultKeyLen,
 	)
 	defer crypto.ClearBytes(recoveryKEK)
 

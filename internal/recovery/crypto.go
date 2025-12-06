@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"pass-cli/internal/vault"
+	"pass-cli/internal/shared"
 
 	"golang.org/x/crypto/argon2"
 )
@@ -15,7 +15,7 @@ import (
 // deriveKey performs Argon2id key derivation
 // Parameters: seed (BIP39 seed), salt (32 bytes), params (KDF configuration)
 // Returns: 32-byte derived key
-func deriveKey(seed, salt []byte, params *vault.KDFParams) []byte {
+func deriveKey(seed, salt []byte, params *shared.KDFParams) []byte {
 	// Use Argon2id with parameters from config
 	key := argon2.IDKey(
 		seed,

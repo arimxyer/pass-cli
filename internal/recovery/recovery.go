@@ -7,29 +7,29 @@ import (
 	"strings"
 
 	"pass-cli/internal/crypto"
-	"pass-cli/internal/vault"
+	"pass-cli/internal/shared"
 
 	"github.com/tyler-smith/go-bip39"
 )
 
 // SetupConfig configures recovery setup during vault initialization
 type SetupConfig struct {
-	Passphrase []byte           // Optional passphrase (25th word). Empty = no passphrase.
-	KDFParams  *vault.KDFParams // Custom Argon2 parameters (optional, uses defaults if nil)
+	Passphrase []byte            // Optional passphrase (25th word). Empty = no passphrase.
+	KDFParams  *shared.KDFParams // Custom Argon2 parameters (optional, uses defaults if nil)
 }
 
 // SetupResult contains the result of recovery setup operation
 type SetupResult struct {
-	Mnemonic         string                  // 24-word mnemonic to display to user
-	Metadata         *vault.RecoveryMetadata // Recovery metadata to store in vault
-	VaultRecoveryKey []byte                  // Vault recovery key (32 bytes) to integrate with vault unlocking
+	Mnemonic         string                   // 24-word mnemonic to display to user
+	Metadata         *shared.RecoveryMetadata // Recovery metadata to store in vault
+	VaultRecoveryKey []byte                   // Vault recovery key (32 bytes) to integrate with vault unlocking
 }
 
 // RecoveryConfig configures recovery execution
 type RecoveryConfig struct {
-	ChallengeWords []string                // Words entered by user (from challenge positions)
-	Passphrase     []byte                  // Passphrase (if required). Empty = no passphrase.
-	Metadata       *vault.RecoveryMetadata // Recovery metadata from vault
+	ChallengeWords []string                 // Words entered by user (from challenge positions)
+	Passphrase     []byte                   // Passphrase (if required). Empty = no passphrase.
+	Metadata       *shared.RecoveryMetadata // Recovery metadata from vault
 }
 
 // VerifyConfig configures backup verification during init
@@ -75,7 +75,7 @@ func SetupRecovery(config *SetupConfig) (*SetupResult, error) {
 			return nil, ErrRandomGeneration
 		}
 
-		kdfParams = &vault.KDFParams{
+		kdfParams = &shared.KDFParams{
 			Algorithm:     "argon2id",
 			Time:          DefaultTime,
 			Memory:        DefaultMemory,
@@ -116,7 +116,7 @@ func SetupRecovery(config *SetupConfig) (*SetupResult, error) {
 	}
 
 	// 11. Build recovery metadata
-	metadata := &vault.RecoveryMetadata{
+	metadata := &shared.RecoveryMetadata{
 		Enabled:              true,
 		Version:              "1",
 		PassphraseRequired:   len(config.Passphrase) > 0,
@@ -261,7 +261,7 @@ func PerformRecovery(config *RecoveryConfig) ([]byte, error) {
 //   - kdfParams: KDF parameters (must include SaltRecovery)
 //
 // Returns: 32-byte recovery KEK
-func DeriveRecoveryKey(mnemonic string, passphrase []byte, kdfParams *vault.KDFParams) []byte {
+func DeriveRecoveryKey(mnemonic string, passphrase []byte, kdfParams *shared.KDFParams) []byte {
 	// Generate BIP39 seed from mnemonic and passphrase
 	seed := bip39.NewSeed(mnemonic, string(passphrase))
 	defer crypto.ClearBytes(seed)
@@ -277,9 +277,9 @@ type ChallengeSetupConfig struct {
 
 // ChallengeSetupResult contains the result of challenge-based recovery setup
 type ChallengeSetupResult struct {
-	Mnemonic    string                  // 24-word mnemonic to display to user
-	RecoveryKEK []byte                  // Recovery KEK for wrapping DEK (caller must clear)
-	Metadata    *vault.RecoveryMetadata // Recovery metadata with challenge fields
+	Mnemonic    string                   // 24-word mnemonic to display to user
+	RecoveryKEK []byte                   // Recovery KEK for wrapping DEK (caller must clear)
+	Metadata    *shared.RecoveryMetadata // Recovery metadata with challenge fields
 }
 
 // SetupChallengeRecovery generates mnemonic and challenge data for v2 vault recovery.
@@ -325,7 +325,7 @@ func SetupChallengeRecovery(config *ChallengeSetupConfig) (*ChallengeSetupResult
 		return nil, ErrRandomGeneration
 	}
 
-	kdfParams := &vault.KDFParams{
+	kdfParams := &shared.KDFParams{
 		Algorithm:     "argon2id",
 		Time:          DefaultTime,
 		Memory:        DefaultMemory,
@@ -355,7 +355,7 @@ func SetupChallengeRecovery(config *ChallengeSetupConfig) (*ChallengeSetupResult
 	// 9. Build recovery metadata
 	// Note: EncryptedRecoveryKey and NonceRecovery will be set by caller
 	// after they wrap their DEK with recoveryKEK
-	metadata := &vault.RecoveryMetadata{
+	metadata := &shared.RecoveryMetadata{
 		Enabled:              true,
 		Version:              "2", // v2 format with challenge support
 		PassphraseRequired:   len(config.Passphrase) > 0,
