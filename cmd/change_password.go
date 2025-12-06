@@ -125,10 +125,19 @@ func runChangePassword(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("passwords do not match")
 	}
 
-	// Change password
-	if err := vaultService.ChangePassword(newPassword); err != nil {
-		crypto.ClearBytes(newPassword)
-		return fmt.Errorf("failed to change password: %w", err)
+	// Change password - use appropriate method based on how vault was unlocked
+	if vaultService.WasUnlockedViaRecovery() {
+		// Recovery flow: Use SetPasswordAfterRecovery (doesn't need old password)
+		if err := vaultService.SetPasswordAfterRecovery(newPassword); err != nil {
+			crypto.ClearBytes(newPassword)
+			return fmt.Errorf("failed to set new password: %w", err)
+		}
+	} else {
+		// Normal flow: Use ChangePassword (re-wraps DEK with new password)
+		if err := vaultService.ChangePassword(newPassword); err != nil {
+			crypto.ClearBytes(newPassword)
+			return fmt.Errorf("failed to change password: %w", err)
+		}
 	}
 
 	// Success message

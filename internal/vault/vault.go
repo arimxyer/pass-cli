@@ -99,6 +99,7 @@ type VaultService struct {
 	unlocked       bool
 	masterPassword []byte // Byte array for secure memory clearing (T009)
 	vaultData      *VaultData
+	recoveryDEK    []byte // DEK from recovery unlock (for SetPasswordAfterRecovery)
 
 	// T066: Audit logging configuration (FR-025: default disabled)
 	auditEnabled bool
@@ -698,7 +699,8 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 // Parameters: vaultKey (32-byte AES-256 encryption key from recovery)
 // Returns: error
 func (v *VaultService) UnlockWithKey(vaultKey []byte) error {
-	defer crypto.ClearBytes(vaultKey) // Clear key after use
+	// Note: We store the DEK for SetPasswordAfterRecovery, so don't clear it here
+	// It will be cleared when Lock() is called or when SetPasswordAfterRecovery completes
 
 	if v.unlocked {
 		return nil // Already unlocked
@@ -722,6 +724,10 @@ func (v *VaultService) UnlockWithKey(vaultKey []byte) error {
 	v.unlocked = true
 	v.masterPassword = nil // Recovery unlock doesn't have a password
 	v.vaultData = &vaultData
+
+	// Store the DEK for SetPasswordAfterRecovery
+	v.recoveryDEK = make([]byte, len(vaultKey))
+	copy(v.recoveryDEK, vaultKey)
 
 	// Restore audit logging if enabled
 	if vaultData.AuditEnabled && vaultData.AuditLogPath != "" && vaultData.VaultID != "" {
@@ -815,6 +821,12 @@ func (v *VaultService) Lock() {
 	if v.masterPassword != nil {
 		crypto.ClearBytes(v.masterPassword)
 		v.masterPassword = nil
+	}
+
+	// Clear recovery DEK if present
+	if v.recoveryDEK != nil {
+		crypto.ClearBytes(v.recoveryDEK)
+		v.recoveryDEK = nil
 	}
 
 	v.vaultData = nil
@@ -1315,6 +1327,83 @@ func (v *VaultService) ChangePassword(newPassword []byte) error {
 	v.LogAudit(security.EventVaultPasswordChange, security.OutcomeSuccess, "")
 
 	return nil
+}
+
+// SetPasswordAfterRecovery sets a new password after vault recovery.
+// This is used when the vault was unlocked via recovery phrase (no old password available).
+// The DEK is already available from the recovery unlock.
+// Parameters: newPassword (new master password)
+// Returns: error
+func (v *VaultService) SetPasswordAfterRecovery(newPassword []byte) error {
+	defer crypto.ClearBytes(newPassword)
+
+	if !v.unlocked {
+		return ErrVaultLocked
+	}
+
+	// Check that we have a recovery DEK
+	if v.recoveryDEK == nil {
+		return errors.New("no recovery DEK available: vault was not unlocked via recovery")
+	}
+
+	// Check vault version - must be v2
+	vaultVersion := v.storageService.GetVersion()
+	if vaultVersion != 2 {
+		return errors.New("SetPasswordAfterRecovery only supported for v2 vaults")
+	}
+
+	// Validate new password against policy
+	passwordPolicy := &security.PasswordPolicy{
+		MinLength:        12,
+		RequireUppercase: true,
+		RequireLowercase: true,
+		RequireDigit:     true,
+		RequireSymbol:    true,
+	}
+	if err := passwordPolicy.Validate(newPassword); err != nil {
+		if rateLimitErr := v.rateLimiter.CheckAndRecordFailure(); rateLimitErr != nil {
+			return rateLimitErr
+		}
+		return fmt.Errorf("new password does not meet requirements: %w", err)
+	}
+	v.rateLimiter.Reset()
+
+	// Marshal vault data
+	data, err := json.Marshal(v.vaultData)
+	if err != nil {
+		return fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	// Set password using the recovery DEK
+	newPasswordStr := string(newPassword)
+	if err := v.storageService.SetPasswordAfterRecoveryV2(data, newPasswordStr, v.recoveryDEK, v.createAuditCallback()); err != nil {
+		return fmt.Errorf("failed to set new password: %w", err)
+	}
+
+	// Clear recovery DEK and set master password
+	crypto.ClearBytes(v.recoveryDEK)
+	v.recoveryDEK = nil
+
+	v.masterPassword = make([]byte, len(newPassword))
+	copy(v.masterPassword, newPassword)
+
+	// Update keychain if available
+	if v.keychainService.IsAvailable() {
+		if err := v.keychainService.Store(newPasswordStr); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to update password in keychain: %v\n", err)
+		}
+	}
+
+	// Log password change
+	v.LogAudit(security.EventVaultPasswordChange, security.OutcomeSuccess, "recovery")
+
+	return nil
+}
+
+// WasUnlockedViaRecovery returns true if the vault was unlocked using recovery phrase
+// and still has the recovery DEK available for SetPasswordAfterRecovery
+func (v *VaultService) WasUnlockedViaRecovery() bool {
+	return v.unlocked && v.recoveryDEK != nil
 }
 
 // EnableKeychain enables keychain integration for the vault.

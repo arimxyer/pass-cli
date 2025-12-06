@@ -663,6 +663,149 @@ func (s *StorageService) ChangePasswordV2(data []byte, oldPassword, newPassword 
 	return nil
 }
 
+// SetPasswordAfterRecoveryV2 sets a new password after vault recovery.
+// This is used when the vault was unlocked via recovery phrase (no old password available).
+// The DEK is passed directly since it was already unwrapped during recovery.
+// Parameters:
+//   - data: plaintext vault data to encrypt
+//   - newPassword: new master password
+//   - dek: 32-byte Data Encryption Key (already unwrapped via recovery)
+//   - callback: optional progress callback for audit logging
+func (s *StorageService) SetPasswordAfterRecoveryV2(data []byte, newPassword string, dek []byte, callback ProgressCallback) error {
+	// Notify audit logger of save operation start
+	if callback != nil {
+		callback("atomic_save_started", s.vaultPath)
+	}
+
+	// Load existing vault to get metadata
+	encryptedVault, err := s.loadEncryptedVault()
+	if err != nil {
+		return err
+	}
+
+	// Verify this is a v2 vault
+	if encryptedVault.Metadata.Version != 2 {
+		return fmt.Errorf("SetPasswordAfterRecoveryV2 called on non-v2 vault")
+	}
+
+	// 1. Generate new salt for new password
+	newSalt, err := s.cryptoService.GenerateSalt()
+	if err != nil {
+		return fmt.Errorf("failed to generate new salt: %w", err)
+	}
+
+	// 2. Derive new password KEK
+	newIterations := crypto.GetIterations()
+	newKEK, err := s.cryptoService.DeriveKey([]byte(newPassword), newSalt, newIterations)
+	if err != nil {
+		return fmt.Errorf("failed to derive new key: %w", err)
+	}
+	defer s.cryptoService.ClearKey(newKEK)
+
+	// 3. Re-wrap DEK with new KEK
+	newWrappedKey, err := crypto.WrapKey(dek, newKEK)
+	if err != nil {
+		return fmt.Errorf("failed to wrap DEK with new password: %w", err)
+	}
+
+	// 4. Update metadata with new wrapped DEK
+	encryptedVault.Metadata.Salt = newSalt
+	encryptedVault.Metadata.Iterations = newIterations
+	encryptedVault.Metadata.WrappedDEK = newWrappedKey.Ciphertext
+	encryptedVault.Metadata.WrappedDEKNonce = newWrappedKey.Nonce
+	encryptedVault.Metadata.UpdatedAt = time.Now()
+
+	// 5. Encrypt vault data with DEK
+	encryptedData, err := s.cryptoService.Encrypt(data, dek)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt vault data: %w", err)
+	}
+
+	// 6. Create encrypted vault structure
+	newVault := EncryptedVault{
+		Metadata: encryptedVault.Metadata,
+		Data:     encryptedData,
+	}
+
+	// 7. Marshal to JSON
+	jsonData, err := json.Marshal(newVault)
+	if err != nil {
+		return fmt.Errorf("failed to marshal vault data: %w", err)
+	}
+
+	// Cleanup orphaned temp files from previous crashes
+	s.cleanupOrphanedTempFiles("")
+
+	// Generate temp filename
+	tempPath := s.generateTempFileName()
+
+	// Write to temp file
+	if err := s.writeToTempFile(tempPath, jsonData); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// Notify after temp file created
+	if callback != nil {
+		callback("temp_file_created", tempPath)
+	}
+
+	// Ensure temp file cleanup on error
+	defer func() {
+		_ = s.cleanupTempFile(tempPath)
+	}()
+
+	// Verification: verify temp file is decryptable with DEK
+	if callback != nil {
+		callback("verification_started", tempPath)
+	}
+
+	if err := s.verifyTempFileWithDEK(tempPath, dek); err != nil {
+		if callback != nil {
+			callback("verification_failed", tempPath, err.Error())
+		}
+		_ = s.cleanupTempFile(tempPath)
+		return actionableErrorMessage(err)
+	}
+
+	if callback != nil {
+		callback("verification_passed", tempPath)
+	}
+
+	// Atomic rename (vault → backup)
+	backupPath := s.vaultPath + BackupSuffix
+	if callback != nil {
+		callback("atomic_rename_started", s.vaultPath, backupPath)
+	}
+
+	if err := s.atomicRename(s.vaultPath, backupPath); err != nil {
+		return actionableErrorMessage(err)
+	}
+
+	// Atomic rename (temp → vault)
+	if callback != nil {
+		callback("atomic_rename_started", tempPath, s.vaultPath)
+	}
+
+	if err := s.atomicRename(tempPath, s.vaultPath); err != nil {
+		// CRITICAL ERROR: Try to restore backup
+		if callback != nil {
+			callback("rollback_started", backupPath, s.vaultPath)
+		}
+		_ = s.atomicRename(backupPath, s.vaultPath)
+		if callback != nil {
+			callback("rollback_completed", s.vaultPath)
+		}
+		return criticalErrorMessage(err)
+	}
+
+	// Notify completion
+	if callback != nil {
+		callback("atomic_save_completed", s.vaultPath)
+	}
+
+	return nil
+}
+
 // verifyTempFileWithDEK verifies a temp file can be decrypted with the DEK
 func (s *StorageService) verifyTempFileWithDEK(tempPath string, dek []byte) error {
 	// Read temp file

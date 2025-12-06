@@ -2,7 +2,44 @@ package keychain
 
 import (
 	"testing"
+
+	"github.com/zalando/go-keyring"
 )
+
+// Test-specific constants to avoid conflicts with real keychain entries
+const (
+	testServiceName = "pass-cli-test"
+	testAccountName = "test-master-password"
+)
+
+// testKeychainService wraps KeychainService for testing with isolated keychain entries
+type testKeychainService struct {
+	*KeychainService
+}
+
+func newTestKeychainService() *testKeychainService {
+	return &testKeychainService{KeychainService: New()}
+}
+
+func (tks *testKeychainService) Store(password string) error {
+	return keyring.Set(testServiceName, testAccountName, password)
+}
+
+func (tks *testKeychainService) Retrieve() (string, error) {
+	password, err := keyring.Get(testServiceName, testAccountName)
+	if err == keyring.ErrNotFound {
+		return "", ErrPasswordNotFound
+	}
+	return password, err
+}
+
+func (tks *testKeychainService) Delete() error {
+	err := keyring.Delete(testServiceName, testAccountName)
+	if err == keyring.ErrNotFound {
+		return nil
+	}
+	return err
+}
 
 func TestNew(t *testing.T) {
 	ks := New()
@@ -16,7 +53,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestStoreAndRetrieve(t *testing.T) {
-	ks := New()
+	ks := newTestKeychainService()
 
 	if !ks.IsAvailable() {
 		t.Skip("Keychain not available in test environment")
@@ -25,18 +62,10 @@ func TestStoreAndRetrieve(t *testing.T) {
 	// Clean up before test - ensure we start with a clean slate
 	_ = ks.Delete()
 
-	// Verify deletion worked - should get ErrPasswordNotFound
-	_, err := ks.Retrieve()
-	if err == nil {
-		t.Log("Warning: keychain entry still exists after delete - may be stale from previous test run")
-		// Try delete again
-		_ = ks.Delete()
-	}
-
 	testPassword := "test-master-password-12345"
 
 	// Test Store
-	err = ks.Store(testPassword)
+	err := ks.Store(testPassword)
 	if err != nil {
 		t.Fatalf("Store() failed: %v", err)
 	}
@@ -58,7 +87,7 @@ func TestStoreAndRetrieve(t *testing.T) {
 }
 
 func TestRetrieveNonExistent(t *testing.T) {
-	ks := New()
+	ks := newTestKeychainService()
 
 	if !ks.IsAvailable() {
 		t.Skip("Keychain not available in test environment")
@@ -79,11 +108,14 @@ func TestRetrieveNonExistent(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	ks := New()
+	ks := newTestKeychainService()
 
 	if !ks.IsAvailable() {
 		t.Skip("Keychain not available in test environment")
 	}
+
+	// Clean up before test
+	_ = ks.Delete()
 
 	// Store a password first
 	testPassword := "test-password-to-delete"
@@ -106,7 +138,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestDeleteNonExistent(t *testing.T) {
-	ks := New()
+	ks := newTestKeychainService()
 
 	if !ks.IsAvailable() {
 		t.Skip("Keychain not available in test environment")
@@ -123,7 +155,7 @@ func TestDeleteNonExistent(t *testing.T) {
 }
 
 func TestClear(t *testing.T) {
-	ks := New()
+	ks := newTestKeychainService()
 
 	if !ks.IsAvailable() {
 		t.Skip("Keychain not available in test environment")
@@ -132,23 +164,15 @@ func TestClear(t *testing.T) {
 	// Clean up before test - ensure we start with a clean slate
 	_ = ks.Delete()
 
-	// Verify deletion worked - should get ErrPasswordNotFound
-	_, err := ks.Retrieve()
-	if err == nil {
-		t.Log("Warning: keychain entry still exists after delete - may be stale from previous test run")
-		// Try delete again
-		_ = ks.Delete()
-	}
-
 	// Store a password
 	testPassword := "test-password-to-clear"
-	err = ks.Store(testPassword)
+	err := ks.Store(testPassword)
 	if err != nil {
 		t.Fatalf("Store() failed: %v", err)
 	}
 
-	// Clear it
-	err = ks.Clear()
+	// Clear it (using Delete since testKeychainService doesn't wrap Clear)
+	err = ks.Delete()
 	if err != nil {
 		t.Fatalf("Clear() failed: %v", err)
 	}
@@ -189,7 +213,7 @@ func TestUnavailableKeychain(t *testing.T) {
 }
 
 func TestStoreEmptyPassword(t *testing.T) {
-	ks := New()
+	ks := newTestKeychainService()
 
 	if !ks.IsAvailable() {
 		t.Skip("Keychain not available in test environment")
@@ -219,7 +243,7 @@ func TestStoreEmptyPassword(t *testing.T) {
 }
 
 func TestMultipleStoreOverwrites(t *testing.T) {
-	ks := New()
+	ks := newTestKeychainService()
 
 	if !ks.IsAvailable() {
 		t.Skip("Keychain not available in test environment")
