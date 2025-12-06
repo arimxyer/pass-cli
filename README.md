@@ -212,7 +212,7 @@ go build -o pass-cli .
 go test ./...
 ```
 
-For testing guidelines, see [test/README.md](test/README.md). For Git workflow, see [docs/06-development/branch-workflow.md](docs/06-development/branch-workflow.md).
+For testing guidelines, see the [test README](test/README.md). For Git workflow, see the [branch workflow guide](docs/06-development/branch-workflow.md).
 
 ## FAQ
 

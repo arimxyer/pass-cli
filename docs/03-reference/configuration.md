@@ -122,3 +122,121 @@ If `vault_path` is not specified, defaults to `~/.pass-cli/vault.enc`.
 3. Configuration file
 4. Built-in defaults (lowest priority)
 
+## Vault Metadata Structure
+
+The vault file stores metadata alongside encrypted credential data. This metadata is not encrypted and is used to manage key derivation and decryption.
+
+### Metadata Fields
+
+| Field | Type | V1 | V2 | Description |
+|-------|------|----|----|-------------|
+| `version` | int | ✓ | ✓ | Vault format version (1 or 2) |
+| `created_at` | timestamp | ✓ | ✓ | ISO 8601 creation timestamp |
+| `updated_at` | timestamp | ✓ | ✓ | ISO 8601 last update timestamp |
+| `salt` | bytes (base64) | ✓ | ✓ | 32-byte salt for password key derivation (PBKDF2) |
+| `iterations` | int | ✓ | ✓ | PBKDF2 iteration count (minimum 100,000 per OWASP 2023) |
+| `wrapped_dek` | bytes (base64) | - | ✓ | Password-wrapped Data Encryption Key (48 bytes: 32-byte key + 16-byte auth tag) |
+| `wrapped_dek_nonce` | bytes (base64) | - | ✓ | GCM nonce for DEK wrapping (12 bytes) |
+| `recovery_wrapped_dek` | bytes (base64) | - | ✓ | Recovery-phrase-wrapped DEK (48 bytes) |
+| `recovery_wrapped_dek_nonce` | bytes (base64) | - | ✓ | GCM nonce for recovery wrapping (12 bytes) |
+| `recovery_salt` | bytes (base64) | - | ✓ | 32-byte salt for recovery phrase key derivation |
+
+### Version Differences
+
+**V1 Format**:
+- Direct password-based encryption
+- Password is derived using PBKDF2 with stored salt and iterations
+- Derived key directly encrypts vault data (AES-256-GCM)
+- Simple but doesn't support recovery mechanisms
+
+**V2 Format**:
+- Key wrapping architecture with Data Encryption Key (DEK)
+- Password-derived KEK wraps the DEK (for password-based unlock)
+- Recovery-derived KEK wraps the DEK (for recovery phrase unlock)
+- DEK encrypts vault data (AES-256-GCM)
+- Supports both password and recovery phrase authentication
+- Enables secure recovery without password knowledge
+
+### V2 Vault Metadata Example
+
+```json
+{
+  "metadata": {
+    "version": 2,
+    "created_at": "2025-12-05T10:30:00Z",
+    "updated_at": "2025-12-05T14:22:45Z",
+    "salt": "abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yzab5678cdef90",
+    "iterations": 600000,
+    "wrapped_dek": "base64encodedwrappeddek48bytes==",
+    "wrapped_dek_nonce": "base64encodednonce12bytes==",
+    "recovery_wrapped_dek": "base64encodedrecoverydek48bytes==",
+    "recovery_wrapped_dek_nonce": "base64encodedrecoverynonce12bytes=="
+  },
+  "data": "base64encodedencryptedvaultdata=="
+}
+```
+
+### V1 Vault Metadata Example
+
+```json
+{
+  "metadata": {
+    "version": 1,
+    "created_at": "2025-12-05T10:30:00Z",
+    "updated_at": "2025-12-05T10:30:00Z",
+    "salt": "abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yzab5678cdef90",
+    "iterations": 100000
+  },
+  "data": "base64encodedencryptedvaultdata=="
+}
+```
+
+### Key Derivation
+
+**V1 Password Path**:
+```
+password + salt + iterations
+    ↓ PBKDF2
+encryption_key (32 bytes)
+    ↓ AES-256-GCM
+encrypted vault data
+```
+
+**V2 Password Path**:
+```
+password + salt + iterations
+    ↓ PBKDF2
+password KEK (32 bytes)
+    ↓ AES-256-GCM (with wrapped_dek + wrapped_dek_nonce)
+DEK (32 bytes)
+    ↓ AES-256-GCM
+encrypted vault data
+```
+
+**V2 Recovery Path**:
+```
+recovery phrase + recovery_salt
+    ↓ Argon2id
+recovery KEK (32 bytes)
+    ↓ AES-256-GCM (with recovery_wrapped_dek + recovery_wrapped_dek_nonce)
+DEK (32 bytes)
+    ↓ AES-256-GCM
+encrypted vault data
+```
+
+### Field Specifications
+
+**salt**: 32 cryptographic random bytes used as input to PBKDF2. Each vault has unique salt to prevent rainbow table attacks.
+
+**iterations**: PBKDF2 iteration count. Default is 600,000 (current OWASP recommendation). Minimum required is 100,000 for backward compatibility. Can be configured via `PASS_CLI_ITERATIONS` environment variable.
+
+**wrapped_dek**: AES-256-GCM ciphertext containing the encrypted DEK. Total size is 48 bytes (32-byte key + 16-byte authentication tag). Authentication tag ensures integrity and authenticity.
+
+**wrapped_dek_nonce**: 12-byte GCM nonce used during DEK encryption. Must be unique for each wrap operation to maintain security.
+
+**recovery_wrapped_dek**: AES-256-GCM ciphertext containing the DEK encrypted with recovery KEK. Allows vault access using recovery phrase instead of password.
+
+**recovery_salt**: 32 cryptographic random bytes used in recovery key derivation. Separate from password salt to avoid key reuse.
+
+For detailed information on key wrapping architecture and security properties, refer to `internal/crypto/keywrap.go` in the source code.
+

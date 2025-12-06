@@ -1,12 +1,12 @@
 {
   "_meta": {
     "generated_by": "doc-manager-mcp",
-    "tool_version": "1.2.3",
+    "tool_version": "1.2.4",
     "warning": "AUTO-GENERATED FILE - Do not edit manually. Changes will be overwritten by doc-manager."
   },
   "version": "1.1",
   "created_at": "2025-11-29T04:31:53.752027+00:00",
-  "updated_at": "2025-12-05T04:31:37.393216+00:00",
+  "updated_at": "2025-12-06T00:00:08.739230+00:00",
   "project_root": "R:\\Test-Projects\\pass-cli",
   "symbols": {
     "init": [
@@ -215,6 +215,16 @@
         "type": "function",
         "file": "cmd/vault_backup_restore.go",
         "line": 47,
+        "column": 0,
+        "signature": "func init()",
+        "parent": null,
+        "doc": null
+      },
+      {
+        "name": "init",
+        "type": "function",
+        "file": "cmd/vault_migrate.go",
+        "line": 37,
         "column": 0,
         "signature": "func init()",
         "parent": null,
@@ -1265,6 +1275,18 @@
         "line": 54,
         "column": 0,
         "signature": "func runVaultBackupRestore(cmd *cobra.Command, args []string) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "runVaultMigrate": [
+      {
+        "name": "runVaultMigrate",
+        "type": "function",
+        "file": "cmd/vault_migrate.go",
+        "line": 41,
+        "column": 0,
+        "signature": "func runVaultMigrate(cmd *cobra.Command, args []string) error",
         "parent": null,
         "doc": null
       }
@@ -3456,7 +3478,7 @@
         "name": "RecordFieldAccess",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 782,
+        "line": 969,
         "column": 0,
         "signature": "func (v *VaultService) RecordFieldAccess(service, field string) error",
         "parent": null,
@@ -3490,7 +3512,7 @@
         "name": "AddCredential",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 706,
+        "line": 893,
         "column": 0,
         "signature": "func (v *VaultService) AddCredential(service, username string, password []byte, category, url, notes string) error",
         "parent": null,
@@ -3512,7 +3534,7 @@
         "name": "UpdateCredential",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 955,
+        "line": 1142,
         "column": 0,
         "signature": "func (v *VaultService) UpdateCredential(service string, opts UpdateOpts) error",
         "parent": null,
@@ -3534,7 +3556,7 @@
         "name": "DeleteCredential",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1042,
+        "line": 1229,
         "column": 0,
         "signature": "func (v *VaultService) DeleteCredential(service string) error",
         "parent": null,
@@ -3844,7 +3866,7 @@
         "name": "VaultService",
         "type": "struct",
         "file": "internal/vault/vault.go",
-        "line": 88,
+        "line": 92,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -4574,7 +4596,7 @@
         "name": "GetIterations",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 360,
+        "line": 844,
         "column": 0,
         "signature": "func (s *StorageService) GetIterations() int",
         "parent": null,
@@ -4671,6 +4693,78 @@
         "type": "struct",
         "file": "internal/crypto/crypto.go",
         "line": 34,
+        "column": 0,
+        "signature": null,
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "GenerateDEK": [
+      {
+        "name": "GenerateDEK",
+        "type": "function",
+        "file": "internal/crypto/keywrap.go",
+        "line": 40,
+        "column": 0,
+        "signature": "func GenerateDEK() (dek []byte, err error)",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "WrapKey": [
+      {
+        "name": "WrapKey",
+        "type": "function",
+        "file": "internal/crypto/keywrap.go",
+        "line": 61,
+        "column": 0,
+        "signature": "func WrapKey(dek, kek []byte) (wrapped WrappedKey, err error)",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "UnwrapKey": [
+      {
+        "name": "UnwrapKey",
+        "type": "function",
+        "file": "internal/crypto/keywrap.go",
+        "line": 111,
+        "column": 0,
+        "signature": "func UnwrapKey(wrapped WrappedKey, kek []byte) (dek []byte, err error)",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "GenerateAndWrapDEK": [
+      {
+        "name": "GenerateAndWrapDEK",
+        "type": "function",
+        "file": "internal/crypto/keywrap.go",
+        "line": 160,
+        "column": 0,
+        "signature": "func GenerateAndWrapDEK(passwordKEK, recoveryKEK []byte) (result KeyWrapResult, err error)",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "WrappedKey": [
+      {
+        "name": "WrappedKey",
+        "type": "struct",
+        "file": "internal/crypto/keywrap.go",
+        "line": 13,
+        "column": 0,
+        "signature": null,
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "KeyWrapResult": [
+      {
+        "name": "KeyWrapResult",
+        "type": "struct",
+        "file": "internal/crypto/keywrap.go",
+        "line": 19,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -5968,7 +6062,7 @@
         "name": "New",
         "type": "function",
         "file": "internal/vault/vault.go",
-        "line": 108,
+        "line": 112,
         "column": 0,
         "signature": "func New(vaultPath string) (*VaultService, error)",
         "parent": null,
@@ -6215,12 +6309,24 @@
         "doc": null
       }
     ],
+    "DeriveRecoveryKey": [
+      {
+        "name": "DeriveRecoveryKey",
+        "type": "function",
+        "file": "internal/recovery/recovery.go",
+        "line": 263,
+        "column": 0,
+        "signature": "func DeriveRecoveryKey(mnemonic string, passphrase []byte, kdfParams *vault.KDFParams) []byte",
+        "parent": null,
+        "doc": null
+      }
+    ],
     "decryptData": [
       {
         "name": "decryptData",
         "type": "function",
         "file": "internal/recovery/recovery.go",
-        "line": 257,
+        "line": 273,
         "column": 0,
         "signature": "func decryptData(ciphertext, nonce, key []byte) ([]byte, error)",
         "parent": null,
@@ -6232,7 +6338,7 @@
         "name": "VerifyBackup",
         "type": "function",
         "file": "internal/recovery/recovery.go",
-        "line": 282,
+        "line": 298,
         "column": 0,
         "signature": "func VerifyBackup(config *VerifyConfig) error",
         "parent": null,
@@ -6244,7 +6350,7 @@
         "name": "encryptData",
         "type": "function",
         "file": "internal/recovery/recovery.go",
-        "line": 322,
+        "line": 338,
         "column": 0,
         "signature": "func encryptData(plaintext, key []byte) (ciphertext, nonce []byte, err error)",
         "parent": null,
@@ -7158,7 +7264,7 @@
         "name": "NewStorageService",
         "type": "function",
         "file": "internal/storage/storage.go",
-        "line": 54,
+        "line": 56,
         "column": 0,
         "signature": "func NewStorageService(cryptoService *crypto.CryptoService, vaultPath string) (*StorageService, error)",
         "parent": null,
@@ -7170,7 +7276,7 @@
         "name": "NewStorageServiceWithFS",
         "type": "function",
         "file": "internal/storage/storage.go",
-        "line": 59,
+        "line": 61,
         "column": 0,
         "signature": "func NewStorageServiceWithFS(cryptoService *crypto.CryptoService, vaultPath string, fs FileSystem) (*StorageService, error)",
         "parent": null,
@@ -7182,9 +7288,21 @@
         "name": "InitializeVault",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 85,
+        "line": 87,
         "column": 0,
         "signature": "func (s *StorageService) InitializeVault(password string) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "InitializeVaultV2": [
+      {
+        "name": "InitializeVaultV2",
+        "type": "method",
+        "file": "internal/storage/storage.go",
+        "line": 127,
+        "column": 0,
+        "signature": "func (s *StorageService) InitializeVaultV2(dek, wrappedDEK, wrappedDEKNonce, salt []byte, iterations int) error",
         "parent": null,
         "doc": null
       }
@@ -7194,9 +7312,21 @@
         "name": "LoadVault",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 118,
+        "line": 183,
         "column": 0,
         "signature": "func (s *StorageService) LoadVault(password string) ([]byte, error)",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "loadVaultV2": [
+      {
+        "name": "loadVaultV2",
+        "type": "method",
+        "file": "internal/storage/storage.go",
+        "line": 214,
+        "column": 0,
+        "signature": "func (s *StorageService) loadVaultV2(encryptedVault *EncryptedVault, password string) ([]byte, error)",
         "parent": null,
         "doc": null
       }
@@ -7206,7 +7336,7 @@
         "name": "LoadVaultWithKey",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 144,
+        "line": 255,
         "column": 0,
         "signature": "func (s *StorageService) LoadVaultWithKey(key []byte) ([]byte, error)",
         "parent": null,
@@ -7218,9 +7348,45 @@
         "name": "SaveVault",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 159,
+        "line": 270,
         "column": 0,
         "signature": "func (s *StorageService) SaveVault(data []byte, password string, callback ProgressCallback) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "SaveVaultWithDEK": [
+      {
+        "name": "SaveVaultWithDEK",
+        "type": "method",
+        "file": "internal/storage/storage.go",
+        "line": 395,
+        "column": 0,
+        "signature": "func (s *StorageService) SaveVaultWithDEK(data, dek []byte, callback ProgressCallback) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "ChangePasswordV2": [
+      {
+        "name": "ChangePasswordV2",
+        "type": "method",
+        "file": "internal/storage/storage.go",
+        "line": 512,
+        "column": 0,
+        "signature": "func (s *StorageService) ChangePasswordV2(data []byte, oldPassword, newPassword string, callback ProgressCallback) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "verifyTempFileWithDEK": [
+      {
+        "name": "verifyTempFileWithDEK",
+        "type": "method",
+        "file": "internal/storage/storage.go",
+        "line": 667,
+        "column": 0,
+        "signature": "func (s *StorageService) verifyTempFileWithDEK(tempPath string, dek []byte) error",
         "parent": null,
         "doc": null
       }
@@ -7230,9 +7396,21 @@
         "name": "prepareEncryptedData",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 257,
+        "line": 690,
         "column": 0,
         "signature": "func (s *StorageService) prepareEncryptedData(data []byte, metadata VaultMetadata, password string) ([]byte, error)",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "prepareEncryptedDataV2": [
+      {
+        "name": "prepareEncryptedDataV2",
+        "type": "method",
+        "file": "internal/storage/storage.go",
+        "line": 721,
+        "column": 0,
+        "signature": "func (s *StorageService) prepareEncryptedDataV2(data []byte, metadata VaultMetadata, password string) ([]byte, []byte, error)",
         "parent": null,
         "doc": null
       }
@@ -7242,7 +7420,7 @@
         "name": "SaveVaultWithIterations",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 288,
+        "line": 772,
         "column": 0,
         "signature": "func (s *StorageService) SaveVaultWithIterations(data []byte, password string, iterations int) error",
         "parent": null,
@@ -7254,9 +7432,43 @@
         "name": "SaveVaultWithIterationsUnsafe",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 329,
+        "line": 813,
         "column": 0,
         "signature": "func (s *StorageService) SaveVaultWithIterationsUnsafe(data []byte, password string, iterations int) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "GetVersion": [
+      {
+        "name": "GetVersion",
+        "type": "method",
+        "file": "internal/storage/storage.go",
+        "line": 854,
+        "column": 0,
+        "signature": "func (s *StorageService) GetVersion() int",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "MigrateToV2": [
+      {
+        "name": "MigrateToV2",
+        "type": "method",
+        "file": "internal/storage/storage.go",
+        "line": 876,
+        "column": 0,
+        "signature": "func (s *StorageService) MigrateToV2(data, dek, wrappedDEK, wrappedDEKNonce, salt []byte, iterations int, callback ProgressCallback) error",
+        "parent": null,
+        "doc": null
+      },
+      {
+        "name": "MigrateToV2",
+        "type": "method",
+        "file": "internal/vault/vault.go",
+        "line": 1569,
+        "column": 0,
+        "signature": "func (v *VaultService) MigrateToV2(passphrase []byte) (string, error)",
         "parent": null,
         "doc": null
       }
@@ -7266,7 +7478,7 @@
         "name": "SetIterations",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 371,
+        "line": 998,
         "column": 0,
         "signature": "func (s *StorageService) SetIterations(iterations int) error",
         "parent": null,
@@ -7278,7 +7490,7 @@
         "name": "VaultExists",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 388,
+        "line": 1015,
         "column": 0,
         "signature": "func (s *StorageService) VaultExists() bool",
         "parent": null,
@@ -7290,7 +7502,7 @@
         "name": "GetVaultInfo",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 393,
+        "line": 1020,
         "column": 0,
         "signature": "func (s *StorageService) GetVaultInfo() (*VaultMetadata, error)",
         "parent": null,
@@ -7302,7 +7514,7 @@
         "name": "ValidateVault",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 410,
+        "line": 1037,
         "column": 0,
         "signature": "func (s *StorageService) ValidateVault() error",
         "parent": null,
@@ -7314,7 +7526,7 @@
         "name": "CreateBackup",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 446,
+        "line": 1073,
         "column": 0,
         "signature": "func (s *StorageService) CreateBackup() error",
         "parent": null,
@@ -7326,7 +7538,7 @@
         "name": "RestoreFromBackup",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 453,
+        "line": 1080,
         "column": 0,
         "signature": "func (s *StorageService) RestoreFromBackup(backupPath string) error",
         "parent": null,
@@ -7338,7 +7550,7 @@
         "name": "RemoveBackup",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 476,
+        "line": 1103,
         "column": 0,
         "signature": "func (s *StorageService) RemoveBackup() error",
         "parent": null,
@@ -7350,7 +7562,7 @@
         "name": "loadEncryptedVault",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 487,
+        "line": 1114,
         "column": 0,
         "signature": "func (s *StorageService) loadEncryptedVault() (*EncryptedVault, error)",
         "parent": null,
@@ -7362,7 +7574,7 @@
         "name": "saveEncryptedVault",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 510,
+        "line": 1137,
         "column": 0,
         "signature": "func (s *StorageService) saveEncryptedVault(data []byte, metadata VaultMetadata, password string) error",
         "parent": null,
@@ -7374,7 +7586,7 @@
         "name": "atomicWrite",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 540,
+        "line": 1167,
         "column": 0,
         "signature": "func (s *StorageService) atomicWrite(path string, data []byte) error",
         "parent": null,
@@ -7386,7 +7598,7 @@
         "name": "preflightChecks",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 593,
+        "line": 1220,
         "column": 0,
         "signature": "func (s *StorageService) preflightChecks() error",
         "parent": null,
@@ -7398,7 +7610,7 @@
         "name": "getAvailableDiskSpace",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 629,
+        "line": 1259,
         "column": 0,
         "signature": "func (s *StorageService) getAvailableDiskSpace(path string) (int64, error)",
         "parent": null,
@@ -7410,7 +7622,7 @@
         "name": "createBackup",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 643,
+        "line": 1273,
         "column": 0,
         "signature": "func (s *StorageService) createBackup() error",
         "parent": null,
@@ -7422,7 +7634,7 @@
         "name": "restoreFromBackup",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 675,
+        "line": 1305,
         "column": 0,
         "signature": "func (s *StorageService) restoreFromBackup(backupPath string) error",
         "parent": null,
@@ -7521,6 +7733,34 @@
             },
             "is_optional": false,
             "doc": null
+          },
+          {
+            "name": "WrappedDEK",
+            "parent_symbol": "VaultMetadata",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/storage/storage.go",
+            "line": 41,
+            "column": 1,
+            "tags": {
+              "json": "wrapped_dek,omitempty"
+            },
+            "is_optional": true,
+            "doc": null
+          },
+          {
+            "name": "WrappedDEKNonce",
+            "parent_symbol": "VaultMetadata",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/storage/storage.go",
+            "line": 42,
+            "column": 1,
+            "tags": {
+              "json": "wrapped_dek_nonce,omitempty"
+            },
+            "is_optional": true,
+            "doc": null
           }
         ]
       }
@@ -7530,7 +7770,7 @@
         "name": "EncryptedVault",
         "type": "struct",
         "file": "internal/storage/storage.go",
-        "line": 43,
+        "line": 45,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -7542,7 +7782,7 @@
             "field_type": "VaultMetadata",
             "default_value": null,
             "file": "internal/storage/storage.go",
-            "line": 44,
+            "line": 46,
             "column": 1,
             "tags": {
               "json": "metadata"
@@ -7556,7 +7796,7 @@
             "field_type": "[]byte",
             "default_value": null,
             "file": "internal/storage/storage.go",
-            "line": 45,
+            "line": 47,
             "column": 1,
             "tags": {
               "json": "data"
@@ -7572,7 +7812,7 @@
         "name": "StorageService",
         "type": "struct",
         "file": "internal/storage/storage.go",
-        "line": 48,
+        "line": 50,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -7836,7 +8076,7 @@
         "name": "LoadMetadata",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1336,
+        "line": 1534,
         "column": 0,
         "signature": "func (v *VaultService) LoadMetadata() (*Metadata, error)",
         "parent": null,
@@ -7858,7 +8098,7 @@
         "name": "SaveMetadata",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1341,
+        "line": 1539,
         "column": 0,
         "signature": "func (v *VaultService) SaveMetadata(metadata *Metadata) error",
         "parent": null,
@@ -7880,7 +8120,7 @@
         "name": "DeleteMetadata",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1346,
+        "line": 1544,
         "column": 0,
         "signature": "func (v *VaultService) DeleteMetadata() error",
         "parent": null,
@@ -8228,7 +8468,7 @@
         "name": "GetStorageService",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 179,
+        "line": 183,
         "column": 0,
         "signature": "func (v *VaultService) GetStorageService() *storage.StorageService",
         "parent": null,
@@ -8240,7 +8480,7 @@
         "name": "EnableAudit",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 186,
+        "line": 190,
         "column": 0,
         "signature": "func (v *VaultService) EnableAudit(auditLogPath, vaultID string) error",
         "parent": null,
@@ -8252,7 +8492,7 @@
         "name": "DisableAudit",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 231,
+        "line": 235,
         "column": 0,
         "signature": "func (v *VaultService) DisableAudit()",
         "parent": null,
@@ -8264,7 +8504,7 @@
         "name": "LogAudit",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 239,
+        "line": 243,
         "column": 0,
         "signature": "func (v *VaultService) LogAudit(eventType, outcome, credentialName string)",
         "parent": null,
@@ -8276,7 +8516,7 @@
         "name": "createAuditCallback",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 261,
+        "line": 265,
         "column": 0,
         "signature": "func (v *VaultService) createAuditCallback() storage.ProgressCallback",
         "parent": null,
@@ -8288,9 +8528,21 @@
         "name": "Initialize",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 319,
+        "line": 323,
         "column": 0,
         "signature": "func (v *VaultService) Initialize(masterPassword []byte, useKeychain bool, auditLogPath, vaultID string) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "InitializeWithRecovery": [
+      {
+        "name": "InitializeWithRecovery",
+        "type": "method",
+        "file": "internal/vault/vault.go",
+        "line": 441,
+        "column": 0,
+        "signature": "func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain bool, auditLogPath, vaultID string, passphrase []byte) (string, error)",
         "parent": null,
         "doc": null
       }
@@ -8300,7 +8552,7 @@
         "name": "Unlock",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 420,
+        "line": 607,
         "column": 0,
         "signature": "func (v *VaultService) Unlock(masterPassword []byte) error",
         "parent": null,
@@ -8312,7 +8564,7 @@
         "name": "UnlockWithKey",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 553,
+        "line": 740,
         "column": 0,
         "signature": "func (v *VaultService) UnlockWithKey(vaultKey []byte) error",
         "parent": null,
@@ -8324,7 +8576,7 @@
         "name": "UnlockWithKeychain",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 637,
+        "line": 824,
         "column": 0,
         "signature": "func (v *VaultService) UnlockWithKeychain() error",
         "parent": null,
@@ -8336,7 +8588,7 @@
         "name": "Lock",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 661,
+        "line": 848,
         "column": 0,
         "signature": "func (v *VaultService) Lock()",
         "parent": null,
@@ -8348,7 +8600,7 @@
         "name": "IsUnlocked",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 677,
+        "line": 864,
         "column": 0,
         "signature": "func (v *VaultService) IsUnlocked() bool",
         "parent": null,
@@ -8360,7 +8612,7 @@
         "name": "save",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 682,
+        "line": 869,
         "column": 0,
         "signature": "func (v *VaultService) save() error",
         "parent": null,
@@ -8372,7 +8624,7 @@
         "name": "GetCredential",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 760,
+        "line": 947,
         "column": 0,
         "signature": "func (v *VaultService) GetCredential(service string, trackUsage bool) (*Credential, error)",
         "parent": null,
@@ -8384,7 +8636,7 @@
         "name": "getGitRepo",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 837,
+        "line": 1024,
         "column": 0,
         "signature": "func (v *VaultService) getGitRepo(dir string) string",
         "parent": null,
@@ -8396,7 +8648,7 @@
         "name": "ListCredentials",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 858,
+        "line": 1045,
         "column": 0,
         "signature": "func (v *VaultService) ListCredentials() ([]string, error)",
         "parent": null,
@@ -8408,7 +8660,7 @@
         "name": "ListCredentialsWithMetadata",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 899,
+        "line": 1086,
         "column": 0,
         "signature": "func (v *VaultService) ListCredentialsWithMetadata() ([]CredentialMetadata, error)",
         "parent": null,
@@ -8420,7 +8672,7 @@
         "name": "UpdateCredentialFields",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1019,
+        "line": 1206,
         "column": 0,
         "signature": "func (v *VaultService) UpdateCredentialFields(service, username, password, category, url, notes string) error",
         "parent": null,
@@ -8432,7 +8684,7 @@
         "name": "GetUsageStats",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1063,
+        "line": 1250,
         "column": 0,
         "signature": "func (v *VaultService) GetUsageStats(service string) (map[string]UsageRecord, error)",
         "parent": null,
@@ -8444,7 +8696,7 @@
         "name": "ChangePassword",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1085,
+        "line": 1273,
         "column": 0,
         "signature": "func (v *VaultService) ChangePassword(newPassword []byte) error",
         "parent": null,
@@ -8456,7 +8708,7 @@
         "name": "EnableKeychain",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1163,
+        "line": 1361,
         "column": 0,
         "signature": "func (v *VaultService) EnableKeychain(password []byte, force bool) error",
         "parent": null,
@@ -8468,7 +8720,7 @@
         "name": "GetKeychainStatus",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1210,
+        "line": 1408,
         "column": 0,
         "signature": "func (v *VaultService) GetKeychainStatus() *KeychainStatus",
         "parent": null,
@@ -8480,7 +8732,7 @@
         "name": "RemoveVault",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1242,
+        "line": 1440,
         "column": 0,
         "signature": "func (v *VaultService) RemoveVault(force bool, removeAll bool) (*RemoveVaultResult, error)",
         "parent": null,
@@ -8492,9 +8744,33 @@
         "name": "PingKeychain",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1351,
+        "line": 1549,
         "column": 0,
         "signature": "func (v *VaultService) PingKeychain() error",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "NeedsMigration": [
+      {
+        "name": "NeedsMigration",
+        "type": "method",
+        "file": "internal/vault/vault.go",
+        "line": 1555,
+        "column": 0,
+        "signature": "func (v *VaultService) NeedsMigration() (bool, error)",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "RecoverWithMnemonic": [
+      {
+        "name": "RecoverWithMnemonic",
+        "type": "method",
+        "file": "internal/vault/vault.go",
+        "line": 1701,
+        "column": 0,
+        "signature": "func (v *VaultService) RecoverWithMnemonic(mnemonic string, passphrase []byte) error",
         "parent": null,
         "doc": null
       }
@@ -8504,7 +8780,7 @@
         "name": "KeychainStatus",
         "type": "struct",
         "file": "internal/vault/vault.go",
-        "line": 20,
+        "line": 24,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -8516,7 +8792,7 @@
         "name": "RemoveVaultResult",
         "type": "struct",
         "file": "internal/vault/vault.go",
-        "line": 27,
+        "line": 31,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -8528,7 +8804,7 @@
         "name": "UsageRecord",
         "type": "struct",
         "file": "internal/vault/vault.go",
-        "line": 53,
+        "line": 57,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -8540,7 +8816,7 @@
             "field_type": "string",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 54,
+            "line": 58,
             "column": 1,
             "tags": {
               "json": "location"
@@ -8554,7 +8830,7 @@
             "field_type": "time.Time",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 55,
+            "line": 59,
             "column": 1,
             "tags": {
               "json": "timestamp"
@@ -8568,7 +8844,7 @@
             "field_type": "string",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 56,
+            "line": 60,
             "column": 1,
             "tags": {
               "json": "git_repo"
@@ -8582,7 +8858,7 @@
             "field_type": "int",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 57,
+            "line": 61,
             "column": 1,
             "tags": {
               "json": "count"
@@ -8596,7 +8872,7 @@
             "field_type": "int",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 58,
+            "line": 62,
             "column": 1,
             "tags": {
               "json": "line_number,omitempty"
@@ -8610,7 +8886,7 @@
             "field_type": "map[string]int",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 59,
+            "line": 63,
             "column": 1,
             "tags": {
               "json": "field_access"
@@ -8626,7 +8902,7 @@
         "name": "Credential",
         "type": "struct",
         "file": "internal/vault/vault.go",
-        "line": 64,
+        "line": 68,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -8638,7 +8914,7 @@
             "field_type": "string",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 65,
+            "line": 69,
             "column": 1,
             "tags": {
               "json": "service"
@@ -8652,7 +8928,7 @@
             "field_type": "string",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 66,
+            "line": 70,
             "column": 1,
             "tags": {
               "json": "username"
@@ -8666,7 +8942,7 @@
             "field_type": "[]byte",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 67,
+            "line": 71,
             "column": 1,
             "tags": {
               "json": "password"
@@ -8680,7 +8956,7 @@
             "field_type": "string",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 68,
+            "line": 72,
             "column": 1,
             "tags": {
               "json": "category,omitempty"
@@ -8694,7 +8970,7 @@
             "field_type": "string",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 69,
+            "line": 73,
             "column": 1,
             "tags": {
               "json": "url,omitempty"
@@ -8708,7 +8984,7 @@
             "field_type": "string",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 70,
+            "line": 74,
             "column": 1,
             "tags": {
               "json": "notes"
@@ -8722,7 +8998,7 @@
             "field_type": "time.Time",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 71,
+            "line": 75,
             "column": 1,
             "tags": {
               "json": "created_at"
@@ -8736,7 +9012,7 @@
             "field_type": "time.Time",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 72,
+            "line": 76,
             "column": 1,
             "tags": {
               "json": "updated_at"
@@ -8750,7 +9026,7 @@
             "field_type": "int",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 73,
+            "line": 77,
             "column": 1,
             "tags": {
               "json": "modified_count"
@@ -8764,7 +9040,7 @@
             "field_type": "map[string]UsageRecord",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 74,
+            "line": 78,
             "column": 1,
             "tags": {
               "json": "usage_records"
@@ -8780,7 +9056,7 @@
         "name": "VaultData",
         "type": "struct",
         "file": "internal/vault/vault.go",
-        "line": 78,
+        "line": 82,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -8792,7 +9068,7 @@
             "field_type": "map[string]Credential",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 79,
+            "line": 83,
             "column": 1,
             "tags": {
               "json": "credentials"
@@ -8806,7 +9082,7 @@
             "field_type": "int",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 80,
+            "line": 84,
             "column": 1,
             "tags": {
               "json": "version"
@@ -8820,7 +9096,7 @@
             "field_type": "bool",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 82,
+            "line": 86,
             "column": 1,
             "tags": {
               "json": "audit_enabled,omitempty"
@@ -8834,7 +9110,7 @@
             "field_type": "string",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 83,
+            "line": 87,
             "column": 1,
             "tags": {
               "json": "audit_log_path,omitempty"
@@ -8848,7 +9124,7 @@
             "field_type": "string",
             "default_value": null,
             "file": "internal/vault/vault.go",
-            "line": 84,
+            "line": 88,
             "column": 1,
             "tags": {
               "json": "vault_id,omitempty"
@@ -8864,7 +9140,7 @@
         "name": "UpdateOpts",
         "type": "struct",
         "file": "internal/vault/vault.go",
-        "line": 874,
+        "line": 1061,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -8876,7 +9152,7 @@
         "name": "CredentialMetadata",
         "type": "struct",
         "file": "internal/vault/vault.go",
-        "line": 883,
+        "line": 1070,
         "column": 0,
         "signature": null,
         "parent": null,

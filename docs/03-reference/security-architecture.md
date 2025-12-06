@@ -81,9 +81,200 @@ Master Key = PBKDF2(
 - **Migration Path**: Manual migration required (export credentials, reinitialize vault, re-import)
 - **See**: `docs/MIGRATION.md` for detailed upgrade instructions
 
+## Vault Format Versions
+
+Pass-CLI supports two vault formats to balance security and recovery capabilities.
+
+### V1 Format (Legacy)
+
+**Architecture:**
+```
+Master Password
+    ↓
+PBKDF2 (600k iterations)
+    ↓
+Encryption Key (32 bytes)
+    ↓
+AES-256-GCM Encrypt Vault Data
+    ↓
+Encrypted Vault File
+```
+
+**Characteristics:**
+- Single password-derived encryption key
+- Direct vault data encryption with derived key
+- No recovery phrase support (recovery phrase data ignored if present)
+- Supported for backward compatibility with existing vaults
+
+**Limitations:**
+- If master password is forgotten, vault is unrecoverable
+- Recovery phrase feature does not work properly in V1
+
+### V2 Format (Current - with DEK and Dual-KEK Wrapping)
+
+**Architecture:**
+```
+Master Password              Recovery Phrase
+    ↓                               ↓
+PBKDF2 (600k iterations)    BIP39 Seed → Argon2id
+    ↓                               ↓
+Password KEK (32 bytes)      Recovery KEK (32 bytes)
+    ↓                               ↓
+  ┌─────────────────────────────────┐
+  │    Key Wrapping Step            │
+  ├─────────────────────────────────┤
+  │ Generate DEK (32 bytes)         │
+  │ Wrap with Password KEK          │
+  │ Wrap with Recovery KEK          │
+  └─────────────────────────────────┘
+         ↓                ↓
+ Password Wrapped    Recovery Wrapped
+ DEK (48 bytes)      DEK (48 bytes)
+         ↓                ↓
+      Stored in Vault Metadata
+             │
+             ↓
+    AES-256-GCM Encrypt
+    Vault Data with DEK
+             ↓
+        Encrypted Vault File
+```
+
+**Characteristics:**
+- Two independent KEKs (Key Encryption Keys) from different sources
+- Both KEKs wrap the same DEK (Data Encryption Key)
+- Either password or recovery phrase can unlock the vault
+- Recovery phrase support with optional 25th-word passphrase
+- Atomic migration from V1 to V2 with rollback capability
+
+**Advantages:**
+- Vault can be unlocked with either password or recovery phrase
+- Provides redundancy for vault access
+- Fixes V1 recovery phrase bug (V1 didn't actually implement proper key wrapping)
+
+## Key Wrapping Architecture (V2)
+
+The V2 vault format uses a three-layer key hierarchy with AES-256-GCM key wrapping.
+
+### Three-Layer Key Hierarchy
+
+**Layer 1: Key Encryption Keys (KEKs)**
+
+Two independent KEKs are derived from different sources:
+
+**Password KEK:**
+- Source: User's master password
+- Derivation: PBKDF2-SHA256 with 600,000 iterations
+- Salt: 32-byte random salt (unique per vault)
+- Output: 32-byte key for AES-256-GCM
+
+**Recovery KEK:**
+- Source: 24-word BIP39 mnemonic + optional passphrase
+- Derivation: BIP39 seed → Argon2id (1 pass, 64MB, 4 threads)
+- Salt: 32-byte random recovery salt
+- Output: 32-byte key for AES-256-GCM
+
+**Layer 2: Data Encryption Key (DEK)**
+
+A single DEK encrypts all vault data:
+- Generated: 256-bit random key via `crypto/rand`
+- Wrapped twice: Once with Password KEK, once with Recovery KEK
+- Storage: Both wrapped versions stored in vault metadata
+- Never stored in plaintext on disk
+- Cleared from memory after vault operations
+
+**Layer 3: Vault Data**
+
+Actual credentials encrypted with DEK:
+- Encryption: AES-256-GCM with unique nonce per operation
+- Format: JSON containing all credentials with metadata
+
+### Key Wrapping Process
+
+**Wrapping a DEK with a KEK (AES-256-GCM):**
+
+```
+Input:  DEK (32 bytes) + KEK (32 bytes)
+        ↓
+Generate nonce (12 bytes random)
+        ↓
+AES-256-GCM.Seal(plaintext=DEK, key=KEK, nonce=nonce)
+        ↓
+Output: Ciphertext (48 bytes: 32-byte DEK + 16-byte auth tag)
+        Nonce (12 bytes)
+```
+
+This is implemented in `internal/crypto/keywrap.go` - see `WrapKey()` and `UnwrapKey()` functions.
+
+### Unlock Paths
+
+**Via Master Password:**
+
+```
+1. User enters master password
+2. Derive Password KEK with PBKDF2 (stored salt from metadata)
+3. Unwrap DEK with Password KEK
+   - Extract: Ciphertext (48 bytes) + Nonce (12 bytes) from metadata
+   - AES-256-GCM.Open(ciphertext, key=Password KEK, nonce)
+   - Result: DEK (32 bytes)
+4. Decrypt vault data with DEK
+5. Clear Password KEK and DEK from memory
+```
+
+**Via Recovery Phrase:**
+
+```
+1. User provides 24-word BIP39 mnemonic + optional passphrase
+2. Derive Recovery KEK with Argon2id (recovery salt from metadata)
+3. Unwrap DEK with Recovery KEK
+   - Extract: Ciphertext (48 bytes) + Nonce (12 bytes) from metadata
+   - AES-256-GCM.Open(ciphertext, key=Recovery KEK, nonce)
+   - Result: DEK (32 bytes)
+4. Decrypt vault data with DEK
+5. Vault is unlocked (no master password set until user changes password)
+6. Clear Recovery KEK and DEK from memory
+```
+
+See `internal/vault/vault.go` - `RecoverWithMnemonic()` function for implementation.
+
+### V1 to V2 Migration
+
+When upgrading a V1 vault to V2:
+
+```
+1. Load V1 vault (decrypt with password-derived key)
+2. Generate new DEK and recovery phrase
+3. Derive both Password KEK and Recovery KEK
+4. Wrap DEK with both KEKs
+5. Re-encrypt vault data with DEK (instead of password key)
+6. Update vault metadata with version=2, wrapped DEKs, recovery metadata
+7. Atomic write with verification and rollback capability
+```
+
+See `internal/storage/storage.go` - `MigrateToV2()` function and `internal/vault/vault.go` - `MigrateToV2()` method.
+
+### Security Properties
+
+**Advantages of Dual-KEK Design:**
+
+- **Redundancy**: Vault access not dependent on single secret
+- **Flexibility**: User can recover with passphrase if password forgotten
+- **Separation of Concerns**: Password security and recovery phrase stored separately
+- **Future-Proof**: Additional KEKs can be added without changing vault format
+
+**Security Guarantees:**
+
+- Both KEKs must be independently derived for each wrapping
+- Each wrapping uses unique random nonce (prevents replay)
+- Authentication tag (GCM) detects tampering with wrapped keys
+- Master password + recovery phrase = complete vault recovery capability
+- Loss of both = vault unrecoverable (no backdoor exists)
+
 ### Encryption Process
 
-#### Encrypting Credentials
+The encryption process differs between V1 and V2 vault formats.
+
+#### V1: Direct Password-Derived Encryption
 
 1. **Generate Salt** (first time only)
    ```text
@@ -110,16 +301,79 @@ Master Key = PBKDF2(
    )
    ```
 
-5. **Combine Components**
+5. **Store in Vault Metadata**
    ```text
-   vault_file = nonce || ciphertext || auth_tag
+   metadata = {
+       version: 1,
+       salt: salt,
+       iterations: 600000
+   }
+   vault_file = JSON(metadata) || ciphertext || auth_tag
+   ```
+
+#### V2: DEK with Dual-KEK Wrapping
+
+1. **Generate DEK and Wrap Keys** (during initialization only)
+   ```text
+   dek = crypto/rand.Read(32 bytes)  // Data Encryption Key
+
+   // Wrap with Password KEK
+   password_nonce = crypto/rand.Read(12 bytes)
+   wrapped_with_password = AES-256-GCM.Seal(
+       plaintext = dek,
+       key = Password KEK,
+       nonce = password_nonce
+   )
+
+   // Wrap with Recovery KEK
+   recovery_nonce = crypto/rand.Read(12 bytes)
+   wrapped_with_recovery = AES-256-GCM.Seal(
+       plaintext = dek,
+       key = Recovery KEK,
+       nonce = recovery_nonce
+   )
+   ```
+
+2. **Store Wrapped Keys in Metadata**
+   ```text
+   metadata = {
+       version: 2,
+       salt: password_salt,
+       iterations: 600000,
+       wrapped_dek: wrapped_with_password,
+       wrapped_dek_nonce: password_nonce
+   }
+   recovery_metadata = {
+       encrypted_recovery_key: wrapped_with_recovery,
+       nonce_recovery: recovery_nonce,
+       salt_recovery: recovery_salt,
+       ...
+   }
+   ```
+
+3. **Generate Nonce and Encrypt Vault Data**
+   ```text
+   vault_nonce = crypto/rand.Read(12 bytes)  // Per-save unique
+   ciphertext = AES-256-GCM.Encrypt(
+       plaintext = JSON(credentials),
+       key = dek,
+       nonce = vault_nonce,
+       additional_data = nil
+   )
+   ```
+
+4. **Store in Vault File**
+   ```text
+   vault_file = JSON(metadata + ciphertext)
    ```
 
 #### Decrypting Credentials
 
+**V1 (Direct Password):**
+
 1. **Load Master Password** from system keychain
-2. **Read Vault File** and extract salt, nonce, ciphertext
-3. **Derive Key** using PBKDF2 with stored salt
+2. **Read Vault File** and extract metadata (salt, iterations)
+3. **Derive Key** using PBKDF2 with stored salt and iterations
 4. **Decrypt and Verify**
    ```text
    plaintext = AES-256-GCM.Decrypt(
@@ -129,6 +383,33 @@ Master Key = PBKDF2(
    )
    ```
 5. **Parse JSON** to access credentials
+
+**V2 (DEK via Password KEK):**
+
+1. **Load Master Password** from system keychain
+2. **Read Vault File** and extract metadata (salt, iterations, wrapped_dek, wrapped_dek_nonce)
+3. **Derive Password KEK** using PBKDF2 with stored salt and iterations
+4. **Unwrap DEK** using Password KEK
+   ```text
+   dek = AES-256-GCM.Open(
+       ciphertext = wrapped_dek,
+       key = Password KEK,
+       nonce = wrapped_dek_nonce
+   )
+   ```
+5. **Decrypt Vault Data** using DEK
+   ```text
+   plaintext = AES-256-GCM.Decrypt(
+       ciphertext = vault_data,
+       key = dek,
+       nonce = vault_nonce
+   )
+   ```
+6. **Parse JSON** to access credentials
+
+**V2 (DEK via Recovery KEK):**
+
+See [Unlock Paths](#unlock-paths) section for the recovery phrase decryption flow.
 
 ### Random Number Generation
 
@@ -218,20 +499,23 @@ Password policy enforced for both vault and credential passwords:
 
 Pass-CLI supports optional BIP39 recovery phrases to recover vault access if you forget your master password. This feature uses the industry-standard BIP39 mnemonic specification (same as hardware wallets).
 
+**Note:** Recovery phrases only work with V2 vaults. V1 vaults do not support recovery phrase functionality. See [Key Wrapping Architecture (V2)](#key-wrapping-architecture-v2) for technical details on how recovery phrases are implemented with dual-KEK wrapping.
+
 #### How It Works
 
-**During Initialization:**
-1. Generate 24-word BIP39 mnemonic phrase
-2. Derive recovery key from mnemonic using PBKDF2
-3. Encrypt recovery key with master password
-4. Store encrypted recovery key in vault metadata
+**During Initialization (V2 Vault):**
+1. Generate 24-word BIP39 mnemonic phrase (256 bits of entropy)
+2. Generate DEK (Data Encryption Key) and wrap it with both Password KEK and Recovery KEK
+3. Recovery KEK derived from mnemonic using Argon2id + recovery salt
+4. Store both wrapped DEK versions in vault metadata
+5. Return mnemonic for user to write down securely
 
-**During Recovery:**
-1. User provides 6 random words from their 24-word phrase (challenge)
-2. System verifies the words match the stored mnemonic
-3. Derive recovery key from complete mnemonic
-4. Decrypt vault metadata to verify recovery key
-5. Allow user to set new master password
+**During Recovery (V2 Vault):**
+1. User provides complete 24-word BIP39 mnemonic + optional passphrase
+2. System derives Recovery KEK from mnemonic using stored recovery salt
+3. Unwrap DEK using Recovery KEK (AES-256-GCM decryption)
+4. Decrypt vault data with DEK
+5. Vault is unlocked without master password (user can set new password)
 
 #### Security Properties
 

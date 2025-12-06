@@ -1,10 +1,10 @@
 {
   "_meta": {
     "generated_by": "doc-manager-mcp",
-    "tool_version": "1.2.3",
+    "tool_version": "1.2.4",
     "warning": "AUTO-GENERATED FILE - Do not edit manually. Changes will be overwritten by doc-manager."
   },
-  "generated_at": "2025-12-04T23:31:38.303997",
+  "generated_at": "2025-12-05T19:00:09.787496",
   "doc_to_code": {
     "01-getting-started/manual-install.md": [
       "cmd/init.go",
@@ -74,7 +74,9 @@
       "cmd/tui/styles/theme.go"
     ],
     "02-guides/recovery-phrase.md": [
-      "cmd/init.go"
+      "cmd/doctor.go",
+      "cmd/init.go",
+      "cmd/vault_migrate.go"
     ],
     "02-guides/scripting-guide.md": [
       "cmd/list.go"
@@ -122,20 +124,30 @@
       "cmd/vault_backup_create.go",
       "cmd/vault_backup_info.go",
       "cmd/vault_backup_restore.go",
+      "cmd/vault_migrate.go",
       "cmd/vault_remove.go",
       "cmd/version.go"
     ],
-    "03-reference/configuration.md": [],
+    "03-reference/configuration.md": [
+      "cmd/version.go",
+      "internal/crypto/keywrap.go"
+    ],
     "03-reference/known-limitations.md": [
       "cmd/init.go"
     ],
     "03-reference/migration.md": [
+      "cmd/doctor.go",
       "cmd/generate.go",
       "cmd/init.go",
-      "cmd/list.go"
+      "cmd/list.go",
+      "cmd/vault_migrate.go",
+      "cmd/vault_remove.go"
     ],
     "03-reference/security-architecture.md": [
-      "cmd/init.go"
+      "cmd/init.go",
+      "internal/crypto/keywrap.go",
+      "internal/storage/storage.go",
+      "internal/vault/vault.go"
     ],
     "04-troubleshooting/faq.md": [
       "cmd/list.go"
@@ -232,6 +244,7 @@
       "01-getting-started/quick-install.md",
       "01-getting-started/quick-start.md",
       "03-reference/command-reference.md",
+      "03-reference/configuration.md",
       "04-troubleshooting/installation.md",
       "05-operations/security-operations.md",
       "06-development/homebrew.md",
@@ -251,7 +264,9 @@
       "02-guides/backup-restore.md",
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "02-guides/recovery-phrase.md",
       "03-reference/command-reference.md",
+      "03-reference/migration.md",
       "05-operations/health-checks.md",
       "README.md"
     ],
@@ -410,6 +425,11 @@
       "03-reference/command-reference.md",
       "04-troubleshooting/tui.md"
     ],
+    "cmd/vault_migrate.go": [
+      "02-guides/recovery-phrase.md",
+      "03-reference/command-reference.md",
+      "03-reference/migration.md"
+    ],
     "cmd/config.go": [
       "03-reference/command-reference.md"
     ],
@@ -427,7 +447,18 @@
     ],
     "cmd/vault_remove.go": [
       "03-reference/command-reference.md",
+      "03-reference/migration.md",
       "README.md"
+    ],
+    "internal/crypto/keywrap.go": [
+      "03-reference/configuration.md",
+      "03-reference/security-architecture.md"
+    ],
+    "internal/storage/storage.go": [
+      "03-reference/security-architecture.md"
+    ],
+    "internal/vault/vault.go": [
+      "03-reference/security-architecture.md"
     ],
     "cmd/root.go": [
       "06-development/contributing.md"
@@ -530,6 +561,7 @@
     "vault.enc.backup": [
       "02-guides/backup-restore.md",
       "03-reference/command-reference.md",
+      "03-reference/migration.md",
       "03-reference/security-architecture.md",
       "04-troubleshooting/vault.md"
     ],
@@ -547,7 +579,9 @@
       "02-guides/backup-restore.md",
       "02-guides/basic-workflows.md",
       "02-guides/keychain-setup.md",
+      "02-guides/recovery-phrase.md",
       "03-reference/command-reference.md",
+      "03-reference/migration.md",
       "05-operations/health-checks.md",
       "README.md"
     ],
@@ -613,13 +647,27 @@
     "use": [
       "02-guides/keychain-setup.md"
     ],
+    "migration": [
+      "02-guides/recovery-phrase.md",
+      "03-reference/migration.md"
+    ],
     "recovery": [
       "02-guides/recovery-phrase.md",
       "03-reference/command-reference.md"
     ],
+    "this": [
+      "02-guides/recovery-phrase.md",
+      "03-reference/command-reference.md"
+    ],
+    "pass-cli vault migrate": [
+      "02-guides/recovery-phrase.md",
+      "03-reference/command-reference.md",
+      "03-reference/migration.md"
+    ],
     "pass-cli change-password": [
       "02-guides/recovery-phrase.md",
       "03-reference/command-reference.md",
+      "03-reference/migration.md",
       "03-reference/security-architecture.md",
       "04-troubleshooting/faq.md",
       "04-troubleshooting/vault.md",
@@ -714,9 +762,6 @@
       "03-reference/command-reference.md"
     ],
     "each": [
-      "03-reference/command-reference.md"
-    ],
-    "this": [
       "03-reference/command-reference.md"
     ],
     "by": [
@@ -853,6 +898,27 @@
     "toggle_sidebar": [
       "03-reference/configuration.md"
     ],
+    "created_at": [
+      "03-reference/configuration.md"
+    ],
+    "updated_at": [
+      "03-reference/configuration.md"
+    ],
+    "wrapped_dek": [
+      "03-reference/configuration.md"
+    ],
+    "wrapped_dek_nonce": [
+      "03-reference/configuration.md"
+    ],
+    "recovery_wrapped_dek": [
+      "03-reference/configuration.md"
+    ],
+    "recovery_wrapped_dek_nonce": [
+      "03-reference/configuration.md"
+    ],
+    "recovery_salt": [
+      "03-reference/configuration.md"
+    ],
     "InputField": [
       "03-reference/known-limitations.md"
     ],
@@ -862,14 +928,15 @@
     "pass-cli # TUI mode": [
       "03-reference/known-limitations.md"
     ],
-    "pass-cli migrate": [
-      "03-reference/migration.md"
-    ],
     "every": [
       "03-reference/migration.md"
     ],
-    "migration": [
+    "the": [
       "03-reference/migration.md"
+    ],
+    "pass-cli vault remove": [
+      "03-reference/migration.md",
+      "README.md"
     ],
     "pass-cli add service1": [
       "03-reference/migration.md"
@@ -961,9 +1028,6 @@
     ],
     "core": [
       "README.md"
-    ],
-    "pass-cli vault remove": [
-      "README.md"
     ]
   },
   "all_references": {
@@ -1045,8 +1109,32 @@
         "doc_file": "03-reference/configuration.md"
       },
       {
-        "reference": "vault_path",
-        "doc_file": "03-reference/migration.md"
+        "reference": "created_at",
+        "doc_file": "03-reference/configuration.md"
+      },
+      {
+        "reference": "updated_at",
+        "doc_file": "03-reference/configuration.md"
+      },
+      {
+        "reference": "wrapped_dek",
+        "doc_file": "03-reference/configuration.md"
+      },
+      {
+        "reference": "wrapped_dek_nonce",
+        "doc_file": "03-reference/configuration.md"
+      },
+      {
+        "reference": "recovery_wrapped_dek",
+        "doc_file": "03-reference/configuration.md"
+      },
+      {
+        "reference": "recovery_wrapped_dek_nonce",
+        "doc_file": "03-reference/configuration.md"
+      },
+      {
+        "reference": "recovery_salt",
+        "doc_file": "03-reference/configuration.md"
       },
       {
         "reference": "vault_path",
@@ -1062,6 +1150,14 @@
       },
       {
         "reference": "vault_path",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "vault_path",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "vault.enc.backup",
         "doc_file": "03-reference/migration.md"
       },
       {
@@ -1527,7 +1623,7 @@
         "doc_file": "02-guides/recovery-phrase.md"
       },
       {
-        "reference": "pass-cli init",
+        "reference": "pass-cli doctor",
         "doc_file": "02-guides/recovery-phrase.md"
       },
       {
@@ -1551,6 +1647,10 @@
         "doc_file": "02-guides/recovery-phrase.md"
       },
       {
+        "reference": "pass-cli vault migrate",
+        "doc_file": "02-guides/recovery-phrase.md"
+      },
+      {
         "reference": "pass-cli change-password",
         "doc_file": "02-guides/recovery-phrase.md"
       },
@@ -1560,6 +1660,10 @@
       },
       {
         "reference": "pass-cli change-password",
+        "doc_file": "02-guides/recovery-phrase.md"
+      },
+      {
+        "reference": "pass-cli vault migrate",
         "doc_file": "02-guides/recovery-phrase.md"
       },
       {
@@ -1820,6 +1924,10 @@
       },
       {
         "reference": "config reset",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli change-password --recover",
         "doc_file": "03-reference/command-reference.md"
       },
       {
@@ -2287,6 +2395,18 @@
         "doc_file": "03-reference/command-reference.md"
       },
       {
+        "reference": "pass-cli vault migrate",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli vault migrate",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli vault migrate",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
         "reference": "pass-cli verify-audit [audit-log-path]",
         "doc_file": "03-reference/command-reference.md"
       },
@@ -2371,6 +2491,18 @@
         "doc_file": "03-reference/configuration.md"
       },
       {
+        "reference": "version",
+        "doc_file": "03-reference/configuration.md"
+      },
+      {
+        "reference": "salt",
+        "doc_file": "03-reference/configuration.md"
+      },
+      {
+        "reference": "iterations",
+        "doc_file": "03-reference/configuration.md"
+      },
+      {
         "reference": "pass-cli config init",
         "doc_file": "03-reference/configuration.md"
       },
@@ -2403,7 +2535,7 @@
         "doc_file": "03-reference/known-limitations.md"
       },
       {
-        "reference": "pass-cli migrate",
+        "reference": "pass-cli change-password --recover",
         "doc_file": "03-reference/migration.md"
       },
       {
@@ -2451,6 +2583,46 @@
         "doc_file": "03-reference/migration.md"
       },
       {
+        "reference": "pass-cli doctor",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "pass-cli vault migrate",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "pass-cli doctor",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "pass-cli list",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "pass-cli get github",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "pass-cli change-password",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "pass-cli vault migrate",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "pass-cli vault migrate",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "pass-cli vault remove",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "pass-cli init",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
         "reference": "pass-cli list",
         "doc_file": "03-reference/migration.md"
       },
@@ -2484,6 +2656,10 @@
       },
       {
         "reference": "pass-cli get service1",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "pass-cli vault migrate",
         "doc_file": "03-reference/migration.md"
       },
       {
@@ -3009,7 +3185,15 @@
         "doc_file": "02-guides/keychain-setup.md"
       },
       {
+        "reference": "migration",
+        "doc_file": "02-guides/recovery-phrase.md"
+      },
+      {
         "reference": "recovery",
+        "doc_file": "02-guides/recovery-phrase.md"
+      },
+      {
+        "reference": "this",
         "doc_file": "02-guides/recovery-phrase.md"
       },
       {
@@ -3066,6 +3250,10 @@
       },
       {
         "reference": "migration",
+        "doc_file": "03-reference/migration.md"
+      },
+      {
+        "reference": "the",
         "doc_file": "03-reference/migration.md"
       },
       {
@@ -3220,6 +3408,26 @@
       }
     ],
     "file_path": [
+      {
+        "reference": "internal/crypto/keywrap.go",
+        "doc_file": "03-reference/configuration.md"
+      },
+      {
+        "reference": "internal/crypto/keywrap.go",
+        "doc_file": "03-reference/security-architecture.md"
+      },
+      {
+        "reference": "internal/vault/vault.go",
+        "doc_file": "03-reference/security-architecture.md"
+      },
+      {
+        "reference": "internal/storage/storage.go",
+        "doc_file": "03-reference/security-architecture.md"
+      },
+      {
+        "reference": "internal/vault/vault.go",
+        "doc_file": "03-reference/security-architecture.md"
+      },
       {
         "reference": ".github/workflows/release.yml",
         "doc_file": "06-development/branch-workflow.md"

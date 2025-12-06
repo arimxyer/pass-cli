@@ -1367,6 +1367,123 @@ Total disk space: 7.30 MB
 
 ---
 
+##### Vault Migrate
+
+Migrate a vault from v1 to v2 format for working recovery phrase support.
+
+**Synopsis:**
+```bash
+pass-cli vault migrate
+```
+
+**Description:**
+Upgrades an existing v1 vault to the v2 format. The v2 format uses a key-wrapping scheme that enables recovery phrases to actually work (v1 recovery phrases were non-functional due to a bug in key derivation).
+
+During migration:
+1. Your vault will be re-encrypted with the new v2 format
+2. A NEW 24-word recovery phrase will be generated (write it down immediately)
+3. Your existing credentials remain unchanged
+4. The migration is atomic (all-or-nothing, safe against power loss)
+
+After migration, you can use `pass-cli change-password --recover` to recover your vault using the new recovery phrase if you forget your master password.
+
+**Flags:**
+
+None.
+
+**Examples:**
+```bash
+# Migrate vault to v2 format
+pass-cli vault migrate
+
+# Migration prompts for confirmation and password verification
+# It will display the new recovery phrase after successful migration
+```
+
+**Interactive Flow:**
+```text
+🔄 Vault Migration
+📁 Vault location: /home/user/.pass-cli/vault.enc
+
+Your vault is using the legacy v1 format.
+The v1 format has a bug where recovery phrases cannot unlock the vault.
+
+Migration will:
+  • Re-encrypt your vault with the new v2 format
+  • Generate a NEW 24-word recovery phrase
+  • Preserve all your existing credentials
+
+Proceed with migration? (yes/no): yes
+
+Enter master password: ********
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Your New Recovery Phrase
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Write down these 24 words in order:
+ 1. about      2. absent    3. accent     4. account    5. achieve
+ 6. acid       7. acquire   8. across     9. act        10. action
+ ... (remaining words)
+
+Verify your backup? (yes/no): yes
+
+Verification (attempt 1/3):
+Word at position 7: device
+[PASS] (1/6)
+
+... (additional verification prompts)
+
+✅ Vault migrated successfully to v2 format!
+
+Your recovery phrase is now fully functional.
+You can use 'pass-cli change-password --recover' if you forget your password.
+```
+
+**Important Notes:**
+
+- **Backup Created Automatically**: A backup is created before migration begins
+- **New Recovery Phrase**: Your old recovery phrase (if any) becomes invalid after migration
+- **Write It Down**: Save the new 24-word phrase in a safe location (paper, safe, etc.)
+- **Atomic Migration**: Safe against power loss and system crashes
+- **No Credential Loss**: All your stored credentials are preserved exactly
+- **Master Password Required**: You must unlock your vault to migrate
+- **Optional Passphrase**: You can add a 25th word passphrase for additional security (advanced)
+
+**Passphrase Protection (Advanced):**
+
+For enhanced security, you can add an optional passphrase (25th word) to your recovery phrase:
+
+```bash
+pass-cli vault migrate
+# When prompted for passphrase protection, select yes
+# Enter and confirm your passphrase (stored separately from the phrase)
+```
+
+Important if using passphrase:
+- You need BOTH the 24 words AND the passphrase to recover your vault
+- Store the passphrase separately from your 24-word phrase
+- If you lose the passphrase, recovery becomes impossible
+- Document your passphrase securely
+
+**Troubleshooting:**
+
+**Vault is already v2 format:**
+```
+✓ Your vault is already using the v2 format.
+  No migration needed - your recovery phrase will work correctly.
+```
+
+**Migration Verification Failed:**
+If you can't verify the recovery phrase after writing it down, migration allows up to 3 attempts. If all fail, please ensure you write down the phrase correctly before migration completes.
+
+**See Also:**
+- [Recovery Phrase Guide](../02-guides/recovery-phrase) - Complete recovery phrase documentation
+- [Change Password](./command-reference#change-password---change-master-password) - Use recovery phrase to recover access
+- [Backup & Restore Guide](../02-guides/backup-restore) - Backup management
+
+---
+
 ### verify-audit - Verify Audit Log Integrity
 
 Verify the integrity of audit log entries by checking HMAC signatures.

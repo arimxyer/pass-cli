@@ -78,7 +78,33 @@ pass-cli get github
 - **NIST SP 800-132**: Recommends iteration counts that result in ≥100ms processing time
 - **Brute-Force Resistance**: 6x computational cost for attackers attempting password cracking
 
-### 2. Password Policy Enforcement
+### 3. Vault Format Migration (V1 → V2)
+
+**What's New**: V2 format fixes a critical bug in recovery phrase handling. V1 vaults had non-functional recovery phrases - they couldn't actually unlock the vault. V2 introduces proper key wrapping that makes recovery phrases fully functional.
+
+**Key Differences**:
+
+| Aspect | V1 Format | V2 Format |
+|--------|-----------|-----------|
+| **Recovery Phrase** | Non-functional (cannot unlock) | Fully functional recovery |
+| **Key Derivation** | Single password-based KEK | Dual KEKs (password + recovery) |
+| **DEK Wrapping** | Direct encryption | Wrapped with both KEKs |
+| **Atomic Safety** | Basic file operations | Atomic migrations with verification |
+| **25th Word Support** | Not supported | Optional passphrase protection |
+
+**Recovery Phrase Example** (what you'll get after migration):
+```
+dragon elegant ancient shadow forest machine quantum triumph vendor
+success chapter biology network cousin shadow eternal puzzle symbol
+```
+
+**Should I Migrate?**
+
+- **YES, if**: You want functional password recovery, or plan to use `pass-cli change-password --recover` if you forget your master password
+- **NO, if**: You're satisfied with your current vault and never plan to recover via recovery phrase
+- **REQUIRED, if**: You generated a recovery phrase - V1's recovery phrases are non-functional, so V2 migration creates a working one
+
+### 4. Password Policy Enforcement
 
 **New Requirements** (enforced for all passwords):
 - Minimum 12 characters (was 8)
@@ -89,7 +115,7 @@ pass-cli get github
 
 **Impact**: Weak passwords will be rejected when creating/updating credentials.
 
-### 3. Audit Logging (Optional Feature)
+### 5. Audit Logging (Optional Feature)
 
 **New Feature**: Tamper-evident audit trail for vault operations.
 
@@ -99,6 +125,274 @@ pass-cli get github
 - Auto-rotation at 10MB with 7-day retention
 
 **Impact**: No impact unless you opt-in to enable audit logging.
+
+## V1 → V2 Migration Guide
+
+### Checking Your Vault Version
+
+Before migrating, determine which format your vault uses:
+
+```bash
+# Check vault version and migration status
+pass-cli doctor
+```
+
+**Output for V1 vault:**
+```
+Vault Information:
+  Location: /home/user/.pass-cli/vault.enc
+  Exists: Yes
+  Format: V1 (legacy - recovery phrases non-functional)
+  Migration Status: Required for working recovery phrases
+```
+
+**Output for V2 vault:**
+```
+Vault Information:
+  Location: /home/user/.pass-cli/vault.enc
+  Exists: Yes
+  Format: V2 (recovery phrases functional)
+  Migration Status: Up to date
+```
+
+### Migration Process
+
+The migration process is atomic and safe - your vault is preserved even if the process is interrupted.
+
+#### Prerequisites
+
+- Access to your current master password
+- ~1 MB free disk space (for temporary files during atomic operation)
+- No concurrent vault access (other processes shouldn't be accessing the vault)
+- Optional: Backup of your vault (highly recommended for peace of mind)
+
+#### Step 1: Create a Backup (Recommended)
+
+While the migration is atomic and safe, backups are always a good practice:
+
+```bash
+# Create a backup before migration
+cp ~/.pass-cli/vault.enc ~/backups/vault-backup-$(date +%Y%m%d-%H%M%S).enc
+
+# Or backup to external drive
+cp ~/.pass-cli/vault.enc /mnt/usb-drive/vault-backup-$(date +%Y%m%d).enc
+```
+
+#### Step 2: Run Migration Command
+
+```bash
+pass-cli vault migrate
+```
+
+This will:
+1. Check if migration is needed (exits if already V2)
+2. Display migration information
+3. Prompt you to confirm
+4. Ask for your current master password to unlock the vault
+5. Optionally prompt for a 25th word passphrase (advanced security)
+6. Generate a new 24-word recovery phrase
+7. Perform atomic migration
+8. Display your new recovery phrase
+
+#### Step 3: Save Your Recovery Phrase
+
+**CRITICAL**: Your recovery phrase is displayed once. If you lose it, password recovery becomes impossible.
+
+The command will show your recovery phrase in this format:
+```
+YOUR RECOVERY PHRASE (24 words):
+
+1.  dragon           7.  ancient          13. forest           19. triumph
+2.  elegant          8.  shadow           14. machine          20. vendor
+3.  ancient          9.  shadow           15. quantum          21. success
+4.  shadow           10. forest           16. triumph          22. chapter
+5.  forest           11. machine          17. vendor           23. biology
+6.  machine          12. quantum          18. success          24. symbol
+```
+
+**Recommended Storage**:
+- Write down on paper (offline, physical backup)
+- Store in a safe or safety deposit box
+- Consider a metal seed phrase card (fire/water resistant)
+- DO NOT store in:
+  - Cloud services (Google Drive, Dropbox, iCloud)
+  - Email accounts
+  - Unencrypted password managers
+  - Screenshots or photos
+
+#### Step 4: Verify Your Backup
+
+The command will optionally prompt you to verify your recovery phrase by asking for 3 random words:
+
+```
+Verification (attempt 1/3):
+  Enter word #4: triumph
+  Enter word #7: forest
+  Enter word #12: quantum
+✓ Backup verified successfully!
+```
+
+This ensures you've written down all 24 words correctly. You get up to 3 attempts.
+
+#### Step 5: Verify Migration Success
+
+```bash
+# Check that migration completed
+pass-cli doctor
+
+# Output should show:
+#   Format: V2 (recovery phrases functional)
+
+# Test accessing your credentials
+pass-cli list
+
+# Test accessing a specific credential
+pass-cli get github
+```
+
+### Post-Migration Actions
+
+#### Critical: Store Recovery Phrase
+
+Your new recovery phrase is now active. Store it securely:
+- Physically write down all 24 words in order
+- Store in secure location (safe, safety deposit box, etc.)
+- Keep separate from your master password
+- Do NOT take photos or screenshots
+
+#### Optional: With Passphrase Protection
+
+If you added a 25th word (passphrase) during migration:
+- Store the 25th word SEPARATELY from the 24-word phrase
+- You'll need both the phrase AND the passphrase to recover
+- This adds an extra security layer if the phrase is compromised
+
+#### Test Recovery (Optional but Recommended)
+
+If you want to verify recovery works (without actually changing your password):
+
+```bash
+# This will guide you through recovery process without making changes
+pass-cli change-password --recover
+```
+
+You'll be prompted to:
+1. Enter your 24-word recovery phrase
+2. Enter the optional 25th word (if you set one)
+3. Choose a new master password
+
+**Note**: You can cancel after verification without changing your password.
+
+### Migration Safety & Atomicity
+
+The migration process is atomic - all or nothing:
+
+**During Migration**:
+- Temporary file is created: `vault.enc.tmp.YYYYMMDD-HHMMSS.RANDOM`
+- Temporary file is verified (decrypted in-memory to ensure correctness)
+- Automatic rename operation (all-or-nothing)
+- Backup created: `vault.enc.backup`
+
+**If Migration Fails**:
+- Original vault file untouched
+- Temporary files cleaned up
+- You can retry the migration
+
+**If Power Loss During Migration**:
+- Automatic cleanup occurs on next vault access
+- Original vault remains intact
+
+### Migration Troubleshooting
+
+#### "Your vault is already using the v2 format"
+
+**Meaning**: Migration is not needed - your vault is already V2.
+
+**Solution**: Your recovery phrase should already be functional. No action needed.
+
+#### "migration failed: failed to unlock vault: incorrect password"
+
+**Meaning**: The password you entered doesn't match the vault's master password.
+
+**Solution**:
+```bash
+# Try migration again with correct password
+pass-cli vault migrate
+```
+
+#### "failed to generate entropy" or "failed to generate mnemonic"
+
+**Meaning**: System entropy source unavailable (rare).
+
+**Solution**:
+- Retry the migration command
+- Ensure system has enough disk space
+- Check system logs for entropy warnings
+- Contact support if issue persists
+
+#### "migration failed: disk full"
+
+**Meaning**: Not enough free disk space for atomic operation.
+
+**Solution**:
+```bash
+# Free up disk space (need ~1 MB minimum)
+df -h  # Check available space
+rm -rf /tmp/*  # Clean temp files (use caution)
+
+# Retry migration
+pass-cli vault migrate
+```
+
+#### "migration failed: permission denied"
+
+**Meaning**: Insufficient file permissions for vault directory.
+
+**Solution**:
+```bash
+# Check permissions
+ls -la ~/.pass-cli/vault.enc
+
+# Fix if needed (make file readable/writable by user)
+chmod 600 ~/.pass-cli/vault.enc
+```
+
+#### "Cannot verify my recovery phrase"
+
+**Meaning**: Words don't match the recovery phrase shown.
+
+**Solution**:
+- Carefully rewrite all 24 words from the migration output
+- Ensure each word is spelled correctly (case-insensitive)
+- Verify you have all 24 words in correct order
+- If still failing, check your written backup for errors
+
+#### "Lost my recovery phrase"
+
+**Meaning**: You didn't write down the recovery phrase and migration is complete.
+
+**Unfortunate Reality**: Recovery phrase cannot be regenerated. The only option is:
+
+**Solution**:
+```bash
+# If you still know your master password:
+# 1. You can still unlock your vault normally
+# 2. Create a new vault and migrate credentials manually
+# 3. Re-run migration to get a new recovery phrase
+
+# Create backup of current vault
+cp ~/.pass-cli/vault.enc ~/.pass-cli/vault.enc.backup
+
+# Remove current vault to start fresh
+pass-cli vault remove
+
+# Initialize new vault with recovery phrase
+pass-cli init
+# This will generate a NEW recovery phrase - SAVE IT!
+
+# Manually migrate credentials from backup vault
+# (requires knowing master password for backup)
+```
 
 ## Migration Scenarios
 
@@ -198,9 +492,24 @@ pass-cli get github
 
 **Time Required**: ~5-10 minutes for 20 credentials.
 
-### Option B: In-Place Migration (Planned)
+### Option B: In-Place Migration (V1 → V2)
 
-> **Note**: An automated `pass-cli migrate` command is planned for a future release. Until then, use Option A (Fresh Vault) or Option C (Hybrid Approach).
+For users with existing V1 vaults who want automated in-place migration:
+
+```bash
+# Migrate V1 vault to V2 format (atomic, safe)
+pass-cli vault migrate
+```
+
+See the [V1 → V2 Migration Guide](#v1--v2-migration-guide) section above for detailed steps.
+
+**Best for**: Most users - atomic, safe, preserves all credentials.
+
+**Advantages**:
+- Automatic process (no manual credential re-entry)
+- Atomic operation (all-or-nothing safety)
+- Generates new functional recovery phrase
+- Backup created automatically
 
 ### Option C: Hybrid Approach (Keep Old Vault)
 

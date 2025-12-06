@@ -18,6 +18,10 @@ Pass-CLI's BIP39 recovery feature generates a 24-word recovery phrase when you c
 - [OK] **Fast**: Recover in under 30 seconds
 - [OK] **Optional**: Can skip with `--no-recovery` flag if you use keychain integration
 
+{{< hint warning >}}
+**V1 Vault Users**: If you created your vault before v0.2.0, your recovery phrase will NOT work. V1 vaults have a bug where recovery phrases cannot unlock the vault. You must migrate to V2 format first. See [Migrating to V2 Format](#migrating-to-v2-format) below.
+{{< /hint >}}
+
 ## Setting Up Recovery
 
 ### During Vault Initialization
@@ -76,6 +80,131 @@ pass-cli init --no-recovery
 
 **Warning**: If you skip recovery phrase generation, you cannot recover vault access if you forget your master password.
 
+## Migrating to V2 Format
+
+### Why Migration is Necessary
+
+V1 vaults (created before pass-cli v0.2.0) have a critical bug: recovery phrases cannot actually unlock the vault. V2 vaults fix this by implementing proper key wrapping, making recovery phrases fully functional.
+
+{{< hint info >}}
+**Check Your Vault Version**: Run `pass-cli doctor` to see if your vault is v1 or v2. If it shows "Vault Format: v1", you need to migrate.
+{{< /hint >}}
+
+### Migration Steps
+
+#### Step 1: Run the Migration Command
+
+```bash
+pass-cli vault migrate
+```
+
+You'll see:
+```
+🔄 Vault Migration
+📁 Vault location: ~/.pass-cli/vault.enc
+
+Your vault is using the legacy v1 format.
+The v1 format has a bug where recovery phrases cannot unlock the vault.
+
+Migration will:
+  • Re-encrypt your vault with the new v2 format
+  • Generate a NEW 24-word recovery phrase
+  • Preserve all your existing credentials
+
+Proceed with migration? (Y/n): y
+```
+
+#### Step 2: Unlock Your Vault
+
+You'll be prompted for your current master password:
+
+```bash
+Enter master password: ****
+[PASS] Vault unlocked
+```
+
+#### Step 3: Optional Passphrase Protection
+
+You can add optional passphrase protection to your recovery phrase (the "25th word"):
+
+```bash
+Advanced: Add passphrase protection (25th word) to recovery phrase? (y/N): y
+
+⚠️  Passphrase Protection:
+   • Adds an extra layer of security to your recovery phrase
+   • You will need BOTH the 24 words AND the passphrase to recover
+   • Store the passphrase separately from your 24-word phrase
+   • If you lose the passphrase, recovery will be impossible
+
+Enter recovery passphrase: ****
+Confirm recovery passphrase: ****
+```
+
+#### Step 4: Write Down Your New Recovery Phrase
+
+A new 24-word recovery phrase is generated:
+
+```
+🔄 Migrating vault...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Recovery Phrase Setup
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Write down these 24 words in order:
+
+ 1. abandon    7. device    13. hover    19. spatial
+ 2. ability    8. diagram   14. hurdle   20. sphere
+ ... (24 words total)
+
+⚠  WARNINGS:
+   • Anyone with this phrase can access your vault
+   • Store offline (write on paper, use a safe)
+   • Your old recovery phrase (if any) is now invalid
+```
+
+{{< hint danger >}}
+**Important**: Your OLD recovery phrase no longer works. The new recovery phrase shown here is what you must use to recover your vault.
+{{< /hint >}}
+
+#### Step 5: Verify Your Backup
+
+You'll be asked to verify your backup by entering a few random words from the new phrase:
+
+```bash
+Verify your backup? (Y/n): y
+
+Verification (attempt 1/3):
+Enter word #7: device
+[PASS] (1/3)
+
+Enter word #18: identify
+[PASS] (2/3)
+
+Enter word #22: spin
+[PASS] (3/3)
+
+✓ Backup verified successfully!
+```
+
+#### Step 6: Done!
+
+```bash
+✅ Vault migrated successfully to v2 format!
+
+Your recovery phrase is now fully functional.
+You can use 'pass-cli change-password --recover' if you forget your password.
+```
+
+### Post-Migration: Securing Your New Recovery Phrase
+
+After migration, your vault uses the new recovery phrase. Store it securely:
+
+- **Write it down** on paper using permanent ink
+- **Store offline** in a safe, lockbox, or safety deposit box
+- **Keep it separate** from your vault file and computer
+- **Don't digitize it** (no photos, cloud storage, email, etc.)
+- **Keep it separate** from your optional passphrase (if you created one)
+
 ### What to Do Next
 
 **CRITICAL**: Write down your 24-word phrase **on paper** (not digitally). Store it securely:
@@ -102,7 +231,11 @@ pass-cli init --no-recovery
 Use recovery if:
 - [OK] You forgot your master password
 - [OK] You have your 24-word recovery phrase
-- [OK] Recovery was enabled during `pass-cli init`
+- [OK] Your vault is V2 format (or migrated to V2)
+
+{{< hint warning >}}
+**V1 Vaults Cannot Use Recovery**: If you haven't migrated to V2 format yet, recovery will not work. See [Migrating to V2 Format](#migrating-to-v2-format) above.
+{{< /hint >}}
 
 **Note**: If keychain is enabled and accessible, you don't need recovery. Your master password is stored securely in your OS keychain.
 
@@ -114,9 +247,11 @@ Use recovery if:
 pass-cli change-password --recover
 ```
 
-#### Step 2: Answer Challenge Questions
+This command unlocks your vault using your recovery phrase and sets a new master password.
 
-You'll be asked for 6 random words from your 24-word phrase:
+#### Step 2: Enter Your Recovery Phrase
+
+You'll be asked for 6 random words from your 24-word phrase in random order:
 
 ```bash
 🔐 Vault Recovery
@@ -269,6 +404,16 @@ Confirm passphrase: ****
 
 ## Troubleshooting
 
+### "Recovery not enabled for this vault" or "Recovery with mnemonic only supported for v2 vaults"
+
+**Cause**: Your vault is still in V1 format.
+
+**Solution**: Migrate to V2 format first. See [Migrating to V2 Format](#migrating-to-v2-format) above.
+
+```bash
+pass-cli vault migrate
+```
+
 ### "Recovery phrase not enabled for this vault"
 
 **Cause**: Vault was initialized with `--no-recovery` flag.
@@ -282,18 +427,19 @@ Confirm passphrase: ****
 **Solutions**:
 1. Check spelling carefully
 2. Verify word position (word #7 = 7th word in your list)
-3. Ensure you're reading from correct recovery phrase backup
+3. Ensure you're reading from correct recovery phrase backup (not an old one from before migration)
 4. Try typing word manually (not copy-paste)
 
 ### "Recovery verification failed"
 
-**Cause**: Too many incorrect words entered.
+**Cause**: Too many incorrect words entered, or wrong recovery phrase used.
 
 **Solutions**:
-1. Double-check your written recovery phrase
+1. Double-check your written recovery phrase (especially after migration)
 2. Verify you're using the correct vault
-3. Ensure recovery phrase hasn't been transcribed incorrectly
-4. If phrase is correct but failing, vault may be corrupted (restore from backup)
+3. If you migrated recently, make sure you're using the NEW recovery phrase (old one no longer works)
+4. Ensure recovery phrase hasn't been transcribed incorrectly
+5. If phrase is correct but failing, vault may be corrupted (restore from backup)
 
 ### Lost Recovery Phrase
 
@@ -302,12 +448,14 @@ Confirm passphrase: ****
 **Options**:
 1. Check all secure storage locations
 2. Check with trusted family members
-3. If truly lost, you must reinitialize vault and re-add credentials
+3. Check backups (if you created them before losing the phrase)
+4. If truly lost, you must reinitialize vault and re-add credentials
 
 **Prevention**:
 - Store recovery phrase in multiple secure locations
 - Tell trusted family member where phrase is stored
 - Include phrase location in your estate planning
+- Keep a backup of your vault file in a secure location (separate from recovery phrase)
 
 ## See Also
 
