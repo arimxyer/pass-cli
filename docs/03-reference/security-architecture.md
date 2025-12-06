@@ -88,7 +88,7 @@ Pass-CLI supports two vault formats to balance security and recovery capabilitie
 ### V1 Format (Legacy)
 
 **Architecture:**
-```
+```text
 Master Password
     ↓
 PBKDF2 (600k iterations)
@@ -113,7 +113,7 @@ Encrypted Vault File
 ### V2 Format (Current - with DEK and Dual-KEK Wrapping)
 
 **Architecture:**
-```
+```text
 Master Password              Recovery Phrase
     ↓                               ↓
 PBKDF2 (600k iterations)    BIP39 Seed → Argon2id
@@ -193,7 +193,7 @@ Actual credentials encrypted with DEK:
 
 **Wrapping a DEK with a KEK (AES-256-GCM):**
 
-```
+```text
 Input:  DEK (32 bytes) + KEK (32 bytes)
         ↓
 Generate nonce (12 bytes random)
@@ -210,7 +210,7 @@ This is implemented in `internal/crypto/keywrap.go` - see `WrapKey()` and `Unwra
 
 **Via Master Password:**
 
-```
+```text
 1. User enters master password
 2. Derive Password KEK with PBKDF2 (stored salt from metadata)
 3. Unwrap DEK with Password KEK
@@ -223,7 +223,7 @@ This is implemented in `internal/crypto/keywrap.go` - see `WrapKey()` and `Unwra
 
 **Via Recovery Phrase:**
 
-```
+```text
 1. User provides 24-word BIP39 mnemonic + optional passphrase
 2. Derive Recovery KEK with Argon2id (recovery salt from metadata)
 3. Unwrap DEK with Recovery KEK
@@ -241,7 +241,7 @@ See `internal/vault/vault.go` - `RecoverWithMnemonic()` function for implementat
 
 When upgrading a V1 vault to V2:
 
-```
+```text
 1. Load V1 vault (decrypt with password-derived key)
 2. Generate new DEK and recovery phrase
 3. Derive both Password KEK and Recovery KEK

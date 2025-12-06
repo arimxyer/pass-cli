@@ -194,7 +194,7 @@ The vault file stores metadata alongside encrypted credential data. This metadat
 ### Key Derivation
 
 **V1 Password Path**:
-```
+```text
 password + salt + iterations
     ↓ PBKDF2
 encryption_key (32 bytes)
@@ -203,7 +203,7 @@ encrypted vault data
 ```
 
 **V2 Password Path**:
-```
+```text
 password + salt + iterations
     ↓ PBKDF2
 password KEK (32 bytes)
@@ -214,7 +214,7 @@ encrypted vault data
 ```
 
 **V2 Recovery Path**:
-```
+```text
 recovery phrase + recovery_salt
     ↓ Argon2id
 recovery KEK (32 bytes)

@@ -93,7 +93,7 @@ pass-cli get github
 | **25th Word Support** | Not supported | Optional passphrase protection |
 
 **Recovery Phrase Example** (what you'll get after migration):
-```
+```text
 dragon elegant ancient shadow forest machine quantum triumph vendor
 success chapter biology network cousin shadow eternal puzzle symbol
 ```
@@ -138,7 +138,7 @@ pass-cli doctor
 ```
 
 **Output for V1 vault:**
-```
+```text
 Vault Information:
   Location: /home/user/.pass-cli/vault.enc
   Exists: Yes
@@ -147,7 +147,7 @@ Vault Information:
 ```
 
 **Output for V2 vault:**
-```
+```text
 Vault Information:
   Location: /home/user/.pass-cli/vault.enc
   Exists: Yes
@@ -199,7 +199,7 @@ This will:
 **CRITICAL**: Your recovery phrase is displayed once. If you lose it, password recovery becomes impossible.
 
 The command will show your recovery phrase in this format:
-```
+```text
 YOUR RECOVERY PHRASE (24 words):
 
 1.  dragon           7.  ancient          13. forest           19. triumph
@@ -224,7 +224,7 @@ YOUR RECOVERY PHRASE (24 words):
 
 The command will optionally prompt you to verify your recovery phrase by asking for 3 random words:
 
-```
+```text
 Verification (attempt 1/3):
   Enter word #4: triumph
   Enter word #7: forest

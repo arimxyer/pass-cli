@@ -99,7 +99,7 @@ pass-cli vault migrate
 ```
 
 You'll see:
-```
+```text
 🔄 Vault Migration
 📁 Vault location: ~/.pass-cli/vault.enc
 
@@ -144,7 +144,7 @@ Confirm recovery passphrase: ****
 
 A new 24-word recovery phrase is generated:
 
-```
+```text
 🔄 Migrating vault...
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -253,7 +253,7 @@ This command unlocks your vault using your recovery phrase and sets a new master
 
 You'll be asked for 6 random words from your 24-word phrase in random order:
 
-```bash
+```text
 🔐 Vault Recovery
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 You will be asked for 6 words from your 24-word phrase.
@@ -283,7 +283,7 @@ Enter word #15: hybrid
 
 #### Step 3: Set New Master Password
 
-```bash
+```text
 Enter new master password: ****
 Confirm new master password: ****
 
