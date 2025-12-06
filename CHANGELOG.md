@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.1] - 2025-12-06
+
+### Fixed
+- **Critical**: 6-word challenge recovery now works correctly for v2 vaults
+  - V2 vaults created in v0.11.0 were missing challenge data (`ChallengePositions`, `EncryptedStoredWords`, `NonceStored`, `SaltChallenge`)
+  - `change-password --recover` would fail immediately with "invalid word" error due to empty challenge positions
+  - Users with affected v2 vaults should run `pass-cli vault migrate` to regenerate recovery phrase with proper challenge data
+
+### Changed
+- **Refactor**: Extracted `RecoveryMetadata` and `KDFParams` types to `internal/shared` package
+  - Eliminates ~200 lines of duplicated challenge setup code
+  - Breaks import cycle between `vault` and `recovery` packages
+  - Single source of truth for `SetupChallengeRecovery()` in recovery package
+  - Backward-compatible type aliases in vault package
+
 ## [0.11.0] - 2025-12-05
 
 ### Added
