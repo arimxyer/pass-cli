@@ -1,6 +1,8 @@
 package vault
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/rand"
 	"encoding/json"
 	"errors"
@@ -425,7 +427,199 @@ const (
 	recoveryArgon2Threads uint8  = 4     // Parallelism
 	recoveryKeyLen        uint32 = 32    // AES-256
 	recoverySaltLen       int    = 32    // 256 bits
+	challengeCount        int    = 6     // Number of challenge words
+	mnemonicWords         int    = 24    // Total words in mnemonic
+	gcmNonceSize          int    = 12    // GCM nonce size
 )
+
+// challengeSetupResult contains the result of challenge-based recovery setup
+type challengeSetupResult struct {
+	Mnemonic    string            // 24-word mnemonic to display to user
+	RecoveryKEK []byte            // Recovery KEK for wrapping DEK (caller must clear)
+	Metadata    *RecoveryMetadata // Recovery metadata with challenge fields
+}
+
+// setupChallengeRecovery generates mnemonic and challenge data for v2 vault recovery.
+// This is an internal helper that sets up the 6-word challenge system.
+func setupChallengeRecovery(passphrase []byte) (*challengeSetupResult, error) {
+	// 1. Generate 24-word mnemonic
+	entropy, err := bip39.NewEntropy(256)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate entropy: %w", err)
+	}
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate mnemonic: %w", err)
+	}
+
+	// 2. Generate BIP39 seed from mnemonic (with optional passphrase)
+	seed := bip39.NewSeed(mnemonic, string(passphrase))
+	defer crypto.ClearBytes(seed)
+
+	// 3. Select 6 challenge positions (crypto-secure random)
+	challengePositions, err := selectChallengePositions(mnemonicWords, challengeCount)
+	if err != nil {
+		return nil, fmt.Errorf("failed to select challenge positions: %w", err)
+	}
+
+	// 4. Split mnemonic into challenge words (6) and stored words (18)
+	challengeWords, storedWords := splitMnemonicWords(mnemonic, challengePositions)
+
+	// 5. Generate KDF parameters with random salts
+	saltChallenge := make([]byte, recoverySaltLen)
+	saltRecovery := make([]byte, recoverySaltLen)
+	if _, err := rand.Read(saltChallenge); err != nil {
+		return nil, fmt.Errorf("failed to generate challenge salt: %w", err)
+	}
+	if _, err := rand.Read(saltRecovery); err != nil {
+		return nil, fmt.Errorf("failed to generate recovery salt: %w", err)
+	}
+
+	kdfParams := KDFParams{
+		Algorithm:     "argon2id",
+		Time:          recoveryArgon2Time,
+		Memory:        recoveryArgon2Memory,
+		Threads:       recoveryArgon2Threads,
+		SaltChallenge: saltChallenge,
+		SaltRecovery:  saltRecovery,
+	}
+
+	// 6. Derive challenge key from challenge words only
+	challengeMnemonic := strings.Join(challengeWords, " ")
+	challengeSeed := bip39.NewSeed(challengeMnemonic, string(passphrase))
+	defer crypto.ClearBytes(challengeSeed)
+	challengeKey := argon2.IDKey(
+		challengeSeed,
+		kdfParams.SaltChallenge,
+		kdfParams.Time,
+		kdfParams.Memory,
+		kdfParams.Threads,
+		recoveryKeyLen,
+	)
+	defer crypto.ClearBytes(challengeKey)
+
+	// 7. Encrypt stored words (18) with challenge key
+	encryptedStoredWords, nonceStored, err := encryptStoredWords(storedWords, challengeKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encrypt stored words: %w", err)
+	}
+
+	// 8. Derive recovery KEK from full mnemonic seed
+	recoveryKEK := argon2.IDKey(
+		seed,
+		kdfParams.SaltRecovery,
+		kdfParams.Time,
+		kdfParams.Memory,
+		kdfParams.Threads,
+		recoveryKeyLen,
+	)
+	// Note: caller is responsible for clearing recoveryKEK
+
+	// 9. Build recovery metadata
+	metadata := &RecoveryMetadata{
+		Enabled:              true,
+		Version:              "2",
+		PassphraseRequired:   len(passphrase) > 0,
+		ChallengePositions:   challengePositions,
+		KDFParams:            kdfParams,
+		EncryptedStoredWords: encryptedStoredWords,
+		NonceStored:          nonceStored,
+		// EncryptedRecoveryKey and NonceRecovery set by caller
+	}
+
+	return &challengeSetupResult{
+		Mnemonic:    mnemonic,
+		RecoveryKEK: recoveryKEK,
+		Metadata:    metadata,
+	}, nil
+}
+
+// selectChallengePositions generates crypto-secure random unique positions
+func selectChallengePositions(totalWords, count int) ([]int, error) {
+	positions := make([]int, 0, count)
+	seen := make(map[int]bool)
+
+	for len(positions) < count {
+		// Generate random bytes
+		var buf [1]byte
+		if _, err := rand.Read(buf[:]); err != nil {
+			return nil, err
+		}
+		pos := int(buf[0]) % totalWords
+
+		if !seen[pos] {
+			positions = append(positions, pos)
+			seen[pos] = true
+		}
+	}
+
+	// Sort positions
+	for i := 0; i < len(positions); i++ {
+		for j := i + 1; j < len(positions); j++ {
+			if positions[i] > positions[j] {
+				positions[i], positions[j] = positions[j], positions[i]
+			}
+		}
+	}
+
+	return positions, nil
+}
+
+// splitMnemonicWords splits 24-word mnemonic into challenge words and stored words
+func splitMnemonicWords(mnemonic string, challengePos []int) (challenge, stored []string) {
+	words := strings.Fields(mnemonic)
+
+	challengeMap := make(map[int]bool)
+	for _, pos := range challengePos {
+		challengeMap[pos] = true
+	}
+
+	challenge = make([]string, 0, len(challengePos))
+	stored = make([]string, 0, len(words)-len(challengePos))
+
+	for i, word := range words {
+		if challengeMap[i] {
+			challenge = append(challenge, word)
+		} else {
+			stored = append(stored, word)
+		}
+	}
+
+	return challenge, stored
+}
+
+// encryptStoredWords encrypts 18 stored words with AES-256-GCM
+func encryptStoredWords(words []string, key []byte) (ciphertext, nonce []byte, err error) {
+	// Serialize words to JSON
+	plaintext, err := json.Marshal(words)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Create AES cipher
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Create GCM mode
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Generate random nonce
+	nonce = make([]byte, gcmNonceSize)
+	if _, err := rand.Read(nonce); err != nil {
+		return nil, nil, err
+	}
+
+	// Encrypt
+	// #nosec G407 - nonce is cryptographically generated above
+	ciphertext = gcm.Seal(nil, nonce, plaintext, nil)
+
+	return ciphertext, nonce, nil
+}
 
 // T022: InitializeWithRecovery creates a new v2 vault with recovery phrase support
 // This method generates a DEK, wraps it with both password and recovery KEKs,
@@ -479,43 +673,21 @@ func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain
 	}
 	defer crypto.ClearBytes(passwordKEK)
 
-	// 3. Generate BIP39 mnemonic (256-bit entropy = 24 words)
-	entropy, err := bip39.NewEntropy(256)
+	// 3. Setup challenge-based recovery (generates mnemonic and challenge data)
+	challengeSetup, err := setupChallengeRecovery(passphrase)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate entropy: %w", err)
+		return "", fmt.Errorf("failed to setup recovery: %w", err)
 	}
-	mnemonic, err := bip39.NewMnemonic(entropy)
-	if err != nil {
-		return "", fmt.Errorf("failed to generate mnemonic: %w", err)
-	}
+	defer crypto.ClearBytes(challengeSetup.RecoveryKEK)
 
-	// 4. Generate recovery salt
-	recoverySalt := make([]byte, recoverySaltLen)
-	if _, err := rand.Read(recoverySalt); err != nil {
-		return "", fmt.Errorf("failed to generate recovery salt: %w", err)
-	}
-
-	// 5. Derive recovery KEK from mnemonic using Argon2id
-	seed := bip39.NewSeed(mnemonic, string(passphrase))
-	defer crypto.ClearBytes(seed)
-	recoveryKEK := argon2.IDKey(
-		seed,
-		recoverySalt,
-		recoveryArgon2Time,
-		recoveryArgon2Memory,
-		recoveryArgon2Threads,
-		recoveryKeyLen,
-	)
-	defer crypto.ClearBytes(recoveryKEK)
-
-	// 6. Generate and wrap DEK with both KEKs
-	keyWrapResult, err := crypto.GenerateAndWrapDEK(passwordKEK, recoveryKEK)
+	// 4. Generate and wrap DEK with both password KEK and recovery KEK
+	keyWrapResult, err := crypto.GenerateAndWrapDEK(passwordKEK, challengeSetup.RecoveryKEK)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate and wrap DEK: %w", err)
 	}
 	defer crypto.ClearBytes(keyWrapResult.DEK)
 
-	// 7. Initialize v2 vault with DEK
+	// 5. Initialize v2 vault with DEK
 	if err := v.storageService.InitializeVaultV2(
 		keyWrapResult.DEK,
 		keyWrapResult.PasswordWrapped.Ciphertext,
@@ -526,7 +698,7 @@ func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain
 		return "", fmt.Errorf("failed to initialize v2 vault: %w", err)
 	}
 
-	// 8. Create vault data structure
+	// 6. Create vault data structure
 	vaultData := &VaultData{
 		Credentials: make(map[string]Credential),
 		Version:     1, // Vault data version (not vault format version)
@@ -547,7 +719,7 @@ func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain
 		}
 	}
 
-	// 9. Marshal and save vault data
+	// 7. Marshal and save vault data
 	data, err := json.Marshal(vaultData)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal vault data: %w", err)
@@ -558,33 +730,22 @@ func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain
 		return "", fmt.Errorf("failed to save initial vault: %w", err)
 	}
 
-	// 10. Store password in keychain if requested
+	// 8. Store password in keychain if requested
 	if useKeychain && v.keychainService.IsAvailable() {
 		if err := v.keychainService.Store(string(masterPassword)); err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: failed to store password in keychain: %v\n", err)
 		}
 	}
 
-	// 11. Log vault creation
+	// 9. Log vault creation
 	v.LogAudit(security.EventVaultUnlock, security.OutcomeSuccess, "")
 
-	// 12. Create recovery metadata
-	recoveryMetadata := &RecoveryMetadata{
-		Enabled:            true,
-		Version:            "2",
-		PassphraseRequired: len(passphrase) > 0,
-		KDFParams: KDFParams{
-			Algorithm:    "argon2id",
-			Time:         recoveryArgon2Time,
-			Memory:       recoveryArgon2Memory,
-			Threads:      recoveryArgon2Threads,
-			SaltRecovery: recoverySalt,
-		},
-		EncryptedRecoveryKey: keyWrapResult.RecoveryWrapped.Ciphertext,
-		NonceRecovery:        keyWrapResult.RecoveryWrapped.Nonce,
-	}
+	// 10. Complete recovery metadata with wrapped DEK
+	recoveryMetadata := challengeSetup.Metadata
+	recoveryMetadata.EncryptedRecoveryKey = keyWrapResult.RecoveryWrapped.Ciphertext
+	recoveryMetadata.NonceRecovery = keyWrapResult.RecoveryWrapped.Nonce
 
-	// 13. Create metadata file
+	// 11. Create metadata file
 	metadata := &Metadata{
 		Version:         "1.0",
 		AuditEnabled:    vaultData.AuditEnabled,
@@ -598,7 +759,7 @@ func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain
 	}
 
 	// Return mnemonic for CLI to display and verify
-	return mnemonic, nil
+	return challengeSetup.Mnemonic, nil
 }
 
 // Unlock opens the vault and loads credentials into memory
@@ -1550,14 +1711,35 @@ func (v *VaultService) PingKeychain() error {
 	return v.keychainService.Ping()
 }
 
-// NeedsMigration checks if the vault is v1 and needs migration to v2.
-// Returns true if the vault is v1 format and would benefit from migration.
+// NeedsMigration checks if the vault needs migration.
+// Returns true if:
+//   - The vault is v1 format (needs migration to v2)
+//   - The vault is v2 but missing challenge data (needs re-migration for 6-word recovery)
 func (v *VaultService) NeedsMigration() (bool, error) {
 	version := v.storageService.GetVersion()
 	if version == 0 {
 		return false, errors.New("vault does not exist or cannot be read")
 	}
-	return version == 1, nil
+
+	// v1 always needs migration
+	if version == 1 {
+		return true, nil
+	}
+
+	// v2 may need re-migration if missing challenge data
+	if version == 2 {
+		meta, err := LoadMetadata(v.vaultPath)
+		if err != nil {
+			// Can't read metadata - assume needs re-migration
+			return true, nil
+		}
+		if meta.Recovery == nil || len(meta.Recovery.ChallengePositions) == 0 {
+			// v2 without challenge data - needs re-migration
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 // MigrateToV2 migrates a v1 vault to v2 format with DEK-based encryption.
@@ -1575,48 +1757,35 @@ func (v *VaultService) MigrateToV2(passphrase []byte) (string, error) {
 		return "", ErrVaultLocked
 	}
 
-	// Verify vault is v1
+	// Verify vault is v1 OR v2 without challenge data (needs re-migration)
 	version := v.storageService.GetVersion()
-	if version != 1 {
-		return "", errors.New("vault is already v2 or newer")
+	needsRemigration := false
+	if version == 2 {
+		// Check if v2 vault is missing challenge data
+		meta, err := LoadMetadata(v.vaultPath)
+		if err != nil || meta.Recovery == nil || len(meta.Recovery.ChallengePositions) == 0 {
+			needsRemigration = true
+		} else {
+			return "", errors.New("vault is already v2 with full recovery support")
+		}
+	} else if version != 1 {
+		return "", errors.New("unsupported vault version")
 	}
 
-	// 1. Generate BIP39 mnemonic (256-bit entropy = 24 words)
-	entropy, err := bip39.NewEntropy(256)
+	// 1. Setup challenge-based recovery (generates mnemonic and challenge data)
+	challengeSetup, err := setupChallengeRecovery(passphrase)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate entropy: %w", err)
+		return "", fmt.Errorf("failed to setup recovery: %w", err)
 	}
-	mnemonic, err := bip39.NewMnemonic(entropy)
-	if err != nil {
-		return "", fmt.Errorf("failed to generate mnemonic: %w", err)
-	}
+	defer crypto.ClearBytes(challengeSetup.RecoveryKEK)
 
-	// 2. Generate recovery salt
-	recoverySalt := make([]byte, recoverySaltLen)
-	if _, err := rand.Read(recoverySalt); err != nil {
-		return "", fmt.Errorf("failed to generate recovery salt: %w", err)
-	}
-
-	// 3. Derive recovery KEK from mnemonic using Argon2id
-	seed := bip39.NewSeed(mnemonic, string(passphrase))
-	defer crypto.ClearBytes(seed)
-	recoveryKEK := argon2.IDKey(
-		seed,
-		recoverySalt,
-		recoveryArgon2Time,
-		recoveryArgon2Memory,
-		recoveryArgon2Threads,
-		recoveryKeyLen,
-	)
-	defer crypto.ClearBytes(recoveryKEK)
-
-	// 4. Generate new salt for password KEK
+	// 2. Generate new salt for password KEK
 	salt, err := v.cryptoService.GenerateSalt()
 	if err != nil {
 		return "", fmt.Errorf("failed to generate salt: %w", err)
 	}
 
-	// 5. Derive password KEK from current password
+	// 3. Derive password KEK from current password
 	iterations := crypto.GetIterations()
 	passwordKEK, err := v.cryptoService.DeriveKey(v.masterPassword, salt, iterations)
 	if err != nil {
@@ -1624,50 +1793,53 @@ func (v *VaultService) MigrateToV2(passphrase []byte) (string, error) {
 	}
 	defer crypto.ClearBytes(passwordKEK)
 
-	// 6. Generate and wrap DEK with both KEKs
-	keyWrapResult, err := crypto.GenerateAndWrapDEK(passwordKEK, recoveryKEK)
+	// 4. Generate and wrap DEK with both password KEK and recovery KEK
+	keyWrapResult, err := crypto.GenerateAndWrapDEK(passwordKEK, challengeSetup.RecoveryKEK)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate and wrap DEK: %w", err)
 	}
 	defer crypto.ClearBytes(keyWrapResult.DEK)
 
-	// 7. Marshal current vault data
+	// 5. Marshal current vault data
 	data, err := json.Marshal(v.vaultData)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal vault data: %w", err)
 	}
 
-	// 8. Perform atomic migration using storage service
-	err = v.storageService.MigrateToV2(
-		data,
-		keyWrapResult.DEK,
-		keyWrapResult.PasswordWrapped.Ciphertext,
-		keyWrapResult.PasswordWrapped.Nonce,
-		salt,
-		iterations,
-		v.createAuditCallback(),
-	)
+	// 6. Perform atomic migration using storage service
+	if needsRemigration {
+		// For v2 re-migration, use the same MigrateToV2 path
+		// The storage service will handle the atomic update
+		err = v.storageService.MigrateToV2(
+			data,
+			keyWrapResult.DEK,
+			keyWrapResult.PasswordWrapped.Ciphertext,
+			keyWrapResult.PasswordWrapped.Nonce,
+			salt,
+			iterations,
+			v.createAuditCallback(),
+		)
+	} else {
+		err = v.storageService.MigrateToV2(
+			data,
+			keyWrapResult.DEK,
+			keyWrapResult.PasswordWrapped.Ciphertext,
+			keyWrapResult.PasswordWrapped.Nonce,
+			salt,
+			iterations,
+			v.createAuditCallback(),
+		)
+	}
 	if err != nil {
 		return "", fmt.Errorf("migration failed: %w", err)
 	}
 
-	// 9. Create/update recovery metadata
-	recoveryMetadata := &RecoveryMetadata{
-		Enabled:            true,
-		Version:            "2",
-		PassphraseRequired: len(passphrase) > 0,
-		KDFParams: KDFParams{
-			Algorithm:    "argon2id",
-			Time:         recoveryArgon2Time,
-			Memory:       recoveryArgon2Memory,
-			Threads:      recoveryArgon2Threads,
-			SaltRecovery: recoverySalt,
-		},
-		EncryptedRecoveryKey: keyWrapResult.RecoveryWrapped.Ciphertext,
-		NonceRecovery:        keyWrapResult.RecoveryWrapped.Nonce,
-	}
+	// 7. Complete recovery metadata with wrapped DEK
+	recoveryMetadata := challengeSetup.Metadata
+	recoveryMetadata.EncryptedRecoveryKey = keyWrapResult.RecoveryWrapped.Ciphertext
+	recoveryMetadata.NonceRecovery = keyWrapResult.RecoveryWrapped.Nonce
 
-	// 10. Update metadata file
+	// 8. Update metadata file
 	meta, err := LoadMetadata(v.vaultPath)
 	if err != nil {
 		// Create new metadata if it doesn't exist
@@ -1685,10 +1857,10 @@ func (v *VaultService) MigrateToV2(passphrase []byte) (string, error) {
 		fmt.Fprintf(os.Stderr, "Warning: failed to save metadata: %v\n", err)
 	}
 
-	// 11. Log migration event
+	// 9. Log migration event
 	v.LogAudit(security.EventVaultPasswordChange, security.OutcomeSuccess, "migration_v1_to_v2")
 
-	return mnemonic, nil
+	return challengeSetup.Mnemonic, nil
 }
 
 // RecoverWithMnemonic recovers vault access using a BIP39 mnemonic phrase.

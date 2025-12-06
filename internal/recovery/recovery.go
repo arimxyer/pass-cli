@@ -14,15 +14,15 @@ import (
 
 // SetupConfig configures recovery setup during vault initialization
 type SetupConfig struct {
-	Passphrase []byte            // Optional passphrase (25th word). Empty = no passphrase.
-	KDFParams  *vault.KDFParams  // Custom Argon2 parameters (optional, uses defaults if nil)
+	Passphrase []byte           // Optional passphrase (25th word). Empty = no passphrase.
+	KDFParams  *vault.KDFParams // Custom Argon2 parameters (optional, uses defaults if nil)
 }
 
 // SetupResult contains the result of recovery setup operation
 type SetupResult struct {
-	Mnemonic         string                 // 24-word mnemonic to display to user
+	Mnemonic         string                  // 24-word mnemonic to display to user
 	Metadata         *vault.RecoveryMetadata // Recovery metadata to store in vault
-	VaultRecoveryKey []byte                 // Vault recovery key (32 bytes) to integrate with vault unlocking
+	VaultRecoveryKey []byte                  // Vault recovery key (32 bytes) to integrate with vault unlocking
 }
 
 // RecoveryConfig configures recovery execution
@@ -34,8 +34,8 @@ type RecoveryConfig struct {
 
 // VerifyConfig configures backup verification during init
 type VerifyConfig struct {
-	Mnemonic        string // Full 24-word mnemonic (generated during setup)
-	VerifyPositions []int  // Positions to prompt for (randomly selected)
+	Mnemonic        string   // Full 24-word mnemonic (generated during setup)
+	VerifyPositions []int    // Positions to prompt for (randomly selected)
 	UserWords       []string // Words entered by user
 }
 
@@ -259,6 +259,7 @@ func PerformRecovery(config *RecoveryConfig) ([]byte, error) {
 //   - mnemonic: full 24-word BIP39 mnemonic
 //   - passphrase: optional passphrase (25th word), can be nil
 //   - kdfParams: KDF parameters (must include SaltRecovery)
+//
 // Returns: 32-byte recovery KEK
 func DeriveRecoveryKey(mnemonic string, passphrase []byte, kdfParams *vault.KDFParams) []byte {
 	// Generate BIP39 seed from mnemonic and passphrase
@@ -267,6 +268,112 @@ func DeriveRecoveryKey(mnemonic string, passphrase []byte, kdfParams *vault.KDFP
 
 	// Derive key using Argon2id with recovery salt
 	return deriveKey(seed, kdfParams.SaltRecovery, kdfParams)
+}
+
+// ChallengeSetupConfig configures challenge-based recovery setup for v2 vaults
+type ChallengeSetupConfig struct {
+	Passphrase []byte // Optional passphrase (25th word). Empty = no passphrase.
+}
+
+// ChallengeSetupResult contains the result of challenge-based recovery setup
+type ChallengeSetupResult struct {
+	Mnemonic    string                  // 24-word mnemonic to display to user
+	RecoveryKEK []byte                  // Recovery KEK for wrapping DEK (caller must clear)
+	Metadata    *vault.RecoveryMetadata // Recovery metadata with challenge fields
+}
+
+// SetupChallengeRecovery generates mnemonic and challenge data for v2 vault recovery.
+// This function sets up the 6-word challenge system while returning the recovery KEK
+// so the caller can wrap their DEK with it.
+//
+// The flow is:
+//  1. Generate 24-word mnemonic
+//  2. Select 6 random challenge positions
+//  3. Encrypt remaining 18 words with key derived from challenge words
+//  4. Derive recovery KEK from full mnemonic (for caller to wrap DEK)
+//  5. Return all data needed for recovery
+//
+// Parameters: config (setup configuration with optional passphrase)
+// Returns: ChallengeSetupResult (mnemonic, recovery KEK, metadata), error
+func SetupChallengeRecovery(config *ChallengeSetupConfig) (*ChallengeSetupResult, error) {
+	// 1. Generate 24-word mnemonic
+	mnemonic, err := GenerateMnemonic()
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Generate BIP39 seed from mnemonic (with optional passphrase)
+	seed := bip39.NewSeed(mnemonic, string(config.Passphrase))
+	defer crypto.ClearBytes(seed)
+
+	// 3. Select 6 challenge positions (crypto-secure random)
+	challengePositions, err := selectChallengePositions(MnemonicWords, ChallengeCount)
+	if err != nil {
+		return nil, err
+	}
+
+	// 4. Split mnemonic into challenge words (6) and stored words (18)
+	challengeWords, storedWords := splitWords(mnemonic, challengePositions)
+
+	// 5. Generate KDF parameters with random salts
+	saltChallenge := make([]byte, DefaultSaltLen)
+	saltRecovery := make([]byte, DefaultSaltLen)
+	if _, err := rand.Read(saltChallenge); err != nil {
+		return nil, ErrRandomGeneration
+	}
+	if _, err := rand.Read(saltRecovery); err != nil {
+		return nil, ErrRandomGeneration
+	}
+
+	kdfParams := &vault.KDFParams{
+		Algorithm:     "argon2id",
+		Time:          DefaultTime,
+		Memory:        DefaultMemory,
+		Threads:       DefaultThreads,
+		SaltChallenge: saltChallenge,
+		SaltRecovery:  saltRecovery,
+	}
+
+	// 6. Derive challenge key from challenge words only
+	challengeMnemonic := strings.Join(challengeWords, " ")
+	challengeSeed := bip39.NewSeed(challengeMnemonic, string(config.Passphrase))
+	defer crypto.ClearBytes(challengeSeed)
+	challengeKey := deriveKey(challengeSeed, kdfParams.SaltChallenge, kdfParams)
+	defer crypto.ClearBytes(challengeKey)
+
+	// 7. Encrypt stored words (18) with challenge key
+	encryptedStoredWords, nonceStored, err := encryptStoredWords(storedWords, challengeKey)
+	if err != nil {
+		return nil, err
+	}
+
+	// 8. Derive recovery KEK from full mnemonic seed
+	// This key will be used by the caller to wrap the DEK
+	recoveryKEK := deriveKey(seed, kdfParams.SaltRecovery, kdfParams)
+	// Note: caller is responsible for clearing recoveryKEK
+
+	// 9. Build recovery metadata
+	// Note: EncryptedRecoveryKey and NonceRecovery will be set by caller
+	// after they wrap their DEK with recoveryKEK
+	metadata := &vault.RecoveryMetadata{
+		Enabled:              true,
+		Version:              "2", // v2 format with challenge support
+		PassphraseRequired:   len(config.Passphrase) > 0,
+		ChallengePositions:   challengePositions,
+		KDFParams:            *kdfParams,
+		EncryptedStoredWords: encryptedStoredWords,
+		NonceStored:          nonceStored,
+		// EncryptedRecoveryKey and NonceRecovery set by caller
+	}
+
+	// 10. Return result
+	result := &ChallengeSetupResult{
+		Mnemonic:    mnemonic,
+		RecoveryKEK: recoveryKEK,
+		Metadata:    metadata,
+	}
+
+	return result, nil
 }
 
 // decryptData is a helper to decrypt arbitrary data with AES-256-GCM

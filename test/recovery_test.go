@@ -123,9 +123,23 @@ func TestIntegration_ChangePasswordWithRecovery(t *testing.T) {
 			t.Error("Recovery should be enabled")
 		}
 
-		// V2 recovery uses key wrapping with full mnemonic
+		// V2 recovery with 6-word challenge
 		if metadata.Recovery.Version != "2" {
 			t.Errorf("Expected version '2', got '%s'", metadata.Recovery.Version)
+		}
+
+		// Verify 6-word challenge data exists
+		if len(metadata.Recovery.ChallengePositions) != 6 {
+			t.Errorf("Expected 6 challenge positions, got %d", len(metadata.Recovery.ChallengePositions))
+		}
+
+		// Verify encrypted stored words (18 words)
+		if len(metadata.Recovery.EncryptedStoredWords) == 0 {
+			t.Error("EncryptedStoredWords should not be empty")
+		}
+
+		if len(metadata.Recovery.NonceStored) != 12 {
+			t.Errorf("NonceStored should be 12 bytes, got %d", len(metadata.Recovery.NonceStored))
 		}
 
 		// Verify encrypted recovery key (wrapped DEK) exists
@@ -142,11 +156,15 @@ func TestIntegration_ChangePasswordWithRecovery(t *testing.T) {
 			t.Errorf("Expected argon2id, got %s", metadata.Recovery.KDFParams.Algorithm)
 		}
 
+		if len(metadata.Recovery.KDFParams.SaltChallenge) != 32 {
+			t.Errorf("SaltChallenge should be 32 bytes, got %d", len(metadata.Recovery.KDFParams.SaltChallenge))
+		}
+
 		if len(metadata.Recovery.KDFParams.SaltRecovery) != 32 {
 			t.Errorf("SaltRecovery should be 32 bytes, got %d", len(metadata.Recovery.KDFParams.SaltRecovery))
 		}
 
-		t.Log("✓ Metadata contains valid v2 recovery configuration")
+		t.Log("✓ Metadata contains valid v2 recovery configuration with 6-word challenge")
 	})
 
 	t.Run("3. Init with --no-recovery flag skips recovery setup", func(t *testing.T) {

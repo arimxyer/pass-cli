@@ -80,10 +80,34 @@ func TestIntegration_InitWithRecovery(t *testing.T) {
 			t.Error("Recovery.Enabled should be true")
 		}
 
-		// V2 recovery uses key wrapping, not challenge/response
-		// Verify v2-specific fields
+		// V2 recovery with 6-word challenge support
 		if metadata.Recovery.Version != "2" {
 			t.Errorf("Expected version 2, got %s", metadata.Recovery.Version)
+		}
+
+		// Verify 6-word challenge data exists
+		if len(metadata.Recovery.ChallengePositions) != 6 {
+			t.Errorf("Expected 6 challenge positions, got %d", len(metadata.Recovery.ChallengePositions))
+		}
+
+		// Verify positions are unique and in range [0-23]
+		seen := make(map[int]bool)
+		for _, pos := range metadata.Recovery.ChallengePositions {
+			if pos < 0 || pos >= 24 {
+				t.Errorf("Invalid position %d (must be 0-23)", pos)
+			}
+			if seen[pos] {
+				t.Errorf("Duplicate position: %d", pos)
+			}
+			seen[pos] = true
+		}
+
+		// Verify encrypted stored words (18 words)
+		if len(metadata.Recovery.EncryptedStoredWords) == 0 {
+			t.Error("EncryptedStoredWords should not be empty")
+		}
+		if len(metadata.Recovery.NonceStored) != 12 {
+			t.Errorf("NonceStored should be 12 bytes, got %d", len(metadata.Recovery.NonceStored))
 		}
 
 		// Verify encrypted recovery key (wrapped DEK) exists
@@ -98,6 +122,9 @@ func TestIntegration_InitWithRecovery(t *testing.T) {
 		if metadata.Recovery.KDFParams.Algorithm != "argon2id" {
 			t.Errorf("Expected argon2id, got %s", metadata.Recovery.KDFParams.Algorithm)
 		}
+		if len(metadata.Recovery.KDFParams.SaltChallenge) != 32 {
+			t.Errorf("SaltChallenge should be 32 bytes, got %d", len(metadata.Recovery.KDFParams.SaltChallenge))
+		}
 		if len(metadata.Recovery.KDFParams.SaltRecovery) != 32 {
 			t.Errorf("SaltRecovery should be 32 bytes, got %d", len(metadata.Recovery.KDFParams.SaltRecovery))
 		}
@@ -107,7 +134,7 @@ func TestIntegration_InitWithRecovery(t *testing.T) {
 			t.Error("PassphraseRequired should be false by default")
 		}
 
-		t.Log("✓ Metadata contains valid v2 recovery configuration")
+		t.Log("✓ Metadata contains valid v2 recovery configuration with 6-word challenge")
 	})
 
 	t.Run("3. Vault can be unlocked with password", func(t *testing.T) {

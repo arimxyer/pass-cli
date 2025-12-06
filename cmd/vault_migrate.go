@@ -57,19 +57,35 @@ func runVaultMigrate(cmd *cobra.Command, args []string) error {
 	}
 
 	if !needsMigration {
-		fmt.Println("✓ Your vault is already using the v2 format.")
-		fmt.Println("  No migration needed - your recovery phrase will work correctly.")
+		fmt.Println("✓ Your vault is already using the v2 format with full recovery support.")
+		fmt.Println("  No migration needed - your 6-word recovery challenge will work correctly.")
 		return nil
 	}
 
-	// Explain what's happening
-	fmt.Println("Your vault is using the legacy v1 format.")
-	fmt.Println("The v1 format has a bug where recovery phrases cannot unlock the vault.")
-	fmt.Println()
-	fmt.Println("Migration will:")
-	fmt.Println("  • Re-encrypt your vault with the new v2 format")
-	fmt.Println("  • Generate a NEW 24-word recovery phrase")
-	fmt.Println("  • Preserve all your existing credentials")
+	// Check if this is a v2 vault missing challenge data (re-migration case)
+	version := vaultService.GetStorageService().GetVersion()
+	if version == 2 {
+		// v2 vault missing challenge data
+		fmt.Println("Your vault uses v2 format but is missing 6-word recovery challenge data.")
+		fmt.Println("This can happen if your vault was created with an earlier version.")
+		fmt.Println()
+		fmt.Println("Re-migration will:")
+		fmt.Println("  • Generate a NEW 24-word recovery phrase")
+		fmt.Println("  • Enable 6-word challenge recovery (you only need to remember 6 words)")
+		fmt.Println("  • Preserve all your existing credentials")
+		fmt.Println()
+		fmt.Println("⚠️  Your OLD recovery phrase will no longer work after this migration.")
+		fmt.Println("   You MUST write down the new 24-word phrase.")
+	} else {
+		// v1 vault
+		fmt.Println("Your vault is using the legacy v1 format.")
+		fmt.Println("The v1 format has a bug where recovery phrases cannot unlock the vault.")
+		fmt.Println()
+		fmt.Println("Migration will:")
+		fmt.Println("  • Re-encrypt your vault with the new v2 format")
+		fmt.Println("  • Generate a NEW 24-word recovery phrase")
+		fmt.Println("  • Preserve all your existing credentials")
+	}
 	fmt.Println()
 
 	// Confirm migration
