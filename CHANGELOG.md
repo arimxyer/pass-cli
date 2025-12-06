@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.11.1] - 2025-12-06
+## [0.11.2] - 2025-12-06
 
 ### Fixed
 - **Critical**: 6-word challenge recovery now works correctly for v2 vaults
