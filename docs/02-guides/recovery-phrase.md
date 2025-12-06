@@ -18,9 +18,9 @@ Pass-CLI's BIP39 recovery feature generates a 24-word recovery phrase when you c
 - [OK] **Fast**: Recover in under 30 seconds
 - [OK] **Optional**: Can skip with `--no-recovery` flag if you use keychain integration
 
-{{< hint warning >}}
+{{< callout type="warning" >}}
 **V1 Vault Users**: If you created your vault before v0.2.0, your recovery phrase will NOT work. V1 vaults have a bug where recovery phrases cannot unlock the vault. You must migrate to V2 format first. See [Migrating to V2 Format](#migrating-to-v2-format) below.
-{{< /hint >}}
+{{< /callout >}}
 
 ## Setting Up Recovery
 
@@ -86,9 +86,9 @@ pass-cli init --no-recovery
 
 V1 vaults (created before pass-cli v0.2.0) have a critical bug: recovery phrases cannot actually unlock the vault. V2 vaults fix this by implementing proper key wrapping, making recovery phrases fully functional.
 
-{{< hint info >}}
+{{< callout type="info" >}}
 **Check Your Vault Version**: Run `pass-cli doctor` to see if your vault is v1 or v2. If it shows "Vault Format: v1", you need to migrate.
-{{< /hint >}}
+{{< /callout >}}
 
 ### Migration Steps
 
@@ -162,9 +162,9 @@ Write down these 24 words in order:
    • Your old recovery phrase (if any) is now invalid
 ```
 
-{{< hint danger >}}
+{{< callout type="error" >}}
 **Important**: Your OLD recovery phrase no longer works. The new recovery phrase shown here is what you must use to recover your vault.
-{{< /hint >}}
+{{< /callout >}}
 
 #### Step 5: Verify Your Backup
 
@@ -233,9 +233,9 @@ Use recovery if:
 - [OK] You have your 24-word recovery phrase
 - [OK] Your vault is V2 format (or migrated to V2)
 
-{{< hint warning >}}
+{{< callout type="warning" >}}
 **V1 Vaults Cannot Use Recovery**: If you haven't migrated to V2 format yet, recovery will not work. See [Migrating to V2 Format](#migrating-to-v2-format) above.
-{{< /hint >}}
+{{< /callout >}}
 
 **Note**: If keychain is enabled and accessible, you don't need recovery. Your master password is stored securely in your OS keychain.
 

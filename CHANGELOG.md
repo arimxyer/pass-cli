@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2025-12-05
+
+### Added
+- **V2 Vault Format**: New key wrapping architecture with Data Encryption Key (DEK) and dual Key Encryption Keys (KEKs)
+  - Password-derived KEK for normal vault access
+  - Recovery-derived KEK for recovery phrase unlock
+  - Both KEKs wrap the same DEK, enabling secure recovery without password knowledge
+- **Vault Migration Command**: `pass-cli vault migrate` to upgrade V1 vaults to V2 format
+  - Preserves all existing credentials
+  - Generates new recovery phrase with proper key wrapping
+  - Interactive verification of new recovery phrase backup
+  - Optional BIP-39 passphrase protection ("25th word")
+- **Recovery Key Integration**: BIP-39 recovery phrases now fully functional for V2 vaults
+  - 6-word challenge recovery (73.8 quintillion combinations)
+  - Argon2id key derivation for recovery KEK
+  - Recovery-wrapped DEK stored in vault metadata
+- **New Vault Metadata Fields**: `wrapped_dek`, `wrapped_dek_nonce`, `recovery_wrapped_dek`, `recovery_wrapped_dek_nonce`, `recovery_salt`
+
+### Fixed
+- **Critical**: V1 vaults had a bug where recovery phrases could not unlock the vault - V2 format resolves this
+- Recovery tests updated for V2 key wrapping format
+- Stale keychain state handling in vault tests
+- JSON unmarshal error return value checking
+
+### Changed
+- Vault initialization now uses V2 format by default with `InitializeWithRecovery`
+- Recovery unlock path uses `RecoverWithMnemonic` with proper DEK unwrapping
+- Documentation updated with V2 architecture details, migration guide, and recovery workflows
+
+### Security
+- AES-256-GCM encryption for DEK wrapping with unique nonces
+- Argon2id (memory-hard) for recovery phrase key derivation
+- PBKDF2-SHA256 (600,000 iterations) for password key derivation
+- Separate salts for password and recovery derivation paths
+
 ## [0.10.0] - 2025-11-12
 
 ### Added
