@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - V2 vaults created in v0.11.0 were missing challenge data (`ChallengePositions`, `EncryptedStoredWords`, `NonceStored`, `SaltChallenge`)
   - `change-password --recover` would fail immediately with "invalid word" error due to empty challenge positions
   - Users with affected v2 vaults should run `pass-cli vault migrate` to regenerate recovery phrase with proper challenge data
+- **Critical**: Password change after recovery unlock now works
+  - Added `SetPasswordAfterRecovery()` method that uses the DEK from recovery unlock
+  - Previously failed with "vault was unlocked via recovery, set a new password first"
+- **Tests**: Keychain tests now use isolated service name to prevent conflicts with real CLI usage
 
 ### Changed
 - **Refactor**: Extracted `RecoveryMetadata` and `KDFParams` types to `internal/shared` package
