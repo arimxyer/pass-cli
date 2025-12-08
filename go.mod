@@ -5,11 +5,11 @@ go 1.25.1
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/fatih/color v1.18.0
-	github.com/gdamore/tcell/v2 v2.13.1
+	github.com/gdamore/tcell/v2 v2.13.2
 	github.com/howeyc/gopass v0.0.0-20210920133722-c8aef6fb66ef
 	github.com/olekukonko/tablewriter v1.1.2
 	github.com/rivo/tview v0.42.0
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tyler-smith/go-bip39 v1.1.0
