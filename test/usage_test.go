@@ -66,20 +66,21 @@ func TestUsageCommand(t *testing.T) {
 			t.Fatalf("Usage command failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 		}
 
-		// Verify output contains expected columns
-		if !strings.Contains(stdout, "Location") {
+		// Verify output contains expected columns (tablewriter v1.x uppercases headers)
+		stdoutUpper := strings.ToUpper(stdout)
+		if !strings.Contains(stdoutUpper, "LOCATION") {
 			t.Error("Expected 'Location' column in output")
 		}
-		if !strings.Contains(stdout, "Repository") {
+		if !strings.Contains(stdoutUpper, "REPOSITORY") {
 			t.Error("Expected 'Repository' column in output")
 		}
-		if !strings.Contains(stdout, "Last Used") {
+		if !strings.Contains(stdoutUpper, "LAST USED") {
 			t.Error("Expected 'Last Used' column in output")
 		}
-		if !strings.Contains(stdout, "Count") {
+		if !strings.Contains(stdoutUpper, "COUNT") {
 			t.Error("Expected 'Count' column in output")
 		}
-		if !strings.Contains(stdout, "Fields") {
+		if !strings.Contains(stdoutUpper, "FIELDS") {
 			t.Error("Expected 'Fields' column in output")
 		}
 
@@ -115,8 +116,8 @@ func TestUsageCommand(t *testing.T) {
 
 		// If accessed from a git repo, should show repository name
 		// If not in git repo, should show "-" or empty
-		// Both are valid - just verify Repository column exists
-		if !strings.Contains(stdout, "Repository") {
+		// Both are valid - just verify Repository column exists (tablewriter v1.x uppercases headers)
+		if !strings.Contains(strings.ToUpper(stdout), "REPOSITORY") {
 			t.Error("Expected 'Repository' column header in output")
 		}
 	})
@@ -249,8 +250,9 @@ func TestUsageCommand(t *testing.T) {
 			t.Fatalf("Usage table format failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 		}
 
-		// Verify table output (default format)
-		if !strings.Contains(stdout, "Location") || !strings.Contains(stdout, "Repository") {
+		// Verify table output (default format) - tablewriter v1.x uppercases headers
+		stdoutUpper := strings.ToUpper(stdout)
+		if !strings.Contains(stdoutUpper, "LOCATION") || !strings.Contains(stdoutUpper, "REPOSITORY") {
 			t.Error("Expected table format headers")
 		}
 

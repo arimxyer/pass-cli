@@ -67,7 +67,7 @@ pass-cli init
 
 | Flag | Type | Description |
 |------|------|-------------|
-| `--enable-audit` | bool | Enable tamper-evident audit logging |
+| `--no-audit` | bool | Disable tamper-evident audit logging (enabled by default) |
 | `--use-keychain` | bool | Store master password in OS keychain |
 | `--no-recovery` | bool | Skip BIP39 recovery phrase generation |
 
@@ -86,13 +86,16 @@ All master passwords must meet complexity requirements:
 - [ERROR] `password123` (too short, no uppercase, no symbol)
 - [ERROR] `MyPassword` (no digit, no symbol)
 
-#### Audit Logging (Optional)
+#### Audit Logging (Enabled by Default)
 
-Enable audit logging to record vault operations with HMAC signatures:
+Audit logging records vault operations with HMAC signatures. It is **enabled by default** during initialization.
 
 ```bash
-# Initialize vault with audit logging
-pass-cli init --enable-audit
+# Initialize vault (audit logging enabled by default)
+pass-cli init
+
+# Disable audit logging if not desired
+pass-cli init --no-audit
 ```
 
 **Audit features**:
@@ -1261,7 +1264,7 @@ pass-cli vault backup create --verbose
 
 ###### Vault Backup Restore
 
-Restore vault from the most recent backup.
+Restore vault from a backup file.
 
 **Synopsis:**
 ```bash
@@ -1269,14 +1272,16 @@ pass-cli vault backup restore [flags]
 ```
 
 **Description:**
-Automatically selects the newest valid backup (automatic or manual) and restores it. Considers both `vault.enc.backup` (automatic) and `vault.enc.*.manual.backup` files.
+Restores your vault from a backup file. By default, selects the newest valid backup. Use `--file` to specify a specific backup, or `--interactive` to choose from a list.
 
-**[WARNING] WARNING:** This command overwrites your current vault file with the backup.
+**[WARNING] WARNING:** This command overwrites your current vault file. After restore, use the **backup's password** to unlock (if you changed passwords since the backup, use the OLD password).
 
 **Flags:**
 
 | Flag | Type | Description |
 |------|------|-------------|
+| `--file` | string | Restore from a specific backup file |
+| `-i`, `--interactive` | bool | Interactively select from available backups |
 | `-f`, `--force` | bool | Skip confirmation prompt |
 | `-v`, `--verbose` | bool | Show detailed operation progress |
 | `--dry-run` | bool | Preview which backup would be restored (no changes) |
@@ -1285,6 +1290,12 @@ Automatically selects the newest valid backup (automatic or manual) and restores
 ```bash
 # Restore from newest backup (with confirmation)
 pass-cli vault backup restore
+
+# Restore from a specific backup file
+pass-cli vault backup restore --file vault.enc.20241210-143022.manual.backup
+
+# Interactive mode: choose from available backups
+pass-cli vault backup restore --interactive
 
 # Restore without confirmation
 pass-cli vault backup restore --force
@@ -1298,14 +1309,72 @@ pass-cli vault backup restore --verbose
 
 **Output:**
 ```text
-Found backup: /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
-Backup age: 2 hours ago
-Size: 2.45 MB
+⚠️  Warning: After restore, use the backup's master password to unlock.
+    If you changed your password since this backup, use the OLD password.
 
-[WARNING]  This will overwrite your current vault file.
-Are you sure you want to restore from this backup? (y/n): y
+Backup to restore:
+  File: /home/user/.pass-cli/vault.enc.20251112-143022.manual.backup
+  Type: manual
+  Modified: 2025-11-12 14:30:22
+
+Are you sure you want to continue? (y/n): y
 
 [OK] Vault restored successfully from backup
+```
+
+###### Vault Backup Preview
+
+Preview credentials inside a backup file without restoring it.
+
+**Synopsis:**
+```bash
+pass-cli vault backup preview --file <backup-file> [flags]
+```
+
+**Description:**
+Decrypts a backup file in-memory to show which credentials it contains. Does NOT modify any files. Useful for finding specific credentials before deciding which backup to restore.
+
+**Flags:**
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `--file` | string | Backup file to preview (required) |
+| `-v`, `--verbose` | bool | Show detailed credential information (username, category, created date) |
+
+**Examples:**
+```bash
+# Preview credentials in a backup
+pass-cli vault backup preview --file vault.enc.20241210-143022.manual.backup
+
+# Preview with detailed information
+pass-cli vault backup preview --file vault.enc.backup --verbose
+```
+
+**Output (basic):**
+```text
+Enter the backup's master password: ********
+
+Found 5 credential(s) in backup:
+
+  1. github.com
+  2. gitlab.com
+  3. aws-console
+  4. email-work
+  5. vpn-office
+
+Backup file: vault.enc.20241210-143022.manual.backup
+Modified: 2024-12-10 14:30:22
+```
+
+**Output (verbose):**
+```text
+┌───┬──────────────┬─────────────────┬──────────┬────────────┐
+│ # │ Service      │ Username        │ Category │ Created    │
+├───┼──────────────┼─────────────────┼──────────┼────────────┤
+│ 1 │ github.com   │ myuser          │ dev      │ 2025-10-15 │
+│ 2 │ gitlab.com   │ myuser          │ dev      │ 2025-10-16 │
+│ 3 │ aws-console  │ admin@company   │ cloud    │ 2025-09-20 │
+└───┴──────────────┴─────────────────┴──────────┴────────────┘
 ```
 
 ###### Vault Backup Info
@@ -1589,10 +1658,10 @@ Review the log file and investigate the flagged entries.
 #### Troubleshooting
 
 **Problem**: "audit log not found"
-**Solution**: Ensure vault was initialized with `--enable-audit` flag
+**Solution**: Audit logging is enabled by default. If you initialized with `--no-audit`, re-initialize without that flag.
 
 **Problem**: "failed to retrieve audit key from keychain"
-**Solution**: Audit key may have been deleted. Re-initialize audit logging with `pass-cli init --enable-audit`
+**Solution**: Audit key may have been deleted. Re-initialize the vault with `pass-cli init` (audit enabled by default)
 
 **Problem**: "HMAC verification failed"
 **Causes**:

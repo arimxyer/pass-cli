@@ -265,7 +265,7 @@ func TestIntegration_VaultRemoveWithMetadata(t *testing.T) {
 
 	// Initialize vault with audit
 	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 

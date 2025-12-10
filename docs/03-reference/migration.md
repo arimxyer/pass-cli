@@ -119,12 +119,12 @@ success chapter biology network cousin shadow eternal puzzle symbol
 
 **New Feature**: Tamper-evident audit trail for vault operations.
 
-- Opt-in via `--enable-audit` flag
+- Enabled by default (use `--no-audit` to disable)
 - HMAC-SHA256 signatures for tamper detection
 - Keys stored in OS keychain
 - Auto-rotation at 10MB with 7-day retention
 
-**Impact**: No impact unless you opt-in to enable audit logging.
+**Impact**: Audit logging is now enabled by default for new vaults.
 
 ## V1 → V2 Migration Guide
 
@@ -458,11 +458,11 @@ pass-cli init
 
 2. **Initialize new vault**:
    ```bash
-   # Create new vault (automatically uses 600k iterations)
+   # Create new vault (audit logging enabled by default)
    pass-cli init
 
-   # Or with audit logging enabled
-   pass-cli init --enable-audit
+   # Or without audit logging (not recommended)
+   pass-cli init --no-audit
    ```
 
 3. **Re-add credentials**:
@@ -525,8 +525,8 @@ See the [V1 → V2 Migration Guide](#v1--v2-migration-guide) section above for d
    # Point config to new vault location
    echo "vault_path: ~/.pass-cli/vault-new.enc" > ~/.pass-cli/config.yml
 
-   # Initialize new vault (uses 600k iterations)
-   pass-cli init --enable-audit
+   # Initialize new vault (audit logging enabled by default)
+   pass-cli init
    ```
 
 2. **Add new credentials to new vault**:
@@ -646,8 +646,8 @@ pass-cli generate  # Automatically meets policy requirements
 # Backup corrupted log
 mv ~/.pass-cli/audit.log ~/.pass-cli/audit.log.corrupted
 
-# Start fresh audit log (requires vault re-init with --enable-audit)
-pass-cli init --enable-audit
+# Start fresh audit log (audit enabled by default)
+pass-cli init
 ```
 
 ### Problem: "Vault File Corrupted" After Migration

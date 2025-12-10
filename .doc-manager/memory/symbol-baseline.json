@@ -6,7 +6,7 @@
   },
   "version": "1.1",
   "created_at": "2025-11-29T04:31:53.752027+00:00",
-  "updated_at": "2025-12-06T00:00:08.739230+00:00",
+  "updated_at": "2025-12-10T22:04:46.080220+00:00",
   "project_root": "R:\\Test-Projects\\pass-cli",
   "symbols": {
     "init": [
@@ -213,8 +213,18 @@
       {
         "name": "init",
         "type": "function",
+        "file": "cmd/vault_backup_preview.go",
+        "line": 42,
+        "column": 0,
+        "signature": "func init()",
+        "parent": null,
+        "doc": null
+      },
+      {
+        "name": "init",
+        "type": "function",
         "file": "cmd/vault_backup_restore.go",
-        "line": 47,
+        "line": 58,
         "column": 0,
         "signature": "func init()",
         "parent": null,
@@ -302,7 +312,7 @@
         "name": "unlockWithRecovery",
         "type": "function",
         "file": "cmd/change_password.go",
-        "line": 143,
+        "line": 152,
         "column": 0,
         "signature": "func unlockWithRecovery(vaultService *vault.VaultService, vaultPath string) error",
         "parent": null,
@@ -624,7 +634,7 @@
         "name": "initVaultAndStorage",
         "type": "function",
         "file": "cmd/helpers.go",
-        "line": 256,
+        "line": 257,
         "column": 0,
         "signature": "func initVaultAndStorage(vaultPath string) (*vault.VaultService, error)",
         "parent": null,
@@ -636,7 +646,7 @@
         "name": "logVerbose",
         "type": "function",
         "file": "cmd/helpers.go",
-        "line": 266,
+        "line": 267,
         "column": 0,
         "signature": "func logVerbose(verbose bool, format string, args ...interface",
         "parent": null,
@@ -648,7 +658,7 @@
         "name": "formatAge",
         "type": "function",
         "file": "cmd/helpers.go",
-        "line": 276,
+        "line": 277,
         "column": 0,
         "signature": "func formatAge(d time.Duration) string",
         "parent": null,
@@ -660,7 +670,7 @@
         "name": "formatSize",
         "type": "function",
         "file": "cmd/helpers.go",
-        "line": 317,
+        "line": 318,
         "column": 0,
         "signature": "func formatSize(bytes int64) string",
         "parent": null,
@@ -672,7 +682,7 @@
         "name": "unlockVault",
         "type": "function",
         "file": "cmd/helpers.go",
-        "line": 331,
+        "line": 332,
         "column": 0,
         "signature": "func unlockVault(vaultService *vault.VaultService) error",
         "parent": null,
@@ -684,7 +694,7 @@
         "name": "displayMnemonic",
         "type": "function",
         "file": "cmd/helpers.go",
-        "line": 358,
+        "line": 359,
         "column": 0,
         "signature": "func displayMnemonic(mnemonic string)",
         "parent": null,
@@ -696,7 +706,7 @@
         "name": "promptForWord",
         "type": "function",
         "file": "cmd/helpers.go",
-        "line": 394,
+        "line": 395,
         "column": 0,
         "signature": "func promptForWord(position int) (string, error)",
         "parent": null,
@@ -708,7 +718,7 @@
         "name": "promptYesNo",
         "type": "function",
         "file": "cmd/helpers.go",
-        "line": 423,
+        "line": 424,
         "column": 0,
         "signature": "func promptYesNo(prompt string, defaultYes bool) (bool, error)",
         "parent": null,
@@ -720,7 +730,7 @@
         "name": "promptForWordWithValidation",
         "type": "function",
         "file": "cmd/helpers.go",
-        "line": 470,
+        "line": 471,
         "column": 0,
         "signature": "func promptForWordWithValidation(position int) (string, error)",
         "parent": null,
@@ -1267,14 +1277,38 @@
         "doc": null
       }
     ],
+    "runVaultBackupPreview": [
+      {
+        "name": "runVaultBackupPreview",
+        "type": "function",
+        "file": "cmd/vault_backup_preview.go",
+        "line": 49,
+        "column": 0,
+        "signature": "func runVaultBackupPreview(cmd *cobra.Command, args []string) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
     "runVaultBackupRestore": [
       {
         "name": "runVaultBackupRestore",
         "type": "function",
         "file": "cmd/vault_backup_restore.go",
-        "line": 54,
+        "line": 67,
         "column": 0,
         "signature": "func runVaultBackupRestore(cmd *cobra.Command, args []string) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "selectBackupInteractively": [
+      {
+        "name": "selectBackupInteractively",
+        "type": "function",
+        "file": "cmd/vault_backup_restore.go",
+        "line": 210,
+        "column": 0,
+        "signature": "func selectBackupInteractively(backups []storage.BackupInfo) (*storage.BackupInfo, error)",
         "parent": null,
         "doc": null
       }
@@ -3478,7 +3512,7 @@
         "name": "RecordFieldAccess",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 969,
+        "line": 941,
         "column": 0,
         "signature": "func (v *VaultService) RecordFieldAccess(service, field string) error",
         "parent": null,
@@ -3512,7 +3546,7 @@
         "name": "AddCredential",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 893,
+        "line": 865,
         "column": 0,
         "signature": "func (v *VaultService) AddCredential(service, username string, password []byte, category, url, notes string) error",
         "parent": null,
@@ -3534,7 +3568,7 @@
         "name": "UpdateCredential",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1142,
+        "line": 1114,
         "column": 0,
         "signature": "func (v *VaultService) UpdateCredential(service string, opts UpdateOpts) error",
         "parent": null,
@@ -3556,7 +3590,7 @@
         "name": "DeleteCredential",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1229,
+        "line": 1201,
         "column": 0,
         "signature": "func (v *VaultService) DeleteCredential(service string) error",
         "parent": null,
@@ -4094,7 +4128,7 @@
         "name": "detectUnknownFields",
         "type": "function",
         "file": "internal/config/config.go",
-        "line": 223,
+        "line": 234,
         "column": 0,
         "signature": "func detectUnknownFields(v *viper.Viper) []ValidationWarning",
         "parent": null,
@@ -4106,7 +4140,7 @@
         "name": "shouldLogConfig",
         "type": "function",
         "file": "internal/config/config.go",
-        "line": 265,
+        "line": 276,
         "column": 0,
         "signature": "func shouldLogConfig() bool",
         "parent": null,
@@ -4118,7 +4152,7 @@
         "name": "LoadFromPath",
         "type": "function",
         "file": "internal/config/config.go",
-        "line": 269,
+        "line": 280,
         "column": 0,
         "signature": "func LoadFromPath(configPath string) (*Config, *ValidationResult)",
         "parent": null,
@@ -4130,7 +4164,7 @@
         "name": "Load",
         "type": "function",
         "file": "internal/config/config.go",
-        "line": 390,
+        "line": 401,
         "column": 0,
         "signature": "func Load() (*Config, *ValidationResult)",
         "parent": null,
@@ -4142,7 +4176,7 @@
         "name": "containsNullByte",
         "type": "function",
         "file": "internal/config/config.go",
-        "line": 592,
+        "line": 603,
         "column": 0,
         "signature": "func containsNullByte(s string) bool",
         "parent": null,
@@ -4154,7 +4188,7 @@
         "name": "isPathWithVariable",
         "type": "function",
         "file": "internal/config/config.go",
-        "line": 602,
+        "line": 613,
         "column": 0,
         "signature": "func isPathWithVariable(path string) bool",
         "parent": null,
@@ -4166,7 +4200,7 @@
         "name": "Validate",
         "type": "method",
         "file": "internal/config/config.go",
-        "line": 406,
+        "line": 417,
         "column": 0,
         "signature": "func (c *Config) Validate() *ValidationResult",
         "parent": null,
@@ -4188,7 +4222,7 @@
         "name": "validateTerminal",
         "type": "method",
         "file": "internal/config/config.go",
-        "line": 434,
+        "line": 445,
         "column": 0,
         "signature": "func (c *Config) validateTerminal(result *ValidationResult) *ValidationResult",
         "parent": null,
@@ -4200,7 +4234,7 @@
         "name": "validateKeybindings",
         "type": "method",
         "file": "internal/config/config.go",
-        "line": 494,
+        "line": 505,
         "column": 0,
         "signature": "func (c *Config) validateKeybindings(result *ValidationResult) *ValidationResult",
         "parent": null,
@@ -4212,7 +4246,7 @@
         "name": "validateVaultPath",
         "type": "method",
         "file": "internal/config/config.go",
-        "line": 544,
+        "line": 555,
         "column": 0,
         "signature": "func (c *Config) validateVaultPath(result *ValidationResult) *ValidationResult",
         "parent": null,
@@ -4224,7 +4258,7 @@
         "name": "GetParsedKeybindings",
         "type": "method",
         "file": "internal/config/config.go",
-        "line": 617,
+        "line": 628,
         "column": 0,
         "signature": "func (c *Config) GetParsedKeybindings() map[string]*Keybinding",
         "parent": null,
@@ -4236,7 +4270,7 @@
         "name": "validateTheme",
         "type": "method",
         "file": "internal/config/config.go",
-        "line": 625,
+        "line": 636,
         "column": 0,
         "signature": "func (c *Config) validateTheme(result *ValidationResult) *ValidationResult",
         "parent": null,
@@ -4596,7 +4630,7 @@
         "name": "GetIterations",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 844,
+        "line": 987,
         "column": 0,
         "signature": "func (s *StorageService) GetIterations() int",
         "parent": null,
@@ -6062,7 +6096,7 @@
         "name": "New",
         "type": "function",
         "file": "internal/vault/vault.go",
-        "line": 112,
+        "line": 113,
         "column": 0,
         "signature": "func New(vaultPath string) (*VaultService, error)",
         "parent": null,
@@ -6220,7 +6254,7 @@
         "file": "internal/recovery/crypto.go",
         "line": 18,
         "column": 0,
-        "signature": "func deriveKey(seed, salt []byte, params *vault.KDFParams) []byte",
+        "signature": "func deriveKey(seed, salt []byte, params *shared.KDFParams) []byte",
         "parent": null,
         "doc": null
       }
@@ -6314,9 +6348,21 @@
         "name": "DeriveRecoveryKey",
         "type": "function",
         "file": "internal/recovery/recovery.go",
-        "line": 263,
+        "line": 264,
         "column": 0,
-        "signature": "func DeriveRecoveryKey(mnemonic string, passphrase []byte, kdfParams *vault.KDFParams) []byte",
+        "signature": "func DeriveRecoveryKey(mnemonic string, passphrase []byte, kdfParams *shared.KDFParams) []byte",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "SetupChallengeRecovery": [
+      {
+        "name": "SetupChallengeRecovery",
+        "type": "function",
+        "file": "internal/recovery/recovery.go",
+        "line": 298,
+        "column": 0,
+        "signature": "func SetupChallengeRecovery(config *ChallengeSetupConfig) (*ChallengeSetupResult, error)",
         "parent": null,
         "doc": null
       }
@@ -6326,7 +6372,7 @@
         "name": "decryptData",
         "type": "function",
         "file": "internal/recovery/recovery.go",
-        "line": 273,
+        "line": 380,
         "column": 0,
         "signature": "func decryptData(ciphertext, nonce, key []byte) ([]byte, error)",
         "parent": null,
@@ -6338,7 +6384,7 @@
         "name": "VerifyBackup",
         "type": "function",
         "file": "internal/recovery/recovery.go",
-        "line": 298,
+        "line": 405,
         "column": 0,
         "signature": "func VerifyBackup(config *VerifyConfig) error",
         "parent": null,
@@ -6350,7 +6396,7 @@
         "name": "encryptData",
         "type": "function",
         "file": "internal/recovery/recovery.go",
-        "line": 338,
+        "line": 445,
         "column": 0,
         "signature": "func encryptData(plaintext, key []byte) (ciphertext, nonce []byte, err error)",
         "parent": null,
@@ -6383,7 +6429,7 @@
           {
             "name": "KDFParams",
             "parent_symbol": "SetupConfig",
-            "field_type": "*vault.KDFParams",
+            "field_type": "*shared.KDFParams",
             "default_value": null,
             "file": "internal/recovery/recovery.go",
             "line": 18,
@@ -6445,7 +6491,7 @@
           {
             "name": "Metadata",
             "parent_symbol": "RecoveryConfig",
-            "field_type": "*vault.RecoveryMetadata",
+            "field_type": "*shared.RecoveryMetadata",
             "default_value": null,
             "file": "internal/recovery/recovery.go",
             "line": 32,
@@ -6505,6 +6551,44 @@
             "doc": null
           }
         ]
+      }
+    ],
+    "ChallengeSetupConfig": [
+      {
+        "name": "ChallengeSetupConfig",
+        "type": "struct",
+        "file": "internal/recovery/recovery.go",
+        "line": 274,
+        "column": 0,
+        "signature": null,
+        "parent": null,
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Passphrase",
+            "parent_symbol": "ChallengeSetupConfig",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/recovery/recovery.go",
+            "line": 275,
+            "column": 1,
+            "tags": null,
+            "is_optional": false,
+            "doc": null
+          }
+        ]
+      }
+    ],
+    "ChallengeSetupResult": [
+      {
+        "name": "ChallengeSetupResult",
+        "type": "struct",
+        "file": "internal/recovery/recovery.go",
+        "line": 279,
+        "column": 0,
+        "signature": null,
+        "parent": null,
+        "doc": null
       }
     ],
     "GetOrCreateAuditKey": [
@@ -6793,6 +6877,244 @@
         "signature": null,
         "parent": null,
         "doc": null
+      }
+    ],
+    "RecoveryMetadata": [
+      {
+        "name": "RecoveryMetadata",
+        "type": "struct",
+        "file": "internal/shared/recovery_types.go",
+        "line": 6,
+        "column": 0,
+        "signature": null,
+        "parent": null,
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Enabled",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 7,
+            "column": 1,
+            "tags": {
+              "json": "enabled"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Version",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 8,
+            "column": 1,
+            "tags": {
+              "json": "version"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "PassphraseRequired",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "bool",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 9,
+            "column": 1,
+            "tags": {
+              "json": "passphrase_required"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "ChallengePositions",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "[]int",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 10,
+            "column": 1,
+            "tags": {
+              "json": "challenge_positions"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "KDFParams",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "KDFParams",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 11,
+            "column": 1,
+            "tags": {
+              "json": "kdf_params"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "EncryptedStoredWords",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 12,
+            "column": 1,
+            "tags": {
+              "json": "encrypted_stored_words"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "NonceStored",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 13,
+            "column": 1,
+            "tags": {
+              "json": "nonce_stored"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "EncryptedRecoveryKey",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 14,
+            "column": 1,
+            "tags": {
+              "json": "encrypted_recovery_key"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "NonceRecovery",
+            "parent_symbol": "RecoveryMetadata",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 15,
+            "column": 1,
+            "tags": {
+              "json": "nonce_recovery"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
+      }
+    ],
+    "KDFParams": [
+      {
+        "name": "KDFParams",
+        "type": "struct",
+        "file": "internal/shared/recovery_types.go",
+        "line": 19,
+        "column": 0,
+        "signature": null,
+        "parent": null,
+        "doc": null,
+        "config_fields": [
+          {
+            "name": "Algorithm",
+            "parent_symbol": "KDFParams",
+            "field_type": "string",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 20,
+            "column": 1,
+            "tags": {
+              "json": "algorithm"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Time",
+            "parent_symbol": "KDFParams",
+            "field_type": "uint32",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 21,
+            "column": 1,
+            "tags": {
+              "json": "time"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Memory",
+            "parent_symbol": "KDFParams",
+            "field_type": "uint32",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 22,
+            "column": 1,
+            "tags": {
+              "json": "memory"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "Threads",
+            "parent_symbol": "KDFParams",
+            "field_type": "uint8",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 23,
+            "column": 1,
+            "tags": {
+              "json": "threads"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "SaltChallenge",
+            "parent_symbol": "KDFParams",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 24,
+            "column": 1,
+            "tags": {
+              "json": "salt_challenge"
+            },
+            "is_optional": false,
+            "doc": null
+          },
+          {
+            "name": "SaltRecovery",
+            "parent_symbol": "KDFParams",
+            "field_type": "[]byte",
+            "default_value": null,
+            "file": "internal/shared/recovery_types.go",
+            "line": 25,
+            "column": 1,
+            "tags": {
+              "json": "salt_recovery"
+            },
+            "is_optional": false,
+            "doc": null
+          }
+        ]
       }
     ],
     "randomHexSuffix": [
@@ -7379,12 +7701,24 @@
         "doc": null
       }
     ],
+    "SetPasswordAfterRecoveryV2": [
+      {
+        "name": "SetPasswordAfterRecoveryV2",
+        "type": "method",
+        "file": "internal/storage/storage.go",
+        "line": 674,
+        "column": 0,
+        "signature": "func (s *StorageService) SetPasswordAfterRecoveryV2(data []byte, newPassword string, dek []byte, callback ProgressCallback) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
     "verifyTempFileWithDEK": [
       {
         "name": "verifyTempFileWithDEK",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 667,
+        "line": 810,
         "column": 0,
         "signature": "func (s *StorageService) verifyTempFileWithDEK(tempPath string, dek []byte) error",
         "parent": null,
@@ -7396,7 +7730,7 @@
         "name": "prepareEncryptedData",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 690,
+        "line": 833,
         "column": 0,
         "signature": "func (s *StorageService) prepareEncryptedData(data []byte, metadata VaultMetadata, password string) ([]byte, error)",
         "parent": null,
@@ -7408,7 +7742,7 @@
         "name": "prepareEncryptedDataV2",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 721,
+        "line": 864,
         "column": 0,
         "signature": "func (s *StorageService) prepareEncryptedDataV2(data []byte, metadata VaultMetadata, password string) ([]byte, []byte, error)",
         "parent": null,
@@ -7420,7 +7754,7 @@
         "name": "SaveVaultWithIterations",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 772,
+        "line": 915,
         "column": 0,
         "signature": "func (s *StorageService) SaveVaultWithIterations(data []byte, password string, iterations int) error",
         "parent": null,
@@ -7432,7 +7766,7 @@
         "name": "SaveVaultWithIterationsUnsafe",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 813,
+        "line": 956,
         "column": 0,
         "signature": "func (s *StorageService) SaveVaultWithIterationsUnsafe(data []byte, password string, iterations int) error",
         "parent": null,
@@ -7444,7 +7778,7 @@
         "name": "GetVersion",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 854,
+        "line": 997,
         "column": 0,
         "signature": "func (s *StorageService) GetVersion() int",
         "parent": null,
@@ -7456,7 +7790,7 @@
         "name": "MigrateToV2",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 876,
+        "line": 1019,
         "column": 0,
         "signature": "func (s *StorageService) MigrateToV2(data, dek, wrappedDEK, wrappedDEKNonce, salt []byte, iterations int, callback ProgressCallback) error",
         "parent": null,
@@ -7466,7 +7800,7 @@
         "name": "MigrateToV2",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1569,
+        "line": 1639,
         "column": 0,
         "signature": "func (v *VaultService) MigrateToV2(passphrase []byte) (string, error)",
         "parent": null,
@@ -7478,7 +7812,7 @@
         "name": "SetIterations",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 998,
+        "line": 1141,
         "column": 0,
         "signature": "func (s *StorageService) SetIterations(iterations int) error",
         "parent": null,
@@ -7490,7 +7824,7 @@
         "name": "VaultExists",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1015,
+        "line": 1158,
         "column": 0,
         "signature": "func (s *StorageService) VaultExists() bool",
         "parent": null,
@@ -7502,7 +7836,7 @@
         "name": "GetVaultInfo",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1020,
+        "line": 1163,
         "column": 0,
         "signature": "func (s *StorageService) GetVaultInfo() (*VaultMetadata, error)",
         "parent": null,
@@ -7514,7 +7848,7 @@
         "name": "ValidateVault",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1037,
+        "line": 1180,
         "column": 0,
         "signature": "func (s *StorageService) ValidateVault() error",
         "parent": null,
@@ -7526,7 +7860,7 @@
         "name": "CreateBackup",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1073,
+        "line": 1216,
         "column": 0,
         "signature": "func (s *StorageService) CreateBackup() error",
         "parent": null,
@@ -7538,7 +7872,7 @@
         "name": "RestoreFromBackup",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1080,
+        "line": 1223,
         "column": 0,
         "signature": "func (s *StorageService) RestoreFromBackup(backupPath string) error",
         "parent": null,
@@ -7550,7 +7884,7 @@
         "name": "RemoveBackup",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1103,
+        "line": 1246,
         "column": 0,
         "signature": "func (s *StorageService) RemoveBackup() error",
         "parent": null,
@@ -7562,7 +7896,7 @@
         "name": "loadEncryptedVault",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1114,
+        "line": 1257,
         "column": 0,
         "signature": "func (s *StorageService) loadEncryptedVault() (*EncryptedVault, error)",
         "parent": null,
@@ -7574,7 +7908,7 @@
         "name": "saveEncryptedVault",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1137,
+        "line": 1280,
         "column": 0,
         "signature": "func (s *StorageService) saveEncryptedVault(data []byte, metadata VaultMetadata, password string) error",
         "parent": null,
@@ -7586,7 +7920,7 @@
         "name": "atomicWrite",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1167,
+        "line": 1310,
         "column": 0,
         "signature": "func (s *StorageService) atomicWrite(path string, data []byte) error",
         "parent": null,
@@ -7598,7 +7932,7 @@
         "name": "preflightChecks",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1220,
+        "line": 1363,
         "column": 0,
         "signature": "func (s *StorageService) preflightChecks() error",
         "parent": null,
@@ -7610,7 +7944,7 @@
         "name": "getAvailableDiskSpace",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1259,
+        "line": 1402,
         "column": 0,
         "signature": "func (s *StorageService) getAvailableDiskSpace(path string) (int64, error)",
         "parent": null,
@@ -7622,7 +7956,7 @@
         "name": "createBackup",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1273,
+        "line": 1416,
         "column": 0,
         "signature": "func (s *StorageService) createBackup() error",
         "parent": null,
@@ -7634,7 +7968,7 @@
         "name": "restoreFromBackup",
         "type": "method",
         "file": "internal/storage/storage.go",
-        "line": 1305,
+        "line": 1448,
         "column": 0,
         "signature": "func (s *StorageService) restoreFromBackup(backupPath string) error",
         "parent": null,
@@ -8054,7 +8388,7 @@
         "name": "MetadataPath",
         "type": "function",
         "file": "internal/vault/metadata.go",
-        "line": 44,
+        "line": 29,
         "column": 0,
         "signature": "func MetadataPath(vaultPath string) string",
         "parent": null,
@@ -8066,7 +8400,7 @@
         "name": "LoadMetadata",
         "type": "function",
         "file": "internal/vault/metadata.go",
-        "line": 49,
+        "line": 34,
         "column": 0,
         "signature": "func LoadMetadata(vaultPath string) (*Metadata, error)",
         "parent": null,
@@ -8076,7 +8410,7 @@
         "name": "LoadMetadata",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1534,
+        "line": 1583,
         "column": 0,
         "signature": "func (v *VaultService) LoadMetadata() (*Metadata, error)",
         "parent": null,
@@ -8088,7 +8422,7 @@
         "name": "SaveMetadata",
         "type": "function",
         "file": "internal/vault/metadata.go",
-        "line": 81,
+        "line": 66,
         "column": 0,
         "signature": "func SaveMetadata(vaultPath string, metadata *Metadata) error",
         "parent": null,
@@ -8098,7 +8432,7 @@
         "name": "SaveMetadata",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1539,
+        "line": 1588,
         "column": 0,
         "signature": "func (v *VaultService) SaveMetadata(metadata *Metadata) error",
         "parent": null,
@@ -8110,7 +8444,7 @@
         "name": "DeleteMetadata",
         "type": "function",
         "file": "internal/vault/metadata.go",
-        "line": 101,
+        "line": 86,
         "column": 0,
         "signature": "func DeleteMetadata(vaultPath string) error",
         "parent": null,
@@ -8120,7 +8454,7 @@
         "name": "DeleteMetadata",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1544,
+        "line": 1593,
         "column": 0,
         "signature": "func (v *VaultService) DeleteMetadata() error",
         "parent": null,
@@ -8132,7 +8466,7 @@
         "name": "Metadata",
         "type": "struct",
         "file": "internal/vault/metadata.go",
-        "line": 11,
+        "line": 13,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -8144,7 +8478,7 @@
             "field_type": "string",
             "default_value": null,
             "file": "internal/vault/metadata.go",
-            "line": 12,
+            "line": 14,
             "column": 1,
             "tags": {
               "json": "version"
@@ -8158,7 +8492,7 @@
             "field_type": "time.Time",
             "default_value": null,
             "file": "internal/vault/metadata.go",
-            "line": 13,
+            "line": 15,
             "column": 1,
             "tags": {
               "json": "created_at"
@@ -8172,7 +8506,7 @@
             "field_type": "time.Time",
             "default_value": null,
             "file": "internal/vault/metadata.go",
-            "line": 14,
+            "line": 16,
             "column": 1,
             "tags": {
               "json": "last_modified"
@@ -8186,7 +8520,7 @@
             "field_type": "bool",
             "default_value": null,
             "file": "internal/vault/metadata.go",
-            "line": 15,
+            "line": 17,
             "column": 1,
             "tags": {
               "json": "keychain_enabled"
@@ -8200,7 +8534,7 @@
             "field_type": "bool",
             "default_value": null,
             "file": "internal/vault/metadata.go",
-            "line": 16,
+            "line": 18,
             "column": 1,
             "tags": {
               "json": "audit_enabled"
@@ -8211,10 +8545,10 @@
           {
             "name": "Recovery",
             "parent_symbol": "Metadata",
-            "field_type": "*RecoveryMetadata",
+            "field_type": "*shared.RecoveryMetadata",
             "default_value": null,
             "file": "internal/vault/metadata.go",
-            "line": 17,
+            "line": 19,
             "column": 1,
             "tags": {
               "json": "recovery,omitempty"
@@ -8225,250 +8559,12 @@
         ]
       }
     ],
-    "RecoveryMetadata": [
-      {
-        "name": "RecoveryMetadata",
-        "type": "struct",
-        "file": "internal/vault/metadata.go",
-        "line": 21,
-        "column": 0,
-        "signature": null,
-        "parent": null,
-        "doc": null,
-        "config_fields": [
-          {
-            "name": "Enabled",
-            "parent_symbol": "RecoveryMetadata",
-            "field_type": "bool",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 22,
-            "column": 1,
-            "tags": {
-              "json": "enabled"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "Version",
-            "parent_symbol": "RecoveryMetadata",
-            "field_type": "string",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 23,
-            "column": 1,
-            "tags": {
-              "json": "version"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "PassphraseRequired",
-            "parent_symbol": "RecoveryMetadata",
-            "field_type": "bool",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 24,
-            "column": 1,
-            "tags": {
-              "json": "passphrase_required"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "ChallengePositions",
-            "parent_symbol": "RecoveryMetadata",
-            "field_type": "[]int",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 25,
-            "column": 1,
-            "tags": {
-              "json": "challenge_positions"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "KDFParams",
-            "parent_symbol": "RecoveryMetadata",
-            "field_type": "KDFParams",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 26,
-            "column": 1,
-            "tags": {
-              "json": "kdf_params"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "EncryptedStoredWords",
-            "parent_symbol": "RecoveryMetadata",
-            "field_type": "[]byte",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 27,
-            "column": 1,
-            "tags": {
-              "json": "encrypted_stored_words"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "NonceStored",
-            "parent_symbol": "RecoveryMetadata",
-            "field_type": "[]byte",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 28,
-            "column": 1,
-            "tags": {
-              "json": "nonce_stored"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "EncryptedRecoveryKey",
-            "parent_symbol": "RecoveryMetadata",
-            "field_type": "[]byte",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 29,
-            "column": 1,
-            "tags": {
-              "json": "encrypted_recovery_key"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "NonceRecovery",
-            "parent_symbol": "RecoveryMetadata",
-            "field_type": "[]byte",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 30,
-            "column": 1,
-            "tags": {
-              "json": "nonce_recovery"
-            },
-            "is_optional": false,
-            "doc": null
-          }
-        ]
-      }
-    ],
-    "KDFParams": [
-      {
-        "name": "KDFParams",
-        "type": "struct",
-        "file": "internal/vault/metadata.go",
-        "line": 34,
-        "column": 0,
-        "signature": null,
-        "parent": null,
-        "doc": null,
-        "config_fields": [
-          {
-            "name": "Algorithm",
-            "parent_symbol": "KDFParams",
-            "field_type": "string",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 35,
-            "column": 1,
-            "tags": {
-              "json": "algorithm"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "Time",
-            "parent_symbol": "KDFParams",
-            "field_type": "uint32",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 36,
-            "column": 1,
-            "tags": {
-              "json": "time"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "Memory",
-            "parent_symbol": "KDFParams",
-            "field_type": "uint32",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 37,
-            "column": 1,
-            "tags": {
-              "json": "memory"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "Threads",
-            "parent_symbol": "KDFParams",
-            "field_type": "uint8",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 38,
-            "column": 1,
-            "tags": {
-              "json": "threads"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "SaltChallenge",
-            "parent_symbol": "KDFParams",
-            "field_type": "[]byte",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 39,
-            "column": 1,
-            "tags": {
-              "json": "salt_challenge"
-            },
-            "is_optional": false,
-            "doc": null
-          },
-          {
-            "name": "SaltRecovery",
-            "parent_symbol": "KDFParams",
-            "field_type": "[]byte",
-            "default_value": null,
-            "file": "internal/vault/metadata.go",
-            "line": 40,
-            "column": 1,
-            "tags": {
-              "json": "salt_recovery"
-            },
-            "is_optional": false,
-            "doc": null
-          }
-        ]
-      }
-    ],
     "GetStorageService": [
       {
         "name": "GetStorageService",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 183,
+        "line": 184,
         "column": 0,
         "signature": "func (v *VaultService) GetStorageService() *storage.StorageService",
         "parent": null,
@@ -8480,7 +8576,7 @@
         "name": "EnableAudit",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 190,
+        "line": 191,
         "column": 0,
         "signature": "func (v *VaultService) EnableAudit(auditLogPath, vaultID string) error",
         "parent": null,
@@ -8492,7 +8588,7 @@
         "name": "DisableAudit",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 235,
+        "line": 236,
         "column": 0,
         "signature": "func (v *VaultService) DisableAudit()",
         "parent": null,
@@ -8504,7 +8600,7 @@
         "name": "LogAudit",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 243,
+        "line": 244,
         "column": 0,
         "signature": "func (v *VaultService) LogAudit(eventType, outcome, credentialName string)",
         "parent": null,
@@ -8516,7 +8612,7 @@
         "name": "createAuditCallback",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 265,
+        "line": 266,
         "column": 0,
         "signature": "func (v *VaultService) createAuditCallback() storage.ProgressCallback",
         "parent": null,
@@ -8528,7 +8624,7 @@
         "name": "Initialize",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 323,
+        "line": 324,
         "column": 0,
         "signature": "func (v *VaultService) Initialize(masterPassword []byte, useKeychain bool, auditLogPath, vaultID string) error",
         "parent": null,
@@ -8540,7 +8636,7 @@
         "name": "InitializeWithRecovery",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 441,
+        "line": 433,
         "column": 0,
         "signature": "func (v *VaultService) InitializeWithRecovery(masterPassword []byte, useKeychain bool, auditLogPath, vaultID string, passphrase []byte) (string, error)",
         "parent": null,
@@ -8552,7 +8648,7 @@
         "name": "Unlock",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 607,
+        "line": 568,
         "column": 0,
         "signature": "func (v *VaultService) Unlock(masterPassword []byte) error",
         "parent": null,
@@ -8564,7 +8660,7 @@
         "name": "UnlockWithKey",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 740,
+        "line": 701,
         "column": 0,
         "signature": "func (v *VaultService) UnlockWithKey(vaultKey []byte) error",
         "parent": null,
@@ -8576,7 +8672,7 @@
         "name": "UnlockWithKeychain",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 824,
+        "line": 790,
         "column": 0,
         "signature": "func (v *VaultService) UnlockWithKeychain() error",
         "parent": null,
@@ -8588,7 +8684,7 @@
         "name": "Lock",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 848,
+        "line": 814,
         "column": 0,
         "signature": "func (v *VaultService) Lock()",
         "parent": null,
@@ -8600,7 +8696,7 @@
         "name": "IsUnlocked",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 864,
+        "line": 836,
         "column": 0,
         "signature": "func (v *VaultService) IsUnlocked() bool",
         "parent": null,
@@ -8612,7 +8708,7 @@
         "name": "save",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 869,
+        "line": 841,
         "column": 0,
         "signature": "func (v *VaultService) save() error",
         "parent": null,
@@ -8624,7 +8720,7 @@
         "name": "GetCredential",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 947,
+        "line": 919,
         "column": 0,
         "signature": "func (v *VaultService) GetCredential(service string, trackUsage bool) (*Credential, error)",
         "parent": null,
@@ -8636,7 +8732,7 @@
         "name": "getGitRepo",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1024,
+        "line": 996,
         "column": 0,
         "signature": "func (v *VaultService) getGitRepo(dir string) string",
         "parent": null,
@@ -8648,7 +8744,7 @@
         "name": "ListCredentials",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1045,
+        "line": 1017,
         "column": 0,
         "signature": "func (v *VaultService) ListCredentials() ([]string, error)",
         "parent": null,
@@ -8660,7 +8756,7 @@
         "name": "ListCredentialsWithMetadata",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1086,
+        "line": 1058,
         "column": 0,
         "signature": "func (v *VaultService) ListCredentialsWithMetadata() ([]CredentialMetadata, error)",
         "parent": null,
@@ -8672,7 +8768,7 @@
         "name": "UpdateCredentialFields",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1206,
+        "line": 1178,
         "column": 0,
         "signature": "func (v *VaultService) UpdateCredentialFields(service, username, password, category, url, notes string) error",
         "parent": null,
@@ -8684,7 +8780,7 @@
         "name": "GetUsageStats",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1250,
+        "line": 1222,
         "column": 0,
         "signature": "func (v *VaultService) GetUsageStats(service string) (map[string]UsageRecord, error)",
         "parent": null,
@@ -8696,9 +8792,33 @@
         "name": "ChangePassword",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1273,
+        "line": 1245,
         "column": 0,
         "signature": "func (v *VaultService) ChangePassword(newPassword []byte) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "SetPasswordAfterRecovery": [
+      {
+        "name": "SetPasswordAfterRecovery",
+        "type": "method",
+        "file": "internal/vault/vault.go",
+        "line": 1337,
+        "column": 0,
+        "signature": "func (v *VaultService) SetPasswordAfterRecovery(newPassword []byte) error",
+        "parent": null,
+        "doc": null
+      }
+    ],
+    "WasUnlockedViaRecovery": [
+      {
+        "name": "WasUnlockedViaRecovery",
+        "type": "method",
+        "file": "internal/vault/vault.go",
+        "line": 1405,
+        "column": 0,
+        "signature": "func (v *VaultService) WasUnlockedViaRecovery() bool",
         "parent": null,
         "doc": null
       }
@@ -8708,7 +8828,7 @@
         "name": "EnableKeychain",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1361,
+        "line": 1410,
         "column": 0,
         "signature": "func (v *VaultService) EnableKeychain(password []byte, force bool) error",
         "parent": null,
@@ -8720,7 +8840,7 @@
         "name": "GetKeychainStatus",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1408,
+        "line": 1457,
         "column": 0,
         "signature": "func (v *VaultService) GetKeychainStatus() *KeychainStatus",
         "parent": null,
@@ -8732,7 +8852,7 @@
         "name": "RemoveVault",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1440,
+        "line": 1489,
         "column": 0,
         "signature": "func (v *VaultService) RemoveVault(force bool, removeAll bool) (*RemoveVaultResult, error)",
         "parent": null,
@@ -8744,7 +8864,7 @@
         "name": "PingKeychain",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1549,
+        "line": 1598,
         "column": 0,
         "signature": "func (v *VaultService) PingKeychain() error",
         "parent": null,
@@ -8756,7 +8876,7 @@
         "name": "NeedsMigration",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1555,
+        "line": 1606,
         "column": 0,
         "signature": "func (v *VaultService) NeedsMigration() (bool, error)",
         "parent": null,
@@ -8768,7 +8888,7 @@
         "name": "RecoverWithMnemonic",
         "type": "method",
         "file": "internal/vault/vault.go",
-        "line": 1701,
+        "line": 1763,
         "column": 0,
         "signature": "func (v *VaultService) RecoverWithMnemonic(mnemonic string, passphrase []byte) error",
         "parent": null,
@@ -9140,7 +9260,7 @@
         "name": "UpdateOpts",
         "type": "struct",
         "file": "internal/vault/vault.go",
-        "line": 1061,
+        "line": 1033,
         "column": 0,
         "signature": null,
         "parent": null,
@@ -9152,7 +9272,7 @@
         "name": "CredentialMetadata",
         "type": "struct",
         "file": "internal/vault/vault.go",
-        "line": 1070,
+        "line": 1042,
         "column": 0,
         "signature": null,
         "parent": null,

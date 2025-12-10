@@ -14,7 +14,7 @@ import (
 
 var (
 	useKeychain bool
-	enableAudit bool // T073: Flag to enable audit logging (FR-025)
+	noAudit     bool // Flag to disable audit logging (enabled by default)
 	noRecovery  bool // T028: Flag to skip BIP39 recovery phrase generation
 )
 
@@ -46,8 +46,8 @@ so you don't have to enter it every time.`,
 func init() {
 	rootCmd.AddCommand(initCmd)
 	initCmd.Flags().BoolVar(&useKeychain, "use-keychain", false, "store master password in system keychain")
-	// T073: Add --enable-audit flag (FR-025: opt-in per FR-025)
-	initCmd.Flags().BoolVar(&enableAudit, "enable-audit", false, "enable tamper-evident audit logging for vault operations")
+	// Audit logging is enabled by default; use --no-audit to disable
+	initCmd.Flags().BoolVar(&noAudit, "no-audit", false, "disable tamper-evident audit logging for vault operations")
 	// T028: Add --no-recovery flag (opt-out of BIP39 recovery)
 	initCmd.Flags().BoolVar(&noRecovery, "no-recovery", false, "skip BIP39 recovery phrase generation")
 }
@@ -109,9 +109,9 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
 	}
 
-	// Prepare audit parameters if requested
+	// Prepare audit parameters (enabled by default unless --no-audit)
 	var auditLogPath, vaultID string
-	if enableAudit {
+	if !noAudit {
 		auditLogPath = getAuditLogPath(vaultPath)
 		vaultID = getVaultID(vaultPath)
 	}
@@ -124,11 +124,11 @@ func runInit(cmd *cobra.Command, args []string) error {
 		}
 
 		// Save metadata for keychain/audit if needed
-		if useKeychain || enableAudit {
+		if useKeychain || !noAudit {
 			metadata := &vault.Metadata{
 				Version:         "1.0",
 				KeychainEnabled: useKeychain,
-				AuditEnabled:    enableAudit,
+				AuditEnabled:    !noAudit,
 			}
 			if err := vaultService.SaveMetadata(metadata); err != nil {
 				return fmt.Errorf("failed to save vault metadata: %w", err)
@@ -251,7 +251,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 	}
 
 	// Display audit logging status
-	if enableAudit && auditLogPath != "" {
+	if !noAudit && auditLogPath != "" {
 		fmt.Printf("📊 Audit logging enabled: %s\n", auditLogPath)
 	}
 

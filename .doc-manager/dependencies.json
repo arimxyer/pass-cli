@@ -4,7 +4,7 @@
     "tool_version": "1.2.4",
     "warning": "AUTO-GENERATED FILE - Do not edit manually. Changes will be overwritten by doc-manager."
   },
-  "generated_at": "2025-12-05T19:00:09.787496",
+  "generated_at": "2025-12-10T17:04:47.490588",
   "doc_to_code": {
     "01-getting-started/manual-install.md": [
       "cmd/init.go",
@@ -27,6 +27,7 @@
       "cmd/doctor.go",
       "cmd/vault_backup_create.go",
       "cmd/vault_backup_info.go",
+      "cmd/vault_backup_preview.go",
       "cmd/vault_backup_restore.go"
     ],
     "02-guides/basic-workflows.md": [
@@ -123,6 +124,7 @@
       "cmd/vault_backup.go",
       "cmd/vault_backup_create.go",
       "cmd/vault_backup_info.go",
+      "cmd/vault_backup_preview.go",
       "cmd/vault_backup_restore.go",
       "cmd/vault_migrate.go",
       "cmd/vault_remove.go",
@@ -304,6 +306,10 @@
       "02-guides/backup-restore.md",
       "03-reference/command-reference.md",
       "README.md"
+    ],
+    "cmd/vault_backup_preview.go": [
+      "02-guides/backup-restore.md",
+      "03-reference/command-reference.md"
     ],
     "cmd/vault_backup_restore.go": [
       "02-guides/backup-restore.md",
@@ -560,7 +566,6 @@
     ],
     "vault.enc.backup": [
       "02-guides/backup-restore.md",
-      "03-reference/command-reference.md",
       "03-reference/migration.md",
       "03-reference/security-architecture.md",
       "04-troubleshooting/vault.md"
@@ -588,6 +593,9 @@
     "restore": [
       "02-guides/backup-restore.md"
     ],
+    "preview": [
+      "02-guides/backup-restore.md"
+    ],
     "info": [
       "02-guides/backup-restore.md"
     ],
@@ -595,6 +603,10 @@
       "02-guides/backup-restore.md",
       "03-reference/command-reference.md",
       "README.md"
+    ],
+    "pass-cli vault backup preview": [
+      "02-guides/backup-restore.md",
+      "03-reference/command-reference.md"
     ],
     "pass-cli generate": [
       "02-guides/basic-workflows.md",
@@ -747,10 +759,6 @@
     ],
     "EDITOR": [
       "03-reference/command-reference.md"
-    ],
-    "pass-cli init --enable-audit": [
-      "03-reference/command-reference.md",
-      "README.md"
     ],
     "pass-cli get github --quiet": [
       "03-reference/command-reference.md"
@@ -1077,10 +1085,6 @@
         "doc_file": "02-guides/tui-guide.md"
       },
       {
-        "reference": "vault.enc.backup",
-        "doc_file": "03-reference/command-reference.md"
-      },
-      {
         "reference": "vault_path",
         "doc_file": "03-reference/configuration.md"
       },
@@ -1363,6 +1367,10 @@
         "doc_file": "01-getting-started/quick-start.md"
       },
       {
+        "reference": "preview",
+        "doc_file": "02-guides/backup-restore.md"
+      },
+      {
         "reference": "info",
         "doc_file": "02-guides/backup-restore.md"
       },
@@ -1404,6 +1412,26 @@
       },
       {
         "reference": "pass-cli vault backup restore",
+        "doc_file": "02-guides/backup-restore.md"
+      },
+      {
+        "reference": "pass-cli vault backup restore",
+        "doc_file": "02-guides/backup-restore.md"
+      },
+      {
+        "reference": "pass-cli vault backup restore",
+        "doc_file": "02-guides/backup-restore.md"
+      },
+      {
+        "reference": "pass-cli vault backup restore",
+        "doc_file": "02-guides/backup-restore.md"
+      },
+      {
+        "reference": "pass-cli vault backup preview",
+        "doc_file": "02-guides/backup-restore.md"
+      },
+      {
+        "reference": "pass-cli vault backup preview",
         "doc_file": "02-guides/backup-restore.md"
       },
       {
@@ -1935,7 +1963,7 @@
         "doc_file": "03-reference/command-reference.md"
       },
       {
-        "reference": "pass-cli init --enable-audit",
+        "reference": "pass-cli init",
         "doc_file": "03-reference/command-reference.md"
       },
       {
@@ -1984,6 +2012,10 @@
       },
       {
         "reference": "pass-cli get",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli init",
         "doc_file": "03-reference/command-reference.md"
       },
       {
@@ -2383,6 +2415,26 @@
         "doc_file": "03-reference/command-reference.md"
       },
       {
+        "reference": "pass-cli vault backup restore",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli vault backup restore",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli vault backup preview",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli vault backup preview",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
+        "reference": "pass-cli vault backup preview",
+        "doc_file": "03-reference/command-reference.md"
+      },
+      {
         "reference": "pass-cli vault backup info [flags]",
         "doc_file": "03-reference/command-reference.md"
       },
@@ -2691,6 +2743,10 @@
         "doc_file": "03-reference/security-architecture.md"
       },
       {
+        "reference": "pass-cli init",
+        "doc_file": "03-reference/security-architecture.md"
+      },
+      {
         "reference": "pass-cli verify-audit",
         "doc_file": "03-reference/security-architecture.md"
       },
@@ -2708,6 +2764,10 @@
       },
       {
         "reference": "pass-cli change-password",
+        "doc_file": "03-reference/security-architecture.md"
+      },
+      {
+        "reference": "pass-cli init",
         "doc_file": "03-reference/security-architecture.md"
       },
       {
@@ -3071,7 +3131,7 @@
         "doc_file": "README.md"
       },
       {
-        "reference": "pass-cli init --enable-audit",
+        "reference": "pass-cli init",
         "doc_file": "README.md"
       },
       {
@@ -3174,6 +3234,10 @@
       },
       {
         "reference": "restore",
+        "doc_file": "02-guides/backup-restore.md"
+      },
+      {
+        "reference": "preview",
         "doc_file": "02-guides/backup-restore.md"
       },
       {

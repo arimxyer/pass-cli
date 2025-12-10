@@ -11,10 +11,10 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"text/tabwriter"
 	"time"
 
 	"github.com/howeyc/gopass"
+	"github.com/olekukonko/tablewriter"
 	"golang.org/x/term"
 )
 
@@ -219,7 +219,7 @@ func formatFieldCounts(fieldCounts map[string]int) string {
 	return strings.Join(parts, ", ")
 }
 
-// T004: formatUsageTable formats usage records as an aligned table
+// T004: formatUsageTable formats usage records as a styled table
 // Per contracts/commands.md: Table format with columns for Location, Repository, Last Used, Count, Fields
 func formatUsageTable(records []vault.UsageRecord) string {
 	if len(records) == 0 {
@@ -227,13 +227,13 @@ func formatUsageTable(records []vault.UsageRecord) string {
 	}
 
 	var builder strings.Builder
-	w := tabwriter.NewWriter(&builder, 0, 0, 2, ' ', 0)
+	table := tablewriter.NewWriter(&builder)
 
-	// Header
-	_, _ = fmt.Fprintln(w, "Location\tRepository\tLast Used\tCount\tFields")
-	_, _ = fmt.Fprintln(w, "────────────────────────────────────────────────────────────────────────────────────")
+	// Configure table style
+	table.Header([]string{"Location", "Repository", "Last Used", "Count", "Fields"})
 
-	// Rows
+	// Prepare data rows
+	var data [][]string
 	for _, record := range records {
 		location := record.Location
 		repository := record.GitRepo
@@ -244,10 +244,11 @@ func formatUsageTable(records []vault.UsageRecord) string {
 		count := fmt.Sprintf("%d", record.Count)
 		fields := formatFieldCounts(record.FieldAccess)
 
-		_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", location, repository, lastUsed, count, fields)
+		data = append(data, []string{location, repository, lastUsed, count, fields})
 	}
 
-	_ = w.Flush()
+	_ = table.Bulk(data)
+	_ = table.Render()
 	return builder.String()
 }
 
