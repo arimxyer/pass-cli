@@ -160,6 +160,17 @@ func GetDefaultConfigTemplate() string {
 # Default: dracula
 theme: "dracula"
 
+# Vault Path Configuration (optional)
+# Uncomment to use a custom vault location instead of the default (~/.pass-cli/vault.enc)
+# Supports: absolute paths, tilde expansion (~), environment variables ($HOME, %USERPROFILE%)
+#
+# Examples:
+#   vault_path: "~/my-vault/vault.enc"           # Tilde expansion
+#   vault_path: "/home/user/secure/vault.enc"   # Absolute path (Linux/macOS)
+#   vault_path: "C:/Users/me/vault.enc"         # Absolute path (Windows)
+#
+# vault_path: ""
+
 # Terminal size warning configuration
 terminal:
   # Enable or disable terminal size warnings (default: true)
