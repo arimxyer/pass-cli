@@ -1,6 +1,6 @@
 baseURL: https://ari1110.github.io/pass-cli/
 languageCode: en-us
-title: pass-cli Documentation
+title: PASS-CLI
 
 # Point to existing /docs folder
 contentDir: ../docs
@@ -20,6 +20,12 @@ params:
 
   navbar:
     displayTitle: true
+    displayLogo: true
+    logo:
+      path: images/logo-dark.svg
+      dark: images/logo-light.svg
+      width: 24
+      height: 28
 
   footer:
     displayCopyright: true

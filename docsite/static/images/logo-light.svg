@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 56" width="48" height="56">
+  <!-- Blocky lock matching ASCII art style -->
+
+  <!-- Shackle (top loop) -->
+  <rect x="16" y="0" width="4" height="20" fill="#e5e7eb"/>
+  <rect x="28" y="0" width="4" height="20" fill="#e5e7eb"/>
+  <rect x="16" y="0" width="16" height="4" fill="#e5e7eb"/>
+
+  <!-- Lock body -->
+  <rect x="8" y="16" width="32" height="40" fill="#e5e7eb"/>
+
+  <!-- Inner panel -->
+  <rect x="14" y="24" width="20" height="26" fill="#1f2937"/>
+
+  <!-- Keyhole circle -->
+  <circle cx="24" cy="37" r="5" fill="#e5e7eb"/>
+</svg>
