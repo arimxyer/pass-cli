@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2025-12-10
+
+### Added
+- **Backup Restore Selection**: New options for restoring from specific backups
+  - `--file` flag to restore from a specific backup file path
+  - `--interactive` / `-i` flag for numbered list selection of available backups
+- **Backup Preview Command**: `vault backup preview` to inspect backup contents before restoring
+  - Shows credential names in backup (requires backup's password)
+  - `--verbose` flag for detailed output with timestamps and categories
+  - Helpful error messages when wrong password used
+- **Audit Logging Default**: Audit logging now enabled by default during vault initialization
+  - Use `--no-audit` flag to disable if not wanted
+  - Existing vaults retain their current audit settings on upgrade
+- **Config Template**: Added `vault_path` configuration example to config template
+
+### Fixed
+- **TUI: PowerShell Shift+Tab**: Pin tcell to v2.11.0 to fix Shift+Tab regression on Windows PowerShell
+  - Root cause: tcell v2.12.0 Win32 input mode redesign broke VT sequence handling
+  - Also fixes status bar styling issues
+  - Filed upstream: https://github.com/gdamore/tcell/issues/901
+
+### Changed
+- **Usage Command Styling**: Refactored to use styled tablewriter for consistent table output
+- **Documentation**: Updated all `--enable-audit` references to `--no-audit` pattern
+
+### Testing
+- Added keychain persistence tests for binary upgrade scenarios
+- Fixed integration tests for tablewriter v1.x uppercase header format
+- Added `--no-audit` to tests that don't specifically test audit functionality
+
 ## [0.11.2] - 2025-12-06
 
 ### Fixed
