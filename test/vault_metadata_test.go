@@ -31,7 +31,7 @@ func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 
 	// Ensure clean state
 	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	// Create vault with audit enabled
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
@@ -111,7 +111,7 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 
 	// Ensure clean state
 	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	// Create directory
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
@@ -211,7 +211,7 @@ func TestIntegration_AutoMetadataCreationOnUnlock(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "unlock-metadata-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	// Create vault with audit enabled
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
@@ -274,7 +274,7 @@ func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "no-audit-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	// Create vault WITHOUT audit (use --no-audit since audit is now enabled by default)
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
@@ -353,7 +353,7 @@ func TestIntegration_MetadataCreatedByInit(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "init-audit-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
 		t.Fatalf("Failed to create vault directory: %v", err)
@@ -411,7 +411,7 @@ func TestIntegration_MetadataUpdateOnAuditChange(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "change-audit-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
 		t.Fatalf("Failed to create vault directory: %v", err)
@@ -486,7 +486,7 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "old-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
 		t.Fatalf("Failed to create vault directory: %v", err)
@@ -577,7 +577,7 @@ func TestIntegration_MetadataDeletedFallback(t *testing.T) {
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
 
 	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
 		t.Fatalf("Failed to create directory: %v", err)
@@ -659,7 +659,7 @@ func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
 
 	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
 		t.Fatalf("Failed to create directory: %v", err)
@@ -737,7 +737,7 @@ func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
 
 	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
 		t.Fatalf("Failed to create directory: %v", err)
@@ -809,7 +809,7 @@ func TestIntegration_UnknownMetadataVersion(t *testing.T) {
 	vaultDir := filepath.Join(testDir, "unknown-version-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
 		t.Fatalf("Failed to create directory: %v", err)

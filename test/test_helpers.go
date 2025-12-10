@@ -4,6 +4,13 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/zalando/go-keyring"
+)
+
+const (
+	// auditKeyService matches the service name used in internal/security/audit.go
+	auditKeyService = "pass-cli-audit"
 )
 
 // setupTestVaultConfig creates a temporary config file with a custom vault_path
@@ -39,4 +46,51 @@ func setupTestVaultConfig(t *testing.T, vaultPath string) (configPath string, cl
 	}
 
 	return configPath, cleanup
+}
+
+// cleanupVaultDir removes a vault directory and its associated keychain entries.
+// This should be used in defer statements to ensure keychain entries don't leak.
+// Walks the directory to find all vault.enc files and cleans up their audit keys.
+//
+//nolint:unused // Used in integration tests (build tag: integration)
+func cleanupVaultDir(t *testing.T, vaultDir string) {
+	t.Helper()
+
+	// Find all vault.enc files in the directory and delete their keychain entries
+	_ = filepath.Walk(vaultDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil // Continue walking even if there are errors
+		}
+		if info != nil && !info.IsDir() && filepath.Base(path) == "vault.enc" {
+			// Delete the audit key for this vault path (full path format)
+			_ = keyring.Delete(auditKeyService, path)
+			// Also delete by vault ID (directory name format - used by pass-cli)
+			vaultID := filepath.Base(filepath.Dir(path))
+			_ = keyring.Delete(auditKeyService, vaultID)
+		}
+		return nil
+	})
+
+	// Also try to delete by the top-level directory name (for single-vault dirs)
+	_ = keyring.Delete(auditKeyService, filepath.Base(vaultDir))
+
+	// Remove the directory
+	_ = os.RemoveAll(vaultDir)
+}
+
+// cleanupVaultPath removes a specific vault's keychain entry and its parent directory.
+// Use this when you know the exact vault.enc path.
+//
+//nolint:unused // Used in integration tests (build tag: integration)
+func cleanupVaultPath(t *testing.T, vaultPath string) {
+	t.Helper()
+
+	// Delete the audit key for this vault (full path format)
+	_ = keyring.Delete(auditKeyService, vaultPath)
+	// Also delete by vault ID (directory name format - used by pass-cli)
+	vaultID := filepath.Base(filepath.Dir(vaultPath))
+	_ = keyring.Delete(auditKeyService, vaultID)
+
+	// Remove the parent directory (which contains the vault)
+	_ = os.RemoveAll(filepath.Dir(vaultPath))
 }

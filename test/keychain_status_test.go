@@ -29,7 +29,7 @@ func TestIntegration_KeychainStatus(t *testing.T) {
 
 	// Ensure clean state
 	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(filepath.Dir(vaultPath)) }() // Best effort cleanup
+	defer cleanupVaultPath(t, vaultPath) // Cleans up keychain entries + directory
 
 	// Step 1: Initialize vault WITHOUT keychain
 	t.Run("1_Init_Without_Keychain", func(t *testing.T) {
@@ -158,7 +158,7 @@ func TestIntegration_KeychainStatusWithMetadata(t *testing.T) {
 
 	// Ensure clean state
 	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
 
 	// Create vault with audit enabled
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {

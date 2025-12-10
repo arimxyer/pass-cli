@@ -18,7 +18,7 @@ func TestV1VaultTriggersMigrationPrompt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
+	defer cleanupVaultDir(t, tempDir)
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	passwordStr := "Test123!@#Password"
@@ -76,7 +76,7 @@ func TestAcceptedMigrationCreatesV2Vault(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
+	defer cleanupVaultDir(t, tempDir)
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	passwordStr := "Test123!@#Password"
@@ -186,7 +186,7 @@ func TestDeclinedMigrationPreservesV1Vault(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
+	defer cleanupVaultDir(t, tempDir)
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	passwordStr := "Test123!@#Password"
@@ -246,7 +246,7 @@ func TestV2VaultDoesNotTriggerMigration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
+	defer cleanupVaultDir(t, tempDir)
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	passwordStr := "Test123!@#Password"
@@ -303,7 +303,7 @@ func TestMigrationIsAtomic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
+	defer cleanupVaultDir(t, tempDir)
 
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	passwordStr := "Test123!@#Password"

@@ -600,7 +600,7 @@ func TestDefaultVaultPath_Init(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp home: %v", err)
 	}
-	defer func() { _ = os.RemoveAll(tmpHome) }() // Best effort cleanup
+	defer cleanupVaultDir(t, tmpHome) // Cleans up keychain entries + directory
 
 	// Set up environment
 	// Use --no-audit to avoid keychain interaction for audit HMAC key storage
@@ -639,7 +639,7 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp home: %v", err)
 	}
-	defer func() { _ = os.RemoveAll(tmpHome) }() // Best effort cleanup
+	defer cleanupVaultDir(t, tmpHome) // Cleans up keychain entries + directory
 
 	masterPassword := "TestPassword123!"
 
@@ -728,7 +728,7 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp home: %v", err)
 	}
-	defer func() { _ = os.RemoveAll(tmpHome) }() // Best effort cleanup
+	defer cleanupVaultDir(t, tmpHome) // Cleans up keychain entries + directory
 
 	// Create custom vault directory
 	customVaultDir := filepath.Join(tmpHome, "custom", "secure")

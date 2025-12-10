@@ -34,7 +34,7 @@ func TestKeychainPersistence_AfterRestart(t *testing.T) {
 
 	// Clean up before and after
 	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(vaultDir) }()
+	defer cleanupVaultDir(t, vaultDir)
 	_ = os.RemoveAll(vaultDir)
 	_ = ks.Delete() // Clear any existing keychain entry
 
@@ -140,7 +140,7 @@ func TestKeychainPersistence_MetadataIntegrity(t *testing.T) {
 	metadataPath := vaultPath + ".meta.json"
 
 	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(vaultDir) }()
+	defer cleanupVaultDir(t, vaultDir)
 	_ = os.RemoveAll(vaultDir)
 	_ = ks.Delete()
 
@@ -203,7 +203,7 @@ func TestKeychainPersistence_GracefulDegradation(t *testing.T) {
 	metadataPath := vaultPath + ".meta.json"
 
 	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(vaultDir) }()
+	defer cleanupVaultDir(t, vaultDir)
 	_ = os.RemoveAll(vaultDir)
 	_ = ks.Delete()
 
@@ -295,7 +295,7 @@ func TestKeychainPersistence_MultipleRestarts(t *testing.T) {
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 
 	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(vaultDir) }()
+	defer cleanupVaultDir(t, vaultDir)
 	_ = os.RemoveAll(vaultDir)
 	_ = ks.Delete()
 
