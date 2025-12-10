@@ -168,15 +168,15 @@ pass-cli init
 
 This creates a vault without storing the master password in OS keychain. You'll need to enter your password for each operation.
 
-#### Enable Audit Logging
+#### Disable Audit Logging
 
-Audit logging is disabled by default. To enable it during initialization:
+Audit logging is enabled by default (recommended). To disable it during initialization:
 
 ```bash
-pass-cli init --enable-audit
+pass-cli init --no-audit
 ```
 
-This creates a vault with tamper-evident HMAC-signed audit logging enabled (recommended for production use).
+This creates a vault without tamper-evident HMAC-signed audit logging. Only disable if you have specific storage constraints.
 
 ## Your First Credential
 

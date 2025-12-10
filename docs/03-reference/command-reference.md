@@ -1658,10 +1658,10 @@ Review the log file and investigate the flagged entries.
 #### Troubleshooting
 
 **Problem**: "audit log not found"
-**Solution**: Ensure vault was initialized with `--enable-audit` flag
+**Solution**: Audit logging is enabled by default. If you initialized with `--no-audit`, re-initialize without that flag.
 
 **Problem**: "failed to retrieve audit key from keychain"
-**Solution**: Audit key may have been deleted. Re-initialize audit logging with `pass-cli init --enable-audit`
+**Solution**: Audit key may have been deleted. Re-initialize the vault with `pass-cli init` (audit enabled by default)
 
 **Problem**: "HMAC verification failed"
 **Causes**:
