@@ -4,7 +4,7 @@
     "tool_version": "1.2.4",
     "warning": "AUTO-GENERATED FILE - Do not edit manually. Changes will be overwritten by doc-manager."
   },
-  "generated_at": "2025-12-10T16:47:55.802497",
+  "generated_at": "2025-12-10T17:04:47.490588",
   "doc_to_code": {
     "01-getting-started/manual-install.md": [
       "cmd/init.go",
@@ -758,9 +758,6 @@
       "README.md"
     ],
     "EDITOR": [
-      "03-reference/command-reference.md"
-    ],
-    "pass-cli init --enable-audit": [
       "03-reference/command-reference.md"
     ],
     "pass-cli get github --quiet": [
@@ -1966,7 +1963,7 @@
         "doc_file": "03-reference/command-reference.md"
       },
       {
-        "reference": "pass-cli init --enable-audit",
+        "reference": "pass-cli init",
         "doc_file": "03-reference/command-reference.md"
       },
       {
