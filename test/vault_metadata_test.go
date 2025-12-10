@@ -276,7 +276,7 @@ func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 
 	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
 
-	// Create vault WITHOUT audit
+	// Create vault WITHOUT audit (use --no-audit since audit is now enabled by default)
 	if err := os.MkdirAll(vaultDir, 0755); err != nil {
 		t.Fatalf("Failed to create vault directory: %v", err)
 	}
@@ -286,7 +286,7 @@ func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 	defer cleanup()
 
 	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init")
+	cmd := exec.Command(binaryPath, "init", "--no-audit")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
