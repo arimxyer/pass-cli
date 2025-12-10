@@ -140,9 +140,9 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 	testConfigPath2, cleanup2 := setupTestVaultConfig(t, vault2Path)
 	defer cleanup2()
 
-	// Initialize vault2 without audit
+	// Initialize vault2 without audit (use --no-audit since audit is enabled by default)
 	input2 := testPassword2 + "\n" + testPassword2 + "\n" + "n\n" + "n\n"
-	cmd = exec.Command(binaryPath, "init")
+	cmd = exec.Command(binaryPath, "init", "--no-audit")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath2)
 	cmd.Stdin = strings.NewReader(input2)
 	stdout.Reset()

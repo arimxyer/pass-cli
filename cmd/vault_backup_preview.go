@@ -84,7 +84,7 @@ func runVaultBackupPreview(cmd *cobra.Command, args []string) error {
 		errStr := err.Error()
 		if strings.Contains(errStr, "cipher: message authentication failed") ||
 			strings.Contains(errStr, "failed to decrypt") {
-			return fmt.Errorf("decryption failed - incorrect password\n\nMake sure you're using the password that was active when this backup was created.\nIf you've changed your password since then, use the OLD password.")
+			return fmt.Errorf("decryption failed - incorrect password: make sure you're using the password that was active when this backup was created, if you've changed your password since then use the OLD password")
 		}
 		return fmt.Errorf("failed to decrypt backup: %w", err)
 	}
@@ -127,7 +127,7 @@ func runVaultBackupPreview(cmd *cobra.Command, args []string) error {
 				category = "-"
 			}
 			created := cred.CreatedAt.Format("2006-01-02")
-			table.Append([]string{
+			_ = table.Append([]string{
 				fmt.Sprintf("%d", i+1),
 				service,
 				cred.Username,

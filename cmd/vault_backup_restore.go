@@ -224,7 +224,7 @@ func selectBackupInteractively(backups []storage.BackupInfo) (*storage.BackupInf
 		if backup.IsCorrupted {
 			status = " ⚠️"
 		}
-		table.Append([]string{
+		_ = table.Append([]string{
 			fmt.Sprintf("%d", i+1),
 			backup.Type + status,
 			age,

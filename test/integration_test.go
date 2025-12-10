@@ -603,7 +603,9 @@ func TestDefaultVaultPath_Init(t *testing.T) {
 	defer func() { _ = os.RemoveAll(tmpHome) }() // Best effort cleanup
 
 	// Set up environment
-	cmd := exec.Command(binaryPath, "init")
+	// Use --no-audit to avoid keychain interaction for audit HMAC key storage
+	// (can cause hangs on macOS CI runners)
+	cmd := exec.Command(binaryPath, "init", "--no-audit")
 	cmd.Env = append(os.Environ(),
 		"PASS_CLI_TEST=1",
 		fmt.Sprintf("HOME=%s", tmpHome),
@@ -662,9 +664,10 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 	}
 
 	// Step 1: Initialize vault
+	// Use --no-audit to avoid keychain interaction for audit HMAC key storage
 	t.Log("Step 1: Initialize vault at default location")
 	initInput := fmt.Sprintf("%s\n%s\nn\nn\n", masterPassword, masterPassword)
-	stdout, stderr, err := runWithHome(initInput, "init")
+	stdout, stderr, err := runWithHome(initInput, "init", "--no-audit")
 	if err != nil {
 		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 	}
