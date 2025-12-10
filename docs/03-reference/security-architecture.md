@@ -636,11 +636,11 @@ chmod 600 ~/backups/vault-*.enc
 - `vault.enc.backup` - Previous vault state (present between saves, removed after unlock)
 - `vault.enc.tmp.YYYYMMDD-HHMMSS.XXXXXX` - Orphaned temp files from crashes (auto-cleaned)
 
-### Audit Logging (Optional)
+### Audit Logging (Enabled by Default)
 
 Tamper-evident audit trail for vault operations:
 
-- **Opt-In**: Disabled by default, enable with `--enable-audit` flag
+- **Enabled by Default**: Automatically initialized during `pass-cli init` (use `--no-audit` to disable)
 - **HMAC Signatures**: HMAC-SHA256 signatures for tamper detection
 - **Key Storage**: Audit HMAC keys stored in OS keychain (separate from vault)
 - **Events Logged**: Vault unlock/lock, password changes, credential operations
@@ -653,10 +653,13 @@ Tamper-evident audit trail for vault operations:
 - **Default**: Same directory as vault (e.g., `~/.pass-cli/audit.log`)
 - **Custom**: Set `PASS_AUDIT_LOG` environment variable
 
-**Enable Audit Logging**:
+**Audit Logging Commands**:
 ```bash
-# New vault with audit logging
-pass-cli init --enable-audit
+# Initialize vault (audit logging enabled by default)
+pass-cli init
+
+# Initialize vault without audit logging
+pass-cli init --no-audit
 
 # Verify audit log integrity
 pass-cli verify-audit

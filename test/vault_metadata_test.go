@@ -44,7 +44,7 @@ func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 
 	// Initialize vault with audit
 	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 
@@ -124,7 +124,7 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 
 	// Initialize vault1 with audit
 	input1 := testPassword1 + "\n" + testPassword1 + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath1)
 	cmd.Stdin = strings.NewReader(input1)
 
@@ -223,7 +223,7 @@ func TestIntegration_AutoMetadataCreationOnUnlock(t *testing.T) {
 	defer cleanup()
 
 	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
@@ -237,7 +237,7 @@ func TestIntegration_AutoMetadataCreationOnUnlock(t *testing.T) {
 	// Verify metadata created by init
 	metaPath := vault.MetadataPath(vaultPath)
 	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
-		t.Fatal("Metadata should be created by init --enable-audit")
+		t.Fatal("Metadata should be created by init audit logging (enabled by default)")
 	}
 
 	// Delete metadata to simulate old vault
@@ -346,8 +346,8 @@ func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 	t.Logf("✓ Metadata created with audit_enabled=false for audit-disabled vault")
 }
 
-// T023: Integration test for metadata creation via init --enable-audit
-// Tests that init command creates metadata when --enable-audit flag is used
+// T023: Integration test for metadata creation via init audit logging (enabled by default)
+// Tests that init command creates metadata when audit logging (enabled by default) flag is used
 func TestIntegration_MetadataCreatedByInit(t *testing.T) {
 	testPassword := "InitAudit-Pass@123"
 	vaultDir := filepath.Join(testDir, "init-audit-vault")
@@ -363,9 +363,9 @@ func TestIntegration_MetadataCreatedByInit(t *testing.T) {
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	// Init with --enable-audit
+	// Init with audit logging (enabled by default)
 	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
@@ -379,7 +379,7 @@ func TestIntegration_MetadataCreatedByInit(t *testing.T) {
 	// Verify metadata created
 	metaPath := vault.MetadataPath(vaultPath)
 	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
-		t.Fatal("Metadata file should be created by init --enable-audit")
+		t.Fatal("Metadata file should be created by init audit logging (enabled by default)")
 	}
 
 	// Verify metadata content
@@ -401,7 +401,7 @@ func TestIntegration_MetadataCreatedByInit(t *testing.T) {
 		t.Error("Metadata should contain version field")
 	}
 
-	t.Logf("✓ Metadata created by init --enable-audit")
+	t.Logf("✓ Metadata created by init audit logging (enabled by default)")
 }
 
 // T024: Integration test for metadata update when audit settings change
@@ -423,7 +423,7 @@ func TestIntegration_MetadataUpdateOnAuditChange(t *testing.T) {
 
 	// Create vault with audit
 	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
@@ -589,7 +589,7 @@ func TestIntegration_MetadataDeletedFallback(t *testing.T) {
 
 	// Create vault with audit
 	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
@@ -671,7 +671,7 @@ func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
 
 	// Create vault with audit
 	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
@@ -749,7 +749,7 @@ func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
 
 	// Create vault with audit
 	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer
@@ -821,7 +821,7 @@ func TestIntegration_UnknownMetadataVersion(t *testing.T) {
 
 	// Create vault with audit
 	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--enable-audit")
+	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
 	var stdout, stderr bytes.Buffer

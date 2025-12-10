@@ -67,7 +67,7 @@ pass-cli init
 
 | Flag | Type | Description |
 |------|------|-------------|
-| `--enable-audit` | bool | Enable tamper-evident audit logging |
+| `--no-audit` | bool | Disable tamper-evident audit logging (enabled by default) |
 | `--use-keychain` | bool | Store master password in OS keychain |
 | `--no-recovery` | bool | Skip BIP39 recovery phrase generation |
 
@@ -86,13 +86,16 @@ All master passwords must meet complexity requirements:
 - [ERROR] `password123` (too short, no uppercase, no symbol)
 - [ERROR] `MyPassword` (no digit, no symbol)
 
-#### Audit Logging (Optional)
+#### Audit Logging (Enabled by Default)
 
-Enable audit logging to record vault operations with HMAC signatures:
+Audit logging records vault operations with HMAC signatures. It is **enabled by default** during initialization.
 
 ```bash
-# Initialize vault with audit logging
-pass-cli init --enable-audit
+# Initialize vault (audit logging enabled by default)
+pass-cli init
+
+# Disable audit logging if not desired
+pass-cli init --no-audit
 ```
 
 **Audit features**:

@@ -165,9 +165,9 @@ For complete command reference, flags, and examples, see [docs/03-reference/comm
 - Skip during init: `pass-cli init --no-recovery`
 - See [Recovery Guide](docs/02-guides/recovery-phrase.md) for details
 
-**Audit Logging** (Optional):
+**Audit Logging** (Enabled by Default):
 - Tamper-evident HMAC-SHA256 signed audit trail
-- Enable with `pass-cli init --enable-audit`
+- Automatically enabled during `pass-cli init` (use `--no-audit` to disable)
 
 **Vault Location**:
 - Windows: `%USERPROFILE%\.pass-cli\vault.enc`
