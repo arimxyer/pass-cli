@@ -98,16 +98,25 @@ pass-cli vault backup create --verbose
 
 ## Restoring From Backup
 
-The restore command automatically selects the newest valid backup (manual or automatic) and replaces your current vault.
+The restore command offers multiple ways to select which backup to restore:
 
-### Basic Restore
+| Mode | Flag | Description |
+|------|------|-------------|
+| **Auto** | (default) | Selects newest valid backup automatically |
+| **Specific** | `--file` | Restore from a specific backup file |
+| **Interactive** | `--interactive` / `-i` | Choose from a numbered list of backups |
+
+**Important**: After restore, use the **backup's password** to unlock. If you changed your password since the backup was created, use the OLD password.
+
+### Basic Restore (Auto Selection)
 
 ```bash
-# Restore with confirmation prompt
+# Restore with confirmation prompt (selects newest backup)
 pass-cli vault backup restore
 
 # Output:
-# [WARNING]  Warning: This will overwrite your current vault with the backup.
+# ⚠️  Warning: After restore, use the backup's master password to unlock.
+#     If you changed your password since this backup, use the OLD password.
 #
 # Backup to restore:
 #   File: /home/user/.pass-cli/vault.enc.20251111-143022.manual.backup
@@ -115,6 +124,39 @@ pass-cli vault backup restore
 #   Modified: 2025-11-11 14:30:22
 #
 # Are you sure you want to continue? (y/n):
+```
+
+### Restore From Specific File
+
+Use `--file` to restore from a specific backup file:
+
+```bash
+# Restore from a specific backup
+pass-cli vault backup restore --file vault.enc.20241210-143022.manual.backup
+
+# Full path also supported
+pass-cli vault backup restore --file ~/.pass-cli/vault.enc.backup
+```
+
+### Interactive Backup Selection
+
+Use `--interactive` or `-i` to choose from available backups:
+
+```bash
+pass-cli vault backup restore --interactive
+
+# Output:
+# Available backups:
+#
+# ┌───┬────────────────────────────────────────────────────┬────────┬──────────┬──────────────────────┐
+# │ # │ File                                               │ Type   │ Size     │ Modified             │
+# ├───┼────────────────────────────────────────────────────┼────────┼──────────┼──────────────────────┤
+# │ 1 │ vault.enc.20251210-143022.manual.backup            │ manual │ 2.5 KB   │ 2025-12-10 14:30:22  │
+# │ 2 │ vault.enc.backup                                   │ auto   │ 2.4 KB   │ 2025-12-10 12:15:00  │
+# │ 3 │ vault.enc.20251209-091500.manual.backup            │ manual │ 2.3 KB   │ 2025-12-09 09:15:00  │
+# └───┴────────────────────────────────────────────────────┴────────┴──────────┴──────────────────────┘
+#
+# Select backup number (1-3):
 ```
 
 ### Restore Without Confirmation
@@ -168,6 +210,65 @@ pass-cli vault backup restore --force --verbose
 # [VERBOSE] Verifying vault file permissions...
 # [VERBOSE] Vault permissions set to 0600
 # [VERBOSE] Restore operation completed
+```
+
+## Previewing Backup Contents
+
+Use the `preview` command to see which credentials are stored in a backup **before** restoring it. This is useful when you have multiple backups and need to find one containing specific credentials.
+
+### Basic Preview
+
+```bash
+pass-cli vault backup preview --file vault.enc.20251111-143022.manual.backup
+
+# You'll be prompted for the backup's password:
+# Enter the backup's master password: ********
+#
+# Found 5 credential(s) in backup:
+#
+#   1. github.com
+#   2. gitlab.com
+#   3. aws-console
+#   4. email-work
+#   5. vpn-office
+#
+# Backup file: vault.enc.20251111-143022.manual.backup
+# Modified: 2025-11-11 14:30:22
+```
+
+### Verbose Preview
+
+Use `--verbose` to see detailed credential information:
+
+```bash
+pass-cli vault backup preview --file vault.enc.backup --verbose
+
+# Output includes username, category, and creation date:
+#
+# ┌───┬──────────────┬─────────────────┬──────────┬────────────┐
+# │ # │ Service      │ Username        │ Category │ Created    │
+# ├───┼──────────────┼─────────────────┼──────────┼────────────┤
+# │ 1 │ github.com   │ myuser          │ dev      │ 2025-10-15 │
+# │ 2 │ gitlab.com   │ myuser          │ dev      │ 2025-10-16 │
+# │ 3 │ aws-console  │ admin@company   │ cloud    │ 2025-09-20 │
+# │ 4 │ email-work   │ me@company.com  │ work     │ 2025-08-01 │
+# │ 5 │ vpn-office   │ myuser          │ work     │ 2025-08-15 │
+# └───┴──────────────┴─────────────────┴──────────┴────────────┘
+```
+
+### Password Considerations
+
+The preview command requires the password that was active **when the backup was created**:
+
+- If you haven't changed your password → Use current password
+- If you changed your password after the backup → Use the **OLD** password
+
+```bash
+# Wrong password error:
+# Error: decryption failed - incorrect password
+#
+# Make sure you're using the password that was active when this backup was created.
+# If you've changed your password since then, use the OLD password.
 ```
 
 ## Viewing Backup Status
