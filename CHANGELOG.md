@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2025-12-11
+
+### Added
+- **Vault-Specific Keychain Entries**: Each vault now stores its master password under a unique keychain account
+  - Account name format: `master-password-<vaultID>` (e.g., `master-password-my-vault`)
+  - VaultID derived from vault directory name for consistency
+  - Enables multiple vaults to have separate keychain entries on the same system
+  - Automatic migration from global entry when vault-specific entry not found
+  - `HasGlobalEntry()`, `MigrateFromGlobal()`, `DeleteGlobal()` methods for migration support
+
+### Fixed
+- **Integration Tests**: Fixed vault-specific keychain account mismatch in 13 test functions
+  - Tests now correctly derive vaultID from vault path to match CLI behavior
+  - Resolved CI failures on macOS and Windows (Ubuntu skipped due to no keychain)
+
+### Changed
+- **Test Structure**: Reorganized integration tests into `test/integration/` directory
+  - Added centralized test helpers package
+  - Improved keychain cleanup in test teardown
+
 ## [0.12.2] - 2025-12-10
 
 ### Fixed
