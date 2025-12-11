@@ -358,27 +358,12 @@ func (eh *EventHandler) handleShowHelp() {
 
 	row := 0
 
-	// Title
-	titleCell := tview.NewTableCell("Keyboard Shortcuts").
-		SetTextColor(tcell.ColorWhite).
-		SetBackgroundColor(tcell.ColorBlue).
-		SetAlign(tview.AlignCenter).
-		SetExpansion(1).
-		SetAttributes(tcell.AttrBold)
-	table.SetCell(row, 0, titleCell)
-	table.SetCell(row, 1, tview.NewTableCell("").SetBackgroundColor(tcell.ColorBlue))
-	row++
-
-	// Separator
-	separatorCell := tview.NewTableCell("══════════════════").
-		SetTextColor(tcell.ColorWhite).
-		SetBackgroundColor(tcell.ColorBlue).
-		SetAlign(tview.AlignCenter).
-		SetExpansion(1)
-	table.SetCell(row, 0, separatorCell)
-	table.SetCell(row, 1, tview.NewTableCell("").SetBackgroundColor(tcell.ColorBlue))
-	row++
-	row++ // Skip blank line row (will just be empty space)
+	// Centered title (added to layout separately, not in table)
+	titleCell := tview.NewTextView()
+	titleCell.SetText("Keyboard Shortcuts")
+	titleCell.SetTextColor(tcell.ColorWhite)
+	titleCell.SetBackgroundColor(tcell.ColorBlue)
+	titleCell.SetTextAlign(tview.AlignCenter)
 
 	// Helper to add section header
 	addSection := func(title string) {
@@ -446,11 +431,12 @@ func (eh *EventHandler) handleShowHelp() {
 	// Set table background color (after all cells are set)
 	table.SetBackgroundColor(tcell.ColorBlue)
 
-	// Create TextView for footer instructions (no SetTextAlign - it clips text!)
+	// Create TextView for footer instructions
 	closeButtonText := tview.NewTextView()
-	closeButtonText.SetText("	↑/↓ Arrow Keys or Mouse Wheel to scroll\n	Esc to close")
+	closeButtonText.SetText("↑/↓ Arrow Keys or Mouse Wheel to scroll\nEsc to close")
 	closeButtonText.SetTextColor(tcell.ColorWhite)
 	closeButtonText.SetBackgroundColor(tcell.ColorBlue)
+	closeButtonText.SetTextAlign(tview.AlignCenter)
 
 	// Make it close modal on Enter
 	closeButtonText.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -472,6 +458,7 @@ func (eh *EventHandler) handleShowHelp() {
 	helpContent := tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(tview.NewBox().SetBackgroundColor(tcell.ColorBlue), 1, 0, false). // Top padding
+		AddItem(titleCell, 1, 0, false).                                          // Centered title
 		AddItem(paddedTable, 0, 1, true).                                         // Table (flex height, gets focus for scrolling)
 		AddItem(tview.NewBox().SetBackgroundColor(tcell.ColorBlue), 1, 0, false). // Spacer
 		AddItem(closeButtonText, 2, 0, false).                                    // Footer text (fixed 2 height for 2 lines)
