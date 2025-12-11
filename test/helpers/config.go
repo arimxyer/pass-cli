@@ -5,6 +5,7 @@ package helpers
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/zalando/go-keyring"
@@ -59,12 +60,12 @@ func SetupTestVaultConfig(t *testing.T, vaultPath string) (configPath string, cl
 func CleanupVaultDir(t *testing.T, vaultDir string) {
 	t.Helper()
 
-	// Find all vault.enc files in the directory and delete their keychain entries
+	// Find all vault files (.enc) in the directory and delete their keychain entries
 	_ = filepath.Walk(vaultDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil // Continue walking even if there are errors
 		}
-		if info != nil && !info.IsDir() && filepath.Base(path) == "vault.enc" {
+		if info != nil && !info.IsDir() && strings.HasSuffix(filepath.Base(path), ".enc") && !strings.Contains(filepath.Base(path), ".backup") {
 			vaultID := filepath.Base(filepath.Dir(path))
 
 			// Clean master password keychain entries
@@ -195,6 +196,7 @@ func SetupTestVault(t *testing.T) string {
 // SetupTestVaultWithName creates a vault with a specific directory name.
 // Useful when you need a specific vaultID for testing.
 // Cleanup is handled automatically via t.Cleanup().
+// Note: vaultDirName can include path separators (e.g., "parent/child/vault-name")
 func SetupTestVaultWithName(t *testing.T, vaultDirName string) string {
 	t.Helper()
 
@@ -205,7 +207,8 @@ func SetupTestVaultWithName(t *testing.T, vaultDirName string) string {
 	}
 
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
-	vaultID := vaultDirName
+	// vaultID is the actual directory name containing vault.enc (last component of path)
+	vaultID := filepath.Base(vaultDir)
 
 	t.Cleanup(func() {
 		// Clean master password keychain entry

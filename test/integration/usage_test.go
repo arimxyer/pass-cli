@@ -19,7 +19,7 @@ import (
 
 func TestUsageCommand(t *testing.T) {
 	testPassword := "Usage-Test-Pass@123"
-	usageVaultPath := filepath.Join(testDir, "usage-vault", "vault.enc")
+	usageVaultPath := helpers.SetupTestVaultWithName(t, "usage-vault")
 
 	// Setup: Initialize vault and add credentials with usage data
 	t.Run("Setup", func(t *testing.T) {

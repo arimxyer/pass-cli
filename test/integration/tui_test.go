@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/zalando/go-keyring"
+
 	"pass-cli/test/helpers"
 )
 
@@ -346,7 +348,15 @@ func BenchmarkTUIStartup(b *testing.B) {
 		b.Fatalf("Failed to initialize vault: %v", err)
 	}
 
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
+	defer func() {
+		// Clean up keychain entries
+		vaultID := filepath.Base(vaultDir)
+		_ = keyring.Delete("pass-cli", "master-password-"+vaultID)
+		_ = keyring.Delete("pass-cli", "master-password")
+		_ = keyring.Delete("pass-cli-audit", vaultPath)
+		_ = keyring.Delete("pass-cli-audit", vaultID)
+		_ = os.RemoveAll(vaultDir)
+	}()
 
 	b.ResetTimer()
 

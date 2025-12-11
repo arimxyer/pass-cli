@@ -16,7 +16,7 @@ import (
 
 func TestListByProject(t *testing.T) {
 	testPassword := "ListProject-Test-Pass@123"
-	listVaultPath := filepath.Join(testDir, "list-project-vault", "vault.enc")
+	listVaultPath := helpers.SetupTestVaultWithName(t, "list-project-vault")
 
 	// Setup: Initialize vault and create credentials with usage from different git repos
 	t.Run("Setup", func(t *testing.T) {
@@ -280,7 +280,7 @@ func TestListByProject(t *testing.T) {
 
 func TestListByLocation(t *testing.T) {
 	testPassword := "ListLocation-Test-Pass@123"
-	locationVaultPath := filepath.Join(testDir, "location-vault", "vault.enc")
+	locationVaultPath := helpers.SetupTestVaultWithName(t, "location-vault")
 
 	// Setup: Initialize vault and create credentials with usage from different locations
 	t.Run("Setup", func(t *testing.T) {

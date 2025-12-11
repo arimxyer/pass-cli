@@ -13,6 +13,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/zalando/go-keyring"
 )
 
 const (
@@ -64,9 +66,45 @@ func TestMain(m *testing.M) {
 
 	// Cleanup
 	_ = os.Remove(binaryPath) // Best effort cleanup
+
+	// Clean up keychain entries for all vaults in testDir
+	cleanupTestDirKeychain(testDir)
+
 	_ = os.RemoveAll(testDir) // Best effort cleanup
 
 	os.Exit(code)
+}
+
+// cleanupTestDirKeychain walks testDir and cleans up keychain entries for all vault files found.
+// This handles the shared testDir cleanup in TestMain.
+func cleanupTestDirKeychain(testDir string) {
+	const keychainService = "pass-cli"
+	const auditService = "pass-cli-audit"
+
+	_ = filepath.Walk(testDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil // Continue walking
+		}
+		// Match any .enc file except backups
+		if info != nil && !info.IsDir() && strings.HasSuffix(filepath.Base(path), ".enc") && !strings.Contains(filepath.Base(path), ".backup") {
+			vaultID := filepath.Base(filepath.Dir(path))
+
+			// Clean master password keychain entries
+			_ = keyring.Delete(keychainService, "master-password-"+vaultID)
+
+			// Clean audit key entries
+			_ = keyring.Delete(auditService, path)
+			_ = keyring.Delete(auditService, vaultID)
+		}
+		return nil
+	})
+
+	// Also clean the shared testVaultDir entry
+	_ = keyring.Delete(keychainService, "master-password-"+testVaultDir)
+	_ = keyring.Delete(auditService, testVaultDir)
+
+	// Clean legacy global entry
+	_ = keyring.Delete(keychainService, "master-password")
 }
 
 // runCommand executes pass-cli with the given arguments
