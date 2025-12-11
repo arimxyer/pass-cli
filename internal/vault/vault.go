@@ -157,8 +157,11 @@ func New(vaultPath string) (*VaultService, error) {
 	// Initialize audit from metadata
 	if meta != nil && meta.AuditEnabled {
 		// Audit is enabled in metadata - initialize it now
-		auditLogPath := filepath.Join(filepath.Dir(vaultPath), "audit.log")
-		if err := v.EnableAudit(auditLogPath, vaultPath); err != nil {
+		vaultDir := filepath.Dir(vaultPath)
+		auditLogPath := filepath.Join(vaultDir, "audit.log")
+		// Use directory name as VaultID for consistency with init command (getVaultID)
+		vaultID := filepath.Base(vaultDir)
+		if err := v.EnableAudit(auditLogPath, vaultID); err != nil {
 			// Non-fatal - continue without audit (graceful degradation)
 			fmt.Fprintf(os.Stderr, "Warning: Failed to enable audit from metadata: %v\n", err)
 		}
@@ -166,10 +169,13 @@ func New(vaultPath string) (*VaultService, error) {
 
 	// T011: Fallback self-discovery if metadata missing/failed OR audit not enabled but log exists
 	if !metadataFileExists || (meta != nil && !meta.AuditEnabled) {
-		auditLogPath := filepath.Join(filepath.Dir(vaultPath), "audit.log")
+		vaultDir := filepath.Dir(vaultPath)
+		auditLogPath := filepath.Join(vaultDir, "audit.log")
 		if _, err := os.Stat(auditLogPath); err == nil {
 			// audit.log exists, enable best-effort audit
-			if err := v.EnableAudit(auditLogPath, vaultPath); err != nil {
+			// Use directory name as VaultID for consistency with init command (getVaultID)
+			vaultID := filepath.Base(vaultDir)
+			if err := v.EnableAudit(auditLogPath, vaultID); err != nil {
 				// Best-effort failed, continue without audit (non-fatal)
 				fmt.Fprintf(os.Stderr, "Warning: Self-discovery audit init failed: %v\n", err)
 			}

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.2] - 2025-12-10
+
+### Fixed
+- **Audit Log HMAC Verification**: Fixed VaultID inconsistency causing HMAC verification failures
+  - `vault.New()` autodiscovery was using full vault path as VaultID
+  - `init` and `verify-audit` commands use directory name as VaultID
+  - This mismatch caused entries logged during autodiscovery to fail verification
+  - Now all code paths consistently use directory name as VaultID
+
+### Added
+- **Integration Test for verify-audit**: Added comprehensive tests to prevent regression
+  - `TestIntegration_VerifyAudit`: Full workflow test (init → add → get → verify)
+  - `TestIntegration_VerifyAudit_ConsistentVaultID`: Tests VaultID consistency across operations
+
 ## [0.12.1] - 2025-12-10
 
 ### Fixed

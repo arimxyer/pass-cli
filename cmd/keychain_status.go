@@ -47,8 +47,11 @@ func runKeychainStatus(cmd *cobra.Command, args []string) error {
 
 	// T036: Initialize audit if enabled
 	if meta != nil && meta.AuditEnabled {
-		auditLogPath := filepath.Join(filepath.Dir(vaultPath), "audit.log")
-		if err := vaultService.EnableAudit(auditLogPath, vaultPath); err != nil {
+		vaultDir := filepath.Dir(vaultPath)
+		auditLogPath := filepath.Join(vaultDir, "audit.log")
+		// Use directory name as VaultID for consistency with init command (getVaultID)
+		vaultID := filepath.Base(vaultDir)
+		if err := vaultService.EnableAudit(auditLogPath, vaultID); err != nil {
 			// Best effort - continue even if audit init fails
 			fmt.Fprintf(os.Stderr, "Warning: Failed to initialize audit: %v\n", err)
 		}
