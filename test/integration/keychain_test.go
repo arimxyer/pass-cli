@@ -17,14 +17,17 @@ import (
 
 // TestKeychain_FullWorkflow tests the complete keychain integration workflow
 func TestKeychain_FullWorkflow(t *testing.T) {
+	testPassword := "Keychain-Test-Pass@123"
+	vaultPath := filepath.Join(testDir, "keychain-vault", "vault.enc")
+
+	// Create vault-specific keychain service using vaultID derived from vaultPath
+	vaultID := filepath.Base(filepath.Dir(vaultPath))
+	ks := keychain.New(vaultID)
+
 	// Check if keychain is available before running tests
-	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping keychain integration tests")
 	}
-
-	testPassword := "Keychain-Test-Pass@123"
-	vaultPath := filepath.Join(testDir, "keychain-vault", "vault.enc")
 
 	// Ensure clean state
 	defer helpers.CleanupKeychain(t, vaultPath)
