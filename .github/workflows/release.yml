@@ -10,9 +10,24 @@ permissions:
   packages: write
 
 jobs:
+  # Wait for CI to pass before releasing
+  wait-for-ci:
+    name: Wait for CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for CI workflow to succeed
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Integration Tests (ubuntu-latest)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success
+
   release:
     name: Release
     runs-on: ubuntu-latest
+    needs: wait-for-ci
 
     steps:
       - name: Checkout code
