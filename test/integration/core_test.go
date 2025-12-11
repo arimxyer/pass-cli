@@ -264,7 +264,9 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 	testPassword := "Error-Test-Pass@123"
 
 	// Initialize vault for error tests
-	vaultPath := filepath.Join(testDir, "error-vault", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "error-vault")
+	// Cleanup is automatic via t.Cleanup()
+
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -330,7 +332,9 @@ func TestIntegration_ScriptFriendly(t *testing.T) {
 	testPassword := "Script-Test-Pass@123"
 
 	// Initialize vault
-	vaultPath := filepath.Join(testDir, "script-vault", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "script-vault")
+	// Cleanup is automatic via t.Cleanup()
+
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -414,7 +418,9 @@ func TestIntegration_Performance(t *testing.T) {
 	testPassword := "Perf-Test-Pass@123"
 
 	// Initialize vault
-	vaultPath := filepath.Join(testDir, "perf-vault", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "perf-vault")
+	// Cleanup is automatic via t.Cleanup()
+
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -476,7 +482,9 @@ func TestIntegration_StressTest(t *testing.T) {
 	testPassword := "Stress-Test-Pass@123"
 
 	// Initialize vault
-	vaultPath := filepath.Join(testDir, "stress-vault", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "stress-vault")
+	// Cleanup is automatic via t.Cleanup()
+
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -581,7 +589,7 @@ func TestDefaultVaultPath_Init(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp home: %v", err)
 	}
-	defer cleanupVaultDir(t, tmpHome) // Cleans up keychain entries + directory
+	defer helpers.CleanupVaultDir(t, tmpHome) // Cleans up keychain entries + directory
 
 	// Set up environment
 	// Use --no-audit to avoid keychain interaction for audit HMAC key storage
@@ -620,7 +628,7 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp home: %v", err)
 	}
-	defer cleanupVaultDir(t, tmpHome) // Cleans up keychain entries + directory
+	defer helpers.CleanupVaultDir(t, tmpHome) // Cleans up keychain entries + directory
 
 	masterPassword := "TestPassword123!"
 
@@ -713,7 +721,7 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp home: %v", err)
 	}
-	defer cleanupVaultDir(t, tmpHome) // Cleans up keychain entries + directory
+	defer helpers.CleanupVaultDir(t, tmpHome) // Cleans up keychain entries + directory
 
 	// Create custom vault directory
 	customVaultDir := filepath.Join(tmpHome, "custom", "secure")
