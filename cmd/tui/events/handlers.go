@@ -352,8 +352,9 @@ func (eh *EventHandler) handleShowHelp() {
 		SetSelectable(true, false). // Rows selectable for scrolling, columns not
 		SetFixed(1, 0).             // Fix title row at top when scrolling
 		SetSelectedStyle(tcell.StyleDefault.
-			Background(tcell.ColorBlue).
-			Foreground(tcell.ColorWhite)) // Keep selection invisible (same colors)
+			Background(tcell.ColorNavy).
+			Foreground(tcell.ColorWhite).
+			Attributes(tcell.AttrBold)) // Highlight selected row
 
 	row := 0
 
@@ -447,7 +448,7 @@ func (eh *EventHandler) handleShowHelp() {
 
 	// Create TextView for close button (no SetTextAlign - it clips text!)
 	closeButtonText := tview.NewTextView()
-	closeButtonText.SetText("	PgUp/PgDn or Mouse Wheel to scroll  •  Esc to close")
+	closeButtonText.SetText("	↑/↓ Arrow Keys or Mouse Wheel to scroll  •  Esc to close")
 	closeButtonText.SetTextColor(tcell.ColorWhite)
 	closeButtonText.SetBackgroundColor(tcell.ColorBlue)
 
