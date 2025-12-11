@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"pass-cli/internal/keychain"
 )
 
 // TestIntegration_VerifyAudit tests the audit log verification command.
@@ -20,7 +22,15 @@ import (
 //
 // Bug context: Previously vault.New() used full vault path as VaultID but
 // init/verify used directory name, causing HMAC verification failures.
+//
+// Note: Requires system keychain for audit HMAC key storage.
 func TestIntegration_VerifyAudit(t *testing.T) {
+	// Skip if keychain is not available (audit logging requires keychain for HMAC keys)
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping verify-audit integration test (audit requires keychain for HMAC keys)")
+	}
+
 	testPassword := "Verify-Audit-Pass@123"
 
 	// Create a unique vault directory for this test
@@ -160,7 +170,15 @@ func TestIntegration_VerifyAudit(t *testing.T) {
 // TestIntegration_VerifyAudit_ConsistentVaultID specifically tests that
 // the VaultID is consistent between vault.New() autodiscovery and
 // the verify-audit command.
+//
+// Note: Requires system keychain for audit HMAC key storage.
 func TestIntegration_VerifyAudit_ConsistentVaultID(t *testing.T) {
+	// Skip if keychain is not available (audit logging requires keychain for HMAC keys)
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping verify-audit integration test (audit requires keychain for HMAC keys)")
+	}
+
 	testPassword := "Consistent-VaultID@123"
 
 	// Create a unique vault directory
