@@ -16,8 +16,11 @@ import (
 )
 
 const (
-	// UI separator for detail panel sections
-	detailSeparator = "═══════════════════════════════════\n"
+	// UI separator for detail panel sections (with small indent for visual balance)
+	detailSeparator = "  ═══════════════════════════════════\n"
+
+	// Width of detail separator for centering calculations (excludes indent)
+	detailSeparatorWidth = 35
 
 	// Maximum path length before truncation in usage locations
 	maxPathDisplayLength = 60
@@ -123,7 +126,7 @@ func (dv *DetailView) formatCredential(cred *vault.CredentialMetadata) string {
 	// Metadata section
 	b.WriteString(textColor() + "\n")
 	b.WriteString(separator())
-	b.WriteString(fmt.Sprintf("            %sMetadata%s\n", colorWithBg("yellow"), textColor()))
+	b.WriteString(fmt.Sprintf("%s%s%s\n", colorWithBg("yellow"), centerText("Metadata"), textColor()))
 	b.WriteString(separator())
 	b.WriteString(textColor() + "\n")
 
@@ -346,6 +349,16 @@ func separator() string {
 	return colorWithBg("yellow") + detailSeparator + textColor()
 }
 
+// centerText centers text within the separator width by adding leading spaces.
+// Includes 2-space indent to match separator.
+func centerText(text string) string {
+	padding := (detailSeparatorWidth - len(text)) / 2
+	if padding < 0 {
+		padding = 0
+	}
+	return "  " + strings.Repeat(" ", padding) + text
+}
+
 // ========================================
 // Usage Location Display (User Story 3)
 // ========================================
@@ -421,7 +434,7 @@ func FormatUsageLocations(cred *vault.Credential) string {
 	// Usage Locations section header (T048)
 	b.WriteString(textColor() + "\n")
 	b.WriteString(separator())
-	b.WriteString(fmt.Sprintf("        %sUsage Locations%s\n", colorWithBg("yellow"), textColor()))
+	b.WriteString(fmt.Sprintf("%s%s%s\n", colorWithBg("yellow"), centerText("Usage Locations"), textColor()))
 	b.WriteString(separator())
 	b.WriteString(textColor() + "\n")
 
