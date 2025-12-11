@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"pass-cli/test/helpers"
 )
 
 // T024-T028: Integration tests for list --by-project command (User Story 2)
@@ -19,14 +21,14 @@ func TestListByProject(t *testing.T) {
 	// Setup: Initialize vault and create credentials with usage from different git repos
 	t.Run("Setup", func(t *testing.T) {
 		// Initialize vault
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n" // password, confirm, no keychain, no passphrase, skip verification
+		input := helpers.BuildInitStdin(helpers.DefaultInitOptions(testPassword))
 		_, _, err := runCommandWithInputAndVault(t, listVaultPath, input, "init")
 		if err != nil {
 			t.Fatalf("Failed to initialize vault: %v", err)
 		}
 
 		// Add credentials
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "add", "github", "--username", "user1", "--password", "pass123")
 		if err != nil {
 			t.Fatalf("Failed to add github credential: %v", err)
@@ -72,13 +74,13 @@ func TestListByProject(t *testing.T) {
 		defer func() { _ = os.Chdir(originalDir) }() // Best effort cleanup
 
 		_ = os.Chdir(webAppRepo) // Best effort directory change for test
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "get", "github", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access github from web-app: %v", err)
 		}
 
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "get", "aws-dev", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access aws-dev from web-app: %v", err)
@@ -86,7 +88,7 @@ func TestListByProject(t *testing.T) {
 
 		// Access heroku from api repo
 		_ = os.Chdir(apiRepo) // Best effort directory change for test
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "get", "heroku", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access heroku from api: %v", err)
@@ -94,7 +96,7 @@ func TestListByProject(t *testing.T) {
 
 		// Access local-db from non-git directory (should be "Ungrouped")
 		_ = os.Chdir(noGitDir) // Best effort directory change for test
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, listVaultPath, input, "get", "local-db", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access local-db from no-git: %v", err)
@@ -105,7 +107,7 @@ func TestListByProject(t *testing.T) {
 
 	// T024: Integration test - list --by-project groups credentials by repository (Acceptance Scenario 1)
 	t.Run("T024_ByProject_Groups_By_Repository", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, listVaultPath, input, "list", "--by-project")
 
 		if err != nil {
@@ -136,7 +138,7 @@ func TestListByProject(t *testing.T) {
 
 	// T025: Integration test - list --by-project shows "Ungrouped" for no repository (Acceptance Scenario 2)
 	t.Run("T025_ByProject_Shows_Ungrouped", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, listVaultPath, input, "list", "--by-project")
 
 		if err != nil {
@@ -156,7 +158,7 @@ func TestListByProject(t *testing.T) {
 
 	// T026: Integration test - list --by-project --format json (Acceptance Scenario 3)
 	t.Run("T026_ByProject_JSON_Format", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, listVaultPath, input, "list", "--by-project", "--format", "json")
 
 		if err != nil {
@@ -206,7 +208,7 @@ func TestListByProject(t *testing.T) {
 		}
 
 		_ = os.Chdir(subDir) // Best effort directory change for test
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		_, _, err := runCommandWithInputAndVault(t, listVaultPath, input, "get", "github", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access github from subdirectory: %v", err)
@@ -215,7 +217,7 @@ func TestListByProject(t *testing.T) {
 		_ = os.Chdir(originalDir) // Best effort directory change for test
 
 		// Now list --by-project should still group under single "my-web-app"
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, listVaultPath, input, "list", "--by-project", "--format", "json")
 
 		if err != nil {
@@ -251,7 +253,7 @@ func TestListByProject(t *testing.T) {
 		// We'll filter by my-web-app directory location
 		webAppPath := filepath.Join(testDir, "my-web-app")
 
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, listVaultPath, input, "list", "--by-project", "--location", webAppPath, "--recursive")
 
 		if err != nil {
@@ -283,14 +285,14 @@ func TestListByLocation(t *testing.T) {
 	// Setup: Initialize vault and create credentials with usage from different locations
 	t.Run("Setup", func(t *testing.T) {
 		// Initialize vault
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n" // password, confirm, no keychain, no passphrase, skip verification
+		input := helpers.BuildInitStdin(helpers.DefaultInitOptions(testPassword))
 		_, _, err := runCommandWithInputAndVault(t, locationVaultPath, input, "init")
 		if err != nil {
 			t.Fatalf("Failed to initialize vault: %v", err)
 		}
 
 		// Add credentials
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "add", "web-cred", "--username", "user1", "--password", "pass123")
 		if err != nil {
 			t.Fatalf("Failed to add web-cred: %v", err)
@@ -323,7 +325,7 @@ func TestListByLocation(t *testing.T) {
 		defer func() { _ = os.Chdir(originalDir) }() // Best effort cleanup
 
 		_ = os.Chdir(webDir) // Best effort directory change for test
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "get", "web-cred", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access web-cred from web-project: %v", err)
@@ -331,7 +333,7 @@ func TestListByLocation(t *testing.T) {
 
 		// Access api-cred from api-project root
 		_ = os.Chdir(apiDir) // Best effort directory change for test
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "get", "api-cred", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access api-cred from api-project: %v", err)
@@ -339,7 +341,7 @@ func TestListByLocation(t *testing.T) {
 
 		// Access db-cred from api-project subdirectory
 		_ = os.Chdir(apiSubDir) // Best effort directory change for test
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, locationVaultPath, input, "get", "db-cred", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access db-cred from api-project/src/handlers: %v", err)
@@ -352,7 +354,7 @@ func TestListByLocation(t *testing.T) {
 	t.Run("T037_Location_Exact_Path", func(t *testing.T) {
 		webDir := filepath.Join(testDir, "web-project")
 
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, locationVaultPath, input, "list", "--location", webDir)
 
 		if err != nil {
@@ -381,7 +383,7 @@ func TestListByLocation(t *testing.T) {
 
 		_ = os.Chdir(testDir) // Best effort directory change for test
 
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, locationVaultPath, input, "list", "--location", "./web-project")
 
 		if err != nil {
@@ -398,7 +400,7 @@ func TestListByLocation(t *testing.T) {
 	t.Run("T039_Location_Recursive", func(t *testing.T) {
 		apiDir := filepath.Join(testDir, "api-project")
 
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, locationVaultPath, input, "list", "--location", apiDir, "--recursive")
 
 		if err != nil {
@@ -423,7 +425,7 @@ func TestListByLocation(t *testing.T) {
 	t.Run("T040_Location_Nonexistent", func(t *testing.T) {
 		nonexistentPath := filepath.Join(testDir, "does-not-exist")
 
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, locationVaultPath, input, "list", "--location", nonexistentPath)
 
 		if err != nil {
@@ -440,7 +442,7 @@ func TestListByLocation(t *testing.T) {
 	t.Run("T041_Location_JSON_Format", func(t *testing.T) {
 		webDir := filepath.Join(testDir, "web-project")
 
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, locationVaultPath, input, "list", "--location", webDir, "--format", "json")
 
 		if err != nil {

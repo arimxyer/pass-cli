@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"pass-cli/test/helpers"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -78,17 +79,7 @@ func runCommand(t *testing.T, args ...string) (string, string, error) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	cmd := exec.Command(binaryPath, args...)
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	// Set environment to avoid interference and use test config
-	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
-
-	err := cmd.Run()
-	return stdout.String(), stderr.String(), err
+	return helpers.RunCmd(t, binaryPath, configPath, "", args...)
 }
 
 // runCommandWithInput executes pass-cli with stdin input
@@ -101,17 +92,7 @@ func runCommandWithInput(t *testing.T, input string, args ...string) (string, st
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	cmd := exec.Command(binaryPath, args...)
-	cmd.Stdin = strings.NewReader(input)
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
-
-	err := cmd.Run()
-	return stdout.String(), stderr.String(), err
+	return helpers.RunCmd(t, binaryPath, configPath, input, args...)
 }
 
 // TestIntegration_CompleteWorkflow tests the full user workflow
@@ -119,7 +100,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 	testPassword := "Test-Master-Pass@123"
 
 	t.Run("1_Init_Vault", func(t *testing.T) {
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n" + "n\n" // password, confirm, no keychain, no passphrase, skip verification
+		input := helpers.BuildInitStdin(helpers.DefaultInitOptions(testPassword))
 		stdout, stderr, err := runCommandWithInput(t, input, "init")
 
 		if err != nil {
@@ -150,7 +131,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 
 		for _, tc := range testCases {
 			t.Run(tc.service, func(t *testing.T) {
-				input := testPassword + "\n"
+				input := helpers.BuildUnlockStdin(testPassword)
 				stdout, stderr, err := runCommandWithInput(t, input, "add", tc.service, "--username", tc.username, "--password", tc.password)
 
 				if err != nil {
@@ -165,7 +146,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 	})
 
 	t.Run("3_List_Credentials", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInput(t, input, "list")
 
 		if err != nil {
@@ -181,7 +162,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 	})
 
 	t.Run("4_Get_Credentials", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInput(t, input, "get", "github.com", "--no-clipboard")
 
 		if err != nil {
@@ -196,7 +177,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 	t.Run("5_Update_Credential", func(t *testing.T) {
 		// Use flags to avoid interactive mode (readPassword() requires terminal)
 		// Use --force to skip usage confirmation since credential was accessed in previous test
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInput(t, input, "update", "github.com", "--username", "newuser", "--password", "new-github-pass-789", "--force")
 
 		if err != nil {
@@ -204,7 +185,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 		}
 
 		// Verify the update
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		stdout, _, err = runCommandWithInput(t, input, "get", "github.com", "--no-clipboard")
 
 		if err != nil {
@@ -217,7 +198,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 	})
 
 	t.Run("6_Delete_Credential", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInput(t, input, "delete", "gitlab.com", "--force")
 
 		if err != nil {
@@ -225,7 +206,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 		}
 
 		// Verify deletion
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		stdout, _, err = runCommandWithInput(t, input, "list")
 		if err != nil {
 			t.Fatalf("List after delete failed: %v", err)
@@ -287,7 +268,7 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
+	input := helpers.BuildInitStdin(helpers.DefaultInitOptions(testPassword))
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -353,21 +334,21 @@ func TestIntegration_ScriptFriendly(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
+	input := helpers.BuildInitStdin(helpers.DefaultInitOptions(testPassword))
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 	_ = cmd.Run() // Best effort setup
 
 	// Add a credential
-	input = testPassword + "\n"
+	input = helpers.BuildUnlockStdin(testPassword)
 	cmd = exec.Command(binaryPath, "add", "api.test.com", "--username", "apiuser", "--password", "apipass123")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 	_ = cmd.Run() // Best effort setup
 
 	t.Run("Quiet_Output", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		cmd := exec.Command(binaryPath, "get", "api.test.com", "--quiet", "--no-clipboard")
 		cmd.Stdin = strings.NewReader(input)
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -396,7 +377,7 @@ func TestIntegration_ScriptFriendly(t *testing.T) {
 	})
 
 	t.Run("Field_Extraction", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		cmd := exec.Command(binaryPath, "get", "api.test.com", "--field", "username", "--quiet", "--no-clipboard")
 		cmd.Stdin = strings.NewReader(input)
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -437,14 +418,14 @@ func TestIntegration_Performance(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
+	input := helpers.BuildInitStdin(helpers.DefaultInitOptions(testPassword))
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
 	_ = cmd.Run() // Best effort setup
 
 	// Add initial credential
-	input = testPassword + "\n" + "user\n" + "pass\n"
+	input = helpers.BuildUnlockStdin(testPassword) + "user\n" + "pass\n"
 	cmd = exec.Command(binaryPath, "add", "test.com")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -454,7 +435,7 @@ func TestIntegration_Performance(t *testing.T) {
 		// First unlock (no cache) - should be < 500ms
 		start := time.Now()
 
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(input)
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -472,7 +453,7 @@ func TestIntegration_Performance(t *testing.T) {
 	t.Run("Cached_Operation_Performance", func(t *testing.T) {
 		// Subsequent operations should be faster < 100ms
 		// Note: This assumes some form of caching/optimization
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 
 		start := time.Now()
 		cmd := exec.Command(binaryPath, "list")
@@ -499,7 +480,7 @@ func TestIntegration_StressTest(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
+	input := helpers.BuildInitStdin(helpers.DefaultInitOptions(testPassword))
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -513,7 +494,7 @@ func TestIntegration_StressTest(t *testing.T) {
 			username := fmt.Sprintf("user%d", i)
 			password := fmt.Sprintf("pass%d", i)
 
-			input := testPassword + "\n"
+			input := helpers.BuildUnlockStdin(testPassword)
 			cmd := exec.Command(binaryPath, "add", service, "--username", username, "--password", password)
 			cmd.Stdin = strings.NewReader(input)
 			cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -525,7 +506,7 @@ func TestIntegration_StressTest(t *testing.T) {
 	})
 
 	t.Run("List_Many_Credentials", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		cmd := exec.Command(binaryPath, "list")
 		cmd.Stdin = strings.NewReader(input)
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -565,7 +546,7 @@ func TestIntegration_StressTest(t *testing.T) {
 		for _, idx := range testIndices {
 			service := fmt.Sprintf("service-%d.com", idx)
 
-			input := testPassword + "\n"
+			input := helpers.BuildUnlockStdin(testPassword)
 			cmd := exec.Command(binaryPath, "get", service, "--no-clipboard")
 			cmd.Stdin = strings.NewReader(input)
 			cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -615,7 +596,7 @@ func TestDefaultVaultPath_Init(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	cmd.Stdin = strings.NewReader("TestPassword123!\nTestPassword123!\nn\nn\nn\n")
+	cmd.Stdin = strings.NewReader(helpers.BuildInitStdin(helpers.DefaultInitOptions("TestPassword123!")))
 
 	// Run init command
 	err = cmd.Run()
@@ -666,7 +647,11 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 	// Step 1: Initialize vault
 	// Use --no-audit to avoid keychain interaction for audit HMAC key storage
 	t.Log("Step 1: Initialize vault at default location")
-	initInput := fmt.Sprintf("%s\n%s\nn\nn\nn\n", masterPassword, masterPassword)
+	initInput := helpers.BuildInitStdin(helpers.InitOptions{
+		Password:   masterPassword,
+		NoAudit:    true,
+		SkipVerify: true,
+	})
 	stdout, stderr, err := runWithHome(initInput, "init", "--no-audit")
 	if err != nil {
 		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
@@ -680,7 +665,7 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 
 	// Step 2: Add a credential
 	t.Log("Step 2: Add credential using default vault path")
-	addInput := fmt.Sprintf("%s\n", masterPassword)
+	addInput := helpers.BuildUnlockStdin(masterPassword)
 	stdout, stderr, err = runWithHome(addInput, "add", "testcred", "--username", "testuser", "--password", "testpass", "--url", "https://example.com")
 	if err != nil {
 		t.Fatalf("Add failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
@@ -688,7 +673,7 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 
 	// Step 3: Retrieve the credential
 	t.Log("Step 3: Retrieve credential using default vault path")
-	getInput := fmt.Sprintf("%s\n", masterPassword)
+	getInput := helpers.BuildUnlockStdin(masterPassword)
 	stdout, stderr, err = runWithHome(getInput, "get", "testcred", "--field", "username")
 	if err != nil {
 		t.Fatalf("Get failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
@@ -700,7 +685,7 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 
 	// Step 4: List credentials
 	t.Log("Step 4: List credentials using default vault path")
-	listInput := fmt.Sprintf("%s\n", masterPassword)
+	listInput := helpers.BuildUnlockStdin(masterPassword)
 	stdout, stderr, err = runWithHome(listInput, "list")
 	if err != nil {
 		t.Fatalf("List failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
@@ -712,7 +697,7 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 
 	// Step 5: Delete the credential
 	t.Log("Step 5: Delete credential using default vault path")
-	deleteInput := fmt.Sprintf("%s\n", masterPassword)
+	deleteInput := helpers.BuildUnlockStdin(masterPassword)
 	stdout, stderr, err = runWithHome(deleteInput, "delete", "testcred")
 	if err != nil {
 		t.Fatalf("Delete failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
@@ -774,7 +759,7 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 
 	// Step 1: Initialize vault at custom location
 	t.Log("Step 1: Initialize vault at custom config location")
-	initInput := fmt.Sprintf("%s\n%s\nn\nn\nn\n", masterPassword, masterPassword)
+	initInput := helpers.BuildInitStdin(helpers.DefaultInitOptions(masterPassword))
 	stdout, stderr, err := runWithConfig(initInput, "init")
 	if err != nil {
 		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
@@ -788,7 +773,7 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 
 	// Step 2: Verify list command uses custom vault (should show empty vault)
 	t.Log("Step 2: Verify list command reads from custom vault")
-	listInput := fmt.Sprintf("%s\n", masterPassword)
+	listInput := helpers.BuildUnlockStdin(masterPassword)
 	stdout, stderr, err = runWithConfig(listInput, "list")
 	// List on empty vault may exit 0 or 1, both are acceptable
 	if err != nil && !strings.Contains(stderr, "no credentials") && !strings.Contains(stdout, "No credentials") {

@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"pass-cli/test/helpers"
 )
 
 // T005-T014: Integration tests for usage command (User Story 1)
@@ -22,14 +24,14 @@ func TestUsageCommand(t *testing.T) {
 	// Setup: Initialize vault and add credentials with usage data
 	t.Run("Setup", func(t *testing.T) {
 		// Initialize vault
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n" // password, confirm, no keychain, no passphrase, skip verification
+		input := helpers.BuildInitStdin(helpers.DefaultInitOptions(testPassword))
 		_, _, err := runCommandWithInputAndVault(t, usageVaultPath, input, "init")
 		if err != nil {
 			t.Fatalf("Failed to initialize vault: %v", err)
 		}
 
 		// Add credential that will have usage history
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, usageVaultPath, input, "add", "github", "--username", "testuser", "--password", "testpass123")
 		if err != nil {
 			t.Fatalf("Failed to add github credential: %v", err)
@@ -42,7 +44,7 @@ func TestUsageCommand(t *testing.T) {
 		}
 
 		// Generate usage history by accessing github credential
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, usageVaultPath, input, "get", "github", "--no-clipboard")
 		if err != nil {
 			t.Fatalf("Failed to access github credential: %v", err)
@@ -50,7 +52,7 @@ func TestUsageCommand(t *testing.T) {
 
 		// Access it again to increment usage count
 		time.Sleep(100 * time.Millisecond) // Small delay for different timestamp
-		input = testPassword + "\n"
+		input = helpers.BuildUnlockStdin(testPassword)
 		_, _, err = runCommandWithInputAndVault(t, usageVaultPath, input, "get", "github", "--no-clipboard", "--field", "password")
 		if err != nil {
 			t.Fatalf("Failed to access github credential again: %v", err)
@@ -59,7 +61,7 @@ func TestUsageCommand(t *testing.T) {
 
 	// T005: Integration test - usage command with credential that has usage history (Acceptance Scenario 1)
 	t.Run("T005_Usage_With_History", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, usageVaultPath, input, "usage", "github")
 
 		if err != nil {
@@ -92,7 +94,7 @@ func TestUsageCommand(t *testing.T) {
 
 	// T006: Integration test - usage command with credential never accessed (Acceptance Scenario 2)
 	t.Run("T006_Usage_Never_Accessed", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, usageVaultPath, input, "usage", "never-accessed")
 
 		if err != nil {
@@ -107,7 +109,7 @@ func TestUsageCommand(t *testing.T) {
 
 	// T007: Integration test - usage command shows git repository name (Acceptance Scenario 3)
 	t.Run("T007_Usage_Shows_Git_Repo", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, _, err := runCommandWithInputAndVault(t, usageVaultPath, input, "usage", "github")
 
 		if err != nil {
@@ -124,7 +126,7 @@ func TestUsageCommand(t *testing.T) {
 
 	// T008: Integration test - usage command with --format json (Acceptance Scenario 4)
 	t.Run("T008_Usage_JSON_Format", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, usageVaultPath, input, "usage", "github", "--format", "json")
 
 		if err != nil {
@@ -175,7 +177,7 @@ func TestUsageCommand(t *testing.T) {
 
 	// T009: Integration test - usage command with non-existent credential (Acceptance Scenario 5)
 	t.Run("T009_Usage_Nonexistent_Credential", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, usageVaultPath, input, "usage", "nonexistent")
 
 		// Should return error for non-existent credential
@@ -194,7 +196,7 @@ func TestUsageCommand(t *testing.T) {
 	t.Run("T010_Usage_Default_Limit", func(t *testing.T) {
 		// This test requires a credential with 50+ usage locations
 		// For now, we'll test the message logic works with small data
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, _, err := runCommandWithInputAndVault(t, usageVaultPath, input, "usage", "github")
 
 		if err != nil {
@@ -212,7 +214,7 @@ func TestUsageCommand(t *testing.T) {
 
 	// T011: Integration test - usage command with --limit 10 (Acceptance Scenario 7)
 	t.Run("T011_Usage_Limit_10", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, usageVaultPath, input, "usage", "github", "--limit", "10")
 
 		if err != nil {
@@ -226,7 +228,7 @@ func TestUsageCommand(t *testing.T) {
 
 	// T012: Integration test - usage command with --limit 0 shows all (Acceptance Scenario 8)
 	t.Run("T012_Usage_Limit_Unlimited", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, usageVaultPath, input, "usage", "github", "--limit", "0")
 
 		if err != nil {
@@ -243,7 +245,7 @@ func TestUsageCommand(t *testing.T) {
 	t.Run("T013_Table_Hides_Deleted_Paths", func(t *testing.T) {
 		// This test would require creating a usage record with a deleted path
 		// For now, verify table format works
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, usageVaultPath, input, "usage", "github", "--format", "table")
 
 		if err != nil {
@@ -261,7 +263,7 @@ func TestUsageCommand(t *testing.T) {
 
 	// T014: Integration test - JSON format includes deleted paths with path_exists (Acceptance Scenario 10)
 	t.Run("T014_JSON_Includes_Deleted_With_PathExists", func(t *testing.T) {
-		input := testPassword + "\n"
+		input := helpers.BuildUnlockStdin(testPassword)
 		stdout, stderr, err := runCommandWithInputAndVault(t, usageVaultPath, input, "usage", "github", "--format", "json")
 
 		if err != nil {
