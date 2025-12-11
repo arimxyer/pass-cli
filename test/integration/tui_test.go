@@ -27,9 +27,16 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
+	// Create isolated home directory to prevent accessing user's real ~/.pass-cli
+	tmpHome := t.TempDir()
+	homeEnvVars := []string{
+		fmt.Sprintf("HOME=%s", tmpHome),
+		fmt.Sprintf("USERPROFILE=%s", tmpHome),
+	}
+
 	// Initialize vault
 	initCmd := exec.Command(binaryPath, "init")
-	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
+	initCmd.Env = append(append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath), homeEnvVars...)
 	initCmd.Stdin = strings.NewReader(helpers.BuildInitStdin(helpers.DefaultInitOptions(testPassword)))
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
@@ -41,10 +48,10 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 		// but we can verify it starts and doesn't immediately crash
 
 		cmd := exec.Command(binaryPath)
-		cmd.Env = append(os.Environ(),
+		cmd.Env = append(append(os.Environ(),
 			"PASS_CLI_TEST=1",
 			"PASS_CLI_CONFIG="+testConfigPath,
-		)
+		), homeEnvVars...)
 
 		// Give it a moment to start, then kill it
 		if err := cmd.Start(); err != nil {
@@ -69,7 +76,7 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 	t.Run("With_Args_Uses_CLI_Mode", func(t *testing.T) {
 		// Run with arguments - this should use CLI mode, not TUI
 		cmd := exec.Command(binaryPath, "version")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
+		cmd.Env = append(append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath), homeEnvVars...)
 
 		output, err := cmd.CombinedOutput()
 		if err != nil {
@@ -87,6 +94,7 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 	t.Run("Help_Flag_Uses_CLI_Mode", func(t *testing.T) {
 		// --help should use CLI mode
 		cmd := exec.Command(binaryPath, "--help")
+		cmd.Env = append(append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath), homeEnvVars...)
 
 		output, err := cmd.CombinedOutput()
 		if err != nil {

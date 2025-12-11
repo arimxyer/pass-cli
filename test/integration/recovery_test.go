@@ -28,8 +28,7 @@ func TestRecovery_InitWithRecovery(t *testing.T) {
 	}
 
 	testPassword := "InitRecovery-Test-Pass@123"
-	tmpDir := t.TempDir()
-	vaultPath := filepath.Join(tmpDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "init-recovery-test")
 
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
@@ -199,8 +198,7 @@ func TestRecovery_ChangePasswordWithRecovery(t *testing.T) {
 
 	t.Run("Init vault with recovery, then change password using recovery", func(t *testing.T) {
 		// Setup test vault directory
-		vaultDir := t.TempDir()
-		vaultPath := filepath.Join(vaultDir, "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "change-pw-recovery")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -261,8 +259,7 @@ func TestRecovery_ChangePasswordWithRecovery(t *testing.T) {
 
 	t.Run("Verify metadata contains valid recovery configuration", func(t *testing.T) {
 		// Setup test vault directory
-		vaultDir := t.TempDir()
-		vaultPath := filepath.Join(vaultDir, "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "verify-recovery-config")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
