@@ -301,14 +301,8 @@ func TestCLI_VaultMigrateSkipsV2Vault(t *testing.T) {
 
 // T015: Integration test: init with recovery creates v2 vault
 func TestInitWithRecoveryCreatesV2Vault(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "vault-init-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "init-recovery-test")
+	// Cleanup is automatic via t.Cleanup()
 
 	// Create vault service
 	vs, err := vault.New(vaultPath)
@@ -364,14 +358,8 @@ func TestInitWithRecoveryCreatesV2Vault(t *testing.T) {
 
 // T016: Integration test: init with --no-recovery creates v1 vault
 func TestInitWithNoRecoveryCreatesV1Vault(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "vault-init-norecovery-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "init-norecovery-test")
+	// Cleanup is automatic via t.Cleanup()
 
 	// Create vault service
 	vs, err := vault.New(vaultPath)
@@ -495,14 +483,8 @@ func contains(s, substr string) bool {
 
 // T026: Integration test: unlock v2 vault with correct password
 func TestUnlockV2VaultWithCorrectPassword(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "vault-unlock-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "unlock-v2-correct-pwd")
+	// Cleanup is automatic via t.Cleanup()
 	passwordStr := "Test123!@#Password"
 
 	// Create v2 vault with recovery enabled
@@ -556,14 +538,8 @@ func TestUnlockV2VaultWithCorrectPassword(t *testing.T) {
 
 // T027: Integration test: unlock v2 vault with wrong password fails
 func TestUnlockV2VaultWithWrongPassword(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "vault-unlock-wrong-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "unlock-v2-wrong-pwd")
+	// Cleanup is automatic via t.Cleanup()
 
 	// Create v2 vault with recovery enabled
 	vs, err := vault.New(vaultPath)
@@ -598,14 +574,8 @@ func TestUnlockV2VaultWithWrongPassword(t *testing.T) {
 
 // T028: Integration test: unlock v1 vault still works (backward compat)
 func TestUnlockV1VaultBackwardCompatibility(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "vault-unlock-v1-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "unlock-v1-compat")
+	// Cleanup is automatic via t.Cleanup()
 	passwordStr := "Test123!@#Password"
 
 	// Create v1 vault (without recovery)
@@ -658,14 +628,8 @@ func TestUnlockV1VaultBackwardCompatibility(t *testing.T) {
 
 // T028.1: Integration test: unlock with corrupted/missing WrappedDEK metadata fails gracefully
 func TestUnlockV2VaultCorruptedMetadataFailsGracefully(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "vault-unlock-corrupt-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "unlock-v2-corrupt")
+	// Cleanup is automatic via t.Cleanup()
 	passwordStr := "Test123!@#Password"
 
 	// Create v2 vault with recovery enabled
@@ -751,14 +715,8 @@ func TestV1AndV2VaultsCanManageCredentials(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create temp directory
-			tempDir, err := os.MkdirTemp("", "vault-cred-test-*")
-			if err != nil {
-				t.Fatalf("Failed to create temp dir: %v", err)
-			}
-			defer func() { _ = os.RemoveAll(tempDir) }()
-
-			vaultPath := filepath.Join(tempDir, "vault.enc")
+			vaultPath := helpers.SetupTestVaultWithName(t, "cred-mgmt-"+tc.name)
+			// Cleanup is automatic via t.Cleanup()
 
 			// Create vault
 			vs, err := vault.New(vaultPath)

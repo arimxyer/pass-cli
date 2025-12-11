@@ -18,8 +18,8 @@ import (
 func TestIntegration_TUILaunchDetection(t *testing.T) {
 	// Create a test vault first
 	testPassword := "Test-Password-TUI@123"
-	vaultDir := filepath.Join(testDir, "tui-test-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "tui-launch-detection")
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -32,10 +32,6 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
-
-	t.Cleanup(func() {
-		_ = os.RemoveAll(vaultDir) // Best effort cleanup
-	})
 
 	t.Run("No_Args_Attempts_TUI_Launch", func(t *testing.T) {
 		// Run with no arguments - this should attempt to launch TUI
@@ -112,8 +108,8 @@ func TestIntegration_TUIVaultPath(t *testing.T) {
 
 	t.Run("Uses_Config_Vault_Path", func(t *testing.T) {
 		// Create vault in custom location
-		customVaultDir := filepath.Join(testDir, "custom-tui-vault")
-		customVaultPath := filepath.Join(customVaultDir, "vault.enc")
+		customVaultPath := helpers.SetupTestVaultWithName(t, "custom-tui-vault")
+		// Cleanup is automatic via t.Cleanup()
 
 		// Setup config with custom vault_path
 		testConfigPath, cleanup := setupTestVaultConfig(t, customVaultPath)
@@ -127,9 +123,6 @@ func TestIntegration_TUIVaultPath(t *testing.T) {
 			t.Fatalf("Failed to initialize custom vault: %v", err)
 		}
 
-		t.Cleanup(func() {
-			_ = os.RemoveAll(customVaultDir) // Best effort cleanup
-		})
 
 		// Verify vault was created at custom path
 		if _, err := os.Stat(customVaultPath); os.IsNotExist(err) {
@@ -161,8 +154,8 @@ func TestIntegration_TUIVaultPath(t *testing.T) {
 // TestIntegration_TUIWithExistingVault verifies TUI works with populated vault
 func TestIntegration_TUIWithExistingVault(t *testing.T) {
 	testPassword := "Test-Password@456"
-	vaultDir := filepath.Join(testDir, "tui-populated-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "tui-populated-vault")
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -175,10 +168,6 @@ func TestIntegration_TUIWithExistingVault(t *testing.T) {
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
-
-	t.Cleanup(func() {
-		_ = os.RemoveAll(vaultDir) // Best effort cleanup
-	})
 
 	// Add some test credentials with all 6 fields
 	credentials := []struct {
@@ -243,8 +232,8 @@ func TestIntegration_TUIKeychainDetection(t *testing.T) {
 	// The actual behavior depends on the OS and keychain availability
 
 	testPassword := "Test-Password-Key@ch123"
-	vaultDir := filepath.Join(testDir, "tui-keychain-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "tui-keychain-vault")
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -257,10 +246,6 @@ func TestIntegration_TUIKeychainDetection(t *testing.T) {
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
-
-	t.Cleanup(func() {
-		_ = os.RemoveAll(vaultDir) // Best effort cleanup
-	})
 
 	// Just verify the vault was created - actual keychain testing requires OS support
 	if _, err := os.Stat(vaultPath); os.IsNotExist(err) {
@@ -385,8 +370,8 @@ func BenchmarkTUIStartup(b *testing.B) {
 // TestIntegration_TUIComponentIntegration verifies components work together
 func TestIntegration_TUIComponentIntegration(t *testing.T) {
 	testPassword := "Test-Integration@789"
-	vaultDir := filepath.Join(testDir, "tui-component-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "tui-component-vault")
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -399,10 +384,6 @@ func TestIntegration_TUIComponentIntegration(t *testing.T) {
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
-
-	t.Cleanup(func() {
-		_ = os.RemoveAll(vaultDir) // Best effort cleanup
-	})
 
 	// Add credentials to test list view integration with all 6 fields
 	for i := 1; i <= 5; i++ {
@@ -449,8 +430,8 @@ func TestIntegration_TUIComponentIntegration(t *testing.T) {
 // TestIntegration_TUIFullFieldSupport verifies all 6 credential fields are properly handled
 func TestIntegration_TUIFullFieldSupport(t *testing.T) {
 	testPassword := "Test-Full-Fields@123"
-	vaultDir := filepath.Join(testDir, "tui-full-fields-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "tui-full-fields-vault")
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -463,10 +444,6 @@ func TestIntegration_TUIFullFieldSupport(t *testing.T) {
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
-
-	t.Cleanup(func() {
-		_ = os.RemoveAll(vaultDir) // Best effort cleanup
-	})
 
 	// Add a credential with all 6 fields populated
 	service := "test-service.com"
@@ -539,8 +516,8 @@ func TestIntegration_TUIFullFieldSupport(t *testing.T) {
 // TestIntegration_TUIEmptyOptionalFields verifies backward compatibility with empty optional fields
 func TestIntegration_TUIEmptyOptionalFields(t *testing.T) {
 	testPassword := "Test-Empty-Fields@456"
-	vaultDir := filepath.Join(testDir, "tui-empty-fields-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "tui-empty-fields-vault")
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -553,10 +530,6 @@ func TestIntegration_TUIEmptyOptionalFields(t *testing.T) {
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
-
-	t.Cleanup(func() {
-		_ = os.RemoveAll(vaultDir) // Best effort cleanup
-	})
 
 	// Add credentials with empty optional fields (category, url, notes)
 	testCases := []struct {
@@ -611,8 +584,8 @@ func TestIntegration_TUIEmptyOptionalFields(t *testing.T) {
 // TestIntegration_TUIUpdateFields verifies updating all 6 credential fields via CLI
 func TestIntegration_TUIUpdateFields(t *testing.T) {
 	testPassword := "Test-Update@789"
-	vaultDir := filepath.Join(testDir, "tui-update-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "tui-update-vault")
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -625,10 +598,6 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
-
-	t.Cleanup(func() {
-		_ = os.RemoveAll(vaultDir) // Best effort cleanup
-	})
 
 	// Add initial credential with all fields
 	service := "update-test.com"
@@ -816,8 +785,8 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 // TestIntegration_TUIDeleteCredential verifies deleting credentials and list/get consistency
 func TestIntegration_TUIDeleteCredential(t *testing.T) {
 	testPassword := "Test-Delete@ABC123"
-	vaultDir := filepath.Join(testDir, "tui-delete-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "tui-delete-vault")
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -830,10 +799,6 @@ func TestIntegration_TUIDeleteCredential(t *testing.T) {
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
-
-	t.Cleanup(func() {
-		_ = os.RemoveAll(vaultDir) // Best effort cleanup
-	})
 
 	// Add multiple credentials with full metadata
 	credentials := []struct {

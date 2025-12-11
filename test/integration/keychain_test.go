@@ -18,7 +18,7 @@ import (
 // TestKeychain_FullWorkflow tests the complete keychain integration workflow
 func TestKeychain_FullWorkflow(t *testing.T) {
 	testPassword := "Keychain-Test-Pass@123"
-	vaultPath := filepath.Join(testDir, "keychain-vault", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "keychain-vault")
 
 	// Create vault-specific keychain service using vaultID derived from vaultPath
 	vaultID := filepath.Base(filepath.Dir(vaultPath))
@@ -29,9 +29,7 @@ func TestKeychain_FullWorkflow(t *testing.T) {
 		t.Skip("System keychain not available - skipping keychain integration tests")
 	}
 
-	// Ensure clean state
-	defer helpers.CleanupKeychain(t, vaultPath)
-	defer helpers.CleanupVaultPath(t, vaultPath)
+	// Cleanup is automatic via t.Cleanup() in SetupTestVaultWithName
 
 	t.Run("1_Init_With_Keychain", func(t *testing.T) {
 		// Setup config with vault_path
@@ -179,7 +177,7 @@ func TestKeychain_FullWorkflow(t *testing.T) {
 // TestKeychain_Fallback tests fallback to password prompt
 func TestKeychain_Fallback(t *testing.T) {
 	testPassword := "Fallback-Test-Pass@789"
-	vaultPath := filepath.Join(testDir, "fallback-vault", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "fallback-vault")
 
 	// Create vault-specific keychain service
 	vaultID := filepath.Base(filepath.Dir(vaultPath))
@@ -188,9 +186,7 @@ func TestKeychain_Fallback(t *testing.T) {
 		t.Skip("System keychain not available - skipping keychain fallback tests")
 	}
 
-	// Ensure clean state
-	defer helpers.CleanupKeychain(t, vaultPath)
-	defer helpers.CleanupVaultPath(t, vaultPath)
+	// Cleanup is automatic via t.Cleanup() in SetupTestVaultWithName
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
@@ -234,7 +230,7 @@ func TestKeychain_Unavailable(t *testing.T) {
 	}
 
 	testPassword := "NoKeychain-Pass@456"
-	vaultPath := filepath.Join(testDir, "no-keychain-vault", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "no-keychain-vault")
 
 	t.Run("Init_Without_Keychain_Available", func(t *testing.T) {
 		// Setup config with vault_path
@@ -276,13 +272,10 @@ func TestKeychain_MultipleVaults(t *testing.T) {
 	// per-vault keychain support in the future
 
 	testPassword := "MultiVault-Pass@999"
-	vault1Path := filepath.Join(testDir, "multi-vault-1", "vault.enc")
-	vault2Path := filepath.Join(testDir, "multi-vault-2", "vault.enc")
+	vault1Path := helpers.SetupTestVaultWithName(t, "multi-vault-1")
+	vault2Path := helpers.SetupTestVaultWithName(t, "multi-vault-2")
 
-	defer helpers.CleanupKeychain(t, vault1Path)
-	defer helpers.CleanupVaultPath(t, vault1Path)
-	defer helpers.CleanupKeychain(t, vault2Path)
-	defer helpers.CleanupVaultPath(t, vault2Path)
+	// Cleanup is automatic via t.Cleanup() in SetupTestVaultWithName
 
 	t.Run("First_Vault_Init", func(t *testing.T) {
 		// Setup config for vault 1
@@ -333,10 +326,9 @@ func TestKeychain_VerboseOutput(t *testing.T) {
 	}
 
 	testPassword := "Verbose-Test-Pass@321"
-	vaultPath := filepath.Join(testDir, "verbose-vault", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "verbose-vault")
 
-	defer helpers.CleanupKeychain(t, vaultPath)
-	defer helpers.CleanupVaultPath(t, vaultPath)
+	// Cleanup is automatic via t.Cleanup() in SetupTestVaultWithName
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
@@ -368,7 +360,7 @@ func TestKeychain_VerboseOutput(t *testing.T) {
 // TestKeychain_Enable tests the keychain enable command
 func TestKeychain_Enable(t *testing.T) {
 	testPassword := "EnableTest-Pass@123"
-	vaultPath := filepath.Join(testDir, "enable-test-vault", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "enable-test-vault")
 
 	// Create vault-specific keychain service
 	vaultID := filepath.Base(filepath.Dir(vaultPath))
@@ -377,9 +369,7 @@ func TestKeychain_Enable(t *testing.T) {
 		t.Skip("System keychain not available - skipping keychain enable integration test")
 	}
 
-	// Ensure clean state
-	defer helpers.CleanupKeychain(t, vaultPath)
-	defer helpers.CleanupVaultPath(t, vaultPath)
+	// Cleanup is automatic via t.Cleanup() in SetupTestVaultWithName
 
 	// Step 1: Initialize vault WITHOUT --use-keychain
 	t.Run("1_Init_Without_Keychain", func(t *testing.T) {
@@ -479,11 +469,9 @@ func TestKeychain_Status(t *testing.T) {
 	}
 
 	testPassword := "StatusTest-Pass@123"
-	vaultPath := filepath.Join(testDir, "status-test-vault", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "status-test-vault")
 
-	// Ensure clean state
-	defer helpers.CleanupKeychain(t, vaultPath)
-	defer helpers.CleanupVaultPath(t, vaultPath)
+	// Cleanup is automatic via t.Cleanup() in SetupTestVaultWithName
 
 	// Step 1: Initialize vault WITHOUT keychain
 	t.Run("1_Init_Without_Keychain", func(t *testing.T) {
@@ -570,18 +558,12 @@ func TestKeychain_StatusWithMetadata(t *testing.T) {
 	}
 
 	testPassword := "MetadataTest-Pass@123"
-	vaultDir := filepath.Join(testDir, "metadata-status-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "metadata-status-vault")
+	vaultDir := filepath.Dir(vaultPath)
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
 
-	// Ensure clean state
-	defer helpers.CleanupKeychain(t, vaultPath)
-	defer helpers.CleanupVaultDir(t, vaultDir)
-
-	// Create vault with audit enabled
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup() in SetupTestVaultWithName
+	// Directory is already created by SetupTestVaultWithName
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
@@ -655,8 +637,8 @@ func TestKeychain_StatusWithMetadata(t *testing.T) {
 // TestKeychain_PersistenceAfterRestart simulates the upgrade scenario
 func TestKeychain_PersistenceAfterRestart(t *testing.T) {
 	testPassword := "PersistenceTest-Pass@123"
-	vaultDir := filepath.Join(testDir, "keychain-persistence-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "keychain-persistence-vault")
+	vaultDir := filepath.Dir(vaultPath)
 	metadataPath := vaultPath + ".meta.json"
 
 	// Create vault-specific keychain service
@@ -666,16 +648,8 @@ func TestKeychain_PersistenceAfterRestart(t *testing.T) {
 		t.Skip("System keychain not available - skipping test")
 	}
 
-	// Clean up before and after
-	defer helpers.CleanupKeychain(t, vaultPath)
-	defer helpers.CleanupVaultDir(t, vaultDir)
-	_ = os.RemoveAll(vaultDir)
-	_ = ks.Delete() // Clear any existing keychain entry
-
-	// Create vault directory
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup() in SetupTestVaultWithName
+	// Directory is already created by SetupTestVaultWithName
 
 	// PHASE 1: Initial setup (like first install)
 	t.Log("Phase 1: Creating vault with keychain enabled...")
@@ -756,8 +730,8 @@ func TestKeychain_PersistenceAfterRestart(t *testing.T) {
 // TestKeychain_PersistenceMetadataIntegrity verifies metadata file integrity
 func TestKeychain_PersistenceMetadataIntegrity(t *testing.T) {
 	testPassword := "MetadataIntegrity-Pass@123"
-	vaultDir := filepath.Join(testDir, "metadata-integrity-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "metadata-integrity-vault")
+	vaultDir := filepath.Dir(vaultPath)
 	metadataPath := vaultPath + ".meta.json"
 
 	// Create vault-specific keychain service (must match what CLI uses)
@@ -765,15 +739,6 @@ func TestKeychain_PersistenceMetadataIntegrity(t *testing.T) {
 	ks := keychain.New(vaultID)
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping test")
-	}
-
-	defer helpers.CleanupKeychain(t, vaultPath)
-	defer helpers.CleanupVaultDir(t, vaultDir)
-	_ = os.RemoveAll(vaultDir)
-	_ = ks.Delete()
-
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
 	// Create and initialize vault with keychain
@@ -820,8 +785,8 @@ func TestKeychain_PersistenceMetadataIntegrity(t *testing.T) {
 // TestKeychain_PersistenceGracefulDegradation verifies graceful failure
 func TestKeychain_PersistenceGracefulDegradation(t *testing.T) {
 	testPassword := "Degradation-Pass@123"
-	vaultDir := filepath.Join(testDir, "degradation-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "degradation-vault")
+	vaultDir := filepath.Dir(vaultPath)
 	metadataPath := vaultPath + ".meta.json"
 
 	// Create vault-specific keychain service (must match what CLI uses)
@@ -829,15 +794,6 @@ func TestKeychain_PersistenceGracefulDegradation(t *testing.T) {
 	ks := keychain.New(vaultID)
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping test")
-	}
-
-	defer helpers.CleanupKeychain(t, vaultPath)
-	defer helpers.CleanupVaultDir(t, vaultDir)
-	_ = os.RemoveAll(vaultDir)
-	_ = ks.Delete()
-
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
 	// Setup: Create vault with keychain enabled
@@ -914,23 +870,14 @@ func TestKeychain_PersistenceGracefulDegradation(t *testing.T) {
 // TestKeychain_PersistenceMultipleRestarts simulates multiple app restarts
 func TestKeychain_PersistenceMultipleRestarts(t *testing.T) {
 	testPassword := "MultiRestart-Pass@123"
-	vaultDir := filepath.Join(testDir, "multi-restart-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "multi-restart-vault")
+	vaultDir := filepath.Dir(vaultPath)
 
 	// Create vault-specific keychain service (must match what CLI uses)
 	vaultID := filepath.Base(vaultDir)
 	ks := keychain.New(vaultID)
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping test")
-	}
-
-	defer helpers.CleanupKeychain(t, vaultPath)
-	defer helpers.CleanupVaultDir(t, vaultDir)
-	_ = os.RemoveAll(vaultDir)
-	_ = ks.Delete()
-
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
 	}
 
 	// Initial setup

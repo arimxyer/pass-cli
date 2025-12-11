@@ -53,7 +53,9 @@ func SetupTestVaultConfig(t *testing.T, vaultPath string) (configPath string, cl
 
 // CleanupVaultDir removes a vault directory and its associated keychain entries.
 // This should be used in defer statements to ensure keychain entries don't leak.
-// Walks the directory to find all vault.enc files and cleans up their audit keys.
+// Walks the directory to find all vault.enc files and cleans up ALL keychain entries:
+// - Master password entries (vault-specific and legacy global)
+// - Audit HMAC key entries
 func CleanupVaultDir(t *testing.T, vaultDir string) {
 	t.Helper()
 
@@ -63,31 +65,46 @@ func CleanupVaultDir(t *testing.T, vaultDir string) {
 			return nil // Continue walking even if there are errors
 		}
 		if info != nil && !info.IsDir() && filepath.Base(path) == "vault.enc" {
-			// Delete the audit key for this vault path (full path format)
-			_ = keyring.Delete(AuditKeyService, path)
-			// Also delete by vault ID (directory name format - used by pass-cli)
 			vaultID := filepath.Base(filepath.Dir(path))
+
+			// Clean master password keychain entries
+			vaultSpecificAccount := "master-password-" + vaultID
+			_ = keyring.Delete(KeychainService, vaultSpecificAccount)
+
+			// Clean audit key entries (both formats)
+			_ = keyring.Delete(AuditKeyService, path)
 			_ = keyring.Delete(AuditKeyService, vaultID)
 		}
 		return nil
 	})
 
 	// Also try to delete by the top-level directory name (for single-vault dirs)
-	_ = keyring.Delete(AuditKeyService, filepath.Base(vaultDir))
+	topLevelID := filepath.Base(vaultDir)
+	_ = keyring.Delete(AuditKeyService, topLevelID)
+	_ = keyring.Delete(KeychainService, "master-password-"+topLevelID)
+
+	// Clean legacy global entry (in case any test used it)
+	_ = keyring.Delete(KeychainService, "master-password")
 
 	// Remove the directory
 	_ = os.RemoveAll(vaultDir)
 }
 
-// CleanupVaultPath removes a specific vault's keychain entry and its parent directory.
+// CleanupVaultPath removes a specific vault's keychain entries and its parent directory.
 // Use this when you know the exact vault.enc path.
+// Cleans ALL keychain entries: master password (vault-specific + legacy) and audit keys.
 func CleanupVaultPath(t *testing.T, vaultPath string) {
 	t.Helper()
 
-	// Delete the audit key for this vault (full path format)
-	_ = keyring.Delete(AuditKeyService, vaultPath)
-	// Also delete by vault ID (directory name format - used by pass-cli)
 	vaultID := filepath.Base(filepath.Dir(vaultPath))
+
+	// Clean master password keychain entries
+	vaultSpecificAccount := "master-password-" + vaultID
+	_ = keyring.Delete(KeychainService, vaultSpecificAccount)
+	_ = keyring.Delete(KeychainService, "master-password") // legacy global
+
+	// Clean audit key entries (both formats)
+	_ = keyring.Delete(AuditKeyService, vaultPath)
 	_ = keyring.Delete(AuditKeyService, vaultID)
 
 	// Remove the parent directory (which contains the vault)
@@ -117,6 +134,9 @@ func CleanupKeychain(t *testing.T, vaultPath string) {
 
 // CreateTempVaultDir creates a temporary directory for a test vault.
 // Returns the vault path (dir/vault.enc) and a cleanup function.
+//
+// Deprecated: Use SetupTestVault() instead which handles all cleanup automatically
+// including keychain entries.
 func CreateTempVaultDir(t *testing.T) (vaultPath string, cleanup func()) {
 	t.Helper()
 
@@ -128,4 +148,75 @@ func CreateTempVaultDir(t *testing.T) (vaultPath string, cleanup func()) {
 	}
 
 	return vaultPath, cleanup
+}
+
+// SetupTestVault creates a temporary vault directory with automatic cleanup.
+// Uses t.Cleanup() to ensure ALL resources are cleaned up:
+//   - Master password keychain entry (vault-specific format)
+//   - Audit HMAC key keychain entries (both path and vaultID formats)
+//   - Temporary files and directories
+//
+// Usage:
+//
+//	vaultPath := helpers.SetupTestVault(t)
+//	// Use vaultPath in tests - cleanup happens automatically
+func SetupTestVault(t *testing.T) string {
+	t.Helper()
+
+	// Create temp directory with a named subdirectory for predictable vaultID
+	tempDir := t.TempDir()
+	vaultDir := filepath.Join(tempDir, "test-vault")
+	if err := os.MkdirAll(vaultDir, 0700); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultID := filepath.Base(vaultDir)
+
+	// Register cleanup that handles EVERYTHING
+	t.Cleanup(func() {
+		// Clean master password keychain entry (vault-specific format)
+		vaultSpecificAccount := "master-password-" + vaultID
+		_ = keyring.Delete(KeychainService, vaultSpecificAccount)
+
+		// Clean legacy global entry (in case test used it)
+		_ = keyring.Delete(KeychainService, "master-password")
+
+		// Clean audit keychain entries (both formats)
+		_ = keyring.Delete(AuditKeyService, vaultPath)
+		_ = keyring.Delete(AuditKeyService, vaultID)
+
+		// Files are cleaned up by t.TempDir() automatically
+	})
+
+	return vaultPath
+}
+
+// SetupTestVaultWithName creates a vault with a specific directory name.
+// Useful when you need a specific vaultID for testing.
+// Cleanup is handled automatically via t.Cleanup().
+func SetupTestVaultWithName(t *testing.T, vaultDirName string) string {
+	t.Helper()
+
+	tempDir := t.TempDir()
+	vaultDir := filepath.Join(tempDir, vaultDirName)
+	if err := os.MkdirAll(vaultDir, 0700); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultID := vaultDirName
+
+	t.Cleanup(func() {
+		// Clean master password keychain entry
+		vaultSpecificAccount := "master-password-" + vaultID
+		_ = keyring.Delete(KeychainService, vaultSpecificAccount)
+		_ = keyring.Delete(KeychainService, "master-password")
+
+		// Clean audit keychain entries
+		_ = keyring.Delete(AuditKeyService, vaultPath)
+		_ = keyring.Delete(AuditKeyService, vaultID)
+	})
+
+	return vaultPath
 }

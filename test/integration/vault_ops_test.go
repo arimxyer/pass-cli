@@ -21,7 +21,7 @@ import (
 // Tests: creates vault with keychain, removes, verifies 95% success rate across multiple runs
 func TestIntegration_VaultRemove(t *testing.T) {
 	testPassword := "RemoveTest-Pass@123"
-	vaultPath := filepath.Join(testDir, "remove-test-vault", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "remove-test-vault")
 
 	// Create vault-specific keychain service (must match what CLI uses)
 	vaultID := filepath.Base(filepath.Dir(vaultPath))
@@ -30,9 +30,7 @@ func TestIntegration_VaultRemove(t *testing.T) {
 		t.Skip("System keychain not available - skipping vault remove integration test")
 	}
 
-	// Ensure clean state
-	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(filepath.Dir(vaultPath)) }() // Best effort cleanup
+	// Cleanup is automatic via t.Cleanup()
 
 	// Step 1: Initialize vault WITH keychain
 	t.Run("1_Init_With_Keychain", func(t *testing.T) {
@@ -244,8 +242,8 @@ func TestIntegration_VaultRemove(t *testing.T) {
 // Tests that vault remove command writes audit entries (attempt + success) when vault has metadata
 func TestIntegration_VaultRemoveWithMetadata(t *testing.T) {
 	testPassword := "RemoveTest-Pass@123"
-	vaultDir := filepath.Join(testDir, "remove-metadata-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "remove-metadata-vault")
+	vaultDir := filepath.Dir(vaultPath)
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
 
 	// Create vault-specific keychain service (must match what CLI uses)
@@ -255,14 +253,7 @@ func TestIntegration_VaultRemoveWithMetadata(t *testing.T) {
 		t.Skip("System keychain not available - skipping test")
 	}
 
-	// Ensure clean state
-	defer cleanupKeychain(t, ks)
-	defer func() { _ = os.RemoveAll(vaultDir) }() // Best effort cleanup
-
-	// Create vault with audit enabled
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -332,7 +323,7 @@ func TestIntegration_VaultRemoveWithMetadata(t *testing.T) {
 func TestIntegration_BackupRestore_Basic(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-restore-test", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-restore-test")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -381,7 +372,7 @@ func TestIntegration_BackupRestore_Basic(t *testing.T) {
 func TestIntegration_BackupRestore_NoBackups(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-no-backup", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-no-backup")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -412,7 +403,7 @@ func TestIntegration_BackupRestore_NoBackups(t *testing.T) {
 func TestIntegration_BackupRestore_CorruptedFallback(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-corrupted-fallback", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-corrupted-fallback")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -474,7 +465,7 @@ func TestIntegration_BackupRestore_CorruptedFallback(t *testing.T) {
 func TestIntegration_BackupRestore_ConfirmationPrompt(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-confirm-test", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-confirm-test")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -508,7 +499,7 @@ func TestIntegration_BackupRestore_ConfirmationPrompt(t *testing.T) {
 func TestIntegration_BackupRestore_ForceFlag(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-force-test", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-force-test")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -536,7 +527,7 @@ func TestIntegration_BackupRestore_ForceFlag(t *testing.T) {
 func TestIntegration_BackupRestore_DryRun(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-dryrun-test", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-dryrun-test")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -586,7 +577,7 @@ func TestIntegration_BackupRestore_DryRun(t *testing.T) {
 func TestIntegration_BackupCreate_Success(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-create-test", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-create-test")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -643,7 +634,7 @@ func TestIntegration_BackupCreate_Success(t *testing.T) {
 func TestIntegration_BackupCreate_VaultNotFound(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-notfound-test", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-notfound-test")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -664,7 +655,7 @@ func TestIntegration_BackupCreate_VaultNotFound(t *testing.T) {
 func TestIntegration_BackupCreate_MultipleBackups(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-multiple-test", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-multiple-test")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -741,7 +732,7 @@ func TestIntegration_BackupCreate_DiskFull(t *testing.T) {
 
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-diskfull-test", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-diskfull-test")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -785,7 +776,7 @@ func TestIntegration_BackupCreate_DiskFull(t *testing.T) {
 func TestIntegration_BackupCreate_PermissionDenied(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-permission-test", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-permission-test")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -837,7 +828,7 @@ func TestIntegration_BackupCreate_MissingDirectory(t *testing.T) {
 	setupTestEnvironment(t)
 
 	// Use nested directory path
-	vaultPath := filepath.Join(testDir, "vault-missing-dir", "subdir", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-missing-dir/subdir")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -899,7 +890,7 @@ func TestIntegration_BackupCreate_Errors(t *testing.T) {
 	setupTestEnvironment(t)
 
 	t.Run("VaultNotFound", func(t *testing.T) {
-		vaultPath := filepath.Join(testDir, "nonexistent", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "nonexistent")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -916,7 +907,7 @@ func TestIntegration_BackupCreate_Errors(t *testing.T) {
 	})
 
 	t.Run("PermissionDenied_ReadOnly", func(t *testing.T) {
-		vaultPath := filepath.Join(testDir, "readonly-test", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "readonly-test")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -963,7 +954,7 @@ func TestIntegration_BackupRestore_Errors(t *testing.T) {
 	setupTestEnvironment(t)
 
 	t.Run("NoBackupsAvailable", func(t *testing.T) {
-		vaultPath := filepath.Join(testDir, "no-backup-restore", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "no-backup-restore")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -990,7 +981,7 @@ func TestIntegration_BackupRestore_Errors(t *testing.T) {
 	})
 
 	t.Run("UserCancelsRestore", func(t *testing.T) {
-		vaultPath := filepath.Join(testDir, "cancel-restore", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "cancel-restore")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -1020,7 +1011,7 @@ func TestIntegration_BackupRestore_Errors(t *testing.T) {
 	})
 
 	t.Run("AllBackupsCorrupted", func(t *testing.T) {
-		vaultPath := filepath.Join(testDir, "all-corrupt", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "all-corrupt")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -1073,7 +1064,7 @@ func TestIntegration_BackupInfo_Errors(t *testing.T) {
 	setupTestEnvironment(t)
 
 	t.Run("VaultNotInitialized", func(t *testing.T) {
-		vaultPath := filepath.Join(testDir, "no-init-info", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "no-init-info")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -1100,7 +1091,7 @@ func TestIntegration_BackupInfo_Errors(t *testing.T) {
 func TestIntegration_BackupCommands_InvalidFlags(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "invalid-flags", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "invalid-flags")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1140,7 +1131,7 @@ func TestIntegration_BackupCommands_InvalidFlags(t *testing.T) {
 func TestIntegration_BackupInfo_NoBackups(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-info-nobackup", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-info-nobackup")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1171,7 +1162,7 @@ func TestIntegration_BackupInfo_NoBackups(t *testing.T) {
 func TestIntegration_BackupInfo_SingleAutomatic(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-info-auto", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-info-auto")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1199,7 +1190,7 @@ func TestIntegration_BackupInfo_SingleAutomatic(t *testing.T) {
 func TestIntegration_BackupInfo_MultipleManual(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-info-multi", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-info-multi")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1240,7 +1231,7 @@ func TestIntegration_BackupInfo_MultipleManual(t *testing.T) {
 func TestIntegration_BackupInfo_Mixed(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-info-mixed", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-info-mixed")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1277,7 +1268,7 @@ func TestIntegration_BackupInfo_Mixed(t *testing.T) {
 func TestIntegration_BackupInfo_CorruptedBackup(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-info-corrupt", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-info-corrupt")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1322,7 +1313,7 @@ func TestIntegration_BackupInfo_CorruptedBackup(t *testing.T) {
 func TestIntegration_BackupInfo_Verbose(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "vault-info-verbose", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "vault-info-verbose")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1358,7 +1349,7 @@ func TestIntegration_BackupInfo_Verbose(t *testing.T) {
 func TestIntegration_BackupOutput_SuccessMessages(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "output-success", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "output-success")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1455,7 +1446,7 @@ func TestIntegration_BackupOutput_ErrorMessages(t *testing.T) {
 	setupTestEnvironment(t)
 
 	t.Run("VaultNotFoundFormat", func(t *testing.T) {
-		vaultPath := filepath.Join(testDir, "output-error-notfound", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "output-error-notfound")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -1476,7 +1467,7 @@ func TestIntegration_BackupOutput_ErrorMessages(t *testing.T) {
 	})
 
 	t.Run("NoBackupFormat", func(t *testing.T) {
-		vaultPath := filepath.Join(testDir, "output-error-nobackup", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "output-error-nobackup")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 

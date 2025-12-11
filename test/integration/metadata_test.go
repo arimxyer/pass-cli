@@ -20,8 +20,8 @@ import (
 // Tests that VaultService falls back to self-discovery when metadata is corrupted
 func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 	testPassword := "CorruptTest-Pass@123"
-	vaultDir := filepath.Join(testDir, "corrupt-metadata-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "corrupt-metadata-vault")
+	vaultDir := filepath.Dir(vaultPath)
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
 
 	// Create vault-specific keychain service (must match what CLI uses)
@@ -31,14 +31,7 @@ func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 		t.Skip("System keychain not available - skipping test")
 	}
 
-	// Ensure clean state
-	defer cleanupKeychain(t, ks)
-	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
-
-	// Create vault with audit enabled
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -101,7 +94,7 @@ func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 	testPassword1 := "Vault1-Pass@123"
 	testPassword2 := "Vault2-Pass@123"
-	vaultDir := filepath.Join(testDir, "multi-vault-dir")
+	vaultDir := t.TempDir()
 	vault1Path := filepath.Join(vaultDir, "vault1.enc")
 	vault2Path := filepath.Join(vaultDir, "vault2.enc")
 
@@ -113,14 +106,11 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 		t.Skip("System keychain not available - skipping test")
 	}
 
-	// Ensure clean state
-	defer cleanupKeychain(t, ks)
-	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
-
-	// Create directory
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
+	t.Cleanup(func() {
+		helpers.CleanupKeychain(t, vault1Path)
+		helpers.CleanupKeychain(t, vault2Path)
+	})
 
 	// Setup config for vault1
 	testConfigPath1, cleanup1 := setupTestVaultConfig(t, vault1Path)
@@ -212,15 +202,9 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 // Tests that metadata is created when unlocking a vault that has audit enabled but no metadata file
 func TestIntegration_AutoMetadataCreationOnUnlock(t *testing.T) {
 	testPassword := "UnlockTest-Pass@123"
-	vaultDir := filepath.Join(testDir, "unlock-metadata-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "unlock-metadata-vault")
 
-	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
-
-	// Create vault with audit enabled
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -275,15 +259,9 @@ func TestIntegration_AutoMetadataCreationOnUnlock(t *testing.T) {
 // Tests that metadata is NOT created for vaults without audit logging
 func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 	testPassword := "NoAudit-Pass@123"
-	vaultDir := filepath.Join(testDir, "no-audit-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "no-audit-vault")
 
-	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
-
-	// Create vault WITHOUT audit (use --no-audit since audit is now enabled by default)
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -354,14 +332,9 @@ func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 // Tests that init command creates metadata when audit logging (enabled by default) flag is used
 func TestIntegration_MetadataCreatedByInit(t *testing.T) {
 	testPassword := "InitAudit-Pass@123"
-	vaultDir := filepath.Join(testDir, "init-audit-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "init-audit-vault")
 
-	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
-
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -412,14 +385,9 @@ func TestIntegration_MetadataCreatedByInit(t *testing.T) {
 // Tests that metadata is synchronized when vault audit config changes
 func TestIntegration_MetadataUpdateOnAuditChange(t *testing.T) {
 	testPassword := "ChangeAudit-Pass@123"
-	vaultDir := filepath.Join(testDir, "change-audit-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "change-audit-vault")
 
-	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
-
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -487,14 +455,9 @@ func TestIntegration_MetadataUpdateOnAuditChange(t *testing.T) {
 // Tests that vaults created before metadata feature still work without breaking changes
 func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 	testPassword := "OldVault-Pass@123"
-	vaultDir := filepath.Join(testDir, "old-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "old-vault")
 
-	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
-
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create vault directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -571,8 +534,8 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 // Tests that VaultService uses fallback when metadata file is deleted
 func TestIntegration_MetadataDeletedFallback(t *testing.T) {
 	testPassword := "DeletedMeta-Pass@123"
-	vaultDir := filepath.Join(testDir, "deleted-meta-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "deleted-meta-vault")
+	vaultDir := filepath.Dir(vaultPath)
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
 
 	// Create vault-specific keychain service (must match what CLI uses)
@@ -582,12 +545,7 @@ func TestIntegration_MetadataDeletedFallback(t *testing.T) {
 		t.Skip("System keychain not available")
 	}
 
-	defer cleanupKeychain(t, ks)
-	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
-
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -655,8 +613,8 @@ func TestIntegration_CorruptedMetadataFallbackUS3(t *testing.T) {
 // Tests that system finds audit.log via self-discovery when no metadata exists
 func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
 	testPassword := "NoMeta-Pass@123"
-	vaultDir := filepath.Join(testDir, "no-meta-audit-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "no-meta-audit-vault")
+	vaultDir := filepath.Dir(vaultPath)
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
 
 	// Create vault-specific keychain service (must match what CLI uses)
@@ -666,12 +624,7 @@ func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
 		t.Skip("System keychain not available")
 	}
 
-	defer cleanupKeychain(t, ks)
-	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
-
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -735,8 +688,8 @@ func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
 // Tests graceful handling when metadata says audit enabled but log file is missing
 func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
 	testPassword := "MissingLog-Pass@123"
-	vaultDir := filepath.Join(testDir, "missing-log-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "missing-log-vault")
+	vaultDir := filepath.Dir(vaultPath)
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
 
 	// Create vault-specific keychain service (must match what CLI uses)
@@ -746,12 +699,7 @@ func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
 		t.Skip("System keychain not available")
 	}
 
-	defer cleanupKeychain(t, ks)
-	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
-
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
@@ -816,14 +764,9 @@ func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
 // Tests forward compatibility with future metadata versions
 func TestIntegration_UnknownMetadataVersion(t *testing.T) {
 	testPassword := "UnknownVer-Pass@123"
-	vaultDir := filepath.Join(testDir, "unknown-version-vault")
-	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "unknown-version-vault")
 
-	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
-
-	if err := os.MkdirAll(vaultDir, 0755); err != nil {
-		t.Fatalf("Failed to create directory: %v", err)
-	}
+	// Cleanup is automatic via t.Cleanup()
 
 	// Setup config with vault_path
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
