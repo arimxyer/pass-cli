@@ -833,7 +833,7 @@ func TestV1AndV2VaultsCanManageCredentials(t *testing.T) {
 // Note: Requires system keychain for audit HMAC key storage.
 func TestIntegration_VerifyAudit(t *testing.T) {
 	// Skip if keychain is not available (audit logging requires keychain for HMAC keys)
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping verify-audit integration test (audit requires keychain for HMAC keys)")
 	}
@@ -981,7 +981,7 @@ func TestIntegration_VerifyAudit(t *testing.T) {
 // Note: Requires system keychain for audit HMAC key storage.
 func TestIntegration_VerifyAudit_ConsistentVaultID(t *testing.T) {
 	// Skip if keychain is not available (audit logging requires keychain for HMAC keys)
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping verify-audit integration test (audit requires keychain for HMAC keys)")
 	}

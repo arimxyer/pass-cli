@@ -20,7 +20,7 @@ import (
 // Tests that VaultService falls back to self-discovery when metadata is corrupted
 func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 	// Check if keychain is available
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping test")
 	}
@@ -99,7 +99,7 @@ func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 // Tests that metadata correctly identifies the right vault when multiple vaults exist
 func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 	// Check if keychain is available
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping test")
 	}
@@ -567,7 +567,7 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 // T032: Integration test for metadata deleted, fallback self-discovery succeeds
 // Tests that VaultService uses fallback when metadata file is deleted
 func TestIntegration_MetadataDeletedFallback(t *testing.T) {
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available")
 	}
@@ -649,7 +649,7 @@ func TestIntegration_CorruptedMetadataFallbackUS3(t *testing.T) {
 // T034: Integration test for audit.log exists but no metadata, best-effort logging
 // Tests that system finds audit.log via self-discovery when no metadata exists
 func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available")
 	}
@@ -727,7 +727,7 @@ func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
 // T035: Integration test for metadata indicates audit but audit.log missing, creates new log
 // Tests graceful handling when metadata says audit enabled but log file is missing
 func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available")
 	}

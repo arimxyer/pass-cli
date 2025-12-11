@@ -21,7 +21,7 @@ import (
 // Tests: creates vault with keychain, removes, verifies 95% success rate across multiple runs
 func TestIntegration_VaultRemove(t *testing.T) {
 	// Check if keychain is available
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping vault remove integration test")
 	}
@@ -243,7 +243,7 @@ func TestIntegration_VaultRemove(t *testing.T) {
 // Tests that vault remove command writes audit entries (attempt + success) when vault has metadata
 func TestIntegration_VaultRemoveWithMetadata(t *testing.T) {
 	// Check if keychain is available
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping test")
 	}

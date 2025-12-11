@@ -18,7 +18,7 @@ import (
 // TestKeychain_FullWorkflow tests the complete keychain integration workflow
 func TestKeychain_FullWorkflow(t *testing.T) {
 	// Check if keychain is available before running tests
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping keychain integration tests")
 	}
@@ -175,7 +175,7 @@ func TestKeychain_FullWorkflow(t *testing.T) {
 
 // TestKeychain_Fallback tests fallback to password prompt
 func TestKeychain_Fallback(t *testing.T) {
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping keychain fallback tests")
 	}
@@ -220,7 +220,7 @@ func TestKeychain_Fallback(t *testing.T) {
 
 // TestKeychain_Unavailable tests behavior when keychain is unavailable
 func TestKeychain_Unavailable(t *testing.T) {
-	ks := keychain.New()
+	ks := keychain.New("")
 
 	// This test verifies graceful handling when keychain is unavailable
 	// If keychain IS available, we skip this test
@@ -261,7 +261,7 @@ func TestKeychain_Unavailable(t *testing.T) {
 
 // TestKeychain_MultipleVaults tests multiple vaults with same keychain
 func TestKeychain_MultipleVaults(t *testing.T) {
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping multiple vaults test")
 	}
@@ -322,7 +322,7 @@ func TestKeychain_MultipleVaults(t *testing.T) {
 
 // TestKeychain_VerboseOutput tests verbose mode shows keychain usage
 func TestKeychain_VerboseOutput(t *testing.T) {
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping verbose output test")
 	}
@@ -363,7 +363,7 @@ func TestKeychain_VerboseOutput(t *testing.T) {
 // TestKeychain_Enable tests the keychain enable command
 func TestKeychain_Enable(t *testing.T) {
 	// Check if keychain is available
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping keychain enable integration test")
 	}
@@ -467,7 +467,7 @@ func TestKeychain_Enable(t *testing.T) {
 // TestKeychain_Status tests the keychain status command
 func TestKeychain_Status(t *testing.T) {
 	// Check if keychain is available
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping keychain status integration test")
 	}
@@ -558,7 +558,7 @@ func TestKeychain_Status(t *testing.T) {
 // TestKeychain_StatusWithMetadata tests that keychain status command writes audit entry
 func TestKeychain_StatusWithMetadata(t *testing.T) {
 	// Check if keychain is available
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping test")
 	}
@@ -649,7 +649,7 @@ func TestKeychain_StatusWithMetadata(t *testing.T) {
 // TestKeychain_PersistenceAfterRestart simulates the upgrade scenario
 func TestKeychain_PersistenceAfterRestart(t *testing.T) {
 	// Skip if keychain is not available
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping test")
 	}
@@ -748,7 +748,7 @@ func TestKeychain_PersistenceAfterRestart(t *testing.T) {
 
 // TestKeychain_PersistenceMetadataIntegrity verifies metadata file integrity
 func TestKeychain_PersistenceMetadataIntegrity(t *testing.T) {
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping test")
 	}
@@ -810,7 +810,7 @@ func TestKeychain_PersistenceMetadataIntegrity(t *testing.T) {
 
 // TestKeychain_PersistenceGracefulDegradation verifies graceful failure
 func TestKeychain_PersistenceGracefulDegradation(t *testing.T) {
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping test")
 	}
@@ -902,7 +902,7 @@ func TestKeychain_PersistenceGracefulDegradation(t *testing.T) {
 
 // TestKeychain_PersistenceMultipleRestarts simulates multiple app restarts
 func TestKeychain_PersistenceMultipleRestarts(t *testing.T) {
-	ks := keychain.New()
+	ks := keychain.New("")
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping test")
 	}
