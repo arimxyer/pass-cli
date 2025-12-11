@@ -446,9 +446,9 @@ func (eh *EventHandler) handleShowHelp() {
 	// Set table background color (after all cells are set)
 	table.SetBackgroundColor(tcell.ColorBlue)
 
-	// Create TextView for close button (no SetTextAlign - it clips text!)
+	// Create TextView for footer instructions (no SetTextAlign - it clips text!)
 	closeButtonText := tview.NewTextView()
-	closeButtonText.SetText("	↑/↓ Arrow Keys or Mouse Wheel to scroll  •  Esc to close")
+	closeButtonText.SetText("	↑/↓ Arrow Keys or Mouse Wheel to scroll\n	Esc to close")
 	closeButtonText.SetTextColor(tcell.ColorWhite)
 	closeButtonText.SetBackgroundColor(tcell.ColorBlue)
 
@@ -474,7 +474,7 @@ func (eh *EventHandler) handleShowHelp() {
 		AddItem(tview.NewBox().SetBackgroundColor(tcell.ColorBlue), 1, 0, false). // Top padding
 		AddItem(paddedTable, 0, 1, true).                                         // Table (flex height, gets focus for scrolling)
 		AddItem(tview.NewBox().SetBackgroundColor(tcell.ColorBlue), 1, 0, false). // Spacer
-		AddItem(closeButtonText, 1, 0, false).                                    // Close text (fixed 1 height)
+		AddItem(closeButtonText, 2, 0, false).                                    // Footer text (fixed 2 height for 2 lines)
 		AddItem(tview.NewBox().SetBackgroundColor(tcell.ColorBlue), 1, 0, false)  // Bottom padding
 
 	helpContent.SetBackgroundColor(tcell.ColorBlue).
