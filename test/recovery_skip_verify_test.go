@@ -30,10 +30,11 @@ func TestIntegration_SkipVerification(t *testing.T) {
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
 
-		// Input: master password, confirm password, no to passphrase, no to verification
+		// Input: master password, confirm password, no keychain, no passphrase, decline verification
 		initStdin := strings.NewReader(
 			testPassword + "\n" + // master password
 				testPassword + "\n" + // confirm password
+				"n\n" + // no keychain
 				"n\n" + // no to passphrase protection
 				"n\n", // decline verification
 		)
@@ -97,10 +98,11 @@ func TestIntegration_SkipVerification(t *testing.T) {
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
 
-		// Input: master password, confirm password, no to passphrase, no to verification
+		// Input: master password, confirm password, no keychain, no passphrase, decline verification
 		initStdin := strings.NewReader(
 			testPassword + "\n" +
 				testPassword + "\n" +
+				"n\n" + // no keychain
 				"n\n" + // no to passphrase
 				"n\n", // decline verification
 		)

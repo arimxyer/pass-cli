@@ -171,7 +171,7 @@ func TestIntegration_KeychainStatusWithMetadata(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault with audit
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n" // password, confirm, no keychain, no passphrase, skip verification
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
