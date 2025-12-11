@@ -19,16 +19,17 @@ import (
 // T014: Integration test for corrupted metadata fallback
 // Tests that VaultService falls back to self-discovery when metadata is corrupted
 func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
-	// Check if keychain is available
-	ks := keychain.New("")
-	if !ks.IsAvailable() {
-		t.Skip("System keychain not available - skipping test")
-	}
-
 	testPassword := "CorruptTest-Pass@123"
 	vaultDir := filepath.Join(testDir, "corrupt-metadata-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
+
+	// Create vault-specific keychain service (must match what CLI uses)
+	vaultID := filepath.Base(vaultDir)
+	ks := keychain.New(vaultID)
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
 
 	// Ensure clean state
 	defer cleanupKeychain(t, ks)
@@ -98,17 +99,19 @@ func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 // T015: Integration test for multiple vaults in same directory
 // Tests that metadata correctly identifies the right vault when multiple vaults exist
 func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
-	// Check if keychain is available
-	ks := keychain.New("")
-	if !ks.IsAvailable() {
-		t.Skip("System keychain not available - skipping test")
-	}
-
 	testPassword1 := "Vault1-Pass@123"
 	testPassword2 := "Vault2-Pass@123"
 	vaultDir := filepath.Join(testDir, "multi-vault-dir")
 	vault1Path := filepath.Join(vaultDir, "vault1.enc")
 	vault2Path := filepath.Join(vaultDir, "vault2.enc")
+
+	// Create vault-specific keychain service (must match what CLI uses)
+	// Both vaults share same parent directory, so same vaultID
+	vaultID := filepath.Base(vaultDir)
+	ks := keychain.New(vaultID)
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
 
 	// Ensure clean state
 	defer cleanupKeychain(t, ks)
@@ -567,15 +570,17 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 // T032: Integration test for metadata deleted, fallback self-discovery succeeds
 // Tests that VaultService uses fallback when metadata file is deleted
 func TestIntegration_MetadataDeletedFallback(t *testing.T) {
-	ks := keychain.New("")
-	if !ks.IsAvailable() {
-		t.Skip("System keychain not available")
-	}
-
 	testPassword := "DeletedMeta-Pass@123"
 	vaultDir := filepath.Join(testDir, "deleted-meta-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
+
+	// Create vault-specific keychain service (must match what CLI uses)
+	vaultID := filepath.Base(vaultDir)
+	ks := keychain.New(vaultID)
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available")
+	}
 
 	defer cleanupKeychain(t, ks)
 	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
@@ -649,15 +654,17 @@ func TestIntegration_CorruptedMetadataFallbackUS3(t *testing.T) {
 // T034: Integration test for audit.log exists but no metadata, best-effort logging
 // Tests that system finds audit.log via self-discovery when no metadata exists
 func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
-	ks := keychain.New("")
-	if !ks.IsAvailable() {
-		t.Skip("System keychain not available")
-	}
-
 	testPassword := "NoMeta-Pass@123"
 	vaultDir := filepath.Join(testDir, "no-meta-audit-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
+
+	// Create vault-specific keychain service (must match what CLI uses)
+	vaultID := filepath.Base(vaultDir)
+	ks := keychain.New(vaultID)
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available")
+	}
 
 	defer cleanupKeychain(t, ks)
 	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory
@@ -727,15 +734,17 @@ func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
 // T035: Integration test for metadata indicates audit but audit.log missing, creates new log
 // Tests graceful handling when metadata says audit enabled but log file is missing
 func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
-	ks := keychain.New("")
-	if !ks.IsAvailable() {
-		t.Skip("System keychain not available")
-	}
-
 	testPassword := "MissingLog-Pass@123"
 	vaultDir := filepath.Join(testDir, "missing-log-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
+
+	// Create vault-specific keychain service (must match what CLI uses)
+	vaultID := filepath.Base(vaultDir)
+	ks := keychain.New(vaultID)
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available")
+	}
 
 	defer cleanupKeychain(t, ks)
 	defer cleanupVaultDir(t, vaultDir) // Cleans up keychain entries + directory

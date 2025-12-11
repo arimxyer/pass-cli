@@ -178,13 +178,15 @@ func TestKeychain_FullWorkflow(t *testing.T) {
 
 // TestKeychain_Fallback tests fallback to password prompt
 func TestKeychain_Fallback(t *testing.T) {
-	ks := keychain.New("")
+	testPassword := "Fallback-Test-Pass@789"
+	vaultPath := filepath.Join(testDir, "fallback-vault", "vault.enc")
+
+	// Create vault-specific keychain service
+	vaultID := filepath.Base(filepath.Dir(vaultPath))
+	ks := keychain.New(vaultID)
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping keychain fallback tests")
 	}
-
-	testPassword := "Fallback-Test-Pass@789"
-	vaultPath := filepath.Join(testDir, "fallback-vault", "vault.enc")
 
 	// Ensure clean state
 	defer helpers.CleanupKeychain(t, vaultPath)
@@ -365,14 +367,15 @@ func TestKeychain_VerboseOutput(t *testing.T) {
 
 // TestKeychain_Enable tests the keychain enable command
 func TestKeychain_Enable(t *testing.T) {
-	// Check if keychain is available
-	ks := keychain.New("")
+	testPassword := "EnableTest-Pass@123"
+	vaultPath := filepath.Join(testDir, "enable-test-vault", "vault.enc")
+
+	// Create vault-specific keychain service
+	vaultID := filepath.Base(filepath.Dir(vaultPath))
+	ks := keychain.New(vaultID)
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping keychain enable integration test")
 	}
-
-	testPassword := "EnableTest-Pass@123"
-	vaultPath := filepath.Join(testDir, "enable-test-vault", "vault.enc")
 
 	// Ensure clean state
 	defer helpers.CleanupKeychain(t, vaultPath)
@@ -651,16 +654,17 @@ func TestKeychain_StatusWithMetadata(t *testing.T) {
 
 // TestKeychain_PersistenceAfterRestart simulates the upgrade scenario
 func TestKeychain_PersistenceAfterRestart(t *testing.T) {
-	// Skip if keychain is not available
-	ks := keychain.New("")
-	if !ks.IsAvailable() {
-		t.Skip("System keychain not available - skipping test")
-	}
-
 	testPassword := "PersistenceTest-Pass@123"
 	vaultDir := filepath.Join(testDir, "keychain-persistence-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 	metadataPath := vaultPath + ".meta.json"
+
+	// Create vault-specific keychain service
+	vaultID := filepath.Base(vaultDir)
+	ks := keychain.New(vaultID)
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
 
 	// Clean up before and after
 	defer helpers.CleanupKeychain(t, vaultPath)
@@ -751,15 +755,17 @@ func TestKeychain_PersistenceAfterRestart(t *testing.T) {
 
 // TestKeychain_PersistenceMetadataIntegrity verifies metadata file integrity
 func TestKeychain_PersistenceMetadataIntegrity(t *testing.T) {
-	ks := keychain.New("")
-	if !ks.IsAvailable() {
-		t.Skip("System keychain not available - skipping test")
-	}
-
 	testPassword := "MetadataIntegrity-Pass@123"
 	vaultDir := filepath.Join(testDir, "metadata-integrity-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 	metadataPath := vaultPath + ".meta.json"
+
+	// Create vault-specific keychain service (must match what CLI uses)
+	vaultID := filepath.Base(vaultDir)
+	ks := keychain.New(vaultID)
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
 
 	defer helpers.CleanupKeychain(t, vaultPath)
 	defer helpers.CleanupVaultDir(t, vaultDir)
@@ -813,15 +819,17 @@ func TestKeychain_PersistenceMetadataIntegrity(t *testing.T) {
 
 // TestKeychain_PersistenceGracefulDegradation verifies graceful failure
 func TestKeychain_PersistenceGracefulDegradation(t *testing.T) {
-	ks := keychain.New("")
-	if !ks.IsAvailable() {
-		t.Skip("System keychain not available - skipping test")
-	}
-
 	testPassword := "Degradation-Pass@123"
 	vaultDir := filepath.Join(testDir, "degradation-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 	metadataPath := vaultPath + ".meta.json"
+
+	// Create vault-specific keychain service (must match what CLI uses)
+	vaultID := filepath.Base(vaultDir)
+	ks := keychain.New(vaultID)
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
 
 	defer helpers.CleanupKeychain(t, vaultPath)
 	defer helpers.CleanupVaultDir(t, vaultDir)
@@ -905,14 +913,16 @@ func TestKeychain_PersistenceGracefulDegradation(t *testing.T) {
 
 // TestKeychain_PersistenceMultipleRestarts simulates multiple app restarts
 func TestKeychain_PersistenceMultipleRestarts(t *testing.T) {
-	ks := keychain.New("")
-	if !ks.IsAvailable() {
-		t.Skip("System keychain not available - skipping test")
-	}
-
 	testPassword := "MultiRestart-Pass@123"
 	vaultDir := filepath.Join(testDir, "multi-restart-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
+
+	// Create vault-specific keychain service (must match what CLI uses)
+	vaultID := filepath.Base(vaultDir)
+	ks := keychain.New(vaultID)
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
 
 	defer helpers.CleanupKeychain(t, vaultPath)
 	defer helpers.CleanupVaultDir(t, vaultDir)

@@ -20,14 +20,15 @@ import (
 // T029: Integration test for remove command
 // Tests: creates vault with keychain, removes, verifies 95% success rate across multiple runs
 func TestIntegration_VaultRemove(t *testing.T) {
-	// Check if keychain is available
-	ks := keychain.New("")
+	testPassword := "RemoveTest-Pass@123"
+	vaultPath := filepath.Join(testDir, "remove-test-vault", "vault.enc")
+
+	// Create vault-specific keychain service (must match what CLI uses)
+	vaultID := filepath.Base(filepath.Dir(vaultPath))
+	ks := keychain.New(vaultID)
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping vault remove integration test")
 	}
-
-	testPassword := "RemoveTest-Pass@123"
-	vaultPath := filepath.Join(testDir, "remove-test-vault", "vault.enc")
 
 	// Ensure clean state
 	defer cleanupKeychain(t, ks)
@@ -242,16 +243,17 @@ func TestIntegration_VaultRemove(t *testing.T) {
 // T013: Integration test for vault remove with metadata
 // Tests that vault remove command writes audit entries (attempt + success) when vault has metadata
 func TestIntegration_VaultRemoveWithMetadata(t *testing.T) {
-	// Check if keychain is available
-	ks := keychain.New("")
-	if !ks.IsAvailable() {
-		t.Skip("System keychain not available - skipping test")
-	}
-
 	testPassword := "RemoveTest-Pass@123"
 	vaultDir := filepath.Join(testDir, "remove-metadata-vault")
 	vaultPath := filepath.Join(vaultDir, "vault.enc")
 	auditLogPath := filepath.Join(vaultDir, "audit.log")
+
+	// Create vault-specific keychain service (must match what CLI uses)
+	vaultID := filepath.Base(vaultDir)
+	ks := keychain.New(vaultID)
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
 
 	// Ensure clean state
 	defer cleanupKeychain(t, ks)
