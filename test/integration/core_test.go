@@ -36,13 +36,13 @@ func TestMain(m *testing.M) {
 	// Build the binary
 	fmt.Println("Building pass-cli binary for integration tests...")
 	buildCmd := exec.Command("go", "build", "-o", binaryName, ".")
-	buildCmd.Dir = ".."
+	buildCmd.Dir = "../.." // From test/integration/ up to project root
 	if err := buildCmd.Run(); err != nil {
 		fmt.Printf("Failed to build binary: %v\n", err)
 		os.Exit(1)
 	}
 
-	binaryPath = filepath.Join("..", binaryName)
+	binaryPath = filepath.Join("../..", binaryName)
 
 	// Convert to absolute path (needed for tests that change directories)
 	var err error
