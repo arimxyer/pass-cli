@@ -1501,7 +1501,7 @@ func TestIntegration_BackupOutput_ErrorMessages(t *testing.T) {
 func TestIntegration_BackupOutput_VerboseMode(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "output-verbose", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "output-verbose")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1586,7 +1586,7 @@ func TestIntegration_BackupOutput_VerboseMode(t *testing.T) {
 func TestIntegration_BackupOutput_WarningMessages(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "output-warnings", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "output-warnings")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1622,7 +1622,7 @@ func TestIntegration_BackupOutput_WarningMessages(t *testing.T) {
 func TestIntegration_BackupOutput_StructureConsistency(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "output-structure", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "output-structure")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1678,7 +1678,7 @@ func TestIntegration_BackupOutput_StructureConsistency(t *testing.T) {
 func TestIntegration_BackupCreate_Performance(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "perf-create", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "perf-create")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1734,7 +1734,7 @@ func TestIntegration_BackupCreate_Performance(t *testing.T) {
 func TestIntegration_BackupRestore_Performance(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "perf-restore", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "perf-restore")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1795,7 +1795,7 @@ func TestIntegration_BackupRestore_Performance(t *testing.T) {
 func TestIntegration_BackupInfo_Performance(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "perf-info", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "perf-info")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1840,7 +1840,7 @@ func TestIntegration_BackupInfo_Performance(t *testing.T) {
 func TestIntegration_BackupInfo_Performance_LargeVault(t *testing.T) {
 	setupTestEnvironment(t)
 
-	vaultPath := filepath.Join(testDir, "perf-info-large", "vault.enc")
+	vaultPath := helpers.SetupTestVaultWithName(t, "perf-info-large")
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
@@ -1893,7 +1893,7 @@ func TestIntegration_BackupPaths_WindowsVsUnix(t *testing.T) {
 
 	t.Run("PathSeparatorConsistency", func(t *testing.T) {
 		// Test that backup paths use OS-appropriate separators
-		vaultPath := filepath.Join(testDir, "platform-sep", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "platform-sep")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -1942,7 +1942,7 @@ func TestIntegration_BackupPaths_WindowsVsUnix(t *testing.T) {
 
 	t.Run("NestedDirectoryPaths", func(t *testing.T) {
 		// Test backup creation with deeply nested paths
-		vaultPath := filepath.Join(testDir, "platform-nested", "level1", "level2", "level3", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "platform-nested/level1/level2/level3")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -1971,7 +1971,7 @@ func TestIntegration_BackupPermissions_Platform(t *testing.T) {
 	setupTestEnvironment(t)
 
 	t.Run("BackupFilePermissions", func(t *testing.T) {
-		vaultPath := filepath.Join(testDir, "platform-perms", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "platform-perms")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -2034,7 +2034,7 @@ func TestIntegration_BackupPermissions_Platform(t *testing.T) {
 	})
 
 	t.Run("RestoredVaultPermissions", func(t *testing.T) {
-		vaultPath := filepath.Join(testDir, "platform-restore-perms", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "platform-restore-perms")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -2078,7 +2078,7 @@ func TestIntegration_BackupDirectory_Platform(t *testing.T) {
 
 	t.Run("DirectoryCreationWithPermissions", func(t *testing.T) {
 		// Test that backup directory is created with correct permissions
-		vaultPath := filepath.Join(testDir, "platform-dirperms", "newdir", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "platform-dirperms/newdir")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -2111,7 +2111,7 @@ func TestIntegration_BackupDirectory_Platform(t *testing.T) {
 
 	t.Run("BackupInNonExistentDirectory", func(t *testing.T) {
 		// Test creating backup when backup directory doesn't exist
-		vaultPath := filepath.Join(testDir, "platform-nodir", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "platform-nodir")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -2144,7 +2144,7 @@ func TestIntegration_BackupPaths_Normalization(t *testing.T) {
 		// Test that relative paths are normalized correctly
 		// Note: Most commands expect absolute paths, but test edge cases
 
-		vaultPath := filepath.Join(testDir, "platform-relpath", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "platform-relpath")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -2182,7 +2182,7 @@ func TestIntegration_BackupPaths_Normalization(t *testing.T) {
 
 	t.Run("PathWithSpaces", func(t *testing.T) {
 		// Test that paths with spaces are handled correctly
-		vaultPath := filepath.Join(testDir, "platform spaces", "my vault", "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "platform spaces/my vault")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -2219,7 +2219,7 @@ func TestIntegration_BackupPaths_Normalization(t *testing.T) {
 			specialName = "vault-test_123@special"
 		}
 
-		vaultPath := filepath.Join(testDir, "platform-special", specialName, "vault.enc")
+		vaultPath := helpers.SetupTestVaultWithName(t, "platform-special/"+specialName)
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 

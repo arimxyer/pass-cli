@@ -16,6 +16,8 @@ const (
 // setupTestVaultConfig creates a temporary config file with a custom vault_path
 // and returns the config file path and cleanup function.
 //
+// Deprecated: Use helpers.SetupTestVaultConfig instead for consistency.
+//
 //nolint:unused // Used in integration tests (build tag: integration)
 func setupTestVaultConfig(t *testing.T, vaultPath string) (configPath string, cleanup func()) {
 	t.Helper()
@@ -53,6 +55,8 @@ func setupTestVaultConfig(t *testing.T, vaultPath string) (configPath string, cl
 // Walks the directory to find all vault.enc files and cleans up ALL keychain entries:
 // - Master password entries (vault-specific and legacy global)
 // - Audit HMAC key entries
+//
+// Deprecated: Use helpers.CleanupVaultDir or helpers.SetupTestVaultWithName (automatic cleanup) instead.
 //
 //nolint:unused // Used in integration tests (build tag: integration)
 func cleanupVaultDir(t *testing.T, vaultDir string) {
@@ -94,6 +98,8 @@ func cleanupVaultDir(t *testing.T, vaultDir string) {
 // cleanupVaultPath removes a specific vault's keychain entries and its parent directory.
 // Use this when you know the exact vault.enc path.
 // Cleans ALL keychain entries: master password (vault-specific + legacy) and audit keys.
+//
+// Deprecated: Use helpers.CleanupVaultPath or helpers.SetupTestVaultWithName (automatic cleanup) instead.
 //
 //nolint:unused // Used in integration tests (build tag: integration)
 func cleanupVaultPath(t *testing.T, vaultPath string) {
