@@ -96,16 +96,22 @@ func CleanupVaultPath(t *testing.T, vaultPath string) {
 
 // CleanupKeychain removes keychain entries for a vault.
 // Call this to clean up keychain entries without removing files.
+// Cleans both vault-specific entries (new format) and legacy global entry.
 func CleanupKeychain(t *testing.T, vaultPath string) {
 	t.Helper()
 
-	// Clean up keychain entries
-	_ = keyring.Delete(KeychainService, vaultPath)
-	_ = keyring.Delete(AuditKeyService, vaultPath)
-
-	// Also clean by vault directory name
+	// Derive vault ID from path
 	vaultID := filepath.Base(filepath.Dir(vaultPath))
-	_ = keyring.Delete(KeychainService, vaultID)
+
+	// Clean up vault-specific keychain entry (new format: master-password-<vaultID>)
+	vaultSpecificAccount := "master-password-" + vaultID
+	_ = keyring.Delete(KeychainService, vaultSpecificAccount)
+
+	// Clean up legacy global keychain entry
+	_ = keyring.Delete(KeychainService, "master-password")
+
+	// Clean up audit keychain entries
+	_ = keyring.Delete(AuditKeyService, vaultPath)
 	_ = keyring.Delete(AuditKeyService, vaultID)
 }
 

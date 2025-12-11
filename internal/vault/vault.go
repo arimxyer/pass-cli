@@ -126,11 +126,15 @@ func New(vaultPath string) (*VaultService, error) {
 		return nil, fmt.Errorf("failed to create storage service: %w", err)
 	}
 
+	// Extract vault ID from path for vault-specific keychain entries
+	vaultDir := filepath.Dir(vaultPath)
+	vaultID := filepath.Base(vaultDir)
+
 	v := &VaultService{
 		vaultPath:       vaultPath,
 		cryptoService:   cryptoService,
 		storageService:  storageService,
-		keychainService: keychain.New(),
+		keychainService: keychain.New(vaultID),
 		unlocked:        false,
 		auditEnabled:    false,                               // T066: Default disabled per FR-025
 		rateLimiter:     security.NewValidationRateLimiter(), // T051a: Initialize rate limiter
@@ -804,9 +808,28 @@ func (v *VaultService) UnlockWithKeychain() error {
 		return ErrKeychainNotEnabled
 	}
 
-	// Attempt to retrieve password from keychain
+	// Attempt to retrieve password from vault-specific keychain entry
 	// This uses keyring.Get() which doesn't require GUI authorization on macOS
 	password, err := v.keychainService.Retrieve()
+
+	// If vault-specific entry not found, try auto-migration from global entry
+	if err == keychain.ErrPasswordNotFound {
+		migrated, migrateErr := v.keychainService.MigrateFromGlobal()
+		if migrateErr != nil {
+			// Log warning but continue - migration is best-effort
+			fmt.Fprintf(os.Stderr, "Warning: keychain migration check failed: %v\n", migrateErr)
+		} else if migrated {
+			// Migration succeeded, try retrieve again
+			password, err = v.keychainService.Retrieve()
+			if err == nil {
+				fmt.Fprintf(os.Stderr, "Migrated keychain entry to vault-specific storage\n")
+				// Clean up global entry after successful migration and unlock
+				// This is safe because we have the password and can re-store if needed
+				_ = v.keychainService.DeleteGlobal()
+			}
+		}
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to retrieve password from keychain: %w", err)
 	}

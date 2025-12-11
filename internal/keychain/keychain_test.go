@@ -18,7 +18,7 @@ type testKeychainService struct {
 }
 
 func newTestKeychainService() *testKeychainService {
-	return &testKeychainService{KeychainService: New()}
+	return &testKeychainService{KeychainService: New("")}
 }
 
 func (tks *testKeychainService) Store(password string) error {
@@ -42,9 +42,22 @@ func (tks *testKeychainService) Delete() error {
 }
 
 func TestNew(t *testing.T) {
-	ks := New()
+	// Test with empty vaultID (legacy/global behavior)
+	ks := New("")
 	if ks == nil {
-		t.Fatal("New() returned nil")
+		t.Fatal("New(\"\") returned nil")
+	}
+	if ks.vaultID != "" {
+		t.Errorf("vaultID = %q, want empty string", ks.vaultID)
+	}
+
+	// Test with vault ID
+	ksVault := New("test-vault")
+	if ksVault == nil {
+		t.Fatal("New(\"test-vault\") returned nil")
+	}
+	if ksVault.vaultID != "test-vault" {
+		t.Errorf("vaultID = %q, want %q", ksVault.vaultID, "test-vault")
 	}
 
 	// Availability depends on the test environment
@@ -282,7 +295,7 @@ func TestMultipleStoreOverwrites(t *testing.T) {
 
 // TestCheckAvailability verifies the lazy initialization behavior
 func TestCheckAvailability(t *testing.T) {
-	ks := New()
+	ks := New("")
 
 	// IsAvailable() now checks availability on demand by calling Ping()
 	// So it should return the actual availability status
@@ -310,5 +323,209 @@ func TestCheckAvailability(t *testing.T) {
 		if ks.IsAvailable() {
 			t.Error("After failed Ping(), IsAvailable() should return false")
 		}
+	}
+}
+
+// TestSanitizeVaultID tests the vault ID sanitization function
+func TestSanitizeVaultID(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"", ""},
+		{".", ""},
+		{"my-vault", "my-vault"},
+		{"my_vault", "my_vault"},
+		{"MyVault123", "MyVault123"},
+		{"my vault", "my_vault"},
+		{"my/vault", "my_vault"},
+		{"my\\vault", "my_vault"},
+		{"my:vault", "my_vault"},
+		{"vault-with-dashes", "vault-with-dashes"},
+		{"vault_with_underscores", "vault_with_underscores"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.input, func(t *testing.T) {
+			result := sanitizeVaultID(tc.input)
+			if result != tc.expected {
+				t.Errorf("sanitizeVaultID(%q) = %q, want %q", tc.input, result, tc.expected)
+			}
+		})
+	}
+}
+
+// TestAccountName tests the account name generation
+func TestAccountName(t *testing.T) {
+	tests := []struct {
+		vaultID  string
+		expected string
+	}{
+		{"", "master-password"},
+		{"my-vault", "master-password-my-vault"},
+		{"test_vault", "master-password-test_vault"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.vaultID, func(t *testing.T) {
+			ks := New(tc.vaultID)
+			result := ks.accountName()
+			if result != tc.expected {
+				t.Errorf("accountName() = %q, want %q", result, tc.expected)
+			}
+		})
+	}
+}
+
+// TestVaultIsolation verifies that different vaults have isolated keychain entries
+func TestVaultIsolation(t *testing.T) {
+	ks1 := New("vault1")
+	ks2 := New("vault2")
+
+	if !ks1.IsAvailable() {
+		t.Skip("Keychain not available in test environment")
+	}
+
+	// Clean up before test
+	_ = ks1.Delete()
+	_ = ks2.Delete()
+
+	// Store different passwords in different vaults
+	password1 := "password-for-vault1"
+	password2 := "password-for-vault2"
+
+	if err := ks1.Store(password1); err != nil {
+		t.Fatalf("Failed to store password1: %v", err)
+	}
+	if err := ks2.Store(password2); err != nil {
+		t.Fatalf("Failed to store password2: %v", err)
+	}
+
+	// Retrieve and verify isolation
+	retrieved1, err := ks1.Retrieve()
+	if err != nil {
+		t.Fatalf("Failed to retrieve password1: %v", err)
+	}
+	if retrieved1 != password1 {
+		t.Errorf("Vault1 password = %q, want %q", retrieved1, password1)
+	}
+
+	retrieved2, err := ks2.Retrieve()
+	if err != nil {
+		t.Fatalf("Failed to retrieve password2: %v", err)
+	}
+	if retrieved2 != password2 {
+		t.Errorf("Vault2 password = %q, want %q", retrieved2, password2)
+	}
+
+	// Clean up
+	_ = ks1.Delete()
+	_ = ks2.Delete()
+}
+
+// TestMigrationFromGlobal tests the migration from global to vault-specific entry
+func TestMigrationFromGlobal(t *testing.T) {
+	ksGlobal := New("")
+	ksVault := New("test-migration-vault")
+
+	if !ksGlobal.IsAvailable() {
+		t.Skip("Keychain not available in test environment")
+	}
+
+	// Clean up before test
+	_ = ksGlobal.Delete()
+	_ = ksVault.Delete()
+
+	// Store password in global entry
+	globalPassword := "global-password-to-migrate"
+	if err := ksGlobal.Store(globalPassword); err != nil {
+		t.Fatalf("Failed to store global password: %v", err)
+	}
+
+	// Verify global entry exists
+	if !ksVault.HasGlobalEntry() {
+		t.Fatal("HasGlobalEntry() should return true after storing global password")
+	}
+
+	// Migrate to vault-specific entry
+	migrated, err := ksVault.MigrateFromGlobal()
+	if err != nil {
+		t.Fatalf("MigrateFromGlobal() failed: %v", err)
+	}
+	if !migrated {
+		t.Fatal("MigrateFromGlobal() should return true when global entry exists")
+	}
+
+	// Verify vault-specific entry has the password
+	retrieved, err := ksVault.Retrieve()
+	if err != nil {
+		t.Fatalf("Failed to retrieve migrated password: %v", err)
+	}
+	if retrieved != globalPassword {
+		t.Errorf("Migrated password = %q, want %q", retrieved, globalPassword)
+	}
+
+	// Global entry should still exist (not deleted by MigrateFromGlobal)
+	if !ksVault.HasGlobalEntry() {
+		t.Error("HasGlobalEntry() should still return true after migration")
+	}
+
+	// Delete global entry
+	if err := ksVault.DeleteGlobal(); err != nil {
+		t.Fatalf("DeleteGlobal() failed: %v", err)
+	}
+
+	// Verify global entry is gone
+	if ksVault.HasGlobalEntry() {
+		t.Error("HasGlobalEntry() should return false after DeleteGlobal()")
+	}
+
+	// Vault-specific entry should still exist
+	retrieved, err = ksVault.Retrieve()
+	if err != nil {
+		t.Fatalf("Vault-specific entry should still exist: %v", err)
+	}
+	if retrieved != globalPassword {
+		t.Errorf("Vault-specific password = %q, want %q", retrieved, globalPassword)
+	}
+
+	// Clean up
+	_ = ksVault.Delete()
+}
+
+// TestMigrationNoGlobalEntry tests migration when no global entry exists
+func TestMigrationNoGlobalEntry(t *testing.T) {
+	ksGlobal := New("")
+	ksVault := New("test-no-global-vault")
+
+	if !ksGlobal.IsAvailable() {
+		t.Skip("Keychain not available in test environment")
+	}
+
+	// Clean up - ensure no global entry exists
+	_ = ksGlobal.Delete()
+	_ = ksVault.Delete()
+
+	// Attempt migration when no global entry exists
+	migrated, err := ksVault.MigrateFromGlobal()
+	if err != nil {
+		t.Fatalf("MigrateFromGlobal() failed: %v", err)
+	}
+	if migrated {
+		t.Error("MigrateFromGlobal() should return false when no global entry exists")
+	}
+}
+
+// TestMigrationWithEmptyVaultID tests that migration is skipped for global service
+func TestMigrationWithEmptyVaultID(t *testing.T) {
+	ksGlobal := New("")
+
+	// Migration should be skipped for global service
+	migrated, err := ksGlobal.MigrateFromGlobal()
+	if err != nil {
+		t.Fatalf("MigrateFromGlobal() failed: %v", err)
+	}
+	if migrated {
+		t.Error("MigrateFromGlobal() should return false for global service")
 	}
 }
