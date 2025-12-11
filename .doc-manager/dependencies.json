@@ -4,7 +4,7 @@
     "tool_version": "1.2.4",
     "warning": "AUTO-GENERATED FILE - Do not edit manually. Changes will be overwritten by doc-manager."
   },
-  "generated_at": "2025-12-10T17:04:47.490588",
+  "generated_at": "2025-12-11T15:18:36.927107",
   "doc_to_code": {
     "01-getting-started/manual-install.md": [
       "cmd/init.go",
