@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.1] - 2025-12-10
+
+### Fixed
+- **TUI Help Modal**: Improved styling and usability
+  - Changed scroll instructions from "PgUp/PgDn" to "↑/↓ Arrow Keys"
+  - Added visible row highlight (navy background + bold) for better focus tracking
+  - Centered title "Keyboard Shortcuts" above shortcuts table
+  - Split footer into two lines for better readability
+- **TUI Detail Panel**: Improved visual styling
+  - Changed label color from gray to lightSlateGray for better contrast
+  - Centered section headers ("Metadata", "Usage Locations") within separator width
+  - Added 2-space indent to separators for visual balance
+
+### Testing
+- Added keychain cleanup to integration test teardown to prevent orphaned credentials
+
 ## [0.12.0] - 2025-12-10
 
 ### Added
