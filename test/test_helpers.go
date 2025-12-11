@@ -94,3 +94,18 @@ func cleanupVaultPath(t *testing.T, vaultPath string) {
 	// Remove the parent directory (which contains the vault)
 	_ = os.RemoveAll(filepath.Dir(vaultPath))
 }
+
+// cleanupKeychain removes keychain entries using KeychainService.
+// This is a compatibility wrapper for old tests.
+// DEPRECATED: Use helpers.CleanupKeychain instead.
+//
+//nolint:unused // Used in integration tests (build tag: integration)
+func cleanupKeychain(t *testing.T, ks interface{}) {
+	t.Helper()
+
+	// Use the keychain service to delete all entries
+	// This is compatible with the old signature cleanupKeychain(t, ks)
+	if ksSvc, ok := ks.(interface{ Clear() error }); ok {
+		_ = ksSvc.Clear() // Best effort cleanup
+	}
+}

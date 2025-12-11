@@ -3,18 +3,20 @@
 package test
 
 import (
-	"bytes"
+	"encoding/json"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"pass-cli/internal/keychain"
+	"pass-cli/internal/vault"
+	"pass-cli/test/helpers"
 )
 
-// TestIntegration_KeychainWorkflow tests the full keychain integration
-func TestIntegration_KeychainWorkflow(t *testing.T) {
+// TestKeychain_FullWorkflow tests the complete keychain integration workflow
+func TestKeychain_FullWorkflow(t *testing.T) {
 	// Check if keychain is available before running tests
 	ks := keychain.New()
 	if !ks.IsAvailable() {
@@ -25,35 +27,27 @@ func TestIntegration_KeychainWorkflow(t *testing.T) {
 	vaultPath := filepath.Join(testDir, "keychain-vault", "vault.enc")
 
 	// Ensure clean state
-	defer cleanupKeychain(t, ks)
+	defer helpers.CleanupKeychain(t, vaultPath)
+	defer helpers.CleanupVaultPath(t, vaultPath)
 
 	t.Run("1_Init_With_Keychain", func(t *testing.T) {
 		// Setup config with vault_path
-		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
 		// Initialize vault with --use-keychain flag
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-		cmd := exec.Command(binaryPath, "init", "--use-keychain")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		cmd.Stdin = strings.NewReader(input)
-
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		err := cmd.Run()
+		input := helpers.BuildInitStdinWithKeychain(testPassword, true)
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "init", "--use-keychain")
 		if err != nil {
-			t.Fatalf("Init with keychain failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+			t.Fatalf("Init with keychain failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 		}
 
-		output := stdout.String()
-		if !strings.Contains(output, "successfully") && !strings.Contains(output, "initialized") {
-			t.Errorf("Expected success message in output, got: %s", output)
+		if !strings.Contains(stdout, "successfully") && !strings.Contains(stdout, "initialized") {
+			t.Errorf("Expected success message in output, got: %s", stdout)
 		}
 
-		if !strings.Contains(output, "keychain") {
-			t.Errorf("Expected keychain confirmation in output, got: %s", output)
+		if !strings.Contains(stdout, "keychain") {
+			t.Errorf("Expected keychain confirmation in output, got: %s", stdout)
 		}
 
 		// Verify vault file was created
@@ -73,147 +67,99 @@ func TestIntegration_KeychainWorkflow(t *testing.T) {
 	})
 
 	t.Run("2_Add_Without_Password_Prompt", func(t *testing.T) {
-		// Reuse config from previous test
-		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
 		// Add credential - should NOT prompt for master password (uses keychain)
 		input := "testuser\n" + "testpass123\n" // Only username and credential password
-		cmd := exec.Command(binaryPath, "add", "github.com")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		cmd.Stdin = strings.NewReader(input)
-
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		err := cmd.Run()
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "add", "github.com")
 		if err != nil {
-			t.Fatalf("Add failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+			t.Fatalf("Add failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 		}
 
-		output := stdout.String()
-		if !strings.Contains(output, "added") && !strings.Contains(output, "successfully") {
-			t.Errorf("Expected success message, got: %s", output)
+		if !strings.Contains(stdout, "added") && !strings.Contains(stdout, "successfully") {
+			t.Errorf("Expected success message, got: %s", stdout)
 		}
 
 		// Should NOT contain "Master password:" prompt
-		allOutput := stdout.String() + stderr.String()
+		allOutput := stdout + stderr
 		if strings.Contains(allOutput, "Master password:") {
 			t.Error("Unexpected master password prompt - keychain should have been used")
 		}
 	})
 
 	t.Run("3_Get_Without_Password_Prompt", func(t *testing.T) {
-		// Reuse config
-		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
 		// Get credential - should NOT prompt for master password
-		cmd := exec.Command(binaryPath, "get", "github.com", "--no-clipboard")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		err := cmd.Run()
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, "", "get", "github.com", "--no-clipboard")
 		if err != nil {
-			t.Fatalf("Get failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+			t.Fatalf("Get failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 		}
 
-		output := stdout.String()
-		if !strings.Contains(output, "testuser") || !strings.Contains(output, "testpass123") {
-			t.Errorf("Expected credential details in output, got: %s", output)
+		if !strings.Contains(stdout, "testuser") || !strings.Contains(stdout, "testpass123") {
+			t.Errorf("Expected credential details in output, got: %s", stdout)
 		}
 
 		// Should NOT contain "Master password:" prompt
-		allOutput := stdout.String() + stderr.String()
+		allOutput := stdout + stderr
 		if strings.Contains(allOutput, "Master password:") {
 			t.Error("Unexpected master password prompt - keychain should have been used")
 		}
 	})
 
 	t.Run("4_List_Without_Password_Prompt", func(t *testing.T) {
-		// Reuse config
-		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
 		// List credentials - should NOT prompt for master password
-		cmd := exec.Command(binaryPath, "list")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		err := cmd.Run()
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, "", "list")
 		if err != nil {
-			t.Fatalf("List failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+			t.Fatalf("List failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 		}
 
-		output := stdout.String()
-		if !strings.Contains(output, "github.com") {
-			t.Errorf("Expected github.com in list output, got: %s", output)
+		if !strings.Contains(stdout, "github.com") {
+			t.Errorf("Expected github.com in list output, got: %s", stdout)
 		}
 
 		// Should NOT contain "Master password:" prompt
-		allOutput := stdout.String() + stderr.String()
+		allOutput := stdout + stderr
 		if strings.Contains(allOutput, "Master password:") {
 			t.Error("Unexpected master password prompt - keychain should have been used")
 		}
 	})
 
 	t.Run("5_Update_Without_Password_Prompt", func(t *testing.T) {
-		// Reuse config
-		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
 		// Update credential - should NOT prompt for master password
-		// Use flags to avoid interactive mode (readPassword() requires terminal)
-		cmd := exec.Command(binaryPath, "update", "github.com", "--username", "updateduser", "--password", "updatedpass456")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		cmd.Stdin = strings.NewReader("") // No input needed with flags
-
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		err := cmd.Run()
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, "", "update", "github.com", "--username", "updateduser", "--password", "updatedpass456")
 		if err != nil {
-			t.Fatalf("Update failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+			t.Fatalf("Update failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 		}
 
 		// Should NOT contain "Master password:" prompt
-		allOutput := stdout.String() + stderr.String()
+		allOutput := stdout + stderr
 		if strings.Contains(allOutput, "Master password:") {
 			t.Error("Unexpected master password prompt - keychain should have been used")
 		}
 	})
 
 	t.Run("6_Delete_Without_Password_Prompt", func(t *testing.T) {
-		// Reuse config
-		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
 		// Delete credential - should NOT prompt for master password
 		input := "y\n" // confirm deletion
-		cmd := exec.Command(binaryPath, "delete", "github.com")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		cmd.Stdin = strings.NewReader(input)
-
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		err := cmd.Run()
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "delete", "github.com")
 		if err != nil {
-			t.Fatalf("Delete failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+			t.Fatalf("Delete failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 		}
 
 		// Should NOT contain "Master password:" prompt in stderr before confirmation
-		// Note: "Master password:" might appear in help text, so we check more specifically
-		stderrOutput := stderr.String()
+		stderrOutput := stderr
 		if strings.Count(stderrOutput, "Master password:") > 0 {
 			// Check if it's actually prompting (before the confirmation)
 			lines := strings.Split(stderrOutput, "\n")
@@ -227,8 +173,8 @@ func TestIntegration_KeychainWorkflow(t *testing.T) {
 	})
 }
 
-// TestIntegration_KeychainFallback tests fallback to password prompt
-func TestIntegration_KeychainFallback(t *testing.T) {
+// TestKeychain_Fallback tests fallback to password prompt
+func TestKeychain_Fallback(t *testing.T) {
 	ks := keychain.New()
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping keychain fallback tests")
@@ -238,18 +184,17 @@ func TestIntegration_KeychainFallback(t *testing.T) {
 	vaultPath := filepath.Join(testDir, "fallback-vault", "vault.enc")
 
 	// Ensure clean state
-	defer cleanupKeychain(t, ks)
+	defer helpers.CleanupKeychain(t, vaultPath)
+	defer helpers.CleanupVaultPath(t, vaultPath)
 
 	// Setup config with vault_path
-	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
 	// Initialize vault WITH keychain
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--use-keychain")
-	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	cmd.Stdin = strings.NewReader(input)
-	if err := cmd.Run(); err != nil {
+	input := helpers.BuildInitStdinWithKeychain(testPassword, true)
+	_, _, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "init", "--use-keychain")
+	if err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
 
@@ -260,31 +205,21 @@ func TestIntegration_KeychainFallback(t *testing.T) {
 		}
 
 		// Try to add credential - should now prompt for master password
-		// Reuse parent testConfigPath from deferred setup
 		input := testPassword + "\n"
-		cmd := exec.Command(binaryPath, "add", "test.com", "--username", "testuser", "--password", "testpass")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		cmd.Stdin = strings.NewReader(input)
-
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		err := cmd.Run()
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "add", "test.com", "--username", "testuser", "--password", "testpass")
 		if err != nil {
-			t.Fatalf("Add with password prompt failed: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+			t.Fatalf("Add with password prompt failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 		}
 
 		// Should work successfully even without keychain
-		output := stdout.String()
-		if !strings.Contains(output, "added") && !strings.Contains(output, "successfully") {
-			t.Errorf("Expected success message, got: %s", output)
+		if !strings.Contains(stdout, "added") && !strings.Contains(stdout, "successfully") {
+			t.Errorf("Expected success message, got: %s", stdout)
 		}
 	})
 }
 
-// TestIntegration_KeychainUnavailable tests behavior when keychain is unavailable
-func TestIntegration_KeychainUnavailable(t *testing.T) {
+// TestKeychain_Unavailable tests behavior when keychain is unavailable
+func TestKeychain_Unavailable(t *testing.T) {
 	ks := keychain.New()
 
 	// This test verifies graceful handling when keychain is unavailable
@@ -298,33 +233,25 @@ func TestIntegration_KeychainUnavailable(t *testing.T) {
 
 	t.Run("Init_Without_Keychain_Available", func(t *testing.T) {
 		// Setup config with vault_path
-		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
 		// Try to initialize with --use-keychain when keychain unavailable
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-		cmd := exec.Command(binaryPath, "init", "--use-keychain")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		cmd.Stdin = strings.NewReader(input)
-
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		err := cmd.Run()
+		input := helpers.BuildInitStdinWithKeychain(testPassword, true)
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "init", "--use-keychain")
 
 		// Should either:
 		// 1. Succeed with warning (graceful degradation)
 		// 2. Fail with clear error message
 		if err == nil {
 			// Check for warning in output
-			allOutput := stdout.String() + stderr.String()
+			allOutput := stdout + stderr
 			if !strings.Contains(allOutput, "warning") && !strings.Contains(allOutput, "Warning") {
 				t.Log("Init succeeded without warning when keychain unavailable (acceptable)")
 			}
 		} else {
 			// Check for clear error message
-			allOutput := stdout.String() + stderr.String()
+			allOutput := stdout + stderr
 			if !strings.Contains(allOutput, "keychain") {
 				t.Errorf("Error message should mention keychain when unavailable, got: %s", allOutput)
 			}
@@ -332,8 +259,8 @@ func TestIntegration_KeychainUnavailable(t *testing.T) {
 	})
 }
 
-// TestIntegration_MultipleVaultsKeychain tests multiple vaults with same keychain
-func TestIntegration_MultipleVaultsKeychain(t *testing.T) {
+// TestKeychain_MultipleVaults tests multiple vaults with same keychain
+func TestKeychain_MultipleVaults(t *testing.T) {
 	ks := keychain.New()
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping multiple vaults test")
@@ -347,69 +274,54 @@ func TestIntegration_MultipleVaultsKeychain(t *testing.T) {
 	vault1Path := filepath.Join(testDir, "multi-vault-1", "vault.enc")
 	vault2Path := filepath.Join(testDir, "multi-vault-2", "vault.enc")
 
-	defer cleanupKeychain(t, ks)
+	defer helpers.CleanupKeychain(t, vault1Path)
+	defer helpers.CleanupVaultPath(t, vault1Path)
+	defer helpers.CleanupKeychain(t, vault2Path)
+	defer helpers.CleanupVaultPath(t, vault2Path)
 
 	t.Run("First_Vault_Init", func(t *testing.T) {
 		// Setup config for vault 1
-		testConfigPath1, cleanup := setupTestVaultConfig(t, vault1Path)
+		testConfigPath1, cleanup := helpers.SetupTestVaultConfig(t, vault1Path)
 		defer cleanup()
 
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-		cmd := exec.Command(binaryPath, "init", "--use-keychain")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath1)
-		cmd.Stdin = strings.NewReader(input)
-
-		if err := cmd.Run(); err != nil {
+		input := helpers.BuildInitStdinWithKeychain(testPassword, true)
+		_, _, err := helpers.RunCmd(t, binaryPath, testConfigPath1, input, "init", "--use-keychain")
+		if err != nil {
 			t.Fatalf("Failed to init vault 1: %v", err)
 		}
 	})
 
 	t.Run("Second_Vault_With_Same_Password", func(t *testing.T) {
 		// Setup config for vault 2
-		testConfigPath2, cleanup2 := setupTestVaultConfig(t, vault2Path)
+		testConfigPath2, cleanup2 := helpers.SetupTestVaultConfig(t, vault2Path)
 		defer cleanup2()
 
 		// Initialize second vault with same password
-		// It will use the same keychain entry
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-		cmd := exec.Command(binaryPath, "init", "--use-keychain")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath2)
-		cmd.Stdin = strings.NewReader(input)
-
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		err := cmd.Run()
+		input := helpers.BuildInitStdinWithKeychain(testPassword, true)
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath2, input, "init", "--use-keychain")
 		if err != nil {
-			t.Fatalf("Failed to init vault 2: %v\nStdout: %s\nStderr: %s", err, stdout.String(), stderr.String())
+			t.Fatalf("Failed to init vault 2: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
 		}
 
 		// Add credential to vault 2 using keychain
 		input = "user2\n" + "pass2\n"
-		cmd = exec.Command(binaryPath, "add", "service2.com")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath2)
-		cmd.Stdin = strings.NewReader(input)
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		if err := cmd.Run(); err != nil {
+		_, _, err = helpers.RunCmd(t, binaryPath, testConfigPath2, input, "add", "service2.com")
+		if err != nil {
 			t.Fatalf("Failed to add to vault 2: %v", err)
 		}
 
 		// Verify vault 1 still works with same keychain
-		testConfigPath1, cleanup1 := setupTestVaultConfig(t, vault1Path)
+		testConfigPath1, cleanup1 := helpers.SetupTestVaultConfig(t, vault1Path)
 		defer cleanup1()
-		cmd = exec.Command(binaryPath, "list")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath1)
-		if err := cmd.Run(); err != nil {
+		_, _, err = helpers.RunCmd(t, binaryPath, testConfigPath1, "", "list")
+		if err != nil {
 			t.Errorf("Vault 1 should still work after vault 2 operations: %v", err)
 		}
 	})
 }
 
-// TestIntegration_KeychainVerboseOutput tests verbose mode shows keychain usage
-func TestIntegration_KeychainVerboseOutput(t *testing.T) {
+// TestKeychain_VerboseOutput tests verbose mode shows keychain usage
+func TestKeychain_VerboseOutput(t *testing.T) {
 	ks := keychain.New()
 	if !ks.IsAvailable() {
 		t.Skip("System keychain not available - skipping verbose output test")
@@ -418,37 +330,29 @@ func TestIntegration_KeychainVerboseOutput(t *testing.T) {
 	testPassword := "Verbose-Test-Pass@321"
 	vaultPath := filepath.Join(testDir, "verbose-vault", "vault.enc")
 
-	defer cleanupKeychain(t, ks)
+	defer helpers.CleanupKeychain(t, vaultPath)
+	defer helpers.CleanupVaultPath(t, vaultPath)
 
 	// Setup config with vault_path
-	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
+	testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
 	// Initialize with keychain
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
-	cmd := exec.Command(binaryPath, "init", "--use-keychain")
-	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	cmd.Stdin = strings.NewReader(input)
-	if err := cmd.Run(); err != nil {
+	input := helpers.BuildInitStdinWithKeychain(testPassword, true)
+	_, _, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "init", "--use-keychain")
+	if err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
 
 	t.Run("Verbose_Shows_Keychain_Usage", func(t *testing.T) {
 		// Run list command with --verbose flag
-		// Reuse parent testConfigPath from deferred setup
-		cmd := exec.Command(binaryPath, "--verbose", "list")
-		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-
-		if err := cmd.Run(); err != nil {
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, "", "--verbose", "list")
+		if err != nil {
 			t.Fatalf("List with verbose failed: %v", err)
 		}
 
 		// Check if verbose output mentions keychain usage
-		allOutput := stdout.String() + stderr.String()
+		allOutput := stdout + stderr
 		if !strings.Contains(allOutput, "keychain") && !strings.Contains(allOutput, "Keychain") {
 			t.Logf("Verbose mode output:\n%s", allOutput)
 			t.Skip("Verbose keychain message may not be implemented yet")
@@ -456,10 +360,609 @@ func TestIntegration_KeychainVerboseOutput(t *testing.T) {
 	})
 }
 
-// cleanupKeychain removes test keychain entries
-func cleanupKeychain(t *testing.T, ks *keychain.KeychainService) {
-	t.Helper()
-	if err := ks.Clear(); err != nil && err != keychain.ErrKeychainUnavailable {
-		t.Logf("Warning: failed to clean up keychain: %v", err)
+// TestKeychain_Enable tests the keychain enable command
+func TestKeychain_Enable(t *testing.T) {
+	// Check if keychain is available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping keychain enable integration test")
 	}
+
+	testPassword := "EnableTest-Pass@123"
+	vaultPath := filepath.Join(testDir, "enable-test-vault", "vault.enc")
+
+	// Ensure clean state
+	defer helpers.CleanupKeychain(t, vaultPath)
+	defer helpers.CleanupVaultPath(t, vaultPath)
+
+	// Step 1: Initialize vault WITHOUT --use-keychain
+	t.Run("1_Init_Without_Keychain", func(t *testing.T) {
+		// Setup config with vault_path
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+
+		input := helpers.BuildInitStdinNoRecovery(testPassword, false)
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "init", "--no-recovery")
+		if err != nil {
+			t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+		}
+
+		// Verify vault file was created
+		if _, err := os.Stat(vaultPath); os.IsNotExist(err) {
+			t.Error("Vault file was not created")
+		}
+
+		// Verify password is NOT in keychain
+		_, err = ks.Retrieve()
+		if err == nil {
+			t.Error("Password should NOT be in keychain after init without --use-keychain")
+		}
+	})
+
+	// Step 2: Run keychain enable command
+	t.Run("2_Enable_Keychain", func(t *testing.T) {
+		input := testPassword + "\n"
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "keychain", "enable")
+		if err != nil {
+			t.Fatalf("Keychain enable failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+		}
+
+		if !strings.Contains(stdout, "enabled") {
+			t.Errorf("Expected success message containing 'enabled', got: %s", stdout)
+		}
+
+		// Verify password is NOW in keychain
+		retrievedPassword, err := ks.Retrieve()
+		if err != nil {
+			t.Fatalf("Password was not stored in keychain: %v", err)
+		}
+
+		if retrievedPassword != testPassword {
+			t.Errorf("Keychain password = %q, want %q", retrievedPassword, testPassword)
+		}
+	})
+
+	// Step 3: Verify subsequent commands don't prompt for password
+	t.Run("3_Add_Without_Password_Prompt", func(t *testing.T) {
+		// Add credential - should NOT prompt for master password (uses keychain)
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		input := "testuser\n" + "testpass123\n" // Only username and credential password
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "add", "github.com")
+		if err != nil {
+			t.Fatalf("Add failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+		}
+
+		// Should NOT contain "Master password:" prompt
+		allOutput := stdout + stderr
+		if strings.Contains(allOutput, "Master password:") {
+			t.Error("Unexpected master password prompt - keychain should have been used")
+		}
+	})
+
+	// Step 4: Test --force flag (overwrite existing keychain entry)
+	t.Run("4_Enable_With_Force", func(t *testing.T) {
+		input := testPassword + "\n"
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "keychain", "enable", "--force")
+		if err != nil {
+			t.Fatalf("Keychain enable --force failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+		}
+
+		// Verify password still in keychain
+		retrievedPassword, err := ks.Retrieve()
+		if err != nil {
+			t.Fatalf("Password was not in keychain after --force: %v", err)
+		}
+
+		if retrievedPassword != testPassword {
+			t.Errorf("Keychain password = %q, want %q", retrievedPassword, testPassword)
+		}
+	})
+}
+
+// TestKeychain_Status tests the keychain status command
+func TestKeychain_Status(t *testing.T) {
+	// Check if keychain is available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping keychain status integration test")
+	}
+
+	testPassword := "StatusTest-Pass@123"
+	vaultPath := filepath.Join(testDir, "status-test-vault", "vault.enc")
+
+	// Ensure clean state
+	defer helpers.CleanupKeychain(t, vaultPath)
+	defer helpers.CleanupVaultPath(t, vaultPath)
+
+	// Step 1: Initialize vault WITHOUT keychain
+	t.Run("1_Init_Without_Keychain", func(t *testing.T) {
+		// Setup config with vault_path
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+
+		// Input: password, confirm, no keychain
+		input := helpers.BuildInitStdinNoRecovery(testPassword, false)
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "init", "--no-recovery")
+		if err != nil {
+			t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+		}
+
+		// Verify vault file was created
+		if _, err := os.Stat(vaultPath); os.IsNotExist(err) {
+			t.Error("Vault file was not created")
+		}
+	})
+
+	// Step 2: Check status BEFORE enabling keychain
+	t.Run("2_Status_Before_Enable", func(t *testing.T) {
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, "", "keychain", "status")
+		if err != nil {
+			t.Errorf("Status command should not error (exit 0): %v\nStderr: %s", err, stderr)
+		}
+
+		if !strings.Contains(stdout, "Available") {
+			t.Errorf("Expected output to contain 'Available', got: %s", stdout)
+		}
+		if !strings.Contains(stdout, "No") && !strings.Contains(stdout, "not enabled") {
+			t.Errorf("Expected output to indicate password not stored, got: %s", stdout)
+		}
+		if !strings.Contains(stdout, "pass-cli keychain enable") {
+			t.Errorf("Expected actionable suggestion to enable keychain, got: %s", stdout)
+		}
+	})
+
+	// Step 3: Enable keychain
+	t.Run("3_Enable_Keychain", func(t *testing.T) {
+		input := testPassword + "\n"
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "keychain", "enable")
+		if err != nil {
+			t.Fatalf("Keychain enable failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+		}
+	})
+
+	// Step 4: Check status AFTER enabling keychain
+	t.Run("4_Status_After_Enable", func(t *testing.T) {
+		testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
+		defer cleanup()
+		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, "", "keychain", "status")
+		if err != nil {
+			t.Errorf("Status command should not error (exit 0): %v\nStderr: %s", err, stderr)
+		}
+
+		if !strings.Contains(stdout, "Available") {
+			t.Errorf("Expected output to contain 'Available', got: %s", stdout)
+		}
+		if !strings.Contains(stdout, "Yes") && !strings.Contains(stdout, "enabled") {
+			t.Errorf("Expected output to indicate password is stored, got: %s", stdout)
+		}
+
+		// Verify backend name is displayed (platform-specific)
+		hasBackend := strings.Contains(stdout, "Windows Credential Manager") ||
+			strings.Contains(stdout, "macOS Keychain") ||
+			strings.Contains(stdout, "Linux Secret Service")
+		if !hasBackend {
+			t.Errorf("Expected output to contain backend name, got: %s", stdout)
+		}
+	})
+}
+
+// TestKeychain_StatusWithMetadata tests that keychain status command writes audit entry
+func TestKeychain_StatusWithMetadata(t *testing.T) {
+	// Check if keychain is available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
+
+	testPassword := "MetadataTest-Pass@123"
+	vaultDir := filepath.Join(testDir, "metadata-status-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	auditLogPath := filepath.Join(vaultDir, "audit.log")
+
+	// Ensure clean state
+	defer helpers.CleanupKeychain(t, vaultPath)
+	defer helpers.CleanupVaultDir(t, vaultDir)
+
+	// Create vault with audit enabled
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	// Setup config with vault_path
+	testConfigPath, cleanup := helpers.SetupTestVaultConfig(t, vaultPath)
+	defer cleanup()
+
+	// Initialize vault with audit
+	input := helpers.BuildInitStdinNoRecovery(testPassword, false)
+	stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, input, "init", "--no-recovery")
+	if err != nil {
+		t.Fatalf("Init with audit failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+	}
+
+	// Verify metadata file created
+	metaPath := vaultPath + ".meta.json"
+	if _, err := os.Stat(metaPath); os.IsNotExist(err) {
+		t.Fatal("Metadata file was not created")
+	}
+
+	// Get initial audit log line count
+	initialLines := 0
+	if _, err := os.Stat(auditLogPath); err == nil {
+		data, _ := os.ReadFile(auditLogPath)
+		initialLines = len(strings.Split(string(data), "\n")) - 1
+	}
+
+	// Run keychain status command
+	stdout, stderr, err = helpers.RunCmd(t, binaryPath, testConfigPath, "", "keychain", "status")
+	if err != nil {
+		t.Fatalf("Keychain status failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
+	}
+
+	// Verify audit entry written
+	time.Sleep(100 * time.Millisecond) // Allow audit flush
+	data, err := os.ReadFile(auditLogPath)
+	if err != nil {
+		t.Fatalf("Failed to read audit log: %v", err)
+	}
+
+	auditLines := strings.Split(string(data), "\n")
+	newLines := len(auditLines) - initialLines - 1
+
+	if newLines < 1 {
+		t.Fatal("No audit entry written for keychain status command")
+	}
+
+	// Verify last audit entry has correct event_type
+	lastLine := auditLines[len(auditLines)-2] // -2 because last is empty
+	var auditEntry map[string]interface{}
+	if err := json.Unmarshal([]byte(lastLine), &auditEntry); err != nil {
+		t.Fatalf("Failed to parse audit entry: %v", err)
+	}
+
+	eventType, ok := auditEntry["event_type"].(string)
+	if !ok {
+		t.Fatal("Audit entry missing event_type field")
+	}
+
+	// Verify event type matches constant from internal/security/audit.go
+	if eventType != "keychain_status" {
+		t.Errorf("Expected event_type 'keychain_status', got %q", eventType)
+	}
+
+	outcome, ok := auditEntry["outcome"].(string)
+	if !ok || outcome == "" {
+		t.Error("Audit entry missing outcome field")
+	}
+
+	t.Logf("Audit entry written: event_type=%s, outcome=%s", eventType, outcome)
+}
+
+// TestKeychain_PersistenceAfterRestart simulates the upgrade scenario
+func TestKeychain_PersistenceAfterRestart(t *testing.T) {
+	// Skip if keychain is not available
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
+
+	testPassword := "PersistenceTest-Pass@123"
+	vaultDir := filepath.Join(testDir, "keychain-persistence-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	metadataPath := vaultPath + ".meta.json"
+
+	// Clean up before and after
+	defer helpers.CleanupKeychain(t, vaultPath)
+	defer helpers.CleanupVaultDir(t, vaultDir)
+	_ = os.RemoveAll(vaultDir)
+	_ = ks.Delete() // Clear any existing keychain entry
+
+	// Create vault directory
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	// PHASE 1: Initial setup (like first install)
+	t.Log("Phase 1: Creating vault with keychain enabled...")
+
+	vs1, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	// Initialize vault
+	if err := vs1.Initialize([]byte(testPassword), false, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	// Enable keychain (stores password + sets metadata.KeychainEnabled = true)
+	if err := vs1.EnableKeychain([]byte(testPassword), false); err != nil {
+		t.Fatalf("Failed to enable keychain: %v", err)
+	}
+
+	// Verify metadata file was created with correct content
+	if _, err := os.Stat(metadataPath); os.IsNotExist(err) {
+		t.Fatal("FAIL: Metadata file was not created after EnableKeychain()")
+	}
+
+	meta1, err := vault.LoadMetadata(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to load metadata: %v", err)
+	}
+	if !meta1.KeychainEnabled {
+		t.Fatal("FAIL: Metadata.KeychainEnabled should be true after EnableKeychain()")
+	}
+	t.Log("  - Metadata file created with KeychainEnabled=true")
+
+	// Verify password is in keychain
+	storedPassword, err := ks.Retrieve()
+	if err != nil {
+		t.Fatalf("FAIL: Password not stored in keychain: %v", err)
+	}
+	if storedPassword != testPassword {
+		t.Fatal("FAIL: Stored password doesn't match original")
+	}
+	t.Log("  - Password stored in keychain")
+
+	// PHASE 2: Simulate app restart / binary update
+	t.Log("Phase 2: Simulating restart (new VaultService instance)...")
+
+	// Create completely NEW VaultService instance
+	vs2, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create second vault service: %v", err)
+	}
+
+	// PHASE 3: Verify auto-unlock works
+	t.Log("Phase 3: Verifying keychain auto-unlock...")
+
+	// This is THE critical test - can UnlockWithKeychain() work after "restart"?
+	err = vs2.UnlockWithKeychain()
+	if err != nil {
+		t.Fatalf("FAIL: UnlockWithKeychain() failed after restart: %v\n"+
+			"This simulates the bug where users need to run 'keychain enable --force' after updates", err)
+	}
+
+	if !vs2.IsUnlocked() {
+		t.Fatal("FAIL: Vault should be unlocked after UnlockWithKeychain()")
+	}
+	t.Log("  - UnlockWithKeychain() succeeded")
+
+	// Verify we can actually access credentials (proves unlock worked)
+	creds, err := vs2.ListCredentials()
+	if err != nil {
+		t.Fatalf("FAIL: ListCredentials() failed after keychain unlock: %v", err)
+	}
+	t.Logf("  - Successfully accessed vault (credential count: %d)", len(creds))
+
+	t.Log("SUCCESS: Keychain persistence works correctly across restart")
+}
+
+// TestKeychain_PersistenceMetadataIntegrity verifies metadata file integrity
+func TestKeychain_PersistenceMetadataIntegrity(t *testing.T) {
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
+
+	testPassword := "MetadataIntegrity-Pass@123"
+	vaultDir := filepath.Join(testDir, "metadata-integrity-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	metadataPath := vaultPath + ".meta.json"
+
+	defer helpers.CleanupKeychain(t, vaultPath)
+	defer helpers.CleanupVaultDir(t, vaultDir)
+	_ = os.RemoveAll(vaultDir)
+	_ = ks.Delete()
+
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	// Create and initialize vault with keychain
+	vs, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs.Initialize([]byte(testPassword), false, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	if err := vs.EnableKeychain([]byte(testPassword), false); err != nil {
+		t.Fatalf("Failed to enable keychain: %v", err)
+	}
+
+	// Read metadata file directly to verify actual disk content
+	metadataBytes, err := os.ReadFile(metadataPath)
+	if err != nil {
+		t.Fatalf("Failed to read metadata file: %v", err)
+	}
+
+	t.Logf("Metadata file content:\n%s", string(metadataBytes))
+
+	// Verify specific fields through multiple loads
+	for i := 0; i < 3; i++ {
+		meta, err := vault.LoadMetadata(vaultPath)
+		if err != nil {
+			t.Fatalf("Load %d: Failed to load metadata: %v", i+1, err)
+		}
+
+		if !meta.KeychainEnabled {
+			t.Fatalf("Load %d: KeychainEnabled should be true, got false", i+1)
+		}
+
+		if meta.Version != "1.0" {
+			t.Fatalf("Load %d: Version should be '1.0', got '%s'", i+1, meta.Version)
+		}
+	}
+
+	t.Log("SUCCESS: Metadata maintains integrity across multiple reads")
+}
+
+// TestKeychain_PersistenceGracefulDegradation verifies graceful failure
+func TestKeychain_PersistenceGracefulDegradation(t *testing.T) {
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
+
+	testPassword := "Degradation-Pass@123"
+	vaultDir := filepath.Join(testDir, "degradation-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+	metadataPath := vaultPath + ".meta.json"
+
+	defer helpers.CleanupKeychain(t, vaultPath)
+	defer helpers.CleanupVaultDir(t, vaultDir)
+	_ = os.RemoveAll(vaultDir)
+	_ = ks.Delete()
+
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	// Setup: Create vault with keychain enabled
+	vs1, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs1.Initialize([]byte(testPassword), false, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	if err := vs1.EnableKeychain([]byte(testPassword), false); err != nil {
+		t.Fatalf("Failed to enable keychain: %v", err)
+	}
+
+	// Test 1: Delete metadata file - should fail gracefully
+	t.Log("Test 1: Simulating deleted metadata file...")
+	if err := os.Remove(metadataPath); err != nil {
+		t.Fatalf("Failed to delete metadata file: %v", err)
+	}
+
+	vs2, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	err = vs2.UnlockWithKeychain()
+	if err == nil {
+		t.Fatal("FAIL: UnlockWithKeychain() should fail when metadata is missing")
+	}
+	if err != vault.ErrKeychainNotEnabled {
+		t.Logf("  - Got expected error type (details: %v)", err)
+	} else {
+		t.Log("  - Got ErrKeychainNotEnabled as expected")
+	}
+
+	// Restore metadata for next test
+	meta := &vault.Metadata{
+		Version:         "1.0",
+		KeychainEnabled: true,
+	}
+	if err := vault.SaveMetadata(vaultPath, meta); err != nil {
+		t.Fatalf("Failed to restore metadata: %v", err)
+	}
+
+	// Test 2: Delete keychain entry - should fail gracefully
+	t.Log("Test 2: Simulating deleted keychain entry...")
+	if err := ks.Delete(); err != nil {
+		t.Fatalf("Failed to delete keychain entry: %v", err)
+	}
+
+	vs3, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	err = vs3.UnlockWithKeychain()
+	if err == nil {
+		t.Fatal("FAIL: UnlockWithKeychain() should fail when keychain entry is missing")
+	}
+	t.Logf("  - Got expected error: %v", err)
+
+	// Test 3: Manual password unlock should still work
+	t.Log("Test 3: Verifying manual password unlock still works...")
+	if err := vs3.Unlock([]byte(testPassword)); err != nil {
+		t.Fatalf("FAIL: Manual unlock should work even when keychain fails: %v", err)
+	}
+	t.Log("  - Manual password unlock succeeded")
+
+	t.Log("SUCCESS: System degrades gracefully when keychain is unavailable")
+}
+
+// TestKeychain_PersistenceMultipleRestarts simulates multiple app restarts
+func TestKeychain_PersistenceMultipleRestarts(t *testing.T) {
+	ks := keychain.New()
+	if !ks.IsAvailable() {
+		t.Skip("System keychain not available - skipping test")
+	}
+
+	testPassword := "MultiRestart-Pass@123"
+	vaultDir := filepath.Join(testDir, "multi-restart-vault")
+	vaultPath := filepath.Join(vaultDir, "vault.enc")
+
+	defer helpers.CleanupKeychain(t, vaultPath)
+	defer helpers.CleanupVaultDir(t, vaultDir)
+	_ = os.RemoveAll(vaultDir)
+	_ = ks.Delete()
+
+	if err := os.MkdirAll(vaultDir, 0755); err != nil {
+		t.Fatalf("Failed to create vault directory: %v", err)
+	}
+
+	// Initial setup
+	vs, err := vault.New(vaultPath)
+	if err != nil {
+		t.Fatalf("Failed to create vault service: %v", err)
+	}
+
+	if err := vs.Initialize([]byte(testPassword), false, "", ""); err != nil {
+		t.Fatalf("Failed to initialize vault: %v", err)
+	}
+
+	if err := vs.EnableKeychain([]byte(testPassword), false); err != nil {
+		t.Fatalf("Failed to enable keychain: %v", err)
+	}
+
+	// Simulate 5 restarts (like 5 scoop updates)
+	for i := 1; i <= 5; i++ {
+		t.Logf("Restart %d: Creating new VaultService instance...", i)
+
+		vsN, err := vault.New(vaultPath)
+		if err != nil {
+			t.Fatalf("Restart %d: Failed to create vault service: %v", i, err)
+		}
+
+		// Verify keychain unlock works
+		if err := vsN.UnlockWithKeychain(); err != nil {
+			t.Fatalf("Restart %d: UnlockWithKeychain() failed: %v\n"+
+				"This indicates a regression in keychain persistence", i, err)
+		}
+
+		if !vsN.IsUnlocked() {
+			t.Fatalf("Restart %d: Vault not unlocked after UnlockWithKeychain()", i)
+		}
+
+		// Access credentials to prove unlock actually worked
+		_, err = vsN.ListCredentials()
+		if err != nil {
+			t.Fatalf("Restart %d: ListCredentials() failed: %v", i, err)
+		}
+
+		// Lock before next iteration
+		vsN.Lock()
+		t.Logf("  - Restart %d: SUCCESS", i)
+	}
+
+	t.Log("SUCCESS: Keychain persistence works across multiple restarts")
 }
