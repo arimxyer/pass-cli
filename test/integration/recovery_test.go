@@ -13,6 +13,7 @@ import (
 	"pass-cli/internal/crypto"
 	"pass-cli/internal/storage"
 	"pass-cli/internal/vault"
+	"pass-cli/test/helpers"
 )
 
 // ========================================
@@ -345,14 +346,8 @@ func TestRecovery_ChangePasswordWithRecovery(t *testing.T) {
 
 // T035: Integration test: full recovery flow succeeds
 func TestRecovery_FullRecoveryFlowSucceeds(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "recovery-full-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer cleanupVaultDir(t, tempDir)
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	// Cleanup is automatic via t.Cleanup()
+	vaultPath := helpers.SetupTestVaultWithName(t, "recovery-full")
 	originalPassword := "Original123!@#"
 	newPassword := "NewPassword123!@#"
 
@@ -469,14 +464,8 @@ func TestRecovery_FullRecoveryFlowSucceeds(t *testing.T) {
 
 // T036: Integration test: recovery with wrong words fails
 func TestRecovery_WithWrongWordsFails(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "recovery-wrong-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer cleanupVaultDir(t, tempDir)
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	// Cleanup is automatic via t.Cleanup()
+	vaultPath := helpers.SetupTestVaultWithName(t, "recovery-wrong")
 
 	// Create v2 vault with recovery
 	vs, err := vault.New(vaultPath)
@@ -522,14 +511,8 @@ func TestRecovery_WithWrongWordsFails(t *testing.T) {
 
 // T037: Integration test: recovery with wrong passphrase fails
 func TestRecovery_WithWrongPassphraseFails(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "recovery-passphrase-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer cleanupVaultDir(t, tempDir)
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	// Cleanup is automatic via t.Cleanup()
+	vaultPath := helpers.SetupTestVaultWithName(t, "recovery-passphrase")
 	correctPassphrase := []byte("MySecretPassphrase")
 
 	// Create v2 vault with recovery AND passphrase
@@ -565,14 +548,8 @@ func TestRecovery_WithWrongPassphraseFails(t *testing.T) {
 
 // T038: Integration test: password change after recovery works
 func TestRecovery_PasswordChangeAfterRecoveryWorks(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "recovery-pwchange-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer cleanupVaultDir(t, tempDir)
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	// Cleanup is automatic via t.Cleanup()
+	vaultPath := helpers.SetupTestVaultWithName(t, "recovery-pwchange")
 	originalPassword := "Original123!@#"
 	newPassword := "NewSecure123!@#"
 
@@ -647,14 +624,8 @@ func TestRecovery_PasswordChangeAfterRecoveryWorks(t *testing.T) {
 
 // T038.1: Integration test: verify error message does not leak key material (FR-024)
 func TestRecovery_ErrorDoesNotLeakKeyMaterial(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "recovery-leak-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer cleanupVaultDir(t, tempDir)
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	// Cleanup is automatic via t.Cleanup()
+	vaultPath := helpers.SetupTestVaultWithName(t, "recovery-leak")
 
 	// Create v2 vault
 	vs, err := vault.New(vaultPath)
@@ -710,14 +681,8 @@ func TestRecovery_ErrorDoesNotLeakKeyMaterial(t *testing.T) {
 
 // Test v2 vault maintains recovery-wrapped DEK after password change
 func TestRecovery_WrappedDEKPreservedAfterPasswordChange(t *testing.T) {
-	// Create temp directory for vault
-	tempDir, err := os.MkdirTemp("", "recovery-preserve-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer cleanupVaultDir(t, tempDir)
-
-	vaultPath := filepath.Join(tempDir, "vault.enc")
+	// Cleanup is automatic via t.Cleanup()
+	vaultPath := helpers.SetupTestVaultWithName(t, "recovery-preserve")
 
 	// Create v2 vault
 	vs, err := vault.New(vaultPath)
@@ -787,9 +752,8 @@ func TestRecovery_WrappedDEKPreservedAfterPasswordChange(t *testing.T) {
 // T050: Integration test for --no-recovery flag
 func TestRecovery_NoRecoveryFlag(t *testing.T) {
 	t.Run("Init with --no-recovery flag", func(t *testing.T) {
-		// Setup test vault directory
-		vaultDir := t.TempDir()
-		vaultPath := filepath.Join(vaultDir, "vault.enc")
+		// Cleanup is automatic via t.Cleanup()
+		vaultPath := helpers.SetupTestVaultWithName(t, "no-recovery-test1")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -851,9 +815,8 @@ func TestRecovery_NoRecoveryFlag(t *testing.T) {
 	})
 
 	t.Run("Attempt recovery on vault without recovery enabled", func(t *testing.T) {
-		// Setup test vault directory
-		vaultDir := t.TempDir()
-		vaultPath := filepath.Join(vaultDir, "vault.enc")
+		// Cleanup is automatic via t.Cleanup()
+		vaultPath := helpers.SetupTestVaultWithName(t, "no-recovery-test2")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -888,9 +851,8 @@ func TestRecovery_NoRecoveryFlag(t *testing.T) {
 	})
 
 	t.Run("Verify vault still works normally", func(t *testing.T) {
-		// Setup test vault directory
-		vaultDir := t.TempDir()
-		vaultPath := filepath.Join(vaultDir, "vault.enc")
+		// Cleanup is automatic via t.Cleanup()
+		vaultPath := helpers.SetupTestVaultWithName(t, "no-recovery-test3")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -933,9 +895,8 @@ func TestRecovery_NoRecoveryFlag(t *testing.T) {
 	})
 
 	t.Run("Init with --no-recovery skips recovery setup", func(t *testing.T) {
-		// Setup test vault directory
-		vaultDir := t.TempDir()
-		vaultPath := filepath.Join(vaultDir, "vault.enc")
+		// Cleanup is automatic via t.Cleanup()
+		vaultPath := helpers.SetupTestVaultWithName(t, "no-recovery-test4")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -992,9 +953,9 @@ func TestRecovery_NoRecoveryFlag(t *testing.T) {
 // T045: Integration test for passphrase flow
 func TestRecovery_WithPassphrase(t *testing.T) {
 	t.Run("Init with passphrase protection", func(t *testing.T) {
-		// Setup test vault directory
-		vaultDir := t.TempDir()
-		vaultPath := filepath.Join(vaultDir, "vault.enc")
+		// Cleanup is automatic via t.Cleanup()
+		vaultPath := helpers.SetupTestVaultWithName(t, "passphrase-test1")
+		vaultDir := filepath.Dir(vaultPath)
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -1069,9 +1030,8 @@ func TestRecovery_WithPassphrase(t *testing.T) {
 	})
 
 	t.Run("Init without passphrase protection", func(t *testing.T) {
-		// Setup test vault directory
-		vaultDir := t.TempDir()
-		vaultPath := filepath.Join(vaultDir, "vault.enc")
+		// Cleanup is automatic via t.Cleanup()
+		vaultPath := helpers.SetupTestVaultWithName(t, "passphrase-test2")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -1142,9 +1102,8 @@ func TestRecovery_WithPassphrase(t *testing.T) {
 // T054: Integration test for skipping backup verification during init
 func TestRecovery_SkipVerification(t *testing.T) {
 	t.Run("Init with recovery, skip verification", func(t *testing.T) {
-		// Setup test vault directory
-		vaultDir := t.TempDir()
-		vaultPath := filepath.Join(vaultDir, "vault.enc")
+		// Cleanup is automatic via t.Cleanup()
+		vaultPath := helpers.SetupTestVaultWithName(t, "skip-verify-test1")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
@@ -1212,8 +1171,8 @@ func TestRecovery_SkipVerification(t *testing.T) {
 		// 2. Metadata is valid
 		// 3. Recovery metadata structure is correct
 
-		vaultDir := t.TempDir()
-		vaultPath := filepath.Join(vaultDir, "vault.enc")
+		// Cleanup is automatic via t.Cleanup()
+		vaultPath := helpers.SetupTestVaultWithName(t, "skip-verify-test2")
 		configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
