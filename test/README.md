@@ -152,10 +152,47 @@ Tests use `//go:build integration` to separate from unit tests. This allows:
 
 ### Test Isolation
 Each test:
-- Creates temporary vault directories
-- Uses unique vault paths
-- Cleans up after completion
-- Cleans up keychain entries after keychain tests
+- Creates temporary vault directories via `helpers.SetupTestVault()` or `helpers.SetupTestVaultWithName()`
+- Uses unique vault paths with predictable vault IDs
+- Automatically cleans up via `t.Cleanup()`:
+  - Vault-specific keychain entries (`pass-cli:master-password-<vaultID>`)
+  - Audit HMAC keychain entries (`pass-cli-audit:<vaultID>`)
+  - Temporary files (handled by `t.TempDir()`)
+
+### Test Helpers Package
+
+The `test/helpers` package provides utilities for integration tests:
+
+```go
+import "pass-cli/test/helpers"
+
+// SetupTestVault creates a vault with automatic cleanup
+// VaultID will be "test-vault"
+vaultPath := helpers.SetupTestVault(t)
+
+// SetupTestVaultWithName creates a vault with a specific name
+// VaultID will be "my-custom-vault"
+vaultPath := helpers.SetupTestVaultWithName(t, "my-custom-vault")
+
+// Both functions automatically clean up:
+// - Keychain entries (master password + audit keys)
+// - Temporary directories (via t.TempDir())
+```
+
+**Available Functions**:
+| Function | Purpose |
+|----------|---------|
+| `SetupTestVault(t)` | Create vault with default name, auto-cleanup |
+| `SetupTestVaultWithName(t, name)` | Create vault with specific name, auto-cleanup |
+| `SetupTestVaultConfig(t, vaultPath)` | Create config file pointing to vault |
+| `CleanupVaultDir(t, dir)` | Manual cleanup (deprecated, use SetupTestVault) |
+| `CleanupVaultPath(t, path)` | Manual cleanup (deprecated, use SetupTestVault) |
+| `CleanupKeychain(t, path)` | Manual keychain cleanup only |
+
+**Keychain Entry Format**:
+- Master password: `pass-cli:master-password-<vaultID>`
+- Audit HMAC key: `pass-cli-audit:<vaultID>`
+- VaultID is derived from: `filepath.Base(filepath.Dir(vaultPath))`
 
 ### Binary Building
 `TestMain` automatically:
@@ -189,10 +226,14 @@ Keychain integration tests interact with real OS keychains:
 
 **Important Notes:**
 - Tests automatically skip if system keychain is unavailable
-- Tests clean up keychain entries in `defer` blocks
-- Safe to run locally - won't interfere with other apps
+- Tests clean up keychain entries automatically via `t.Cleanup()`
+- Safe to run locally - won't interfere with other apps or your real vault
+- Each test vault uses isolated keychain entries (`master-password-<vaultID>`)
 - On CI/CD, keychain may not be available (tests will skip gracefully)
-- Use the keychain service name "pass-cli" and account "master-password"
+
+**Keychain Services Used:**
+- `pass-cli` - Master password storage (account: `master-password-<vaultID>`)
+- `pass-cli-audit` - Audit HMAC keys (account: `<vaultID>`)
 
 ## Test Utilities
 
@@ -266,7 +307,6 @@ Integration test fixture directory containing encrypted vault for testing.
 ## Future Enhancements
 
 Potential additions for comprehensive testing:
-- Per-vault keychain entries (currently uses single shared entry)
 - Concurrent access tests (multiple processes)
 - Backup/restore workflow tests
 - Import/export functionality tests (if implemented)
