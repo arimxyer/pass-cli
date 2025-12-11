@@ -158,13 +158,13 @@ jobs:
 
       - name: Run integration tests
         if: needs.check-changes.outputs.code-changed == 'true'
-        run: go test -v -tags=integration -timeout 4m ./test
+        run: go test -v -tags=integration -timeout 4m ./test/integration
         shell: bash
 
       - name: Check for TODO-skipped tests
         if: needs.check-changes.outputs.code-changed == 'true'
         run: |
-          if grep -r 't.Skip("TODO:' test/; then
+          if grep -r 't.Skip("TODO:' test/integration; then
             echo "ERROR: Found TODO-skipped tests"
             exit 1
           fi
