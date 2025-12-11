@@ -119,7 +119,7 @@ func TestIntegration_CompleteWorkflow(t *testing.T) {
 	testPassword := "Test-Master-Pass@123"
 
 	t.Run("1_Init_Vault", func(t *testing.T) {
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" // password, confirm, no passphrase, skip verification
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n" + "n\n" // password, confirm, no keychain, no passphrase, skip verification
 		stdout, stderr, err := runCommandWithInput(t, input, "init")
 
 		if err != nil {
@@ -287,7 +287,7 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -353,7 +353,7 @@ func TestIntegration_ScriptFriendly(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -437,7 +437,7 @@ func TestIntegration_Performance(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -499,7 +499,7 @@ func TestIntegration_StressTest(t *testing.T) {
 	configPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)

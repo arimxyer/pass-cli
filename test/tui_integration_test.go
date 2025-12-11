@@ -26,7 +26,7 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 	// Initialize vault
 	initCmd := exec.Command(binaryPath, "init")
 	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n")
+	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
@@ -120,7 +120,7 @@ func TestIntegration_TUIVaultPath(t *testing.T) {
 		// Initialize vault
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-		initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n")
+		initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n")
 		if err := initCmd.Run(); err != nil {
 			t.Fatalf("Failed to initialize custom vault: %v", err)
 		}
@@ -169,7 +169,7 @@ func TestIntegration_TUIWithExistingVault(t *testing.T) {
 	// Initialize vault
 	initCmd := exec.Command(binaryPath, "init")
 	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n")
+	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
@@ -251,7 +251,7 @@ func TestIntegration_TUIKeychainDetection(t *testing.T) {
 	// Initialize vault without keychain
 	initCmd := exec.Command(binaryPath, "init")
 	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n")
+	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
@@ -354,7 +354,7 @@ func BenchmarkTUIStartup(b *testing.B) {
 
 	initCmd := exec.Command(binaryPath, "init")
 	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n")
+	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		b.Fatalf("Failed to initialize vault: %v", err)
 	}
@@ -393,7 +393,7 @@ func TestIntegration_TUIComponentIntegration(t *testing.T) {
 	// Initialize vault
 	initCmd := exec.Command(binaryPath, "init")
 	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n")
+	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
@@ -457,7 +457,7 @@ func TestIntegration_TUIFullFieldSupport(t *testing.T) {
 	// Initialize vault
 	initCmd := exec.Command(binaryPath, "init")
 	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n")
+	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
@@ -547,7 +547,7 @@ func TestIntegration_TUIEmptyOptionalFields(t *testing.T) {
 	// Initialize vault
 	initCmd := exec.Command(binaryPath, "init")
 	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n")
+	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
@@ -619,7 +619,7 @@ func TestIntegration_TUIUpdateFields(t *testing.T) {
 	// Initialize vault
 	initCmd := exec.Command(binaryPath, "init")
 	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n")
+	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}
@@ -824,7 +824,7 @@ func TestIntegration_TUIDeleteCredential(t *testing.T) {
 	// Initialize vault
 	initCmd := exec.Command(binaryPath, "init")
 	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
-	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n")
+	initCmd.Stdin = strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n")
 	if err := initCmd.Run(); err != nil {
 		t.Fatalf("Failed to initialize vault: %v", err)
 	}

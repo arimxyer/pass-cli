@@ -43,7 +43,7 @@ func TestIntegration_CorruptedMetadataFallback(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault with audit
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
@@ -123,7 +123,7 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 	defer cleanup1()
 
 	// Initialize vault1 with audit
-	input1 := testPassword1 + "\n" + testPassword1 + "\n" + "n\n" + "n\n"
+	input1 := testPassword1 + "\n" + testPassword1 + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath1)
 	cmd.Stdin = strings.NewReader(input1)
@@ -141,7 +141,7 @@ func TestIntegration_MultipleVaultsInDirectory(t *testing.T) {
 	defer cleanup2()
 
 	// Initialize vault2 without audit (use --no-audit since audit is enabled by default)
-	input2 := testPassword2 + "\n" + testPassword2 + "\n" + "n\n" + "n\n"
+	input2 := testPassword2 + "\n" + testPassword2 + "\n" + "n\n" + "n\n" + "n\n"
 	cmd = exec.Command(binaryPath, "init", "--no-audit")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath2)
 	cmd.Stdin = strings.NewReader(input2)
@@ -222,7 +222,7 @@ func TestIntegration_AutoMetadataCreationOnUnlock(t *testing.T) {
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
@@ -285,7 +285,7 @@ func TestIntegration_NoMetadataWhenAuditDisabled(t *testing.T) {
 	testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
 	defer cleanup()
 
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init", "--no-audit")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
@@ -364,7 +364,7 @@ func TestIntegration_MetadataCreatedByInit(t *testing.T) {
 	defer cleanup()
 
 	// Init with audit logging (enabled by default)
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
@@ -422,7 +422,7 @@ func TestIntegration_MetadataUpdateOnAuditChange(t *testing.T) {
 	defer cleanup()
 
 	// Create vault with audit
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
@@ -497,7 +497,7 @@ func TestIntegration_BackwardCompatibilityOldVaults(t *testing.T) {
 	defer cleanup()
 
 	// Create vault without metadata (simulate old vault)
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
@@ -588,7 +588,7 @@ func TestIntegration_MetadataDeletedFallback(t *testing.T) {
 	defer cleanup()
 
 	// Create vault with audit
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
@@ -670,7 +670,7 @@ func TestIntegration_AuditLogExistsNoMetadata(t *testing.T) {
 	defer cleanup()
 
 	// Create vault with audit
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
@@ -748,7 +748,7 @@ func TestIntegration_MetadataWithMissingAuditLog(t *testing.T) {
 	defer cleanup()
 
 	// Create vault with audit
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)
@@ -820,7 +820,7 @@ func TestIntegration_UnknownMetadataVersion(t *testing.T) {
 	defer cleanup()
 
 	// Create vault with audit
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 	cmd.Stdin = strings.NewReader(input)

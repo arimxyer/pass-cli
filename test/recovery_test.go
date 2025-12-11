@@ -32,7 +32,7 @@ func TestIntegration_ChangePasswordWithRecovery(t *testing.T) {
 		testPassword := "Test@Password123"
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n") // password, confirm, no passphrase, skip verification
+		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n") // password, confirm, no keychain, no passphrase, skip verification
 		initCmd.Stdin = initStdin
 
 		output, err := initCmd.CombinedOutput()
@@ -94,7 +94,7 @@ func TestIntegration_ChangePasswordWithRecovery(t *testing.T) {
 		testPassword := "Test@Password123"
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n") // password, confirm, no passphrase, skip verification
+		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n") // password, confirm, no keychain, no passphrase, skip verification
 		initCmd.Stdin = initStdin
 
 		output, err := initCmd.CombinedOutput()
@@ -178,7 +178,7 @@ func TestIntegration_ChangePasswordWithRecovery(t *testing.T) {
 		testPassword := "Test@Password123"
 		initCmd := exec.Command(binaryPath, "init", "--no-recovery")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n")
+		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n") // password, confirm, no keychain
 		initCmd.Stdin = initStdin
 
 		output, err := initCmd.CombinedOutput()

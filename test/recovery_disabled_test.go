@@ -30,10 +30,11 @@ func TestIntegration_NoRecovery(t *testing.T) {
 		initCmd := exec.Command(binaryPath, "init", "--no-recovery")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
 
-		// Input: master password, confirm password
+		// Input: master password, confirm password, no keychain
 		initStdin := strings.NewReader(
 			testPassword + "\n" + // master password
-				testPassword + "\n", // confirm password
+				testPassword + "\n" + // confirm password
+				"n\n", // decline keychain
 		)
 		initCmd.Stdin = initStdin
 
@@ -92,7 +93,7 @@ func TestIntegration_NoRecovery(t *testing.T) {
 
 		initCmd := exec.Command(binaryPath, "init", "--no-recovery")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n")
+		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n") // password, confirm, no keychain
 		initCmd.Stdin = initStdin
 
 		if output, err := initCmd.CombinedOutput(); err != nil {
@@ -129,7 +130,7 @@ func TestIntegration_NoRecovery(t *testing.T) {
 
 		initCmd := exec.Command(binaryPath, "init", "--no-recovery")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n")
+		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n") // password, confirm, no keychain
 		initCmd.Stdin = initStdin
 
 		if output, err := initCmd.CombinedOutput(); err != nil {

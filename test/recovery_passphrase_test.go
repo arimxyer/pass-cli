@@ -31,10 +31,11 @@ func TestIntegration_RecoveryWithPassphrase(t *testing.T) {
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
 
-		// Input: master password, confirm password, yes to passphrase, passphrase, confirm passphrase, no to verification
+		// Input: master password, confirm password, no keychain, yes to passphrase, passphrase, confirm passphrase, no to verification
 		initStdin := strings.NewReader(
 			testPassword + "\n" + // master password
 				testPassword + "\n" + // confirm password
+				"n\n" + // decline keychain
 				"y\n" + // yes to passphrase protection
 				testPassphrase + "\n" + // recovery passphrase
 				testPassphrase + "\n" + // confirm passphrase
@@ -106,10 +107,11 @@ func TestIntegration_RecoveryWithPassphrase(t *testing.T) {
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
 
-		// Input: master password, confirm password, no to passphrase, no to verification
+		// Input: master password, confirm password, no keychain, no to passphrase, no to verification
 		initStdin := strings.NewReader(
 			testPassword + "\n" + // master password
 				testPassword + "\n" + // confirm password
+				"n\n" + // decline keychain
 				"n\n" + // no to passphrase protection
 				"n\n", // skip verification
 		)
