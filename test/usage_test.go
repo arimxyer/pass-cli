@@ -22,7 +22,7 @@ func TestUsageCommand(t *testing.T) {
 	// Setup: Initialize vault and add credentials with usage data
 	t.Run("Setup", func(t *testing.T) {
 		// Initialize vault
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n" // password, confirm, no keychain, no passphrase, skip verification
 		_, _, err := runCommandWithInputAndVault(t, usageVaultPath, input, "init")
 		if err != nil {
 			t.Fatalf("Failed to initialize vault: %v", err)
