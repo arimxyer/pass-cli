@@ -615,7 +615,7 @@ func TestDefaultVaultPath_Init(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	cmd.Stdin = strings.NewReader("TestPassword123!\nTestPassword123!\nn\nn\n")
+	cmd.Stdin = strings.NewReader("TestPassword123!\nTestPassword123!\nn\nn\nn\n")
 
 	// Run init command
 	err = cmd.Run()
@@ -666,7 +666,7 @@ func TestDefaultVaultPath_Operations(t *testing.T) {
 	// Step 1: Initialize vault
 	// Use --no-audit to avoid keychain interaction for audit HMAC key storage
 	t.Log("Step 1: Initialize vault at default location")
-	initInput := fmt.Sprintf("%s\n%s\nn\nn\n", masterPassword, masterPassword)
+	initInput := fmt.Sprintf("%s\n%s\nn\nn\nn\n", masterPassword, masterPassword)
 	stdout, stderr, err := runWithHome(initInput, "init", "--no-audit")
 	if err != nil {
 		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)
@@ -774,7 +774,7 @@ func TestCustomVaultPath_Operations(t *testing.T) {
 
 	// Step 1: Initialize vault at custom location
 	t.Log("Step 1: Initialize vault at custom config location")
-	initInput := fmt.Sprintf("%s\n%s\nn\nn\n", masterPassword, masterPassword)
+	initInput := fmt.Sprintf("%s\n%s\nn\nn\nn\n", masterPassword, masterPassword)
 	stdout, stderr, err := runWithConfig(initInput, "init")
 	if err != nil {
 		t.Fatalf("Init failed: %v\nStdout: %s\nStderr: %s", err, stdout, stderr)

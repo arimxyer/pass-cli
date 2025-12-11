@@ -31,10 +31,11 @@ func TestCLI_InitCreatesV2VaultByDefault(t *testing.T) {
 	// Input for init command:
 	// 1. password
 	// 2. confirm password
-	// 3. "n" for passphrase
-	// 4. "n" to skip verification
+	// 3. "n" for keychain
+	// 4. "n" for passphrase
+	// 5. "n" to skip verification
 	testPassword := "Test123!@#Password"
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 
 	cmd := exec.Command(binaryPath, "init")
 	cmd.Stdin = strings.NewReader(input)
@@ -108,8 +109,9 @@ func TestCLI_InitNoRecoveryCreatesV1Vault(t *testing.T) {
 	// Input for init command:
 	// 1. password
 	// 2. confirm password
+	// 3. "n" for keychain
 	testPassword := "Test123!@#Password"
-	input := testPassword + "\n" + testPassword + "\n"
+	input := testPassword + "\n" + testPassword + "\n" + "n\n"
 
 	cmd := exec.Command(binaryPath, "init", "--no-recovery")
 	cmd.Stdin = strings.NewReader(input)
@@ -180,7 +182,8 @@ func TestCLI_VaultMigrateUpgradesV1ToV2(t *testing.T) {
 	testPassword := "Test123!@#Password"
 
 	// Step 1: Create v1 vault with --no-recovery
-	initInput := testPassword + "\n" + testPassword + "\n"
+	// Input: password, confirm, "n" for keychain
+	initInput := testPassword + "\n" + testPassword + "\n" + "n\n"
 	initCmd := exec.Command(binaryPath, "init", "--no-recovery")
 	initCmd.Stdin = strings.NewReader(initInput)
 	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)
@@ -272,7 +275,8 @@ func TestCLI_VaultMigrateSkipsV2Vault(t *testing.T) {
 	testPassword := "Test123!@#Password"
 
 	// Create v2 vault (default)
-	initInput := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	// Input: password, confirm, "n" for keychain, "n" for passphrase, "n" for verification
+	initInput := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	initCmd := exec.Command(binaryPath, "init")
 	initCmd.Stdin = strings.NewReader(initInput)
 	initCmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+configPath)

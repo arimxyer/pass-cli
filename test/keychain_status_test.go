@@ -37,7 +37,8 @@ func TestIntegration_KeychainStatus(t *testing.T) {
 		testConfigPath, cleanup := setupTestVaultConfig(t, vaultPath)
 		defer cleanup()
 
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+		// Input: password, confirm, no keychain, no passphrase, skip verification
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 		cmd := exec.Command(binaryPath, "init")
 		cmd.Env = append(os.Environ(), "PASS_CLI_TEST=1", "PASS_CLI_CONFIG="+testConfigPath)
 		cmd.Stdin = strings.NewReader(input)

@@ -63,8 +63,8 @@ func TestIntegration_VerifyAudit(t *testing.T) {
 
 	t.Run("1_Init_Vault_With_Audit", func(t *testing.T) {
 		// Initialize vault (audit enabled by default)
-		// Input: password, confirm password, no passphrase, skip verification
-		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+		// Input: password, confirm password, no keychain, no passphrase, skip verification
+		input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 		stdout, stderr, err := runCmd(input, "init")
 
 		if err != nil {
@@ -206,7 +206,8 @@ func TestIntegration_VerifyAudit_ConsistentVaultID(t *testing.T) {
 	}
 
 	// Initialize vault
-	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n"
+	// Input: password, confirm, no keychain, no passphrase, skip verification
+	input := testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n"
 	_, stderr, err := runCmd(input, "init")
 	if err != nil {
 		t.Fatalf("Init failed: %v\nStderr: %s", err, stderr)

@@ -26,7 +26,7 @@ func TestIntegration_BackupPaths_WindowsVsUnix(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -75,7 +75,7 @@ func TestIntegration_BackupPaths_WindowsVsUnix(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -104,7 +104,7 @@ func TestIntegration_BackupPermissions_Platform(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -167,7 +167,7 @@ func TestIntegration_BackupPermissions_Platform(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -211,7 +211,7 @@ func TestIntegration_BackupDirectory_Platform(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault (should create directory)
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -244,7 +244,7 @@ func TestIntegration_BackupDirectory_Platform(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -277,7 +277,7 @@ func TestIntegration_BackupPaths_Normalization(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -315,7 +315,7 @@ func TestIntegration_BackupPaths_Normalization(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed with spaces in path: %v\nstderr: %s", err, stderr)
 		}
@@ -352,7 +352,7 @@ func TestIntegration_BackupPaths_Normalization(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed with special chars: %v\nstderr: %s", err, stderr)
 		}
