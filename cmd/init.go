@@ -103,6 +103,14 @@ func runInit(cmd *cobra.Command, args []string) error {
 	}
 	crypto.ClearBytes(confirmPassword)
 
+	// Prompt for keychain if flag not explicitly set
+	if !cmd.Flags().Changed("use-keychain") {
+		useKeychain, err = promptYesNo("Store master password in system keychain?", true)
+		if err != nil {
+			return fmt.Errorf("failed to read keychain option: %w", err)
+		}
+	}
+
 	// Create vault service
 	vaultService, err := vault.New(vaultPath)
 	if err != nil {

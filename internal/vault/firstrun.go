@@ -12,6 +12,8 @@ import (
 
 	"golang.org/x/term"
 	"pass-cli/internal/crypto"
+	"pass-cli/internal/recovery"
+	"pass-cli/internal/security"
 )
 
 // Errors for first-run detection and guided initialization
@@ -104,7 +106,7 @@ func commandRequiresVault(commandName string) bool {
 }
 
 // RunGuidedInit runs the interactive guided initialization flow
-// T058: Main guided init orchestrator
+// T058: Main guided init orchestrator - Updated for V2 with recovery phrase
 func RunGuidedInit(vaultPath string, isTTY bool) error {
 	if !isTTY {
 		return showNonTTYError()
@@ -132,25 +134,57 @@ func RunGuidedInit(vaultPath string, isTTY bool) error {
 	}
 	defer crypto.ClearBytes(password)
 
+	// Display password strength indicator
+	displayPasswordStrength(password)
+
 	keychainEnabled := promptKeychainOption(reader)
 	auditEnabled := promptAuditOption(reader)
 
-	// Create guided init config
-	config := GuidedInitConfig{
-		VaultPath:      vaultPath,
-		EnableKeychain: keychainEnabled,
-		EnableAuditLog: auditEnabled,
-		MasterPassword: password,
+	// Prompt for optional passphrase (25th word)
+	var passphrase []byte
+	usePassphrase := promptPassphraseOption(reader)
+	if usePassphrase {
+		passphrase, err = promptPassphrase(reader)
+		if err != nil {
+			return fmt.Errorf("passphrase setup failed: %w", err)
+		}
+		defer crypto.ClearBytes(passphrase)
 	}
 
-	// Delegate to existing vault initialization
-	// This would call the existing InitializeVault function
-	// For now, create a minimal vault file as placeholder
-	if err := createVaultFromConfig(config); err != nil {
+	// Create vault service
+	vaultService, err := New(vaultPath)
+	if err != nil {
+		return fmt.Errorf("failed to create vault service: %w", err)
+	}
+
+	// Prepare audit parameters
+	var auditLogPath, vaultID string
+	if auditEnabled {
+		vaultDir := filepath.Dir(vaultPath)
+		auditLogPath = filepath.Join(vaultDir, "audit.log")
+		vaultID = filepath.Base(vaultDir)
+	}
+
+	// Initialize V2 vault with recovery phrase
+	mnemonic, err := vaultService.InitializeWithRecovery(password, keychainEnabled, auditLogPath, vaultID, passphrase)
+	if err != nil {
 		return fmt.Errorf("vault creation failed: %w", err)
 	}
 
-	showSuccessMessage(keychainEnabled, auditEnabled)
+	// Display mnemonic to user
+	displayMnemonicGrid(mnemonic)
+
+	// Prompt for backup verification
+	if promptBackupVerification(reader) {
+		if err := runBackupVerification(reader, mnemonic); err != nil {
+			// Non-fatal - vault is created, user just needs to ensure backup is correct
+			fmt.Println("⚠  Please ensure you have written down all 24 words correctly!")
+		}
+	} else {
+		fmt.Println("⚠  Skipping verification. Please ensure you have written down all 24 words correctly!")
+	}
+
+	showSuccessMessageV2(keychainEnabled, auditEnabled, vaultPath)
 	return nil
 }
 
@@ -358,23 +392,8 @@ func showManualInitInstructions() error {
 	return ErrUserDeclined
 }
 
-// showSuccessMessage displays success message after vault creation
-// T064: Success message with next steps
-func showSuccessMessage(keychainEnabled, auditEnabled bool) {
-	fmt.Println("\n✓ Vault created successfully!")
-	if keychainEnabled {
-		fmt.Println("✓ Master password stored in system keychain")
-	}
-	if auditEnabled {
-		fmt.Println("✓ Audit logging enabled")
-	}
-	fmt.Println("\nNext steps:")
-	fmt.Println("  pass-cli add <service>    - Add a new credential")
-	fmt.Println("  pass-cli list             - List all credentials")
-	fmt.Println("  pass-cli doctor           - Check vault health")
-}
-
-// createVaultFromConfig creates a new vault from guided init config
+// createVaultFromConfig creates a new vault from guided init config (V1 - legacy)
+// Kept for backward compatibility with RunGuidedInitWithInput test helper
 func createVaultFromConfig(config GuidedInitConfig) error {
 	// Create vault service
 	vaultService, err := New(config.VaultPath)
@@ -396,4 +415,222 @@ func createVaultFromConfig(config GuidedInitConfig) error {
 	}
 
 	return nil
+}
+
+// displayPasswordStrength shows password strength indicator
+func displayPasswordStrength(password []byte) {
+	policy := &security.PasswordPolicy{
+		MinLength:        12,
+		RequireUppercase: true,
+		RequireLowercase: true,
+		RequireDigit:     true,
+		RequireSymbol:    true,
+	}
+	strength := policy.Strength(password)
+	switch strength {
+	case security.PasswordStrengthWeak:
+		fmt.Println("⚠  Password strength: Weak")
+	case security.PasswordStrengthMedium:
+		fmt.Println("⚠  Password strength: Medium")
+	case security.PasswordStrengthStrong:
+		fmt.Println("✓ Password strength: Strong")
+	}
+}
+
+// promptPassphraseOption asks if user wants to add passphrase protection
+func promptPassphraseOption(reader *bufio.Reader) bool {
+	fmt.Println()
+	fmt.Println("Advanced: Add passphrase protection (25th word)?")
+	fmt.Println("   • Adds an extra layer of security to your recovery phrase")
+	fmt.Println("   • You will need BOTH the 24 words AND the passphrase to recover")
+	fmt.Print("Add passphrase? (y/n) [n]: ")
+
+	response, err := reader.ReadString('\n')
+	if err != nil {
+		return false // Default to no
+	}
+
+	response = strings.TrimSpace(strings.ToLower(response))
+	return response == "y" || response == "yes"
+}
+
+// promptPassphrase prompts for passphrase with confirmation
+func promptPassphrase(reader *bufio.Reader) ([]byte, error) {
+	fmt.Println()
+	fmt.Println("⚠️  Passphrase Protection:")
+	fmt.Println("   • Store the passphrase separately from your 24-word phrase")
+	fmt.Println("   • If you lose the passphrase, recovery will be impossible")
+	fmt.Println()
+
+	fmt.Print("Enter recovery passphrase: ")
+	var passphrase []byte
+	var err error
+
+	if term.IsTerminal(int(os.Stdin.Fd())) {
+		passphrase, err = term.ReadPassword(int(os.Stdin.Fd()))
+		fmt.Println()
+	} else {
+		line, err2 := reader.ReadString('\n')
+		if err2 != nil {
+			return nil, err2
+		}
+		passphrase = []byte(strings.TrimSpace(line))
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to read passphrase: %w", err)
+	}
+
+	// Confirm passphrase
+	fmt.Print("Confirm recovery passphrase: ")
+	var confirm []byte
+	if term.IsTerminal(int(os.Stdin.Fd())) {
+		confirm, err = term.ReadPassword(int(os.Stdin.Fd()))
+		fmt.Println()
+	} else {
+		line, err2 := reader.ReadString('\n')
+		if err2 != nil {
+			crypto.ClearBytes(passphrase)
+			return nil, err2
+		}
+		confirm = []byte(strings.TrimSpace(line))
+	}
+
+	if err != nil {
+		crypto.ClearBytes(passphrase)
+		return nil, fmt.Errorf("failed to read confirmation: %w", err)
+	}
+
+	if string(passphrase) != string(confirm) {
+		crypto.ClearBytes(passphrase)
+		crypto.ClearBytes(confirm)
+		return nil, fmt.Errorf("passphrases do not match")
+	}
+
+	crypto.ClearBytes(confirm)
+	return passphrase, nil
+}
+
+// displayMnemonicGrid formats 24-word mnemonic as 4x6 grid
+func displayMnemonicGrid(mnemonic string) {
+	words := strings.Fields(mnemonic)
+	if len(words) != 24 {
+		fmt.Printf("Invalid mnemonic: expected 24 words, got %d\n", len(words))
+		return
+	}
+
+	fmt.Println()
+	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+	fmt.Println("Recovery Phrase Setup")
+	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+	fmt.Println("Write down these 24 words in order:")
+	fmt.Println()
+
+	// Display in 4 columns x 6 rows
+	for row := 0; row < 6; row++ {
+		line := ""
+		for col := 0; col < 4; col++ {
+			idx := col*6 + row
+			if idx < len(words) {
+				line += fmt.Sprintf("%3d. %-12s ", idx+1, words[idx])
+			}
+		}
+		fmt.Println(line)
+	}
+
+	fmt.Println()
+	fmt.Println("⚠  WARNINGS:")
+	fmt.Println("   • Anyone with this phrase can access your vault")
+	fmt.Println("   • Store offline (write on paper, use a safe)")
+	fmt.Println("   • Recovery requires 6 random words from this list")
+	fmt.Println()
+}
+
+// promptBackupVerification asks if user wants to verify backup
+func promptBackupVerification(reader *bufio.Reader) bool {
+	fmt.Print("Verify your backup? (Y/n): ")
+	response, err := reader.ReadString('\n')
+	if err != nil {
+		return true // Default to yes
+	}
+
+	response = strings.TrimSpace(strings.ToLower(response))
+	return response == "" || response == "y" || response == "yes"
+}
+
+// runBackupVerification runs the 3-word verification process
+func runBackupVerification(reader *bufio.Reader, mnemonic string) error {
+	// Select 3 random positions for verification
+	verifyPositions, err := recovery.SelectVerifyPositions(3)
+	if err != nil {
+		return fmt.Errorf("failed to select verify positions: %w", err)
+	}
+
+	const maxAttempts = 3
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		fmt.Printf("\nVerification (attempt %d/%d):\n", attempt, maxAttempts)
+
+		// Prompt for words at verify positions
+		userWords := make([]string, len(verifyPositions))
+		for i, pos := range verifyPositions {
+			word, err := promptForWordInput(reader, pos)
+			if err != nil {
+				return fmt.Errorf("failed to read word: %w", err)
+			}
+			userWords[i] = word
+		}
+
+		// Verify backup
+		verifyConfig := &recovery.VerifyConfig{
+			Mnemonic:        mnemonic,
+			VerifyPositions: verifyPositions,
+			UserWords:       userWords,
+		}
+
+		if err := recovery.VerifyBackup(verifyConfig); err == nil {
+			fmt.Println("✓ Backup verified successfully!")
+			return nil
+		}
+
+		// Verification failed
+		if attempt < maxAttempts {
+			fmt.Println("✗ Verification failed. Please try again.")
+		} else {
+			fmt.Println("✗ Verification failed after 3 attempts.")
+		}
+	}
+
+	return fmt.Errorf("backup verification failed")
+}
+
+// promptForWordInput prompts user to enter a word at a specific position
+func promptForWordInput(reader *bufio.Reader, position int) (string, error) {
+	fmt.Printf("Enter word #%d: ", position+1)
+
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		return "", fmt.Errorf("failed to read word: %w", err)
+	}
+
+	return strings.ToLower(strings.TrimSpace(line)), nil
+}
+
+// showSuccessMessageV2 displays success message after V2 vault creation
+func showSuccessMessageV2(keychainEnabled, auditEnabled bool, vaultPath string) {
+	fmt.Println()
+	fmt.Println("✅ Vault initialized successfully!")
+	fmt.Printf("📍 Location: %s\n", vaultPath)
+
+	if keychainEnabled {
+		fmt.Println("🔑 Master password stored in system keychain")
+	}
+	if auditEnabled {
+		fmt.Println("📊 Audit logging enabled")
+	}
+
+	fmt.Println("🔑 You can recover your vault using the 24-word recovery phrase")
+
+	fmt.Println("\n💡 Next steps:")
+	fmt.Println("   • Add a credential: pass-cli add <service>")
+	fmt.Println("   • View help: pass-cli --help")
 }
