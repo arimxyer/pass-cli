@@ -73,6 +73,8 @@ For detailed usage and examples, see [docs/01-getting-started/quick-start.md](do
 
 Pass-CLI includes a Terminal User Interface for visual credential management:
 
+![Pass-CLI TUI](docsite/static/images/tui-demo.png)
+
 ```bash
 # Launch TUI mode (no arguments)
 pass-cli
