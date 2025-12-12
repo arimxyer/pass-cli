@@ -18,123 +18,101 @@ After installation, verify pass-cli is available:
 pass-cli version
 ```
 
-## First-Run Guided Initialization
+## Initialize Your Vault
 
-The easiest way to get started is to let pass-cli guide you through the setup process automatically.
-
-### How It Works
-
-When you run any vault-requiring command (`add`, `get`, `list`, `update`, `delete`) for the first time without an existing vault, pass-cli automatically detects this and offers to guide you through initialization.
-
-### Example: First-Run Experience
-
-```bash
-$ pass-cli list
-
-╔════════════════════════════════════════════════════════════╗
-║                  Welcome to pass-cli!                      ║
-╚════════════════════════════════════════════════════════════╝
-
-This appears to be your first time using pass-cli.
-Would you like to create a new vault? (y/n): y
-
-Great! Let's set up your secure password vault.
-
-┌────────────────────────────────────────────────────────────┐
-│ Step 1: Master Password                                    │
-└────────────────────────────────────────────────────────────┘
-
-Your master password encrypts all credentials in your vault.
-
-Password Requirements:
-  • Minimum 12 characters
-  • At least one uppercase letter
-  • At least one lowercase letter
-  • At least one number
-  • At least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?)
-
-Enter master password: ••••••••••••••
-Confirm master password: ••••••••••••••
-
-[PASS] Password meets all requirements
-
-┌────────────────────────────────────────────────────────────┐
-│ Step 2: Keychain Integration                               │
-└────────────────────────────────────────────────────────────┘
-
-Store your master password in OS keychain for convenience?
-(Windows Credential Manager, macOS Keychain, Linux Secret Service)
-
-Benefits:
-  [PASS] No need to type password for every operation
-  [PASS] Secure OS-level storage
-  [PASS] Can be disabled later via OS credential manager
-
-Enable keychain storage? (y/n): y
-
-[PASS] Master password stored in keychain
-
-┌────────────────────────────────────────────────────────────┐
-│ Step 3: Audit Logging                                      │
-└────────────────────────────────────────────────────────────┘
-
-Enable audit logging to track all vault operations?
-
-Benefits:
-  [PASS] Security audit trail
-  [PASS] Tamper-evident with HMAC signatures
-  [PASS] Track all add/get/update/delete operations
-
-Enable audit logging? (y/n): y
-
-[PASS] Audit logging enabled
-
-┌────────────────────────────────────────────────────────────┐
-│ Setup Complete!                                            │
-└────────────────────────────────────────────────────────────┘
-
-Your vault has been created at:
-  /home/user/.pass-cli/vault.enc
-
-Next steps:
-  • Add your first credential: pass-cli add github
-  • List credentials: pass-cli list
-  • Check vault health: pass-cli doctor
-
-No credentials found.
-```
-
-### When Guided Initialization Is NOT Triggered
-
-Guided initialization is **skipped** in these scenarios:
-
-1. **Vault already exists**: If you have an existing vault at the default or configured location, no prompt appears
-2. **Custom vault configured**: If you've configured `vault_path` in your config file, initialization uses that location automatically
-3. **Non-TTY environment**: If running in a script or pipe (stdin is not a terminal), initialization is skipped to avoid blocking
-4. **Commands that don't require vault**: Commands like `version`, `doctor`, `help` don't trigger initialization
-
-### Non-TTY Behavior
-
-If you run pass-cli in a script or CI/CD environment without a vault:
-
-```bash
-$ echo "list" | pass-cli list
-Error: vault file not found: /home/user/.pass-cli/vault.enc
-
-Run 'pass-cli init' to create a new vault.
-```
-
-This prevents scripts from hanging while waiting for interactive input.
-
-## Manual Initialization
-
-If you prefer to initialize your vault explicitly, or if you're in a non-interactive environment, use the `init` command:
+To get started, run the init command:
 
 ```bash
 pass-cli init
 ```
 
-This provides the same setup process as guided initialization, but you invoke it explicitly.
+This walks you through creating your secure vault with a master password and recovery phrase.
+
+### Example Walkthrough
+
+```bash
+$ pass-cli init
+
+🔐 Initializing new password vault
+📁 Vault location: /home/user/.pass-cli/vault.enc
+```
+
+**Step 1: Master Password**
+
+```bash
+Enter master password: ••••••••••••••
+Confirm master password: ••••••••••••••
+✓ Password strength: Strong
+```
+
+**Step 2: Configuration Options**
+
+```bash
+Enable keychain storage for master password? (y/n) [y]: y
+
+Audit logging tracks all vault operations (no credentials logged)
+Enable audit logging? (y/n) [y]: y
+
+Advanced: Add passphrase protection (25th word)?
+   • Adds an extra layer of security to your recovery phrase
+   • You will need BOTH the 24 words AND the passphrase to recover
+Add passphrase? (y/n) [n]: n
+```
+
+**Step 3: Recovery Phrase**
+
+```bash
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Recovery Phrase Setup
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Write down these 24 words in order:
+
+  1. abandon       7. brother     13. country     19. fragile
+  2. ability       8. brown       14. couple      20. frame
+  3. able          9. brush       15. course      21. frequent
+  4. about        10. bubble      16. cousin      22. fresh
+  5. above        11. buddy       17. cover       23. friend
+  6. absent       12. budget      18. crack       24. fringe
+
+⚠  WARNINGS:
+   • Anyone with this phrase can access your vault
+   • Store offline (write on paper, use a safe)
+   • Recovery requires 6 random words from this list
+```
+
+**Step 4: Backup Verification**
+
+```bash
+Verify your backup? (Y/n): y
+
+Verification (attempt 1/3):
+Enter word #4: about
+Enter word #12: budget
+Enter word #19: fragile
+✓ Backup verified successfully!
+```
+
+**Setup Complete**
+
+```bash
+✅ Vault initialized successfully!
+📍 Location: /home/user/.pass-cli/vault.enc
+🔑 Master password stored in system keychain
+📊 Audit logging enabled
+🔑 You can recover your vault using the 24-word recovery phrase
+
+💡 Next steps:
+   • Add a credential: pass-cli add <service>
+   • View help: pass-cli --help
+```
+
+> **Important**: The 24-word recovery phrase is your backup if you forget your master password. Write it down and store it securely offline. Anyone with this phrase can access your vault.
+
+### Auto-Detection
+
+You can also trigger initialization by running any vault command (`add`, `get`, `list`, etc.) without an existing vault. pass-cli will detect this and offer to create one.
+
+> **Note**: Auto-detection requires an interactive terminal. In scripts or CI/CD, use `pass-cli init` explicitly.
 
 ### Advanced Options
 
@@ -163,7 +141,7 @@ During the interactive initialization, answer "n" when prompted about keychain s
 
 ```bash
 pass-cli init
-# When asked "Enable keychain storage? (y/n):", enter "n"
+# When asked "Enable keychain storage for master password? (y/n) [y]:", enter "n"
 ```
 
 This creates a vault without storing the master password in OS keychain. You'll need to enter your password for each operation.
@@ -178,9 +156,33 @@ pass-cli init --no-audit
 
 This creates a vault without tamper-evident HMAC-signed audit logging. Only disable if you have specific storage constraints.
 
+#### Skip Recovery Phrase (Not Recommended)
+
+By default, pass-cli generates a 24-word BIP39 recovery phrase that can be used to recover your vault if you forget your master password. To create a password-only vault without recovery:
+
+```bash
+pass-cli init --no-recovery
+```
+
+> **Warning**: Without the recovery phrase, if you forget your master password, your vault cannot be recovered. Only use this option if you have another backup strategy.
+
+#### Add Passphrase Protection (25th Word)
+
+For additional security, you can add a passphrase (sometimes called the "25th word") to your recovery phrase. During initialization, answer "y" when prompted:
+
+```bash
+pass-cli init
+# When asked "Advanced: Add passphrase protection (25th word)?", enter "y"
+```
+
+With passphrase protection:
+- You need BOTH the 24 words AND the passphrase to recover
+- Store the passphrase separately from your recovery phrase
+- If you lose either, recovery is impossible
+
 ## Your First Credential
 
-After initialization (automatic or manual), add your first credential:
+After initialization, add your first credential:
 
 ```bash
 $ pass-cli add github
