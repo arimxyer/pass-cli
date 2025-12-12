@@ -114,9 +114,24 @@ jobs:
           cache: true
           cache-dependency-path: go.sum
 
+      - name: Set up Linux keychain (D-Bus + gnome-keyring)
+        if: needs.check-changes.outputs.code-changed == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnome-keyring dbus-x11
+        shell: bash
+
       - name: Run unit tests
         if: needs.check-changes.outputs.code-changed == 'true'
-        run: go test -v -coverprofile=coverage.txt -covermode=atomic ./...
+        run: |
+          # Start D-Bus session
+          eval $(dbus-launch --sh-syntax)
+          # Start and unlock gnome-keyring for Secret Service API
+          gnome-keyring-daemon --start --components=secrets &
+          sleep 1
+          echo "" | gnome-keyring-daemon --unlock
+          # Run tests
+          go test -v -coverprofile=coverage.txt -covermode=atomic ./...
         shell: bash
 
       - name: Upload coverage to Codecov
