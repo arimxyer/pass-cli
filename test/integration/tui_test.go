@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -28,10 +29,14 @@ func TestIntegration_TUILaunchDetection(t *testing.T) {
 	defer cleanup()
 
 	// Create isolated home directory to prevent accessing user's real ~/.pass-cli
-	tmpHome := t.TempDir()
-	homeEnvVars := []string{
-		fmt.Sprintf("HOME=%s", tmpHome),
-		fmt.Sprintf("USERPROFILE=%s", tmpHome),
+	// Skip on macOS - overriding HOME breaks keychain access which is tied to the user session
+	var homeEnvVars []string
+	if runtime.GOOS != "darwin" {
+		tmpHome := t.TempDir()
+		homeEnvVars = []string{
+			fmt.Sprintf("HOME=%s", tmpHome),
+			fmt.Sprintf("USERPROFILE=%s", tmpHome),
+		}
 	}
 
 	// Initialize vault
