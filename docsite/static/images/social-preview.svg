@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <!-- Dark background -->
+  <rect width="1280" height="640" fill="#0f172a"/>
+
+  <!-- ASCII Art rendered as monospace text - left aligned then centered as group -->
+  <g transform="translate(45, 200)">
+    <text font-family="Consolas, 'SF Mono', 'Cascadia Code', monospace"
+          font-size="28"
+          fill="#e2e8f0"
+          xml:space="preserve">
+      <tspan x="0" dy="0">    ╔═══╗       ██████╗   █████╗  ███████╗ ███████╗       █████╗ ██╗     ██╗</tspan>
+      <tspan x="0" dy="34">    ║   ║       ██╔══██╗ ██╔══██╗ ██╔════╝ ██╔════╝      ██╔═══╝ ██║     ██║</tspan>
+      <tspan x="0" dy="34">  ╔═╩═══╩═╗     ██████╔╝ ███████║ ███████╗ ███████╗█████╗██║     ██║     ██║</tspan>
+      <tspan x="0" dy="34">  ║ ┌───┐ ║     ██╔═══╝  ██╔══██║ ╚════██║ ╚════██║╚════╝██║     ██║     ██║</tspan>
+      <tspan x="0" dy="34">  ║ │ ● │ ║     ██║      ██║  ██║ ███████║ ███████║      ╚██████╗███████╗██║</tspan>
+      <tspan x="0" dy="34">  ╚═╧═══╧═╝     ╚═╝      ╚═╝  ╚═╝ ╚══════╝ ╚══════╝       ╚═════╝╚══════╝╚═╝</tspan>
+    </text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="640" y="480"
+        text-anchor="middle"
+        font-family="ui-sans-serif, system-ui, -apple-system, sans-serif"
+        font-size="28"
+        fill="#94a3b8">A secure, cross-platform command-line password manager</text>
+
+  <!-- Subtle accent line -->
+  <rect x="440" y="520" width="400" height="2" fill="#3b82f6" opacity="0.6"/>
+</svg>
