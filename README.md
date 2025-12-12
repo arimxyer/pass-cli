@@ -84,7 +84,7 @@ pass-cli list
 **Key Features**:
 - Visual navigation with arrow keys and Tab
 - Interactive forms for adding/editing credentials
-- Password visibility toggle with `Ctrl+P`
+- Password visibility toggle with `p` (or `Ctrl+P` in forms)
 - Search and filter with `/`
 - Customizable keyboard shortcuts
 - Responsive layout (requires 60x30 minimum terminal size)
@@ -123,6 +123,9 @@ pass-cli vault remove
 
 # Create manual vault backup
 pass-cli vault backup create
+
+# Preview backup contents (without restoring)
+pass-cli vault backup preview --file vault.enc.backup
 
 # Restore vault from backup
 pass-cli vault backup restore
@@ -218,10 +221,12 @@ No. Pass-CLI stores everything locally on your machine. There are no cloud depen
 
 ### How do I backup my vault?
 
-The vault is a single file. Simply copy it:
+Use the built-in backup command:
 ```bash
-cp ~/.pass-cli/vault.enc ~/backup/vault-$(date +%Y%m%d).enc
+pass-cli vault backup create
 ```
+
+This creates a timestamped manual backup. View all backups with `pass-cli vault backup info`.
 
 ### What happens if I forget my master password?
 

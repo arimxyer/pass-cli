@@ -20,14 +20,19 @@ A:
 
 **Q: How do I backup my vault?**
 
-A:
+A: Use the built-in backup commands:
 ```bash
-# Simple copy
-cp ~/.pass-cli/vault.enc ~/backups/vault-$(date +%Y%m%d).enc
+# Create a manual backup
+pass-cli vault backup create
 
-# Automated daily backup (cron)
-0 0 * * * cp ~/.pass-cli/vault.enc ~/backups/vault-$(date +%Y%m%d).enc
+# View all available backups
+pass-cli vault backup info
+
+# Restore from a backup
+pass-cli vault backup restore
 ```
+
+For automated backups, you can use cron with the backup command or copy the vault file directly.
 
 ---
 
