@@ -245,6 +245,14 @@ For more details, see [Recovery Phrase Guide](docs/02-guides/recovery-phrase.md)
 
 For more questions and troubleshooting, see [docs/04-troubleshooting/faq.md](docs/04-troubleshooting/faq.md).
 
+## Roadmap
+
+Planned features for future releases:
+
+- **TOTP / 2FA Support**: Store TOTP secrets with credentials and generate 6-digit codes on demand - no separate authenticator app needed
+
+Have a feature request? Open an issue on [GitHub](https://github.com/ari1110/pass-cli/issues).
+
 ## Contributing
 
 Contributions are welcome! See [docs/06-development/branch-workflow.md](docs/06-development/branch-workflow.md) for Git workflow and contribution guidelines.
