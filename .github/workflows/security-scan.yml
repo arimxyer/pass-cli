@@ -51,7 +51,7 @@ jobs:
           sarif_file: results.sarif
 
       - name: Upload SARIF artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: gosec-sarif-results
