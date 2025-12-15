@@ -201,7 +201,7 @@ For complete security details, best practices, and migration guides, see [docs/0
 
 ```bash
 # Clone and build
-git clone https://github.com/ari1110/pass-cli.git
+git clone https://github.com/arimxyer/pass-cli.git
 cd pass-cli
 go build -o pass-cli .
 
@@ -251,7 +251,7 @@ Planned features for future releases:
 
 - **TOTP / 2FA Support**: Store TOTP secrets with credentials and generate 6-digit codes on demand - no separate authenticator app needed
 
-Have a feature request? Open an issue on [GitHub](https://github.com/ari1110/pass-cli/issues).
+Have a feature request? Open an issue on [GitHub](https://github.com/arimxyer/pass-cli/issues).
 
 ## Contributing
 
@@ -263,9 +263,9 @@ This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE
 
 ## Links
 
-- **Releases**: [GitHub Releases](https://github.com/ari1110/pass-cli/releases)
-- **Issues**: [GitHub Issues](https://github.com/ari1110/pass-cli/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/ari1110/pass-cli/discussions)
+- **Releases**: [GitHub Releases](https://github.com/arimxyer/pass-cli/releases)
+- **Issues**: [GitHub Issues](https://github.com/arimxyer/pass-cli/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/arimxyer/pass-cli/discussions)
 
 ---
 

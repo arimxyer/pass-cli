@@ -254,14 +254,14 @@
   - If exists, proceed to T030
 
 - [X] **T026** [US4] Review `R:\Test-Projects\pass-cli\docs\INSTALLATION.md` - Homebrew installation (FR-008)
-  - Verify tap command: `brew tap ari1110/homebrew-tap`
+  - Verify tap command: `brew tap arimxyer/homebrew-tap`
   - Verify install command: `brew install pass-cli`
   - Verify verify command: `pass-cli version`
   - Test on macOS/Linux if available, or verify Homebrew tap is current
   - Check package manager status from research.md
 
 - [X] **T027** [US4] Review `R:\Test-Projects\pass-cli\docs\INSTALLATION.md` - Scoop installation (FR-008)
-  - Verify bucket command: `scoop bucket add pass-cli https://github.com/ari1110/scoop-bucket`
+  - Verify bucket command: `scoop bucket add pass-cli https://github.com/arimxyer/scoop-bucket`
   - Verify install command: `scoop install pass-cli`
   - Verify verify command: `pass-cli version`
   - Test on Windows if available, or verify Scoop bucket is current

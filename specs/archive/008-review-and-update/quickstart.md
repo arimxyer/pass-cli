@@ -18,7 +18,7 @@ This quickstart provides the minimal steps to validate Pass-CLI documentation ac
 
 2. **Repository cloned and feature branch checked out**
    ```bash
-   git clone https://github.com/ari1110/pass-cli.git
+   git clone https://github.com/arimxyer/pass-cli.git
    cd pass-cli
    git checkout 008-review-and-update
    ```
@@ -151,9 +151,9 @@ pass-cli generate --help
 **File**: `R:\Test-Projects\pass-cli\docs\INSTALLATION.md`
 
 **Checklist**:
-- [ ] Homebrew tap command: `brew tap ari1110/homebrew-tap`
+- [ ] Homebrew tap command: `brew tap arimxyer/homebrew-tap`
 - [ ] Homebrew install command: `brew install pass-cli`
-- [ ] Scoop bucket command: `scoop bucket add pass-cli https://github.com/ari1110/scoop-bucket`
+- [ ] Scoop bucket command: `scoop bucket add pass-cli https://github.com/arimxyer/scoop-bucket`
 - [ ] Scoop install command: `scoop install pass-cli`
 - [ ] Manual installation download links point to current release (v0.0.1 or later)
 - [ ] Checksum verification instructions accurate

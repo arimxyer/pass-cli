@@ -200,19 +200,19 @@ Commits from October 2025 show ongoing refinements:
 ### Assumptions
 
 **Homebrew (macOS/Linux)**:
-- Repository: `ari1110/homebrew-tap`
-- Installation: `brew tap ari1110/homebrew-tap && brew install pass-cli`
+- Repository: `arimxyer/homebrew-tap`
+- Installation: `brew tap arimxyer/homebrew-tap && brew install pass-cli`
 - **Assumption**: Package manager should be updated after v0.0.1 release
 - **Validation Needed**: Confirm Homebrew formula points to v0.0.1 release artifacts
 
 **Scoop (Windows)**:
-- Repository: `ari1110/scoop-bucket`
-- Installation: `scoop bucket add pass-cli https://github.com/ari1110/scoop-bucket && scoop install pass-cli`
+- Repository: `arimxyer/scoop-bucket`
+- Installation: `scoop bucket add pass-cli https://github.com/arimxyer/scoop-bucket && scoop install pass-cli`
 - **Assumption**: Package manager should be updated after v0.0.1 release
 - **Validation Needed**: Confirm Scoop manifest points to v0.0.1 release artifacts
 
 **Manual Installation**:
-- GitHub Releases: `https://github.com/ari1110/pass-cli/releases`
+- GitHub Releases: `https://github.com/arimxyer/pass-cli/releases`
 - Requires download and extraction of platform-specific binary
 
 ---

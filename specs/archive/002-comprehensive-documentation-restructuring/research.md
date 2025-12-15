@@ -212,7 +212,7 @@ This research summarizes the comprehensive documentation audit that identified i
 3. **File Count Test**: `find docs -name '*.md' -not -name '_index.md' -not -name 'README.md' | wc -l` → Must equal 29
 4. **Git History Test**: `git log --follow docs/02-guides/keychain-setup.md` → Must show history from original sources
 5. **Redundancy Test**: Manual search for duplicate paragraphs → Must find <5% overlap
-6. **Render Test**: Visit https://ari1110.github.io/pass-cli/ → All pages load without errors
+6. **Render Test**: Visit https://arimxyer.github.io/pass-cli/ → All pages load without errors
 
 **Acceptance Criteria**: All 6 tests pass before marking feature complete.
 
