@@ -2,18 +2,18 @@
 # This manifest is used to submit Pass-CLI to the Windows Package Manager (winget)
 # Submission URL: https://github.com/microsoft/winget-pkgs
 
-PackageIdentifier: ari1110.pass-cli
+PackageIdentifier: arimxyer.pass-cli
 PackageVersion: 1.0.0
 PackageLocale: en-US
-Publisher: ari1110
-PublisherUrl: https://github.com/ari1110
-PublisherSupportUrl: https://github.com/ari1110/pass-cli/issues
-Author: ari1110
+Publisher: arimxyer
+PublisherUrl: https://github.com/arimxyer
+PublisherSupportUrl: https://github.com/arimxyer/pass-cli/issues
+Author: arimxyer
 PackageName: Pass-CLI
-PackageUrl: https://github.com/ari1110/pass-cli
+PackageUrl: https://github.com/arimxyer/pass-cli
 License: MIT
-LicenseUrl: https://github.com/ari1110/pass-cli/blob/main/LICENSE
-Copyright: Copyright (c) 2025 ari1110
+LicenseUrl: https://github.com/arimxyer/pass-cli/blob/main/LICENSE
+Copyright: Copyright (c) 2025 arimxyer
 ShortDescription: A secure, cross-platform CLI password and API key manager for developers
 Description: |-
   Pass-CLI is a secure, cross-platform command-line password and API key manager
@@ -42,7 +42,7 @@ Tags:
 Installers:
   - Architecture: x64
     InstallerType: zip
-    InstallerUrl: https://github.com/ari1110/pass-cli/releases/download/v1.0.0/pass-cli_1.0.0_windows_x86_64.zip
+    InstallerUrl: https://github.com/arimxyer/pass-cli/releases/download/v1.0.0/pass-cli_1.0.0_windows_x86_64.zip
     InstallerSha256: PLACEHOLDER_HASH_AMD64
     NestedInstallerFiles:
       - RelativeFilePath: pass-cli.exe
@@ -50,7 +50,7 @@ Installers:
 
   - Architecture: arm64
     InstallerType: zip
-    InstallerUrl: https://github.com/ari1110/pass-cli/releases/download/v1.0.0/pass-cli_1.0.0_windows_arm64.zip
+    InstallerUrl: https://github.com/arimxyer/pass-cli/releases/download/v1.0.0/pass-cli_1.0.0_windows_arm64.zip
     InstallerSha256: PLACEHOLDER_HASH_ARM64
     NestedInstallerFiles:
       - RelativeFilePath: pass-cli.exe

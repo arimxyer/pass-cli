@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/ari1110/pass-cli/schemas/vault-metadata.json",
+  "$id": "https://github.com/arimxyer/pass-cli/schemas/vault-metadata.json",
   "title": "Vault Metadata",
   "description": "Plaintext configuration file containing audit settings for a pass-cli vault, enabling audit logging without vault decryption.",
   "type": "object",

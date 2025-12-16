@@ -17,7 +17,7 @@ Reorganize 20 existing documentation files (~33,000 words) into a 6-section task
 **Primary Dependencies**: Hugo Book theme (alex-shpak/hugo-book), Hugo static site generator
 **Storage**: File-based (markdown files in docs/ directory, Hugo site in docsite/)
 **Testing**: Hugo build validation (`hugo --source docsite/`), link validation (zero broken relref links), line count verification (wc -l), git history verification (`git log --follow`)
-**Target Platform**: Documentation site deployed to GitHub Pages (https://ari1110.github.io/pass-cli/)
+**Target Platform**: Documentation site deployed to GitHub Pages (https://arimxyer.github.io/pass-cli/)
 **Project Type**: Documentation restructuring (not source code)
 **Performance Goals**:
   - User find-time reduced by 40% (proxy: average doc length 450 → 300 lines)

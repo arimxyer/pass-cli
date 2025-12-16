@@ -8,11 +8,11 @@
 ```
 > A secure, cross-platform command-line password manager designed for developers
 
-![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?label=Last%20Updated)
+![Version](https://img.shields.io/github/v/release/arimxyer/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/arimxyer/pass-cli?label=Last%20Updated)
 
 Pass-CLI is a fast, secure password and API key manager that stores credentials locally with AES-256-GCM encryption. Built for developers who need quick, script-friendly access to credentials without cloud dependencies.
 
-📚 **[View Full Documentation](https://ari1110.github.io/pass-cli/)** | [Getting Started](docs/01-getting-started/quick-start.md) | [Installation](docs/01-getting-started/quick-install.md) | [Usage Guide](docs/03-reference/command-reference.md)
+📚 **[View Full Documentation](https://arimxyer.github.io/pass-cli/)** | [Getting Started](docs/01-getting-started/quick-start.md) | [Installation](docs/01-getting-started/quick-install.md) | [Usage Guide](docs/03-reference/command-reference.md)
 
 ## Key Features
 
@@ -35,13 +35,13 @@ Pass-CLI is a fast, secure password and API key manager that stores credentials 
 
 **macOS / Linux (Homebrew)**:
 ```bash
-brew tap ari1110/homebrew-tap
+brew tap arimxyer/homebrew-tap
 brew install pass-cli
 ```
 
 **Windows (Scoop)**:
 ```powershell
-scoop bucket add pass-cli https://github.com/ari1110/scoop-bucket
+scoop bucket add pass-cli https://github.com/arimxyer/scoop-bucket
 scoop install pass-cli
 ```
 
@@ -201,7 +201,7 @@ For complete security details, best practices, and migration guides, see [docs/0
 
 ```bash
 # Clone and build
-git clone https://github.com/ari1110/pass-cli.git
+git clone https://github.com/arimxyer/pass-cli.git
 cd pass-cli
 go build -o pass-cli .
 
@@ -251,7 +251,7 @@ Planned features for future releases:
 
 - **TOTP / 2FA Support**: Store TOTP secrets with credentials and generate 6-digit codes on demand - no separate authenticator app needed
 
-Have a feature request? Open an issue on [GitHub](https://github.com/ari1110/pass-cli/issues).
+Have a feature request? Open an issue on [GitHub](https://github.com/arimxyer/pass-cli/issues).
 
 ## Contributing
 
@@ -263,9 +263,9 @@ This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE
 
 ## Links
 
-- **Releases**: [GitHub Releases](https://github.com/ari1110/pass-cli/releases)
-- **Issues**: [GitHub Issues](https://github.com/ari1110/pass-cli/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/ari1110/pass-cli/discussions)
+- **Releases**: [GitHub Releases](https://github.com/arimxyer/pass-cli/releases)
+- **Issues**: [GitHub Issues](https://github.com/arimxyer/pass-cli/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/arimxyer/pass-cli/discussions)
 
 ---
 
