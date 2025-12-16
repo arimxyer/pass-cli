@@ -50,7 +50,7 @@ Examples:
   # List all credentials
   pass-cli list
 
-For more information, visit: https://github.com/ari1110/pass-cli`,
+For more information, visit: https://github.com/arimxyer/pass-cli`,
 		PersistentPreRunE: checkFirstRun,
 		Run:               runRootCommand,
 	}
@@ -79,7 +79,7 @@ Instead, configure your vault location in the config file:
   3. Run your command without the --vault flag
 
 For more details, see the migration guide:
-  https://github.com/ari1110/pass-cli/blob/main/docs/MIGRATION.md
+  https://github.com/arimxyer/pass-cli/blob/main/docs/MIGRATION.md
 
 Original error: %w`, os.Getenv("HOME"), err)
 		}

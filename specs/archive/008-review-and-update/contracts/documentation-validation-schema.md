@@ -174,13 +174,13 @@ This contract defines the validation requirements, acceptance criteria, and test
 **Validation Criteria**:
 
 1. **Homebrew Installation (FR-008)**
-   - Tap command: `brew tap ari1110/homebrew-tap`
+   - Tap command: `brew tap arimxyer/homebrew-tap`
    - Install command: `brew install pass-cli`
    - Verify command: `pass-cli version`
    - Commands execute successfully on macOS and Linux
 
 2. **Scoop Installation (FR-008)**
-   - Bucket command: `scoop bucket add pass-cli https://github.com/ari1110/scoop-bucket`
+   - Bucket command: `scoop bucket add pass-cli https://github.com/arimxyer/scoop-bucket`
    - Install command: `scoop install pass-cli`
    - Verify command: `pass-cli version`
    - Commands execute successfully on Windows

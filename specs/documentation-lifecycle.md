@@ -4,7 +4,7 @@ weight: 8
 toc: true
 ---
 
-![Version](https://img.shields.io/github/v/release/ari1110/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/ari1110/pass-cli?path=docs&label=Last%20Updated)
+![Version](https://img.shields.io/github/v/release/arimxyer/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/arimxyer/pass-cli?path=docs&label=Last%20Updated)
 
 ## 1. Purpose & Scope
 

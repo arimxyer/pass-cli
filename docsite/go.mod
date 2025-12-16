@@ -1,4 +1,4 @@
-module github.com/ari1110/pass-cli/docsite
+module github.com/arimxyer/pass-cli/docsite
 
 go 1.21
 

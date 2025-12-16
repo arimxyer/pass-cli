@@ -107,7 +107,7 @@ Each documentation file references zero or more CLI commands that must be valida
 **Examples**:
 - `USAGE.md` → `["pass-cli init", "pass-cli add", "pass-cli get", "pass-cli list", "pass-cli update", "pass-cli delete", "pass-cli generate", "pass-cli version"]`
 - `README.md` → `["pass-cli init", "pass-cli add github", "pass-cli get github", "pass-cli get github --copy"]`
-- `INSTALLATION.md` → `["brew tap ari1110/homebrew-tap", "brew install pass-cli", "scoop bucket add pass-cli ...", "scoop install pass-cli"]`
+- `INSTALLATION.md` → `["brew tap arimxyer/homebrew-tap", "brew install pass-cli", "scoop bucket add pass-cli ...", "scoop install pass-cli"]`
 
 ### Validation Issue → Documentation File (Many-to-One)
 

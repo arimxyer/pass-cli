@@ -4,7 +4,7 @@
 
 # Installation examples
 echo "# Installation examples from README.md"
-echo "brew tap ari1110/homebrew-tap"
+echo "brew tap arimxyer/homebrew-tap"
 echo "brew install pass-cli"
 
 echo "# Manual installation"
@@ -104,7 +104,7 @@ echo "pass-cli config reset"
 
 # Build from source examples
 echo "# Build from source examples from README.md"
-echo "git clone https://github.com/ari1110/pass-cli.git"
+echo "git clone https://github.com/arimxyer/pass-cli.git"
 echo "cd pass-cli"
 echo "go build -o pass-cli ."
 echo "make build"

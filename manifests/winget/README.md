@@ -17,7 +17,7 @@ After the release is built, update `pass-cli.yaml` with the actual SHA256 hashes
 ```powershell
 # Get checksums from the GitHub release checksums.txt file
 # Replace VERSION with actual release version
-curl -L https://github.com/ari1110/pass-cli/releases/download/vVERSION/checksums.txt
+curl -L https://github.com/arimxyer/pass-cli/releases/download/vVERSION/checksums.txt
 ```
 
 Replace `PLACEHOLDER_HASH_AMD64` and `PLACEHOLDER_HASH_ARM64` with the actual SHA256 values.
@@ -53,8 +53,8 @@ wingetcreate submit --token YOUR_GITHUB_TOKEN manifests/winget/pass-cli.yaml
 Or manually:
 
 1. Clone your fork of `microsoft/winget-pkgs`
-2. Create a new branch: `git checkout -b ari1110.pass-cli-1.0.0`
-3. Copy manifest to: `manifests/a/ari1110/pass-cli/1.0.0/`
+2. Create a new branch: `git checkout -b arimxyer.pass-cli-1.0.0`
+3. Copy manifest to: `manifests/a/arimxyer/pass-cli/1.0.0/`
 4. Commit and push
 5. Create PR to microsoft/winget-pkgs
 
@@ -62,7 +62,7 @@ Or manually:
 
 - Automated checks will validate the manifest
 - Microsoft reviewers will approve (typically 3-7 days)
-- Once merged, Pass-CLI will be available via `winget install ari1110.pass-cli`
+- Once merged, Pass-CLI will be available via `winget install arimxyer.pass-cli`
 
 ## Testing Locally
 
@@ -76,7 +76,7 @@ winget install --manifest manifests/winget/pass-cli.yaml
 pass-cli version
 
 # Uninstall
-winget uninstall ari1110.pass-cli
+winget uninstall arimxyer.pass-cli
 ```
 
 ## References
