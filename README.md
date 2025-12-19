@@ -41,7 +41,7 @@ brew install pass-cli
 
 **Windows (Scoop)**:
 ```powershell
-scoop bucket add pass-cli https://github.com/arimxyer/scoop-bucket
+scoop bucket add arimxyer https://github.com/arimxyer/scoop-bucket
 scoop install pass-cli
 ```
 
