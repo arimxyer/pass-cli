@@ -5,7 +5,7 @@ go 1.25.1
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/fatih/color v1.18.0
-	github.com/gdamore/tcell/v2 v2.11.0
+	github.com/gdamore/tcell/v2 v2.13.5
 	github.com/howeyc/gopass v0.0.0-20210920133722-c8aef6fb66ef
 	github.com/olekukonko/tablewriter v1.1.2
 	github.com/rivo/tview v0.42.0
