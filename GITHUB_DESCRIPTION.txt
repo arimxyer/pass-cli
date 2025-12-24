@@ -1,0 +1,21 @@
+🔐 Pass-CLI - Secure, cross-platform command-line password manager for developers. Local-first credential storage with AES-256-GCM encryption, BIP39 recovery, OS keychain integration, and script-friendly output modes. No cloud dependencies, works completely offline.
+
+---
+
+Short Description (160 chars max):
+Secure CLI password manager for developers. AES-256 encryption, BIP39 recovery, OS keychain integration. Local-first, no cloud dependencies.
+
+---
+
+Topics/Tags:
+password-manager, cli, security, encryption, golang, developer-tools, credentials, aes-256, cross-platform, offline-first, tui, bip39, keychain, vault, command-line
+
+---
+
+One-Line Summary:
+A secure, offline-first command-line password manager designed for developers with AES-256 encryption, BIP39 recovery, and OS keychain integration.
+
+---
+
+GitHub About Section (350 chars max):
+Secure CLI password manager for developers. Features AES-256-GCM encryption, BIP39 recovery phrase, OS keychain integration (Windows/macOS/Linux), Terminal UI, and script-friendly output modes. Local-first credential storage with no cloud dependencies. Perfect for CI/CD pipelines and developer workflows.
