@@ -70,3 +70,4 @@ docsite/.hugo_build.lock
 # Temporary documentation files
 docs-backup-*.zip
 docs-file-mappings*.txt
+/pass-cli
