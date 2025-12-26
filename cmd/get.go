@@ -17,6 +17,7 @@ var (
 	getField       string
 	getNoClipboard bool
 	getMasked      bool
+	getTOTP        bool // Output TOTP code instead of password
 )
 
 var getCmd = &cobra.Command{
@@ -32,6 +33,7 @@ are displayed. Use flags to customize the output:
   --field      Extract a specific field (username, password, category, url, notes, service)
   --no-clipboard  Skip copying to clipboard
   --masked     Display password as asterisks (default shows full password)
+  --totp       Output TOTP code instead of password (requires TOTP to be configured)
 
 Automatic usage tracking records where credentials are accessed based on
 your current working directory.`,
@@ -48,7 +50,13 @@ your current working directory.`,
   pass-cli get github --no-clipboard
 
   # Get with masked password display
-  pass-cli get github --masked`,
+  pass-cli get github --masked
+
+  # Get TOTP code
+  pass-cli get github --totp
+
+  # Get TOTP code for scripts
+  pass-cli get github --totp --quiet`,
 	Args: cobra.ExactArgs(1),
 	RunE: runGet,
 }
@@ -59,6 +67,7 @@ func init() {
 	getCmd.Flags().StringVarP(&getField, "field", "f", "password", "field to extract (username, password, category, url, notes, service)")
 	getCmd.Flags().BoolVar(&getNoClipboard, "no-clipboard", false, "do not copy to clipboard")
 	getCmd.Flags().BoolVar(&getMasked, "masked", false, "display password as asterisks")
+	getCmd.Flags().BoolVar(&getTOTP, "totp", false, "output TOTP code instead of password")
 }
 
 func runGet(cmd *cobra.Command, args []string) error {
@@ -90,6 +99,11 @@ func runGet(cmd *cobra.Command, args []string) error {
 	cred, err := vaultService.GetCredential(service, false)
 	if err != nil {
 		return fmt.Errorf("failed to get credential: %w", err)
+	}
+
+	// TOTP mode - output TOTP code
+	if getTOTP {
+		return outputTOTPMode(cred, vaultService, service)
 	}
 
 	// Quiet mode - output only requested field
@@ -139,6 +153,64 @@ func outputQuietMode(cred *vault.Credential, vaultService *vault.VaultService, s
 	return nil
 }
 
+// outputTOTPMode generates and displays the TOTP code
+func outputTOTPMode(cred *vault.Credential, vaultService *vault.VaultService, service string) error {
+	// Generate TOTP code with audit logging
+	code, remaining, err := vaultService.GetTOTPCode(service)
+	if err != nil {
+		return fmt.Errorf("failed to generate TOTP code: %w", err)
+	}
+
+	// Track TOTP access for usage statistics
+	if err := vaultService.RecordFieldAccess(service, "totp"); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to track TOTP access: %v\n", err)
+	}
+
+	// Quiet mode - just output the code
+	if getQuiet {
+		fmt.Println(code)
+		return nil
+	}
+
+	// Normal mode - show code with countdown
+	fmt.Printf("🔐 TOTP Code: %s\n", code)
+	fmt.Printf("⏱  Valid for: %ds\n", remaining)
+
+	// Show progress bar
+	period := 30
+	if cred.TOTPPeriod > 0 {
+		period = cred.TOTPPeriod
+	}
+	progress := float64(remaining) / float64(period)
+	barWidth := 20
+	filled := int(progress * float64(barWidth))
+	empty := barWidth - filled
+	fmt.Printf("   [%s%s]\n", strings.Repeat("█", filled), strings.Repeat("░", empty))
+
+	// Copy to clipboard unless disabled
+	if !getNoClipboard {
+		if err := clipboard.WriteAll(code); err != nil {
+			fmt.Fprintf(os.Stderr, "\n⚠️  Warning: failed to copy to clipboard: %v\n", err)
+		} else {
+			fmt.Println("\n✅ TOTP code copied to clipboard!")
+
+			// Schedule clipboard clear in background (based on remaining validity)
+			go func() {
+				time.Sleep(time.Duration(remaining) * time.Second)
+				// Only clear if the clipboard still contains our code
+				if current, err := clipboard.ReadAll(); err == nil && current == code {
+					_ = clipboard.WriteAll("")
+					if IsVerbose() {
+						fmt.Fprintln(os.Stderr, "🧹 Clipboard cleared")
+					}
+				}
+			}()
+		}
+	}
+
+	return nil
+}
+
 func outputNormalMode(cred *vault.Credential, vaultService *vault.VaultService, service string) error {
 	// Display credential details
 	fmt.Printf("📝 Service: %s\n", cred.Service)
@@ -165,6 +237,15 @@ func outputNormalMode(cred *vault.Credential, vaultService *vault.VaultService, 
 
 	if cred.Notes != "" {
 		fmt.Printf("📋 Notes: %s\n", cred.Notes)
+	}
+
+	// Display TOTP status if configured
+	if cred.HasTOTP() {
+		issuer := cred.TOTPIssuer
+		if issuer == "" {
+			issuer = "configured"
+		}
+		fmt.Printf("🔐 TOTP: %s (use --totp to get code)\n", issuer)
 	}
 
 	// Display timestamps
