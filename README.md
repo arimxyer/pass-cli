@@ -28,6 +28,7 @@ Pass-CLI is a fast, secure password and API key manager that stores credentials 
 - **Usage Tracking**: Automatic tracking of where credentials are used across projects
 - **Offline First**: No cloud dependencies, works completely offline
 - **Interactive TUI**: Terminal UI for visual credential management
+- **TOTP / 2FA Support**: Store TOTP secrets and generate 6-digit codes - no separate authenticator app needed
 
 ## Quick Start
 
@@ -246,10 +247,6 @@ For more details, see [Recovery Phrase Guide](docs/02-guides/recovery-phrase.md)
 For more questions and troubleshooting, see [docs/04-troubleshooting/faq.md](docs/04-troubleshooting/faq.md).
 
 ## Roadmap
-
-Planned features for future releases:
-
-- **TOTP / 2FA Support**: Store TOTP secrets with credentials and generate 6-digit codes on demand - no separate authenticator app needed
 
 Have a feature request? Open an issue on [GitHub](https://github.com/arimxyer/pass-cli/issues).
 
