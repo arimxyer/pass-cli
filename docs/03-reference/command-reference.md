@@ -178,6 +178,8 @@ pass-cli add <service> [flags]
 | `--category` | `-c` | string | Category for organizing credentials (e.g., 'Cloud', 'Databases') |
 | `--url` | | string | Service URL |
 | `--notes` | | string | Additional notes |
+| `--totp` | | bool | Prompt for TOTP secret interactively |
+| `--totp-uri` | | string | TOTP URI (otpauth://totp/...) |
 
 #### Examples
 
@@ -217,6 +219,12 @@ pass-cli add github \
   -p secret123 \
   --url https://github.com \
   --notes "Work account"
+
+# Add credential with TOTP (interactive prompt for secret)
+pass-cli add github --totp
+
+# Add credential with TOTP URI directly
+pass-cli add github --totp-uri "otpauth://totp/GitHub:user?secret=JBSWY3DPEHPK3PXP&issuer=GitHub"
 ```
 
 #### Interactive Prompts
@@ -265,6 +273,9 @@ pass-cli get <service> [flags]
 | `--field` | `-f` | string | Extract specific field |
 | `--no-clipboard` | | bool | Skip clipboard copy |
 | `--masked` | | bool | Display password as asterisks |
+| `--totp` | | bool | Generate and display TOTP code |
+| `--totp-qr` | | bool | Display TOTP QR code in terminal |
+| `--totp-qr-file` | | string | Export TOTP QR code to PNG file |
 
 #### Field Options
 
@@ -301,6 +312,18 @@ pass-cli get github --no-clipboard
 
 # Display with masked password
 pass-cli get github --masked
+
+# Generate TOTP code (if TOTP configured for credential)
+pass-cli get github --totp
+
+# TOTP code only (for scripts)
+pass-cli get github --totp --quiet
+
+# Display TOTP QR code in terminal (to add to another device)
+pass-cli get github --totp-qr
+
+# Export TOTP QR code to file (use with caution - contains secret)
+pass-cli get github --totp-qr-file totp-github.png
 ```
 
 #### Output Examples
@@ -326,6 +349,12 @@ mySecretPassword123!
 ```bash
 $ pass-cli get github --field username --quiet
 user@example.com
+```
+
+**TOTP code generation:**
+```bash
+$ pass-cli get github --totp
+123456
 ```
 
 #### Notes
@@ -441,6 +470,8 @@ pass-cli update <service> [flags]
 | `--category` | | string | New category |
 | `--url` | | string | New URL |
 | `--notes` | | string | New notes |
+| `--totp-uri` | | string | New TOTP URI (otpauth://totp/...) |
+| `--clear-totp` | | bool | Clear TOTP configuration |
 | `--clear-category` | | bool | Clear category field to empty |
 | `--clear-notes` | | bool | Clear notes field to empty |
 | `--clear-url` | | bool | Clear URL field to empty |
@@ -463,6 +494,12 @@ pass-cli update github --notes "Updated account info"
 
 # Update category
 pass-cli update github --category "Work"
+
+# Update TOTP configuration
+pass-cli update github --totp-uri "otpauth://totp/GitHub:user?secret=JBSWY3DPEHPK3PXP&issuer=GitHub"
+
+# Clear TOTP configuration
+pass-cli update github --clear-totp
 
 # Generate new random password (16 characters)
 pass-cli update github --generate
@@ -1785,6 +1822,7 @@ pass-cli
 | `e` | Edit credential |
 | `d` | Delete credential |
 | `c` | Copy password |
+| `t` | Copy TOTP code |
 | `q` | Quit |
 
 #### See Also
