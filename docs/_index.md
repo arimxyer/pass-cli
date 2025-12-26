@@ -19,6 +19,7 @@ Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform 
 - [Command Reference](03-reference/command-reference) - Complete command reference
 - [Recovery Phrase](02-guides/recovery-phrase) - BIP39 recovery phrase setup and usage
 - [Backup & Restore Guide](02-guides/backup-restore) - Manual vault backup management
+- [TOTP & 2FA Support](02-guides/totp-guide) - Store and generate 2FA codes
 - [Security Architecture](03-reference/security-architecture) - Security features and cryptography
 - [Troubleshooting](04-troubleshooting/_index) - Common issues and solutions by category
 

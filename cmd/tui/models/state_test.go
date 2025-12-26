@@ -163,6 +163,10 @@ func (m *MockVaultService) RecordFieldAccess(service, field string) error {
 	return nil
 }
 
+func (m *MockVaultService) GetTOTPCode(service string) (string, int, error) {
+	return "", 0, errors.New("TOTP not configured")
+}
+
 // SetCredentials sets the mock credentials for testing.
 func (m *MockVaultService) SetCredentials(creds []vault.CredentialMetadata) {
 	m.mu.Lock()

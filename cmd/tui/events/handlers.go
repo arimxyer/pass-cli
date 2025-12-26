@@ -177,6 +177,9 @@ func (eh *EventHandler) handleGlobalKey(event *tcell.EventKey) *tcell.EventKey {
 		case 'n':
 			eh.handleCopyField("notes")
 			return nil
+		case 't':
+			eh.handleCopyTOTP()
+			return nil
 		}
 	}
 
@@ -311,6 +314,20 @@ func (eh *EventHandler) handleCopyField(field string) {
 	}
 }
 
+// handleCopyTOTP generates and copies the TOTP code to clipboard.
+func (eh *EventHandler) handleCopyTOTP() {
+	if eh.detailView == nil {
+		return
+	}
+
+	remaining, err := eh.detailView.CopyTOTPToClipboard()
+	if err != nil {
+		eh.statusBar.ShowError(err)
+	} else {
+		eh.statusBar.ShowSuccess(fmt.Sprintf("TOTP code copied! Valid for %ds", remaining))
+	}
+}
+
 // handleToggleDetailPanel toggles the detail panel visibility through three states.
 // Cycles: Auto (responsive) -> Hide -> Show -> Auto
 // Displays status bar message showing the new state.
@@ -412,6 +429,7 @@ func (eh *EventHandler) handleShowHelp() {
 	addShortcut("u", "Copy username")
 	addShortcut("l", "Copy URL")
 	addShortcut("n", "Copy notes")
+	addShortcut("t", "Copy TOTP code")
 	row++ // Blank line (just skip row, don't add cells)
 
 	// View section

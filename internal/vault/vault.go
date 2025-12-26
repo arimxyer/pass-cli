@@ -76,6 +76,13 @@ type Credential struct {
 	UpdatedAt     time.Time              `json:"updated_at"`
 	ModifiedCount int                    `json:"modified_count"` // Number of times credential has been modified
 	UsageRecord   map[string]UsageRecord `json:"usage_records"`  // Map of location -> UsageRecord
+
+	// TOTP fields for 2FA support (all optional)
+	TOTPSecret    string `json:"totp_secret,omitempty"`    // Base32 encoded TOTP secret
+	TOTPAlgorithm string `json:"totp_algorithm,omitempty"` // SHA1, SHA256, SHA512 (default: SHA1)
+	TOTPDigits    int    `json:"totp_digits,omitempty"`    // 6 or 8 (default: 6)
+	TOTPPeriod    int    `json:"totp_period,omitempty"`    // Period in seconds (default: 30)
+	TOTPIssuer    string `json:"totp_issuer,omitempty"`    // Issuer name for display
 }
 
 // VaultData is the decrypted vault structure
@@ -1065,6 +1072,14 @@ type UpdateOpts struct {
 	Category *string
 	URL      *string
 	Notes    *string
+
+	// TOTP fields (nil = don't change, non-nil = set value)
+	TOTPSecret    *string // Base32 encoded TOTP secret (empty string clears TOTP)
+	TOTPAlgorithm *string // SHA1, SHA256, SHA512
+	TOTPDigits    *int    // 6 or 8
+	TOTPPeriod    *int    // Period in seconds
+	TOTPIssuer    *string // Issuer name
+	ClearTOTP     bool    // If true, clears all TOTP fields
 }
 
 // CredentialMetadata contains non-sensitive credential information for listing
@@ -1081,6 +1096,10 @@ type CredentialMetadata struct {
 	LastAccessed    time.Time // Most recent access time
 	Locations       []string  // List of locations where accessed
 	GitRepositories []string  // List of unique git repositories where accessed (for --by-project grouping)
+
+	// TOTP metadata (non-sensitive)
+	HasTOTP    bool   // Whether TOTP is configured for this credential
+	TOTPIssuer string // Issuer name for display
 }
 
 // ListCredentialsWithMetadata returns all credentials with metadata (no passwords)
@@ -1130,6 +1149,10 @@ func (v *VaultService) ListCredentialsWithMetadata() ([]CredentialMetadata, erro
 		meta.LastAccessed = lastAccessed
 		meta.Locations = locations
 		meta.GitRepositories = gitReposList
+
+		// TOTP metadata
+		meta.HasTOTP = cred.TOTPSecret != ""
+		meta.TOTPIssuer = cred.TOTPIssuer
 
 		metadata = append(metadata, meta)
 	}
@@ -1183,6 +1206,51 @@ func (v *VaultService) UpdateCredential(service string, opts UpdateOpts) error {
 		fieldUpdated = true
 	}
 
+	// TOTP field updates with audit logging
+	hadTOTPBefore := credential.TOTPSecret != ""
+	totpCleared := false
+	totpAdded := false
+	totpUpdated := false
+
+	if opts.ClearTOTP {
+		// Clear all TOTP fields
+		if hadTOTPBefore {
+			totpCleared = true
+		}
+		credential.TOTPSecret = ""
+		credential.TOTPAlgorithm = ""
+		credential.TOTPDigits = 0
+		credential.TOTPPeriod = 0
+		credential.TOTPIssuer = ""
+		fieldUpdated = true
+	} else {
+		if opts.TOTPSecret != nil {
+			if hadTOTPBefore {
+				totpUpdated = true
+			} else if *opts.TOTPSecret != "" {
+				totpAdded = true
+			}
+			credential.TOTPSecret = *opts.TOTPSecret
+			fieldUpdated = true
+		}
+		if opts.TOTPAlgorithm != nil {
+			credential.TOTPAlgorithm = *opts.TOTPAlgorithm
+			fieldUpdated = true
+		}
+		if opts.TOTPDigits != nil {
+			credential.TOTPDigits = *opts.TOTPDigits
+			fieldUpdated = true
+		}
+		if opts.TOTPPeriod != nil {
+			credential.TOTPPeriod = *opts.TOTPPeriod
+			fieldUpdated = true
+		}
+		if opts.TOTPIssuer != nil {
+			credential.TOTPIssuer = *opts.TOTPIssuer
+			fieldUpdated = true
+		}
+	}
+
 	// Only increment counter if something was actually modified
 	if fieldUpdated {
 		credential.ModifiedCount++
@@ -1197,6 +1265,16 @@ func (v *VaultService) UpdateCredential(service string, opts UpdateOpts) error {
 
 	// T071: Log credential update (FR-020)
 	v.LogAudit(security.EventCredentialUpdate, security.OutcomeSuccess, service)
+
+	// TOTP-specific audit events
+	if totpCleared {
+		v.LogAudit(security.EventTOTPClear, security.OutcomeSuccess, service)
+	} else if totpAdded {
+		v.LogAudit(security.EventTOTPAdd, security.OutcomeSuccess, service)
+	} else if totpUpdated {
+		v.LogAudit(security.EventTOTPUpdate, security.OutcomeSuccess, service)
+	}
+
 	return nil
 }
 
@@ -1265,6 +1343,34 @@ func (v *VaultService) GetUsageStats(service string) (map[string]UsageRecord, er
 	}
 
 	return stats, nil
+}
+
+// GetTOTPCode generates a TOTP code for the specified credential and logs the access
+// Returns the code, remaining validity in seconds, and any error
+func (v *VaultService) GetTOTPCode(service string) (string, int, error) {
+	if !v.unlocked {
+		return "", 0, ErrVaultLocked
+	}
+
+	credential, exists := v.vaultData.Credentials[service]
+	if !exists {
+		return "", 0, fmt.Errorf("%w: %s", ErrCredentialNotFound, service)
+	}
+
+	if !credential.HasTOTP() {
+		return "", 0, fmt.Errorf("no TOTP configured for credential: %s", service)
+	}
+
+	code, remaining, err := credential.GetTOTPCode()
+	if err != nil {
+		v.LogAudit(security.EventTOTPAccess, security.OutcomeFailure, service)
+		return "", 0, err
+	}
+
+	// Log TOTP access
+	v.LogAudit(security.EventTOTPAccess, security.OutcomeSuccess, service)
+
+	return code, remaining, nil
 }
 
 // ChangePassword changes the vault master password

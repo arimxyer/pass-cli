@@ -115,6 +115,17 @@ func (dv *DetailView) formatCredential(cred *vault.CredentialMetadata) string {
 	// Password field with masking
 	dv.formatPasswordField(&b, cred)
 
+	// TOTP field (if configured)
+	if cred.HasTOTP {
+		issuerDisplay := cred.TOTPIssuer
+		if issuerDisplay == "" {
+			issuerDisplay = "configured"
+		}
+		b.WriteString(fmt.Sprintf("%sTOTP:%s       %s  %s(Press 't' to copy code)%s\n",
+			colorWithBg("lightSlateGray"), textColor(), issuerDisplay,
+			colorWithBg("lightSlateGray"), textColor()))
+	}
+
 	// Notes (if present)
 	if cred.Notes != "" {
 		b.WriteString(fmt.Sprintf("\n%sNotes:%s\n", colorWithBg("lightSlateGray"), textColor()))
@@ -314,6 +325,37 @@ func (dv *DetailView) CopyFieldToClipboard(field string) error {
 	}
 
 	return nil
+}
+
+// CopyTOTPToClipboard generates and copies the TOTP code to clipboard.
+// Returns the remaining seconds until the code expires, or error if no TOTP configured.
+func (dv *DetailView) CopyTOTPToClipboard() (int, error) {
+	cred := dv.appState.GetSelectedCredential()
+	if cred == nil {
+		return 0, fmt.Errorf("no credential selected")
+	}
+
+	if !cred.HasTOTP {
+		return 0, fmt.Errorf("no TOTP configured for %s", cred.Service)
+	}
+
+	// Get TOTP code from vault service (includes audit logging)
+	code, remaining, err := dv.appState.GetTOTPCode(cred.Service)
+	if err != nil {
+		return 0, fmt.Errorf("failed to generate TOTP code: %w", err)
+	}
+
+	// Copy to clipboard
+	if err := clipboard.WriteAll(code); err != nil {
+		return 0, fmt.Errorf("failed to copy to clipboard: %w", err)
+	}
+
+	// Track TOTP access
+	if err := dv.appState.RecordFieldAccess(cred.Service, "totp"); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to track TOTP access: %v\n", err)
+	}
+
+	return remaining, nil
 }
 
 // applyStyles applies theme colors and borders to the detail view.

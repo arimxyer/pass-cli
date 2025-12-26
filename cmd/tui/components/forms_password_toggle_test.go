@@ -91,6 +91,10 @@ func (m *mockVaultServiceForForms) RecordFieldAccess(service, field string) erro
 	return nil
 }
 
+func (m *mockVaultServiceForForms) GetTOTPCode(service string) (string, int, error) {
+	return "", 0, errors.New("TOTP not configured")
+}
+
 // TestAddFormPasswordVisibilityToggle verifies the toggle changes label
 // T004: Unit test for AddForm password visibility toggle functionality
 // NOTE: tview InputField doesn't expose GetMaskCharacter(), so we test via label changes

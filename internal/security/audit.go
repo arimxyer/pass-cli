@@ -46,6 +46,12 @@ const (
 	// Backup operations (001-add-manual-vault)
 	EventBackupCreate  = "backup_create"  // FR-017: Manual backup creation
 	EventBackupRestore = "backup_restore" // FR-017: Vault restoration from backup
+
+	// TOTP operations (feature/totp-support)
+	EventTOTPAccess = "totp_access" // TOTP code generated/accessed
+	EventTOTPAdd    = "totp_add"    // TOTP secret added to credential
+	EventTOTPUpdate = "totp_update" // TOTP secret updated
+	EventTOTPClear  = "totp_clear"  // TOTP secret removed from credential
 )
 
 // Outcome constants

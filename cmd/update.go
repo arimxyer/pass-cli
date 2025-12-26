@@ -26,6 +26,8 @@ var (
 	clearNotes             bool
 	updateGeneratePassword bool
 	updateGenLength        int
+	updateTOTPURI          string // TOTP otpauth:// URI
+	clearTOTP              bool   // Clear TOTP configuration
 )
 
 var updateCmd = &cobra.Command{
@@ -37,11 +39,14 @@ var updateCmd = &cobra.Command{
 You can selectively update individual fields (username, password, category, url, notes) without
 affecting the others. Empty values mean "don't change".
 
-To explicitly clear optional fields (category, url, notes) to empty, use the --clear-* flags.
+To explicitly clear optional fields (category, url, notes, totp) to empty, use the --clear-* flags.
 These flags take precedence over corresponding value flags.
 
 Use --generate to auto-generate a new secure password (password rotation). The generated
 password will be copied to clipboard automatically.
+
+Use --totp-uri to add or update TOTP/2FA configuration for the credential.
+Use --clear-totp to remove TOTP configuration.
 
 By default, you'll see a usage warning if the credential has been accessed before,
 showing where and when it was last used. Use --force to skip the confirmation.`,
@@ -81,6 +86,12 @@ showing where and when it was last used. Use --force to skip the confirmation.`,
   # Generate new 32-character password
   pass-cli update github -g --gen-length 32
 
+  # Add or update TOTP/2FA
+  pass-cli update github --totp-uri "otpauth://totp/GitHub:user?secret=JBSWY3DPEHPK3PXP&issuer=GitHub"
+
+  # Remove TOTP/2FA configuration
+  pass-cli update github --clear-totp
+
   # Skip confirmation
   pass-cli update github --force`,
 	Args: cobra.ExactArgs(1),
@@ -99,10 +110,14 @@ func init() {
 	updateCmd.Flags().BoolVar(&clearCategory, "clear-category", false, "clear category field to empty")
 	updateCmd.Flags().BoolVar(&clearURL, "clear-url", false, "clear URL field to empty")
 	updateCmd.Flags().BoolVar(&clearNotes, "clear-notes", false, "clear notes field to empty")
+	updateCmd.Flags().StringVar(&updateTOTPURI, "totp-uri", "", "TOTP/2FA otpauth:// URI to add or update")
+	updateCmd.Flags().BoolVar(&clearTOTP, "clear-totp", false, "remove TOTP/2FA configuration")
 	updateCmd.Flags().BoolVar(&updateForce, "force", false, "skip confirmation prompt")
 
 	// Mark --password and --generate as mutually exclusive
 	updateCmd.MarkFlagsMutuallyExclusive("password", "generate")
+	// Mark --totp-uri and --clear-totp as mutually exclusive
+	updateCmd.MarkFlagsMutuallyExclusive("totp-uri", "clear-totp")
 }
 
 func runUpdate(cmd *cobra.Command, args []string) error {
@@ -154,7 +169,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 
 	// If no flags provided (including clear flags), prompt for what to update
 	if updateUsername == "" && updatePassword == "" && updateNotes == "" && updateCategory == "" && updateURL == "" &&
-		!clearCategory && !clearURL && !clearNotes && !updateGeneratePassword {
+		updateTOTPURI == "" && !clearCategory && !clearURL && !clearNotes && !clearTOTP && !updateGeneratePassword {
 		fmt.Println("What would you like to update? (leave empty to keep current value)")
 		fmt.Println()
 
@@ -204,7 +219,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 
 	// Check if anything is being updated
 	if updateUsername == "" && updatePassword == "" && updateNotes == "" && updateCategory == "" && updateURL == "" &&
-		!clearCategory && !clearURL && !clearNotes && !updateGeneratePassword {
+		updateTOTPURI == "" && !clearCategory && !clearURL && !clearNotes && !clearTOTP && !updateGeneratePassword {
 		fmt.Println("No changes specified.")
 		return nil
 	}
@@ -273,6 +288,24 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 		opts.URL = &updateURL
 	}
 
+	// Handle TOTP: clear flag takes precedence
+	if clearTOTP {
+		opts.ClearTOTP = true
+	} else if updateTOTPURI != "" {
+		// Parse and validate TOTP URI
+		totpConfig, err := vault.ParseTOTPURI(updateTOTPURI)
+		if err != nil {
+			return fmt.Errorf("invalid TOTP URI: %w", err)
+		}
+		opts.TOTPSecret = &totpConfig.Secret
+		opts.TOTPAlgorithm = &totpConfig.Algorithm
+		opts.TOTPDigits = &totpConfig.Digits
+		opts.TOTPPeriod = &totpConfig.Period
+		if totpConfig.Issuer != "" {
+			opts.TOTPIssuer = &totpConfig.Issuer
+		}
+	}
+
 	if err := vaultService.UpdateCredential(service, opts); err != nil {
 		return fmt.Errorf("failed to update credential: %w", err)
 	}
@@ -301,6 +334,11 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 		fmt.Printf("📋 Notes cleared\n")
 	} else if updateNotes != "" {
 		fmt.Printf("📋 New notes: %s\n", updateNotes)
+	}
+	if clearTOTP {
+		fmt.Printf("🔐 TOTP cleared\n")
+	} else if updateTOTPURI != "" {
+		fmt.Printf("🔐 TOTP configured\n")
 	}
 
 	return nil

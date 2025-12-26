@@ -22,7 +22,8 @@ type VaultService interface {
 	UpdateCredential(service string, opts vault.UpdateOpts) error
 	DeleteCredential(service string) error
 	GetCredential(service string, trackUsage bool) (*vault.Credential, error)
-	RecordFieldAccess(service, field string) error // Track field-specific access
+	RecordFieldAccess(service, field string) error   // Track field-specific access
+	GetTOTPCode(service string) (string, int, error) // Generate TOTP code with remaining seconds
 }
 
 // UpdateCredentialOpts mirrors vault.UpdateOpts for AppState layer.
@@ -34,6 +35,14 @@ type UpdateCredentialOpts struct {
 	Category *string
 	URL      *string
 	Notes    *string
+
+	// TOTP fields (nil = don't change, non-nil = set value)
+	TOTPSecret    *string
+	TOTPAlgorithm *string
+	TOTPDigits    *int
+	TOTPPeriod    *int
+	TOTPIssuer    *string
+	ClearTOTP     bool // If true, clears all TOTP fields
 }
 
 // AppState holds all application state with thread-safe access.
@@ -159,6 +168,15 @@ func (s *AppState) RecordFieldAccess(service, field string) error {
 	return s.vault.RecordFieldAccess(service, field)
 }
 
+// GetTOTPCode generates a TOTP code for the specified service.
+// Returns the code, remaining seconds until expiration, and any error.
+func (s *AppState) GetTOTPCode(service string) (string, int, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	return s.vault.GetTOTPCode(service)
+}
+
 // LoadCredentials loads all credentials from the vault.
 // CRITICAL: Follows Lock→Mutate→Unlock→Notify pattern to prevent deadlocks.
 func (s *AppState) LoadCredentials() error {
@@ -224,11 +242,17 @@ func (s *AppState) AddCredential(service, username, password, category, url, not
 func (s *AppState) UpdateCredential(service string, opts UpdateCredentialOpts) error {
 	// Convert AppState UpdateCredentialOpts to vault.UpdateOpts
 	vaultOpts := vault.UpdateOpts{
-		Username: opts.Username,
-		Password: opts.Password,
-		Category: opts.Category,
-		URL:      opts.URL,
-		Notes:    opts.Notes,
+		Username:      opts.Username,
+		Password:      opts.Password,
+		Category:      opts.Category,
+		URL:           opts.URL,
+		Notes:         opts.Notes,
+		TOTPSecret:    opts.TOTPSecret,
+		TOTPAlgorithm: opts.TOTPAlgorithm,
+		TOTPDigits:    opts.TOTPDigits,
+		TOTPPeriod:    opts.TOTPPeriod,
+		TOTPIssuer:    opts.TOTPIssuer,
+		ClearTOTP:     opts.ClearTOTP,
 	}
 
 	// Perform vault I/O without holding lock (vault has its own synchronization)

@@ -66,6 +66,7 @@ Both modes access the same encrypted vault file (`~/.pass-cli/vault.enc`).
 | `u` | Copy username to clipboard | Detail panel |
 | `l` | Copy URL to clipboard | Detail panel |
 | `n` | Copy notes to clipboard | Detail panel |
+| `t` | Copy TOTP code to clipboard | Detail panel |
 
 #### View Controls
 
