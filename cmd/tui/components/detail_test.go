@@ -72,6 +72,10 @@ func (t *testVaultService) RecordFieldAccess(service, field string) error {
 	return nil
 }
 
+func (t *testVaultService) GetTOTPCode(service string) (string, int, error) {
+	return "", 0, fmt.Errorf("TOTP not configured")
+}
+
 // Test helper functions
 
 // CreateTestCredential creates a test credential with usage records
