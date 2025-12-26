@@ -45,7 +45,7 @@ func CheckTimeSync() TimeSyncResult {
 		result.Error = err
 		return result
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	result.Checked = true
 
@@ -142,11 +142,20 @@ func ParseTOTPURI(uri string) (*TOTPConfig, error) {
 		return nil, fmt.Errorf("unsupported OTP type: %s (only totp is supported)", key.Type())
 	}
 
+	// Safely convert period - cap to reasonable range then convert
+	// TOTP periods are typically 30s, max 5 minutes is reasonable
+	keyPeriod := key.Period()
+	periodInt := 30 // Default to standard period
+	if keyPeriod > 0 && keyPeriod <= 300 {
+		// #nosec G115 -- keyPeriod is bounds-checked to max 300, safe for int
+		periodInt = int(keyPeriod)
+	}
+
 	config := &TOTPConfig{
 		Secret:  key.Secret(),
 		Issuer:  key.Issuer(),
 		Account: key.AccountName(),
-		Period:  int(key.Period()),
+		Period:  periodInt,
 		Digits:  key.Digits().Length(),
 	}
 
@@ -180,9 +189,12 @@ func ValidateTOTPSecret(secret string) error {
 		return fmt.Errorf("TOTP secret cannot be empty")
 	}
 
-	// Check for valid base32 characters (A-Z, 2-7)
+	// Check for valid base32 characters (A-Z, 2-7, =)
 	for _, c := range secret {
-		if !((c >= 'A' && c <= 'Z') || (c >= '2' && c <= '7') || c == '=') {
+		isUpperAlpha := c >= 'A' && c <= 'Z'
+		isValidDigit := c >= '2' && c <= '7'
+		isPadding := c == '='
+		if !isUpperAlpha && !isValidDigit && !isPadding {
 			return fmt.Errorf("invalid base32 character in TOTP secret: %c", c)
 		}
 	}
@@ -218,9 +230,9 @@ func GenerateTOTPCode(cred *Credential) (string, int, error) {
 		digits = otp.DigitsEight
 	}
 
-	// Determine period
+	// Determine period with bounds check (TOTP periods are typically 30s, max 5 min)
 	period := uint(30)
-	if cred.TOTPPeriod > 0 {
+	if cred.TOTPPeriod > 0 && cred.TOTPPeriod <= 300 {
 		period = uint(cred.TOTPPeriod)
 	}
 
@@ -236,8 +248,11 @@ func GenerateTOTPCode(cred *Credential) (string, int, error) {
 	}
 
 	// Calculate remaining validity
+	// period is bounds-checked above (max 300), safe to convert
 	epoch := now.Unix()
-	remaining := int(period) - int(epoch%int64(period))
+	// #nosec G115 -- period is bounds-checked to max 300, safe for int
+	periodInt := int(period)
+	remaining := periodInt - int(epoch%int64(periodInt))
 
 	return code, remaining, nil
 }
