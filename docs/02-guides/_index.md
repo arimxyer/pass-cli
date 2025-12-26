@@ -12,5 +12,6 @@ Task-oriented guides for common pass-cli workflows and features.
   {{< card link="usage-tracking" title="Usage Tracking" icon="chart-bar" subtitle="Automatic credential usage tracking by working directory" >}}
   {{< card link="backup-restore" title="Backup & Restore" icon="document-duplicate" subtitle="Vault backup and disaster recovery procedures" >}}
   {{< card link="tui-guide" title="TUI Guide" icon="terminal" subtitle="Interactive terminal user interface guide" >}}
+  {{< card link="totp-guide" title="TOTP & 2FA" icon="shield-check" subtitle="Store TOTP secrets and generate 2FA codes" >}}
   {{< card link="scripting-guide" title="Scripting Guide" icon="code" subtitle="Automate pass-cli with scripts and CI/CD integration" >}}
 {{< /cards >}}

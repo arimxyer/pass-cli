@@ -227,6 +227,8 @@ pass-cli add github --totp
 pass-cli add github --totp-uri "otpauth://totp/GitHub:user?secret=JBSWY3DPEHPK3PXP&issuer=GitHub"
 ```
 
+> **Tip**: When adding TOTP, the `Service` and `Username` fields are used as defaults for the QR code's issuer and account name. See the [TOTP & 2FA Guide](../02-guides/totp-guide) for details on how these fields are used.
+
 #### Interactive Prompts
 
 When not using flags, you'll be prompted:
@@ -325,6 +327,17 @@ pass-cli get github --totp-qr
 # Export TOTP QR code to file (use with caution - contains secret)
 pass-cli get github --totp-qr-file totp-github.png
 ```
+
+#### TOTP URI Labeling (Service & Username)
+
+When generating a TOTP QR code or URI, Pass-CLI uses the following fields to identify the account in your authenticator app:
+
+- **Issuer**: Uses `TOTPIssuer` field, or falls back to `Service` name if empty.
+- **Account**: Uses `Username` field, or falls back to `Service` name if empty.
+
+**Best Practice**: Set the `Username` field to distinguish between multiple accounts at the same service. If you only have one account, leaving `Username` empty is fine as the service name will be used.
+
+For more details on TOTP configuration and usage, see the [TOTP & 2FA Guide](../02-guides/totp-guide).
 
 #### Output Examples
 
