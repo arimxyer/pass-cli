@@ -301,24 +301,55 @@ func (c *Credential) ClearTOTP() {
 //
 // The URI follows the otpauth:// format:
 // otpauth://totp/ISSUER:ACCOUNT?secret=SECRET&issuer=ISSUER&algorithm=ALG&digits=N&period=N
+//
+// Returns an error if:
+// - No TOTP secret is configured
+// - Both Service and Username are empty (no account identity)
+// - Algorithm is not SHA1, SHA256, or SHA512
+// - Digits is not 6 or 8
+// - Period is outside 1-300 seconds range
 func (c *Credential) BuildTOTPURI() (string, error) {
 	if c.TOTPSecret == "" {
 		return "", fmt.Errorf("no TOTP configured for this credential")
 	}
 
-	// Get parameters with defaults
+	// Normalize secret: trim whitespace and uppercase
+	secret := strings.TrimSpace(strings.ToUpper(c.TOTPSecret))
+	if secret == "" {
+		return "", fmt.Errorf("TOTP secret is empty after normalization")
+	}
+
+	// Validate and normalize algorithm
 	algorithm := strings.ToUpper(c.TOTPAlgorithm)
 	if algorithm == "" {
 		algorithm = "SHA1"
 	}
+	switch algorithm {
+	case "SHA1", "SHA256", "SHA512":
+		// Valid algorithms
+	default:
+		return "", fmt.Errorf("unsupported TOTP algorithm: %s (must be SHA1, SHA256, or SHA512)", algorithm)
+	}
+
+	// Validate digits
 	digits := c.TOTPDigits
 	if digits == 0 {
 		digits = 6
 	}
+	if digits != 6 && digits != 8 {
+		return "", fmt.Errorf("unsupported TOTP digits: %d (must be 6 or 8)", digits)
+	}
+
+	// Validate period
 	period := c.TOTPPeriod
 	if period == 0 {
 		period = 30
 	}
+	if period < 1 || period > 300 {
+		return "", fmt.Errorf("TOTP period out of range: %d (must be 1-300 seconds)", period)
+	}
+
+	// Get issuer and account
 	issuer := c.TOTPIssuer
 	if issuer == "" {
 		issuer = c.Service
@@ -326,6 +357,11 @@ func (c *Credential) BuildTOTPURI() (string, error) {
 	account := c.Username
 	if account == "" {
 		account = c.Service
+	}
+
+	// Validate we have an account identity
+	if account == "" {
+		return "", fmt.Errorf("cannot build TOTP URI: no account identity (Service and Username are both empty)")
 	}
 
 	// Build label (issuer:account or just account)
@@ -338,7 +374,7 @@ func (c *Credential) BuildTOTPURI() (string, error) {
 	// Build query parameters
 	// secret is already base32 encoded - use directly without re-encoding
 	params := url.Values{}
-	params.Set("secret", c.TOTPSecret)
+	params.Set("secret", secret)
 	if issuer != "" {
 		params.Set("issuer", issuer)
 	}
@@ -353,7 +389,12 @@ func (c *Credential) BuildTOTPURI() (string, error) {
 		params.Set("period", strconv.Itoa(period))
 	}
 
-	return fmt.Sprintf("otpauth://totp/%s?%s", label, params.Encode()), nil
+	// Build URI with proper encoding
+	// Use strings.ReplaceAll to convert + to %20 for maximum authenticator app compatibility
+	// (url.Values.Encode() uses + for spaces, but some apps expect %20)
+	queryString := strings.ReplaceAll(params.Encode(), "+", "%20")
+
+	return fmt.Sprintf("otpauth://totp/%s?%s", label, queryString), nil
 }
 
 // DisplayQRCode displays a QR code in the terminal for the credential's TOTP configuration

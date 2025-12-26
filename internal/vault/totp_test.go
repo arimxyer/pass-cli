@@ -412,10 +412,11 @@ func TestBuildTOTPURI_SecretMatchesCodeGeneration(t *testing.T) {
 	}
 
 	// Most importantly: codes generated from both should match
+	// Use the same timestamp for both to avoid flakiness at TOTP step boundaries
 	now := time.Now()
-	codeFromCred, _, err := cred.GetTOTPCode()
+	codeFromCred, err := totp.GenerateCode(cred.TOTPSecret, now)
 	if err != nil {
-		t.Fatalf("GetTOTPCode failed: %v", err)
+		t.Fatalf("GenerateCode from credential failed: %v", err)
 	}
 
 	codeFromURI, err := totp.GenerateCode(parsedKey.Secret(), now)
@@ -537,5 +538,264 @@ func TestBuildTOTPURI_SpecialCharactersInLabel(t *testing.T) {
 	// Should start with otpauth://totp/
 	if !strings.HasPrefix(uri, "otpauth://totp/") {
 		t.Errorf("URI should start with otpauth://totp/, got: %s", uri)
+	}
+}
+
+func TestBuildTOTPURI_SpaceEncodingAsPercent20(t *testing.T) {
+	// Verify that spaces in issuer are encoded as %20 (not +)
+	// for maximum compatibility with authenticator apps
+	cred := &Credential{
+		Service:    "test",
+		Username:   "user",
+		TOTPSecret: "JBSWY3DPEHPK3PXP",
+		TOTPIssuer: "Company Name",
+	}
+
+	uri, err := cred.BuildTOTPURI()
+	if err != nil {
+		t.Fatalf("BuildTOTPURI failed: %v", err)
+	}
+
+	// Should use %20 for spaces, not +
+	if strings.Contains(uri, "issuer=Company+Name") {
+		t.Errorf("URI should use %%20 for spaces, not +, got: %s", uri)
+	}
+	if !strings.Contains(uri, "issuer=Company%20Name") {
+		t.Errorf("URI should contain issuer=Company%%20Name, got: %s", uri)
+	}
+
+	// Verify it still parses correctly
+	parsedKey, err := otp.NewKeyFromURL(uri)
+	if err != nil {
+		t.Fatalf("Failed to parse URI with %%20 spaces: %v", err)
+	}
+	if parsedKey.Issuer() != "Company Name" {
+		t.Errorf("Parsed issuer should be 'Company Name', got: %s", parsedKey.Issuer())
+	}
+}
+
+func TestBuildTOTPURI_SecretNormalization(t *testing.T) {
+	tests := []struct {
+		name           string
+		inputSecret    string
+		expectedSecret string
+	}{
+		{
+			name:           "lowercase to uppercase",
+			inputSecret:    "jbswy3dpehpk3pxp",
+			expectedSecret: "JBSWY3DPEHPK3PXP",
+		},
+		{
+			name:           "with leading/trailing whitespace",
+			inputSecret:    "  JBSWY3DPEHPK3PXP  ",
+			expectedSecret: "JBSWY3DPEHPK3PXP",
+		},
+		{
+			name:           "mixed case with whitespace",
+			inputSecret:    " JbSwY3DpEhPk3PxP ",
+			expectedSecret: "JBSWY3DPEHPK3PXP",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cred := &Credential{
+				Service:    "test",
+				Username:   "user",
+				TOTPSecret: tt.inputSecret,
+			}
+
+			uri, err := cred.BuildTOTPURI()
+			if err != nil {
+				t.Fatalf("BuildTOTPURI failed: %v", err)
+			}
+
+			if !strings.Contains(uri, "secret="+tt.expectedSecret) {
+				t.Errorf("URI should contain normalized secret=%s, got: %s", tt.expectedSecret, uri)
+			}
+		})
+	}
+}
+
+func TestBuildTOTPURI_InvalidAlgorithm(t *testing.T) {
+	cred := &Credential{
+		Service:       "test",
+		Username:      "user",
+		TOTPSecret:    "JBSWY3DPEHPK3PXP",
+		TOTPAlgorithm: "MD5", // Invalid algorithm
+	}
+
+	_, err := cred.BuildTOTPURI()
+	if err == nil {
+		t.Error("expected error for invalid algorithm MD5, got nil")
+	}
+	if !strings.Contains(err.Error(), "unsupported TOTP algorithm") {
+		t.Errorf("error should mention unsupported algorithm, got: %v", err)
+	}
+}
+
+func TestBuildTOTPURI_InvalidDigits(t *testing.T) {
+	tests := []struct {
+		name   string
+		digits int
+	}{
+		{"too few digits", 4},
+		{"too many digits", 10},
+		{"odd number", 7},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cred := &Credential{
+				Service:    "test",
+				Username:   "user",
+				TOTPSecret: "JBSWY3DPEHPK3PXP",
+				TOTPDigits: tt.digits,
+			}
+
+			_, err := cred.BuildTOTPURI()
+			if err == nil {
+				t.Errorf("expected error for digits=%d, got nil", tt.digits)
+			}
+			if !strings.Contains(err.Error(), "unsupported TOTP digits") {
+				t.Errorf("error should mention unsupported digits, got: %v", err)
+			}
+		})
+	}
+}
+
+func TestBuildTOTPURI_InvalidPeriod(t *testing.T) {
+	tests := []struct {
+		name   string
+		period int
+	}{
+		{"zero period", 0},       // Note: 0 gets defaulted to 30, so this won't error
+		{"negative period", -1},  // This will error (but Go's int won't go negative from 0 default)
+		{"too long period", 301}, // Over 5 minutes
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cred := &Credential{
+				Service:    "test",
+				Username:   "user",
+				TOTPSecret: "JBSWY3DPEHPK3PXP",
+				TOTPPeriod: tt.period,
+			}
+
+			_, err := cred.BuildTOTPURI()
+			// 0 gets defaulted to 30, so only non-zero invalid values error
+			if tt.period == 0 {
+				if err != nil {
+					t.Errorf("period=0 should default to 30, not error: %v", err)
+				}
+				return
+			}
+			if err == nil {
+				t.Errorf("expected error for period=%d, got nil", tt.period)
+			}
+			if !strings.Contains(err.Error(), "TOTP period out of range") {
+				t.Errorf("error should mention period out of range, got: %v", err)
+			}
+		})
+	}
+}
+
+func TestBuildTOTPURI_EmptyIdentity(t *testing.T) {
+	// Both Service and Username are empty - should error
+	cred := &Credential{
+		TOTPSecret: "JBSWY3DPEHPK3PXP",
+	}
+
+	_, err := cred.BuildTOTPURI()
+	if err == nil {
+		t.Error("expected error when both Service and Username are empty, got nil")
+	}
+	if !strings.Contains(err.Error(), "no account identity") {
+		t.Errorf("error should mention no account identity, got: %v", err)
+	}
+}
+
+func TestBuildTOTPURI_ValidAlgorithms(t *testing.T) {
+	algorithms := []string{"SHA1", "SHA256", "SHA512", "sha1", "sha256", "sha512"}
+
+	for _, algo := range algorithms {
+		t.Run(algo, func(t *testing.T) {
+			cred := &Credential{
+				Service:       "test",
+				Username:      "user",
+				TOTPSecret:    "JBSWY3DPEHPK3PXP",
+				TOTPAlgorithm: algo,
+			}
+
+			uri, err := cred.BuildTOTPURI()
+			if err != nil {
+				t.Fatalf("BuildTOTPURI failed for algorithm %s: %v", algo, err)
+			}
+
+			// Verify it parses correctly
+			_, err = otp.NewKeyFromURL(uri)
+			if err != nil {
+				t.Fatalf("Generated URI for algorithm %s is not valid: %v", algo, err)
+			}
+		})
+	}
+}
+
+func TestBuildTOTPURI_ValidDigits(t *testing.T) {
+	validDigits := []int{6, 8}
+
+	for _, digits := range validDigits {
+		t.Run(fmt.Sprintf("digits=%d", digits), func(t *testing.T) {
+			cred := &Credential{
+				Service:    "test",
+				Username:   "user",
+				TOTPSecret: "JBSWY3DPEHPK3PXP",
+				TOTPDigits: digits,
+			}
+
+			uri, err := cred.BuildTOTPURI()
+			if err != nil {
+				t.Fatalf("BuildTOTPURI failed for digits=%d: %v", digits, err)
+			}
+
+			// Verify it parses correctly
+			parsedKey, err := otp.NewKeyFromURL(uri)
+			if err != nil {
+				t.Fatalf("Generated URI for digits=%d is not valid: %v", digits, err)
+			}
+			if parsedKey.Digits().Length() != digits {
+				t.Errorf("Expected digits=%d, got %d", digits, parsedKey.Digits().Length())
+			}
+		})
+	}
+}
+
+func TestBuildTOTPURI_ValidPeriods(t *testing.T) {
+	validPeriods := []int{15, 30, 60, 120, 300}
+
+	for _, period := range validPeriods {
+		t.Run(fmt.Sprintf("period=%d", period), func(t *testing.T) {
+			cred := &Credential{
+				Service:    "test",
+				Username:   "user",
+				TOTPSecret: "JBSWY3DPEHPK3PXP",
+				TOTPPeriod: period,
+			}
+
+			uri, err := cred.BuildTOTPURI()
+			if err != nil {
+				t.Fatalf("BuildTOTPURI failed for period=%d: %v", period, err)
+			}
+
+			// Verify it parses correctly
+			parsedKey, err := otp.NewKeyFromURL(uri)
+			if err != nil {
+				t.Fatalf("Generated URI for period=%d is not valid: %v", period, err)
+			}
+			if parsedKey.Period() != uint64(period) {
+				t.Errorf("Expected period=%d, got %d", period, parsedKey.Period())
+			}
+		})
 	}
 }
