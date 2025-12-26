@@ -2,9 +2,13 @@ package vault
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/pquerna/otp"
+	"github.com/pquerna/otp/totp"
 )
 
 func TestParseTOTPURI_ValidFullURI(t *testing.T) {
@@ -371,5 +375,167 @@ func TestFormatTimeSyncWarning_NotChecked(t *testing.T) {
 	warning := FormatTimeSyncWarning(result)
 	if warning != "" {
 		t.Errorf("expected no warning when not checked and no error, got: %s", warning)
+	}
+}
+
+func TestBuildTOTPURI_SecretMatchesCodeGeneration(t *testing.T) {
+	// This test ensures that the secret in the generated QR code URI
+	// matches the secret used for TOTP code generation.
+	// This was a bug where totp.Generate() re-encoded the already-encoded secret.
+	secret := "JBSWY3DPEHPK3PXP"
+	cred := &Credential{
+		Service:    "TestService",
+		Username:   "testuser",
+		TOTPSecret: secret,
+	}
+
+	// Build the URI
+	uri, err := cred.BuildTOTPURI()
+	if err != nil {
+		t.Fatalf("BuildTOTPURI failed: %v", err)
+	}
+
+	// Verify the URI contains the exact same secret (not re-encoded)
+	if !strings.Contains(uri, "secret="+secret) {
+		t.Errorf("URI should contain original secret=%s, got URI: %s", secret, uri)
+	}
+
+	// Parse the URI back and verify codes match
+	parsedKey, err := otp.NewKeyFromURL(uri)
+	if err != nil {
+		t.Fatalf("Failed to parse generated URI: %v", err)
+	}
+
+	// The secret from the parsed URI should match the original
+	if parsedKey.Secret() != secret {
+		t.Errorf("Parsed secret=%s does not match original=%s", parsedKey.Secret(), secret)
+	}
+
+	// Most importantly: codes generated from both should match
+	now := time.Now()
+	codeFromCred, _, err := cred.GetTOTPCode()
+	if err != nil {
+		t.Fatalf("GetTOTPCode failed: %v", err)
+	}
+
+	codeFromURI, err := totp.GenerateCode(parsedKey.Secret(), now)
+	if err != nil {
+		t.Fatalf("GenerateCode from URI failed: %v", err)
+	}
+
+	if codeFromCred != codeFromURI {
+		t.Errorf("Code mismatch! Credential generated %s, URI would generate %s", codeFromCred, codeFromURI)
+	}
+}
+
+func TestBuildTOTPURI_NoTOTPConfigured(t *testing.T) {
+	cred := &Credential{
+		Service: "test",
+	}
+
+	_, err := cred.BuildTOTPURI()
+	if err == nil {
+		t.Error("expected error for no TOTP configured, got nil")
+	}
+}
+
+func TestBuildTOTPURI_DefaultValues(t *testing.T) {
+	cred := &Credential{
+		Service:    "github",
+		Username:   "user@example.com",
+		TOTPSecret: "JBSWY3DPEHPK3PXP",
+	}
+
+	uri, err := cred.BuildTOTPURI()
+	if err != nil {
+		t.Fatalf("BuildTOTPURI failed: %v", err)
+	}
+
+	// Should have the secret
+	if !strings.Contains(uri, "secret=JBSWY3DPEHPK3PXP") {
+		t.Errorf("URI missing secret, got: %s", uri)
+	}
+
+	// Should use service as issuer when not specified
+	if !strings.Contains(uri, "issuer=github") {
+		t.Errorf("URI should use service as issuer, got: %s", uri)
+	}
+
+	// Should NOT have algorithm param (default SHA1 is omitted)
+	if strings.Contains(uri, "algorithm=") {
+		t.Errorf("URI should not include default algorithm=SHA1, got: %s", uri)
+	}
+
+	// Should NOT have digits param (default 6 is omitted)
+	if strings.Contains(uri, "digits=") {
+		t.Errorf("URI should not include default digits=6, got: %s", uri)
+	}
+
+	// Should NOT have period param (default 30 is omitted)
+	if strings.Contains(uri, "period=") {
+		t.Errorf("URI should not include default period=30, got: %s", uri)
+	}
+}
+
+func TestBuildTOTPURI_NonDefaultValues(t *testing.T) {
+	cred := &Credential{
+		Service:       "github",
+		Username:      "user@example.com",
+		TOTPSecret:    "JBSWY3DPEHPK3PXP",
+		TOTPAlgorithm: "SHA256",
+		TOTPDigits:    8,
+		TOTPPeriod:    60,
+		TOTPIssuer:    "GitHub Inc",
+	}
+
+	uri, err := cred.BuildTOTPURI()
+	if err != nil {
+		t.Fatalf("BuildTOTPURI failed: %v", err)
+	}
+
+	// Parse the URI to check values
+	parsedURL, err := url.Parse(uri)
+	if err != nil {
+		t.Fatalf("Failed to parse URI: %v", err)
+	}
+
+	params := parsedURL.Query()
+
+	if params.Get("algorithm") != "SHA256" {
+		t.Errorf("expected algorithm=SHA256, got: %s", params.Get("algorithm"))
+	}
+	if params.Get("digits") != "8" {
+		t.Errorf("expected digits=8, got: %s", params.Get("digits"))
+	}
+	if params.Get("period") != "60" {
+		t.Errorf("expected period=60, got: %s", params.Get("period"))
+	}
+	if params.Get("issuer") != "GitHub Inc" {
+		t.Errorf("expected issuer='GitHub Inc', got: %s", params.Get("issuer"))
+	}
+}
+
+func TestBuildTOTPURI_SpecialCharactersInLabel(t *testing.T) {
+	cred := &Credential{
+		Service:    "My Service",
+		Username:   "user@example.com",
+		TOTPSecret: "JBSWY3DPEHPK3PXP",
+		TOTPIssuer: "Company Name",
+	}
+
+	uri, err := cred.BuildTOTPURI()
+	if err != nil {
+		t.Fatalf("BuildTOTPURI failed: %v", err)
+	}
+
+	// Should be a valid URI
+	_, err = url.Parse(uri)
+	if err != nil {
+		t.Errorf("Generated URI is not valid: %v", err)
+	}
+
+	// Should start with otpauth://totp/
+	if !strings.HasPrefix(uri, "otpauth://totp/") {
+		t.Errorf("URI should start with otpauth://totp/, got: %s", uri)
 	}
 }

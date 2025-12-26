@@ -3,7 +3,9 @@ package vault
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -296,33 +298,27 @@ func (c *Credential) ClearTOTP() {
 
 // BuildTOTPURI constructs an otpauth:// URI from the credential's TOTP config
 // Useful for exporting or displaying QR codes
+//
+// The URI follows the otpauth:// format:
+// otpauth://totp/ISSUER:ACCOUNT?secret=SECRET&issuer=ISSUER&algorithm=ALG&digits=N&period=N
 func (c *Credential) BuildTOTPURI() (string, error) {
 	if c.TOTPSecret == "" {
 		return "", fmt.Errorf("no TOTP configured for this credential")
 	}
 
-	// Determine algorithm
-	algo := otp.AlgorithmSHA1
-	switch strings.ToUpper(c.TOTPAlgorithm) {
-	case "SHA256":
-		algo = otp.AlgorithmSHA256
-	case "SHA512":
-		algo = otp.AlgorithmSHA512
+	// Get parameters with defaults
+	algorithm := strings.ToUpper(c.TOTPAlgorithm)
+	if algorithm == "" {
+		algorithm = "SHA1"
 	}
-
-	// Determine digits
-	digits := otp.DigitsSix
-	if c.TOTPDigits == 8 {
-		digits = otp.DigitsEight
+	digits := c.TOTPDigits
+	if digits == 0 {
+		digits = 6
 	}
-
-	// Determine period
-	period := uint(30)
-	if c.TOTPPeriod > 0 {
-		period = uint(c.TOTPPeriod)
+	period := c.TOTPPeriod
+	if period == 0 {
+		period = 30
 	}
-
-	// Determine issuer and account
 	issuer := c.TOTPIssuer
 	if issuer == "" {
 		issuer = c.Service
@@ -332,20 +328,32 @@ func (c *Credential) BuildTOTPURI() (string, error) {
 		account = c.Service
 	}
 
-	// Generate key with the library
-	key, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      issuer,
-		AccountName: account,
-		Period:      period,
-		Digits:      digits,
-		Algorithm:   algo,
-		Secret:      []byte(c.TOTPSecret), // Will be re-encoded
-	})
-	if err != nil {
-		return "", fmt.Errorf("failed to build TOTP URI: %w", err)
+	// Build label (issuer:account or just account)
+	// The label appears in the authenticator app as the credential name
+	label := url.PathEscape(account)
+	if issuer != "" {
+		label = url.PathEscape(issuer) + ":" + url.PathEscape(account)
 	}
 
-	return key.URL(), nil
+	// Build query parameters
+	// secret is already base32 encoded - use directly without re-encoding
+	params := url.Values{}
+	params.Set("secret", c.TOTPSecret)
+	if issuer != "" {
+		params.Set("issuer", issuer)
+	}
+	// Only include non-default values to keep URI clean
+	if algorithm != "SHA1" {
+		params.Set("algorithm", algorithm)
+	}
+	if digits != 6 {
+		params.Set("digits", strconv.Itoa(digits))
+	}
+	if period != 30 {
+		params.Set("period", strconv.Itoa(period))
+	}
+
+	return fmt.Sprintf("otpauth://totp/%s?%s", label, params.Encode()), nil
 }
 
 // DisplayQRCode displays a QR code in the terminal for the credential's TOTP configuration
