@@ -53,6 +53,7 @@ type EditForm struct {
 	originalPassword string // Track original password to detect changes
 	passwordFetched  bool   // Track if password has been fetched (lazy loading)
 	passwordVisible  bool   // Track password visibility state for toggle
+	clearTOTP        bool   // Track if user wants to clear TOTP
 
 	onSubmit        func()
 	onCancel        func()
@@ -141,6 +142,9 @@ func (af *AddForm) buildFormFields() {
 	af.form.AddInputField("URL", "", 0, nil, nil)
 	af.form.AddTextArea("Notes", "", 0, 5, 0, nil)
 
+	// TOTP field (optional) - accepts base32 secret or otpauth:// URI
+	af.form.AddInputField("TOTP Secret/URI", "", 0, nil, nil)
+
 	// Action buttons
 	af.form.AddButton("Generate Password", af.onGeneratePassword)
 	af.form.AddButton("Add", af.onAddPressed)
@@ -168,6 +172,7 @@ func (af *AddForm) onAddPressed() {
 
 	url := af.form.GetFormItem(4).(*tview.InputField).GetText()
 	notes := af.form.GetFormItem(5).(*tview.TextArea).GetText()
+	totpInput := af.form.GetFormItem(6).(*tview.InputField).GetText()
 
 	// Call AppState to add credential with all 6 fields
 	err := af.appState.AddCredential(service, username, password, category, url, notes)
@@ -175,6 +180,29 @@ func (af *AddForm) onAddPressed() {
 		// Error already handled by AppState onError callback
 		// Form stays open for correction
 		return
+	}
+
+	// If TOTP was provided, update credential with TOTP fields
+	if totpInput != "" {
+		totpConfig, err := vault.ParseTOTPURI(strings.TrimSpace(totpInput))
+		if err != nil {
+			// TOTP parsing failed - credential was added but without TOTP
+			// Could show warning but don't fail the whole operation
+			// Form will close, user can edit later to fix TOTP
+		} else {
+			// Update credential with TOTP fields
+			opts := models.UpdateCredentialOpts{
+				TOTPSecret:    &totpConfig.Secret,
+				TOTPAlgorithm: &totpConfig.Algorithm,
+				TOTPDigits:    &totpConfig.Digits,
+				TOTPPeriod:    &totpConfig.Period,
+			}
+			if totpConfig.Issuer != "" {
+				opts.TOTPIssuer = &totpConfig.Issuer
+			}
+			// Ignore error - credential was added, TOTP is optional
+			_ = af.appState.UpdateCredential(service, opts)
+		}
 	}
 
 	// Success - invoke callback to close modal
@@ -237,12 +265,13 @@ func (af *AddForm) hasUnsavedData() bool {
 	category := af.form.GetFormItem(3).(*tview.InputField).GetText()
 	url := af.form.GetFormItem(4).(*tview.InputField).GetText()
 	notes := af.form.GetFormItem(5).(*tview.TextArea).GetText()
+	totp := af.form.GetFormItem(6).(*tview.InputField).GetText()
 
 	// Consider form "dirty" if any field has non-empty value
 	// Ignore "Uncategorized" since it's the default
 	return service != "" || username != "" || password != "" ||
 		(category != "" && category != "Uncategorized") ||
-		url != "" || notes != ""
+		url != "" || notes != "" || totp != ""
 }
 
 // validate checks that required fields are filled.
@@ -373,9 +402,9 @@ func (af *AddForm) applyStyles() {
 	// Apply form-level styling
 	styles.ApplyFormStyle(af.form)
 
-	// Style individual input fields
+	// Style individual input fields (7 fields: Service, Username, Password, Category, URL, Notes, TOTP)
 	// Use BackgroundLight for input fields - lighter than form Background for contrast
-	for i := 0; i < 6; i++ {
+	for i := 0; i < 7; i++ {
 		item := af.form.GetFormItem(i)
 		switch field := item.(type) {
 		case *tview.InputField:
@@ -528,6 +557,24 @@ func (ef *EditForm) buildFormFieldsWithValues() {
 	ef.form.AddInputField("URL", ef.credential.URL, 0, nil, nil)
 	ef.form.AddTextArea("Notes", ef.credential.Notes, 0, 5, 0, nil)
 
+	// TOTP field - show current status in label, allow adding/updating
+	totpLabel := "TOTP Secret/URI"
+	if ef.credential.HasTOTP {
+		if ef.credential.TOTPIssuer != "" {
+			totpLabel = fmt.Sprintf("TOTP [%s] (leave empty to keep)", ef.credential.TOTPIssuer)
+		} else {
+			totpLabel = "TOTP [configured] (leave empty to keep)"
+		}
+	}
+	ef.form.AddInputField(totpLabel, "", 0, nil, nil)
+
+	// Clear TOTP checkbox - only meaningful if credential has TOTP
+	if ef.credential.HasTOTP {
+		ef.form.AddCheckbox("Clear TOTP", false, func(checked bool) {
+			ef.clearTOTP = checked
+		})
+	}
+
 	// Action buttons
 	ef.form.AddButton("Generate Password", ef.onGeneratePassword)
 	ef.form.AddButton("Save", ef.onSavePressed)
@@ -605,6 +652,7 @@ func (ef *EditForm) performSave() {
 
 	url := ef.form.GetFormItem(4).(*tview.InputField).GetText()
 	notes := ef.form.GetFormItem(5).(*tview.TextArea).GetText()
+	totpInput := ef.form.GetFormItem(6).(*tview.InputField).GetText()
 
 	// Build UpdateCredentialOpts with only non-empty fields
 	opts := models.UpdateCredentialOpts{}
@@ -629,6 +677,26 @@ func (ef *EditForm) performSave() {
 
 	// Always set notes (even if empty, to allow clearing)
 	opts.Notes = &notes
+
+	// Handle TOTP: clear takes precedence, then update if provided
+	if ef.clearTOTP {
+		opts.ClearTOTP = true
+	} else if totpInput != "" {
+		// Parse and validate TOTP input
+		totpConfig, err := vault.ParseTOTPURI(strings.TrimSpace(totpInput))
+		if err != nil {
+			// TOTP parsing failed - don't fail the whole save, just skip TOTP update
+			// User can try again
+		} else {
+			opts.TOTPSecret = &totpConfig.Secret
+			opts.TOTPAlgorithm = &totpConfig.Algorithm
+			opts.TOTPDigits = &totpConfig.Digits
+			opts.TOTPPeriod = &totpConfig.Period
+			if totpConfig.Issuer != "" {
+				opts.TOTPIssuer = &totpConfig.Issuer
+			}
+		}
+	}
 
 	// Call AppState to update credential with options struct
 	err := ef.appState.UpdateCredential(service, opts)
@@ -697,6 +765,7 @@ func (ef *EditForm) hasUnsavedChanges() bool {
 	category := ef.form.GetFormItem(3).(*tview.InputField).GetText()
 	url := ef.form.GetFormItem(4).(*tview.InputField).GetText()
 	notes := ef.form.GetFormItem(5).(*tview.TextArea).GetText()
+	totpInput := ef.form.GetFormItem(6).(*tview.InputField).GetText()
 
 	// Normalize current category for comparison
 	normalizedCategory := normalizeCategory(category)
@@ -706,7 +775,9 @@ func (ef *EditForm) hasUnsavedChanges() bool {
 		password != ef.originalPassword ||
 		normalizedCategory != ef.credential.Category ||
 		url != ef.credential.URL ||
-		notes != ef.credential.Notes
+		notes != ef.credential.Notes ||
+		totpInput != "" || // Any TOTP input means changes
+		ef.clearTOTP // Clear TOTP checkbox is checked
 }
 
 // validate checks that required fields are filled.
@@ -834,8 +905,14 @@ func (ef *EditForm) applyStyles() {
 	styles.ApplyFormStyle(ef.form)
 
 	// Style individual input fields
+	// Form has 7 fields (Service, Username, Password, Category, URL, Notes, TOTP)
+	// Plus optional Clear TOTP checkbox (8th item) if credential has TOTP
 	// Use BackgroundLight for input fields - lighter than form Background for contrast
-	for i := 0; i < 6; i++ {
+	numFields := 7
+	if ef.credential.HasTOTP {
+		numFields = 8 // Include Clear TOTP checkbox
+	}
+	for i := 0; i < numFields; i++ {
 		item := ef.form.GetFormItem(i)
 		switch field := item.(type) {
 		case *tview.InputField:
@@ -846,6 +923,9 @@ func (ef *EditForm) applyStyles() {
 				Background(theme.BackgroundLight).
 				Foreground(theme.TextPrimary))
 		case *tview.DropDown:
+			field.SetFieldBackgroundColor(theme.BackgroundLight).
+				SetFieldTextColor(theme.TextPrimary)
+		case *tview.Checkbox:
 			field.SetFieldBackgroundColor(theme.BackgroundLight).
 				SetFieldTextColor(theme.TextPrimary)
 		}

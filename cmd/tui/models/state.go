@@ -35,6 +35,14 @@ type UpdateCredentialOpts struct {
 	Category *string
 	URL      *string
 	Notes    *string
+
+	// TOTP fields (nil = don't change, non-nil = set value)
+	TOTPSecret    *string
+	TOTPAlgorithm *string
+	TOTPDigits    *int
+	TOTPPeriod    *int
+	TOTPIssuer    *string
+	ClearTOTP     bool // If true, clears all TOTP fields
 }
 
 // AppState holds all application state with thread-safe access.
@@ -234,11 +242,17 @@ func (s *AppState) AddCredential(service, username, password, category, url, not
 func (s *AppState) UpdateCredential(service string, opts UpdateCredentialOpts) error {
 	// Convert AppState UpdateCredentialOpts to vault.UpdateOpts
 	vaultOpts := vault.UpdateOpts{
-		Username: opts.Username,
-		Password: opts.Password,
-		Category: opts.Category,
-		URL:      opts.URL,
-		Notes:    opts.Notes,
+		Username:      opts.Username,
+		Password:      opts.Password,
+		Category:      opts.Category,
+		URL:           opts.URL,
+		Notes:         opts.Notes,
+		TOTPSecret:    opts.TOTPSecret,
+		TOTPAlgorithm: opts.TOTPAlgorithm,
+		TOTPDigits:    opts.TOTPDigits,
+		TOTPPeriod:    opts.TOTPPeriod,
+		TOTPIssuer:    opts.TOTPIssuer,
+		ClearTOTP:     opts.ClearTOTP,
 	}
 
 	// Perform vault I/O without holding lock (vault has its own synchronization)
