@@ -17,7 +17,9 @@ var (
 	getField       string
 	getNoClipboard bool
 	getMasked      bool
-	getTOTP        bool // Output TOTP code instead of password
+	getTOTP        bool   // Output TOTP code instead of password
+	getTOTPQR      bool   // Display TOTP QR code in terminal
+	getTOTPQRFile  string // Export TOTP QR code to file
 )
 
 var getCmd = &cobra.Command{
@@ -34,6 +36,8 @@ are displayed. Use flags to customize the output:
   --no-clipboard  Skip copying to clipboard
   --masked     Display password as asterisks (default shows full password)
   --totp       Output TOTP code instead of password (requires TOTP to be configured)
+  --totp-qr    Display TOTP QR code in terminal (for adding to another device)
+  --totp-qr-file  Export TOTP QR code to a PNG file
 
 Automatic usage tracking records where credentials are accessed based on
 your current working directory.`,
@@ -56,7 +60,13 @@ your current working directory.`,
   pass-cli get github --totp
 
   # Get TOTP code for scripts
-  pass-cli get github --totp --quiet`,
+  pass-cli get github --totp --quiet
+
+  # Display TOTP QR code in terminal (to add to another device)
+  pass-cli get github --totp-qr
+
+  # Export TOTP QR code to a PNG file
+  pass-cli get github --totp-qr-file totp-github.png`,
 	Args: cobra.ExactArgs(1),
 	RunE: runGet,
 }
@@ -68,6 +78,8 @@ func init() {
 	getCmd.Flags().BoolVar(&getNoClipboard, "no-clipboard", false, "do not copy to clipboard")
 	getCmd.Flags().BoolVar(&getMasked, "masked", false, "display password as asterisks")
 	getCmd.Flags().BoolVar(&getTOTP, "totp", false, "output TOTP code instead of password")
+	getCmd.Flags().BoolVar(&getTOTPQR, "totp-qr", false, "display TOTP QR code in terminal")
+	getCmd.Flags().StringVar(&getTOTPQRFile, "totp-qr-file", "", "export TOTP QR code to PNG file")
 }
 
 func runGet(cmd *cobra.Command, args []string) error {
@@ -99,6 +111,16 @@ func runGet(cmd *cobra.Command, args []string) error {
 	cred, err := vaultService.GetCredential(service, false)
 	if err != nil {
 		return fmt.Errorf("failed to get credential: %w", err)
+	}
+
+	// TOTP QR code display mode
+	if getTOTPQR {
+		return outputTOTPQRMode(cred, service)
+	}
+
+	// TOTP QR code file export mode
+	if getTOTPQRFile != "" {
+		return exportTOTPQRFile(cred, service, getTOTPQRFile)
 	}
 
 	// TOTP mode - output TOTP code
@@ -155,6 +177,12 @@ func outputQuietMode(cred *vault.Credential, vaultService *vault.VaultService, s
 
 // outputTOTPMode generates and displays the TOTP code
 func outputTOTPMode(cred *vault.Credential, vaultService *vault.VaultService, service string) error {
+	// Check time sync in background (don't block code generation)
+	timeSyncChan := make(chan vault.TimeSyncResult, 1)
+	go func() {
+		timeSyncChan <- vault.CheckTimeSync()
+	}()
+
 	// Generate TOTP code with audit logging
 	code, remaining, err := vaultService.GetTOTPCode(service)
 	if err != nil {
@@ -170,6 +198,17 @@ func outputTOTPMode(cred *vault.Credential, vaultService *vault.VaultService, se
 	if getQuiet {
 		fmt.Println(code)
 		return nil
+	}
+
+	// Check for time sync warning (non-blocking, with short timeout)
+	select {
+	case result := <-timeSyncChan:
+		if warning := vault.FormatTimeSyncWarning(result); warning != "" {
+			fmt.Fprintln(os.Stderr, warning)
+			fmt.Fprintln(os.Stderr)
+		}
+	case <-time.After(100 * time.Millisecond):
+		// Don't wait too long - time check is best-effort
 	}
 
 	// Normal mode - show code with countdown
@@ -207,6 +246,54 @@ func outputTOTPMode(cred *vault.Credential, vaultService *vault.VaultService, se
 			}()
 		}
 	}
+
+	return nil
+}
+
+// outputTOTPQRMode displays the TOTP QR code in the terminal
+func outputTOTPQRMode(cred *vault.Credential, service string) error {
+	if !cred.HasTOTP() {
+		return fmt.Errorf("no TOTP configured for credential: %s", service)
+	}
+
+	fmt.Printf("🔐 TOTP QR Code for: %s\n", service)
+	if cred.TOTPIssuer != "" {
+		fmt.Printf("   Issuer: %s\n", cred.TOTPIssuer)
+	}
+	fmt.Println()
+	fmt.Println("Scan this QR code with your authenticator app:")
+	fmt.Println()
+
+	if err := cred.DisplayQRCode(os.Stdout); err != nil {
+		return fmt.Errorf("failed to display QR code: %w", err)
+	}
+
+	fmt.Println()
+	fmt.Println("⚠️  Keep this QR code private - it contains your TOTP secret!")
+
+	return nil
+}
+
+// exportTOTPQRFile exports the TOTP QR code to a PNG file
+func exportTOTPQRFile(cred *vault.Credential, service string, filename string) error {
+	if !cred.HasTOTP() {
+		return fmt.Errorf("no TOTP configured for credential: %s", service)
+	}
+
+	// Default size of 256x256 pixels
+	size := 256
+
+	if err := cred.ExportQRCode(filename, size); err != nil {
+		return fmt.Errorf("failed to export QR code: %w", err)
+	}
+
+	fmt.Printf("✅ TOTP QR code exported to: %s\n", filename)
+	fmt.Printf("   Service: %s\n", service)
+	if cred.TOTPIssuer != "" {
+		fmt.Printf("   Issuer: %s\n", cred.TOTPIssuer)
+	}
+	fmt.Println()
+	fmt.Println("⚠️  Keep this file private - it contains your TOTP secret!")
 
 	return nil
 }

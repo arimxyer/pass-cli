@@ -1,8 +1,10 @@
 package vault
 
 import (
+	"fmt"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestParseTOTPURI_ValidFullURI(t *testing.T) {
@@ -312,5 +314,62 @@ func TestDefaultTOTPConfig(t *testing.T) {
 	}
 	if config.Period != 30 {
 		t.Errorf("expected default period 30, got %d", config.Period)
+	}
+}
+
+func TestFormatTimeSyncWarning_InSync(t *testing.T) {
+	result := TimeSyncResult{
+		Checked: true,
+		InSync:  true,
+		Drift:   5 * time.Second,
+	}
+
+	warning := FormatTimeSyncWarning(result)
+	if warning != "" {
+		t.Errorf("expected no warning for in-sync time, got: %s", warning)
+	}
+}
+
+func TestFormatTimeSyncWarning_OutOfSync(t *testing.T) {
+	result := TimeSyncResult{
+		Checked:    true,
+		InSync:     false,
+		Drift:      2 * time.Minute,
+		LocalTime:  time.Now(),
+		ServerTime: time.Now().Add(-2 * time.Minute),
+	}
+
+	warning := FormatTimeSyncWarning(result)
+	if warning == "" {
+		t.Error("expected warning for out-of-sync time")
+	}
+	if !strings.Contains(warning, "Warning") {
+		t.Errorf("expected warning message to contain 'Warning', got: %s", warning)
+	}
+}
+
+func TestFormatTimeSyncWarning_CheckFailed(t *testing.T) {
+	result := TimeSyncResult{
+		Checked: false,
+		Error:   fmt.Errorf("network error"),
+	}
+
+	warning := FormatTimeSyncWarning(result)
+	if warning == "" {
+		t.Error("expected warning for failed check")
+	}
+	if !strings.Contains(warning, "Could not verify") {
+		t.Errorf("expected 'Could not verify' in warning, got: %s", warning)
+	}
+}
+
+func TestFormatTimeSyncWarning_NotChecked(t *testing.T) {
+	result := TimeSyncResult{
+		Checked: false,
+	}
+
+	warning := FormatTimeSyncWarning(result)
+	if warning != "" {
+		t.Errorf("expected no warning when not checked and no error, got: %s", warning)
 	}
 }

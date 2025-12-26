@@ -2,12 +2,99 @@ package vault
 
 import (
 	"fmt"
+	"net/http"
+	"os"
 	"strings"
 	"time"
 
+	"github.com/mdp/qrterminal/v3"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
+	"github.com/skip2/go-qrcode"
 )
+
+// TimeSyncThreshold is the maximum acceptable clock drift in seconds
+const TimeSyncThreshold = 30
+
+// TimeSyncResult holds the result of a time sync check
+type TimeSyncResult struct {
+	InSync     bool          // Whether the clock is within acceptable drift
+	Drift      time.Duration // Estimated drift from server time
+	Checked    bool          // Whether the check was performed
+	Error      error         // Any error during the check
+	ServerTime time.Time     // The server's reported time
+	LocalTime  time.Time     // Local time when check was performed
+}
+
+// CheckTimeSync verifies that the local system clock is reasonably accurate
+// by comparing against an HTTP server's Date header.
+// Returns a TimeSyncResult with drift information.
+func CheckTimeSync() TimeSyncResult {
+	result := TimeSyncResult{
+		LocalTime: time.Now(),
+	}
+
+	// Use a reliable, fast endpoint - just need the Date header
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	// HEAD request to minimize data transfer
+	resp, err := client.Head("https://www.google.com")
+	if err != nil {
+		result.Error = err
+		return result
+	}
+	defer resp.Body.Close()
+
+	result.Checked = true
+
+	// Parse the Date header
+	dateHeader := resp.Header.Get("Date")
+	if dateHeader == "" {
+		result.Error = fmt.Errorf("no Date header in response")
+		return result
+	}
+
+	serverTime, err := http.ParseTime(dateHeader)
+	if err != nil {
+		result.Error = fmt.Errorf("failed to parse Date header: %w", err)
+		return result
+	}
+
+	result.ServerTime = serverTime
+	result.Drift = result.LocalTime.Sub(serverTime)
+
+	// Check if drift is within acceptable range
+	if result.Drift < 0 {
+		result.Drift = -result.Drift // Absolute value
+	}
+	result.InSync = result.Drift <= TimeSyncThreshold*time.Second
+
+	return result
+}
+
+// FormatTimeSyncWarning returns a user-friendly warning message if time is out of sync
+func FormatTimeSyncWarning(result TimeSyncResult) string {
+	if !result.Checked {
+		if result.Error != nil {
+			return fmt.Sprintf("⚠️  Could not verify time sync: %v", result.Error)
+		}
+		return ""
+	}
+
+	if result.InSync {
+		return "" // No warning needed
+	}
+
+	direction := "ahead"
+	if result.LocalTime.Before(result.ServerTime) {
+		direction = "behind"
+	}
+
+	return fmt.Sprintf("⚠️  Warning: System clock is %v %s. TOTP codes may not work!\n"+
+		"   Please sync your system time.", result.Drift.Round(time.Second), direction)
+}
 
 // TOTPConfig holds parsed TOTP configuration from an otpauth:// URI
 type TOTPConfig struct {
@@ -244,4 +331,35 @@ func (c *Credential) BuildTOTPURI() (string, error) {
 	}
 
 	return key.URL(), nil
+}
+
+// DisplayQRCode displays a QR code in the terminal for the credential's TOTP configuration
+// This allows users to scan the code with their authenticator app
+func (c *Credential) DisplayQRCode(writer *os.File) error {
+	uri, err := c.BuildTOTPURI()
+	if err != nil {
+		return err
+	}
+
+	config := qrterminal.Config{
+		Level:     qrterminal.L,
+		Writer:    writer,
+		BlackChar: qrterminal.BLACK,
+		WhiteChar: qrterminal.WHITE,
+		QuietZone: 1,
+	}
+
+	qrterminal.GenerateWithConfig(uri, config)
+	return nil
+}
+
+// ExportQRCode exports a QR code to a PNG file for the credential's TOTP configuration
+// size is the image width/height in pixels (e.g., 256)
+func (c *Credential) ExportQRCode(filename string, size int) error {
+	uri, err := c.BuildTOTPURI()
+	if err != nil {
+		return err
+	}
+
+	return qrcode.WriteFile(uri, qrcode.Medium, size, filename)
 }

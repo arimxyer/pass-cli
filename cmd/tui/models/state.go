@@ -22,7 +22,8 @@ type VaultService interface {
 	UpdateCredential(service string, opts vault.UpdateOpts) error
 	DeleteCredential(service string) error
 	GetCredential(service string, trackUsage bool) (*vault.Credential, error)
-	RecordFieldAccess(service, field string) error // Track field-specific access
+	RecordFieldAccess(service, field string) error   // Track field-specific access
+	GetTOTPCode(service string) (string, int, error) // Generate TOTP code with remaining seconds
 }
 
 // UpdateCredentialOpts mirrors vault.UpdateOpts for AppState layer.
@@ -157,6 +158,15 @@ func (s *AppState) RecordFieldAccess(service, field string) error {
 	defer s.mu.RUnlock()
 
 	return s.vault.RecordFieldAccess(service, field)
+}
+
+// GetTOTPCode generates a TOTP code for the specified service.
+// Returns the code, remaining seconds until expiration, and any error.
+func (s *AppState) GetTOTPCode(service string) (string, int, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	return s.vault.GetTOTPCode(service)
 }
 
 // LoadCredentials loads all credentials from the vault.
