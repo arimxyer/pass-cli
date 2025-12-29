@@ -968,8 +968,13 @@ func (v *VaultService) GetCredential(service string, trackUsage bool) (*Credenti
 	// T071: Log credential access (FR-020)
 	v.LogAudit(security.EventCredentialAccess, security.OutcomeSuccess, service)
 
-	// Return a copy to prevent external modification
+	// Return a deep copy to prevent external modification
+	// (shallow copy would share the Password []byte backing array)
 	cred := credential
+	if credential.Password != nil {
+		cred.Password = make([]byte, len(credential.Password))
+		copy(cred.Password, credential.Password)
+	}
 	return &cred, nil
 }
 
