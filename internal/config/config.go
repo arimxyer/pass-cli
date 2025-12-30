@@ -182,6 +182,26 @@ theme: "dracula"
 #
 # vault_path: ""
 
+# Cloud Sync Configuration (optional)
+# Sync your vault across devices using rclone (https://rclone.org)
+# Requires: rclone installed and configured with a remote
+#
+# Setup:
+#   1. Install rclone: brew install rclone (macOS) or scoop install rclone (Windows)
+#   2. Configure remote: rclone config
+#   3. Uncomment and set remote below
+#
+# sync:
+#   enabled: true
+#   remote: "gdrive:.pass-cli"    # Format: <remote-name>:<path>
+#
+# Examples:
+#   remote: "gdrive:.pass-cli"     # Google Drive
+#   remote: "dropbox:Apps/pass-cli" # Dropbox
+#   remote: "onedrive:Documents/pass-cli" # OneDrive
+#
+# See: https://arimxyer.github.io/pass-cli/docs/02-guides/sync-guide/
+
 # Terminal size warning configuration
 terminal:
   # Enable or disable terminal size warnings (default: true)
