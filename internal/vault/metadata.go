@@ -16,7 +16,8 @@ type Metadata struct {
 	LastModified    time.Time                `json:"last_modified"`
 	KeychainEnabled bool                     `json:"keychain_enabled"`
 	AuditEnabled    bool                     `json:"audit_enabled"`
-	Recovery        *shared.RecoveryMetadata `json:"recovery,omitempty"` // BIP39 recovery configuration
+	AuditSalt       []byte                   `json:"audit_salt,omitempty"` // Salt for portable audit key derivation
+	Recovery        *shared.RecoveryMetadata `json:"recovery,omitempty"`   // BIP39 recovery configuration
 }
 
 // RecoveryMetadata is an alias for shared.RecoveryMetadata for backward compatibility

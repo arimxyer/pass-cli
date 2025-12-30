@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/zalando/go-keyring"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 // T057: AuditLogEntry represents a single security event with tamper-evident HMAC signature
@@ -197,17 +198,44 @@ func (l *AuditLogger) Log(entry *AuditLogEntry) error {
 	return nil
 }
 
-// T065: Audit key management using OS keychain
+// T065: Audit key management using OS keychain or password derivation
 // Per FR-034: Generate unique 32-byte HMAC key per vault, store via OS keychain with vault UUID as identifier
-// Per FR-035: Enables verification without master password
+// Per FR-035: Enables verification without master password (when using keychain)
+// Portable mode: Derive key from master password + salt for cross-OS sync
 
 const (
 	auditKeyService = "pass-cli-audit"
 	auditKeyLength  = 32 // HMAC-SHA256 key size
+	auditSaltLength = 32 // Salt size for PBKDF2 derivation
 )
+
+// GenerateAuditSalt creates a new random salt for audit key derivation
+func GenerateAuditSalt() ([]byte, error) {
+	salt := make([]byte, auditSaltLength)
+	if _, err := rand.Read(salt); err != nil {
+		return nil, fmt.Errorf("failed to generate audit salt: %w", err)
+	}
+	return salt, nil
+}
+
+// DeriveAuditKey derives an audit HMAC key from master password and salt
+// Uses PBKDF2-SHA256 with 100,000 iterations for portable cross-OS verification
+func DeriveAuditKey(password, salt []byte) ([]byte, error) {
+	if len(password) == 0 {
+		return nil, fmt.Errorf("password cannot be empty")
+	}
+	if len(salt) != auditSaltLength {
+		return nil, fmt.Errorf("invalid salt length: got %d, want %d", len(salt), auditSaltLength)
+	}
+
+	// PBKDF2 with SHA256, 100k iterations (same as vault key derivation)
+	key := pbkdf2.Key(password, salt, 100000, auditKeyLength, sha256.New)
+	return key, nil
+}
 
 // GetOrCreateAuditKey retrieves or generates audit HMAC key for a vault
 // vaultID should be the vault UUID or unique identifier
+// This is the legacy keychain-based method for backward compatibility
 func GetOrCreateAuditKey(vaultID string) ([]byte, error) {
 	// Try to retrieve existing key from OS keychain
 	keyHex, err := keyring.Get(auditKeyService, vaultID)
@@ -238,6 +266,40 @@ func GetOrCreateAuditKey(vaultID string) ([]byte, error) {
 	return key, nil
 }
 
+// GetOrCreateAuditKeyPortable gets or creates an audit key with portable mode support
+// If password and salt are provided, derives key from password (portable mode)
+// Otherwise falls back to keychain (legacy mode)
+func GetOrCreateAuditKeyPortable(vaultID string, password, salt []byte) ([]byte, []byte, error) {
+	// Portable mode: derive from password + salt
+	if len(password) > 0 && len(salt) > 0 {
+		key, err := DeriveAuditKey(password, salt)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to derive audit key: %w", err)
+		}
+		return key, salt, nil
+	}
+
+	// Portable mode with new salt: generate salt and derive key
+	if len(password) > 0 && len(salt) == 0 {
+		newSalt, err := GenerateAuditSalt()
+		if err != nil {
+			return nil, nil, err
+		}
+		key, err := DeriveAuditKey(password, newSalt)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to derive audit key: %w", err)
+		}
+		return key, newSalt, nil
+	}
+
+	// Legacy mode: use keychain
+	key, err := GetOrCreateAuditKey(vaultID)
+	if err != nil {
+		return nil, nil, err
+	}
+	return key, nil, nil
+}
+
 // DeleteAuditKey removes audit key from OS keychain
 func DeleteAuditKey(vaultID string) error {
 	if err := keyring.Delete(auditKeyService, vaultID); err != nil {
@@ -255,6 +317,51 @@ func NewAuditLogger(filePath string, vaultID string) (*AuditLogger, error) {
 	key, err := GetOrCreateAuditKey(vaultID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get audit key: %w", err)
+	}
+
+	// Get current log file size if it exists
+	var currentSize int64
+	if info, err := os.Stat(filePath); err == nil {
+		currentSize = info.Size()
+	}
+
+	return &AuditLogger{
+		filePath:     filePath,
+		maxSizeBytes: 10 * 1024 * 1024, // 10MB default (FR-024)
+		currentSize:  currentSize,
+		auditKey:     key,
+	}, nil
+}
+
+// NewAuditLoggerPortable creates an audit logger with portable password-based key derivation
+// This enables audit log verification across different OSes when syncing vaults
+// Returns (logger, salt, error) - salt should be persisted in vault metadata
+func NewAuditLoggerPortable(filePath string, vaultID string, password, existingSalt []byte) (*AuditLogger, []byte, error) {
+	// Get or create audit key in portable mode
+	key, salt, err := GetOrCreateAuditKeyPortable(vaultID, password, existingSalt)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get audit key: %w", err)
+	}
+
+	// Get current log file size if it exists
+	var currentSize int64
+	if info, err := os.Stat(filePath); err == nil {
+		currentSize = info.Size()
+	}
+
+	return &AuditLogger{
+		filePath:     filePath,
+		maxSizeBytes: 10 * 1024 * 1024, // 10MB default (FR-024)
+		currentSize:  currentSize,
+		auditKey:     key,
+	}, salt, nil
+}
+
+// NewAuditLoggerWithKey creates an audit logger with a pre-derived key
+// Used when the key is already available (e.g., from portable derivation)
+func NewAuditLoggerWithKey(filePath string, key []byte) (*AuditLogger, error) {
+	if len(key) != auditKeyLength {
+		return nil, fmt.Errorf("invalid key length: got %d, want %d", len(key), auditKeyLength)
 	}
 
 	// Get current log file size if it exists

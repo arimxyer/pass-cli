@@ -16,6 +16,7 @@ type Config struct {
 	Keybindings map[string]string `mapstructure:"keybindings"`
 	VaultPath   string            `mapstructure:"vault_path"`
 	Theme       string            `mapstructure:"theme"`
+	Sync        SyncConfig        `mapstructure:"sync"`
 
 	// LoadErrors populated during config loading (not in YAML)
 	LoadErrors []string `mapstructure:"-"`
@@ -31,6 +32,12 @@ type TerminalConfig struct {
 	MinHeight            int    `mapstructure:"min_height"`
 	DetailPosition       string `mapstructure:"detail_position"`
 	DetailAutoThreshold  int    `mapstructure:"detail_auto_threshold"`
+}
+
+// SyncConfig represents rclone sync configuration for cross-device vault synchronization
+type SyncConfig struct {
+	Enabled bool   `mapstructure:"enabled"` // Enable/disable sync
+	Remote  string `mapstructure:"remote"`  // rclone remote name + path (e.g., "gdrive:.pass-cli")
 }
 
 // ValidationResult represents the outcome of checking configuration correctness
@@ -75,7 +82,11 @@ func GetDefaults() *Config {
 			"confirm":           "enter",
 			"cancel":            "esc",
 		},
-		Theme:      "dracula",
+		Theme: "dracula",
+		Sync: SyncConfig{
+			Enabled: false,
+			Remote:  "",
+		},
 		LoadErrors: []string{},
 	}
 
@@ -256,6 +267,9 @@ func detectUnknownFields(v *viper.Viper) []ValidationWarning {
 		"keybindings.cancel":            true,
 		"theme":                         true,
 		"vault_path":                    true,
+		"sync":                          true,
+		"sync.enabled":                  true,
+		"sync.remote":                   true,
 	}
 
 	// Check for unknown fields
@@ -339,6 +353,8 @@ func LoadFromPath(configPath string) (*Config, *ValidationResult) {
 	}
 	v.SetDefault("vault_path", "")
 	v.SetDefault("theme", defaults.Theme)
+	v.SetDefault("sync.enabled", defaults.Sync.Enabled)
+	v.SetDefault("sync.remote", defaults.Sync.Remote)
 
 	// Read and parse YAML
 	if err := v.ReadInConfig(); err != nil {
@@ -432,6 +448,9 @@ func (c *Config) Validate() *ValidationResult {
 
 	// Validate theme
 	result = c.validateTheme(result)
+
+	// Validate sync
+	result = c.validateSync(result)
 
 	// Set Valid flag based on error count
 	if len(result.Errors) > 0 {
@@ -652,6 +671,24 @@ func (c *Config) validateTheme(result *ValidationResult) *ValidationResult {
 		result.Errors = append(result.Errors, ValidationError{
 			Field:   "theme",
 			Message: fmt.Sprintf("unknown theme '%s' (valid themes: dracula, nord, gruvbox, monokai)", c.Theme),
+		})
+	}
+
+	return result
+}
+
+// validateSync validates the sync configuration
+func (c *Config) validateSync(result *ValidationResult) *ValidationResult {
+	// If sync is not enabled, no validation needed
+	if !c.Sync.Enabled {
+		return result
+	}
+
+	// If sync is enabled, remote must be specified
+	if c.Sync.Remote == "" {
+		result.Errors = append(result.Errors, ValidationError{
+			Field:   "sync.remote",
+			Message: "sync.remote is required when sync.enabled is true (e.g., 'gdrive:.pass-cli')",
 		})
 	}
 

@@ -101,6 +101,9 @@ func runGet(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
 	}
 
+	// Sync pull before unlock to get latest version
+	maybeSyncPull(vaultPath)
+
 	// Unlock vault
 	if err := unlockVault(vaultService); err != nil {
 		return err

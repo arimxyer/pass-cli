@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"pass-cli/internal/config"
 	"pass-cli/internal/recovery"
+	intsync "pass-cli/internal/sync"
 	"pass-cli/internal/vault"
 	"path/filepath"
 	"runtime"
@@ -24,6 +26,13 @@ import (
 var (
 	testStdinScanner *bufio.Scanner
 	scannerOnce      sync.Once
+)
+
+// Session state for sync - tracks if we've already synced this session
+// This prevents repeated pulls on every command
+var (
+	syncedThisSession bool
+	syncMu            sync.Mutex
 )
 
 // readLine reads a line from stdin in test mode using the shared scanner
@@ -352,6 +361,63 @@ func unlockVault(vaultService *vault.VaultService) error {
 	}
 
 	return nil
+}
+
+// maybeSyncPull performs a sync pull if sync is enabled and we haven't synced this session.
+// This should be called before unlocking the vault to ensure we have the latest version.
+// Safe to call even if sync is disabled - will no-op.
+func maybeSyncPull(vaultPath string) {
+	syncMu.Lock()
+	defer syncMu.Unlock()
+
+	// Skip if already synced this session
+	if syncedThisSession {
+		return
+	}
+
+	// Load config to check if sync is enabled
+	cfg, _ := config.Load()
+	if cfg == nil || !cfg.Sync.Enabled {
+		return
+	}
+
+	// Create sync service and pull
+	syncService := intsync.NewService(cfg.Sync)
+	if !syncService.IsEnabled() {
+		return
+	}
+
+	vaultDir := intsync.GetVaultDir(vaultPath)
+	if IsVerbose() {
+		fmt.Fprintln(os.Stderr, "🔄 Syncing vault from remote...")
+	}
+	_ = syncService.Pull(vaultDir)
+
+	// Mark as synced for this session
+	syncedThisSession = true
+}
+
+// maybeSyncPush performs a sync push if sync is enabled.
+// This should be called after any write operation (add, update, delete).
+// Safe to call even if sync is disabled - will no-op.
+func maybeSyncPush(vaultPath string) {
+	// Load config to check if sync is enabled
+	cfg, _ := config.Load()
+	if cfg == nil || !cfg.Sync.Enabled {
+		return
+	}
+
+	// Create sync service and push
+	syncService := intsync.NewService(cfg.Sync)
+	if !syncService.IsEnabled() {
+		return
+	}
+
+	vaultDir := intsync.GetVaultDir(vaultPath)
+	if IsVerbose() {
+		fmt.Fprintln(os.Stderr, "🔄 Syncing vault to remote...")
+	}
+	_ = syncService.Push(vaultDir)
 }
 
 // T031: displayMnemonic formats 24-word mnemonic as 4x6 grid

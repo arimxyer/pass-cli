@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"pass-cli/internal/config"
 	"pass-cli/internal/crypto"
 	"pass-cli/internal/keychain"
 	"pass-cli/internal/recovery"
@@ -253,6 +254,53 @@ func (v *VaultService) EnableAudit(auditLogPath, vaultID string) error {
 func (v *VaultService) DisableAudit() {
 	v.auditEnabled = false
 	v.auditLogger = nil
+}
+
+// EnableAuditPortable enables audit logging with portable password-based key derivation
+// This enables audit verification across different OSes when syncing vaults
+// The salt is stored in vault metadata for retrieval on other systems
+func (v *VaultService) EnableAuditPortable(auditLogPath, vaultID string, password, existingSalt []byte) error {
+	if v.auditEnabled {
+		return nil // Already enabled
+	}
+
+	logger, newSalt, err := security.NewAuditLoggerPortable(auditLogPath, vaultID, password, existingSalt)
+	if err != nil {
+		return fmt.Errorf("failed to create portable audit logger: %w", err)
+	}
+
+	v.auditLogger = logger
+	v.auditEnabled = true
+
+	// DISC-013 fix: Persist audit configuration to vault data
+	if v.vaultData != nil {
+		v.vaultData.AuditEnabled = true
+		v.vaultData.AuditLogPath = auditLogPath
+		v.vaultData.VaultID = vaultID
+		// Save vault data to persist audit configuration
+		if err := v.save(); err != nil {
+			return fmt.Errorf("failed to persist audit configuration: %w", err)
+		}
+	}
+
+	// Save salt to metadata for cross-OS retrieval
+	existingMeta, err := LoadMetadata(v.vaultPath)
+	if err == nil && existingMeta != nil {
+		// Update metadata with salt if we generated a new one
+		if len(newSalt) > 0 || len(existingSalt) > 0 {
+			if len(newSalt) > 0 {
+				existingMeta.AuditSalt = newSalt
+			} else {
+				existingMeta.AuditSalt = existingSalt
+			}
+		}
+		existingMeta.AuditEnabled = true
+		if err := SaveMetadata(v.vaultPath, existingMeta); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to save audit salt to metadata: %v\n", err)
+		}
+	}
+
+	return nil
 }
 
 // T074: LogAudit logs an audit event with graceful degradation (FR-026)
@@ -651,9 +699,26 @@ func (v *VaultService) Unlock(masterPassword []byte) error {
 
 	// DISC-013 fix: Restore audit logging if it was enabled
 	if vaultData.AuditEnabled && vaultData.AuditLogPath != "" && vaultData.VaultID != "" {
-		if err := v.EnableAudit(vaultData.AuditLogPath, vaultData.VaultID); err != nil {
-			// Log warning but don't fail unlock - audit logging is optional
-			fmt.Fprintf(os.Stderr, "Warning: failed to restore audit logging: %v\n", err)
+		// Check if sync is enabled - if so, use portable audit mode for cross-OS verification
+		cfg, _ := config.Load()
+		if cfg != nil && cfg.Sync.Enabled {
+			// Load audit salt from metadata for portable mode
+			meta, metaErr := LoadMetadata(v.vaultPath)
+			var auditSalt []byte
+			if metaErr == nil && meta != nil && len(meta.AuditSalt) > 0 {
+				auditSalt = meta.AuditSalt
+			}
+			// Use portable audit mode with password-derived key
+			if err := v.EnableAuditPortable(vaultData.AuditLogPath, vaultData.VaultID, masterPassword, auditSalt); err != nil {
+				// Log warning but don't fail unlock - audit logging is optional
+				fmt.Fprintf(os.Stderr, "Warning: failed to restore portable audit logging: %v\n", err)
+			}
+		} else {
+			// Use legacy keychain-based audit mode
+			if err := v.EnableAudit(vaultData.AuditLogPath, vaultData.VaultID); err != nil {
+				// Log warning but don't fail unlock - audit logging is optional
+				fmt.Fprintf(os.Stderr, "Warning: failed to restore audit logging: %v\n", err)
+			}
 		}
 	}
 
