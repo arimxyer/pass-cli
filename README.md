@@ -1,14 +1,15 @@
-```text
-    ╔═══╗       ██████╗   █████╗  ███████╗ ███████╗       █████╗ ██╗     ██╗
-    ║   ║       ██╔══██╗ ██╔══██╗ ██╔════╝ ██╔════╝      ██╔═══╝ ██║     ██║
-  ╔═╩═══╩═╗     ██████╔╝ ███████║ ███████╗ ███████╗█████╗██║     ██║     ██║
-  ║ ┌───┐ ║     ██╔═══╝  ██╔══██║ ╚════██║ ╚════██║╚════╝██║     ██║     ██║
-  ║ │ ● │ ║     ██║      ██║  ██║ ███████║ ███████║      ╚██████╗███████╗██║
-  ╚═╧═══╧═╝     ╚═╝      ╚═╝  ╚═╝ ╚══════╝ ╚══════╝       ╚═════╝╚══════╝╚═╝
-```
-> A secure, cross-platform command-line password manager designed for developers
+<p align="center">
+  <img src="docsite/static/images/social-preview.png" alt="Pass-CLI" width="600">
+</p>
 
-![Version](https://img.shields.io/github/v/release/arimxyer/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/arimxyer/pass-cli?label=Last%20Updated)
+<p align="center">
+  <strong>A secure, cross-platform command-line password manager designed for developers</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/arimxyer/pass-cli?label=Version" alt="Version">
+  <img src="https://img.shields.io/github/last-commit/arimxyer/pass-cli?label=Last%20Updated" alt="Last Updated">
+</p>
 
 Pass-CLI is a fast, secure password and API key manager that stores credentials locally with AES-256-GCM encryption. Built for developers who need quick, script-friendly access to credentials without cloud dependencies.
 
