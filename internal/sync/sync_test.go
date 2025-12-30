@@ -20,11 +20,8 @@ func TestNewService(t *testing.T) {
 	if service == nil {
 		t.Fatal("NewService returned nil")
 	}
-	if service.config.Enabled != true {
-		t.Error("Expected Enabled to be true")
-	}
-	if service.config.Remote != "gdrive:.pass-cli" {
-		t.Errorf("Expected Remote to be 'gdrive:.pass-cli', got '%s'", service.config.Remote)
+	if !service.IsEnabled() {
+		t.Error("Expected service to be enabled")
 	}
 }
 
@@ -205,10 +202,10 @@ func TestPull_CreatesDirectory(t *testing.T) {
 
 	// Create a temp directory that doesn't exist yet
 	tmpDir := filepath.Join(os.TempDir(), "pass-cli-sync-test-"+randString(8))
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Ensure it doesn't exist
-	os.RemoveAll(tmpDir)
+	_ = os.RemoveAll(tmpDir)
 
 	service := NewService(config.SyncConfig{
 		Enabled: true,

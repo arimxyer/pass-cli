@@ -355,7 +355,9 @@ func TestCrossOSAuditKeyDerivation(t *testing.T) {
 		Outcome:        "success",
 		CredentialName: "github",
 	}
-	entry.Sign(windowsKey)
+	if err := entry.Sign(windowsKey); err != nil {
+		t.Fatalf("Sign() failed: %v", err)
+	}
 
 	// Simulate: Linux receives vault (with salt in metadata) and verifies
 	// Using same password + salt should derive same key
