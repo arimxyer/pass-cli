@@ -222,6 +222,100 @@ pass-cli list
 # Shows: github
 ```
 
+## Connecting to an Existing Synced Vault
+
+If you already have pass-cli set up with sync on another device and want to connect from a new machine:
+
+> **Important**: Do NOT run `pass-cli init` - this creates a new vault and overwrites your synced one on next push.
+
+### Step-by-Step Setup
+
+**1. Install pass-cli and rclone on the new machine**:
+
+```bash
+# macOS
+brew tap arimxyer/homebrew-tap && brew install pass-cli rclone
+
+# Windows
+scoop bucket add arimxyer https://github.com/arimxyer/scoop-bucket
+scoop install pass-cli rclone
+
+# Linux
+# Install pass-cli from releases, then:
+sudo apt install rclone
+```
+
+**2. Configure rclone with the same cloud account**:
+
+```bash
+rclone config
+# Create remote with the SAME name as your other device (e.g., "gdrive")
+# Log in with the SAME cloud account
+```
+
+**3. Verify you can see your existing vault**:
+
+```bash
+rclone ls gdrive:.pass-cli
+# Should show: vault.enc, vault.enc.meta.json, etc.
+```
+
+**4. Create the pass-cli config file manually**:
+
+```bash
+# Create config directory
+mkdir -p ~/.pass-cli
+
+# Create config file
+cat > ~/.pass-cli/config.yml << 'EOF'
+sync:
+  enabled: true
+  remote: "gdrive:.pass-cli"
+EOF
+```
+
+On Windows (PowerShell):
+```powershell
+mkdir -Force ~\.pass-cli
+@"
+sync:
+  enabled: true
+  remote: "gdrive:.pass-cli"
+"@ | Out-File -FilePath ~\.pass-cli\config.yml -Encoding UTF8
+```
+
+**5. Run any pass-cli command** - it will pull your vault:
+
+```bash
+pass-cli list
+# Output:
+# Syncing vault...
+# Enter master password: ****
+# github
+# aws-prod
+# ...
+```
+
+Use your **existing master password** from the original device.
+
+### What Happens Behind the Scenes
+
+1. pass-cli sees sync is enabled
+2. Calls `rclone sync <remote> <local>` (pull)
+3. Your vault downloads from cloud to `~/.pass-cli/`
+4. pass-cli prompts for master password
+5. Vault unlocks with your existing password
+6. You're connected!
+
+### Common Mistakes
+
+| Mistake | Result | Fix |
+|---------|--------|-----|
+| Running `pass-cli init` first | Creates new vault, may overwrite cloud on push | Delete local vault, follow steps above |
+| Different rclone remote name | Sync can't find remote | Use same remote name on all devices |
+| Wrong cloud account | Downloads empty or different vault | Reconfigure rclone with correct account |
+| Typo in remote path | "Remote not found" error | Check with `rclone listremotes` |
+
 ## Conflict Handling
 
 Pass-CLI uses rclone's sync behavior which **overwrites** the destination with the source. This means:
