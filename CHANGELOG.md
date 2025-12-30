@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2025-12-29
+
+### Added
+- **TOTP/2FA Support**: Complete Time-based One-Time Password implementation per RFC 6238
+  - CLI: `--totp-uri` and `--totp` flags for `add` command
+  - CLI: `--totp`, `--totp-qr`, `--totp-qr-file` flags for `get` command with countdown display
+  - CLI: `--totp-uri` and `--clear-totp` flags for `update` command
+  - TUI: TOTP display in detail view with issuer when available
+  - TUI: `t` key binding to copy TOTP code to clipboard
+  - TUI: TOTP input fields in Add and Edit forms
+  - Supports both base32 secrets and `otpauth://` URIs
+  - Configurable algorithm (SHA1/SHA256/SHA512), digits (6/8), and period (1-300s)
+  - Audit logging for TOTP operations: `EventTOTPAccess`, `EventTOTPAdd`, `EventTOTPUpdate`, `EventTOTPClear`
+- **TOTP Documentation**: Comprehensive guide at `docs/02-guides/totp-guide.md`
+- **Social Preview**: GitHub social preview image for repository
+- **README Improvements**: TUI screenshot, roadmap section, updated FAQ
+
+### Fixed
+- **Critical: Vault Corruption on Password Copy**: Fixed shallow copy in `GetCredential()` causing vault corruption
+  - Password `[]byte` slice shared memory with vault's internal data
+  - Callers zeroing their copy (security best practice) corrupted vault's canonical data
+  - TUI: pressing `c` twice would panic due to NUL bytes sent to Windows clipboard
+  - Now returns deep copy of password bytes for each caller
+- **Scoop Bucket URL**: Fixed incorrect URL in README
+
+### Changed
+- **Repository Username**: Updated from `ari1110` to `arimxyer` across all configs and documentation
+
+### Dependencies
+- Added `github.com/pquerna/otp v1.5.0` for RFC 6238 TOTP implementation
+- Bumped `golang.org/x/crypto` from 0.45.0 to 0.46.0
+- Bumped `actions/cache` from 4 to 5
+- Bumped `actions/upload-artifact` from 5 to 6
+- Bumped `actions/download-artifact` from 6 to 7
+- Bumped `DavidAnson/markdownlint-cli2-action` from 21 to 22
+
+### Testing
+- Added Linux keychain testing with D-Bus + gnome-keyring in CI
+- Improved HOME directory isolation in TUI tests
+- Enhanced keychain cleanup patterns across all integration tests
+- Migrated tests to use `helpers.SetupTestVaultWithName` for consistency
+
 ## [0.13.0] - 2025-12-11
 
 ### Added
