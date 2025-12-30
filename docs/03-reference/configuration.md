@@ -44,6 +44,11 @@ terminal:
   # Width threshold for auto positioning (default: 120)
   detail_auto_threshold: 120  # Range: 80-500
 
+# Cloud sync configuration (optional)
+sync:
+  enabled: false              # Enable rclone-based sync
+  remote: "gdrive:.pass-cli"  # rclone remote:path
+
 # Custom keyboard shortcuts (TUI mode)
 keybindings:
   quit: "q"                  # Quit application
@@ -115,6 +120,50 @@ If `vault_path` is not specified, defaults to `~/.pass-cli/vault.enc`.
 - Invalid config shows warning modal, app continues with defaults
 - UI hints automatically update to reflect custom keybindings
 
+### Sync Configuration
+
+Enable cloud synchronization using [rclone](https://rclone.org/) to access your vault across multiple devices.
+
+```yaml
+sync:
+  enabled: true
+  remote: "gdrive:.pass-cli"
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | bool | `false` | Enable/disable rclone sync |
+| `remote` | string | `""` | rclone remote and path |
+
+**Sync Behavior**:
+- **Pull**: Happens once per CLI session (before first vault access)
+- **Push**: Happens after every write operation (add, update, delete)
+- **Graceful degradation**: Sync failures warn but don't block operations
+
+**Remote Path Examples**:
+```yaml
+# Google Drive
+remote: "gdrive:.pass-cli"
+
+# Dropbox
+remote: "dropbox:Apps/pass-cli"
+
+# OneDrive
+remote: "onedrive:Documents/pass-cli"
+
+# S3-compatible
+remote: "s3:my-bucket/pass-cli"
+```
+
+**Prerequisites**:
+1. Install rclone: `brew install rclone` (macOS) or `scoop install rclone` (Windows)
+2. Configure remote: `rclone config`
+3. Test connectivity: `rclone ls <remote>:`
+
+**Validation**: When `enabled: true`, the `remote` field must not be empty.
+
+See the [Cloud Sync Guide](../02-guides/sync-guide) for detailed setup instructions.
+
 ### Configuration Priority
 
 1. Command-line flags (highest priority)
@@ -140,6 +189,7 @@ The vault file stores metadata alongside encrypted credential data. This metadat
 | `recovery_wrapped_dek` | bytes (base64) | - | ✓ | Recovery-phrase-wrapped DEK (48 bytes) |
 | `recovery_wrapped_dek_nonce` | bytes (base64) | - | ✓ | GCM nonce for recovery wrapping (12 bytes) |
 | `recovery_salt` | bytes (base64) | - | ✓ | 32-byte salt for recovery phrase key derivation |
+| `audit_salt` | bytes (base64) | ✓ | ✓ | 32-byte salt for portable audit key derivation (sync mode) |
 
 ### Version Differences
 
