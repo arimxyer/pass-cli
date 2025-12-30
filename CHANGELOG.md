@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.0] - 2025-12-30
+
+### Added
+- **Cloud Sync**: Sync vault across devices using rclone
+  - Automatic pull on first CLI usage per session
+  - Automatic push after write operations (add, update, delete)
+  - Supports 70+ cloud providers via rclone (Google Drive, Dropbox, OneDrive, S3, etc.)
+  - Graceful degradation: sync failures warn but don't block operations
+  - Configuration via `sync.enabled` and `sync.remote` in config.yml
+- **Portable Audit Keys**: Cross-OS audit log verification for synced vaults
+  - Audit keys derived from master password + salt (PBKDF2-SHA256, 100k iterations)
+  - Salt stored in vault metadata for portability
+  - `verify-audit` works on any synced device with same master password
+- **Sync Documentation**: Comprehensive guide at `docs/02-guides/sync-guide.md`
+- **Config Template**: Sync configuration examples in `pass-cli config init` output
+
+### Changed
+- **README**: Updated "Offline First" to "Local-First" with optional sync mention
+- **Configuration Reference**: Added sync configuration section
+
 ## [0.14.0] - 2025-12-29
 
 ### Added
