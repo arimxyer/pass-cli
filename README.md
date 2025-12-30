@@ -26,7 +26,8 @@ Pass-CLI is a fast, secure password and API key manager that stores credentials 
 - **Cross-Platform**: Single binary for Windows, macOS (Intel/ARM), and Linux (amd64/arm64)
 - **Script-Friendly**: Clean output modes (`--quiet`, `--field`, `--masked`) for shell integration
 - **Usage Tracking**: Automatic tracking of where credentials are used across projects
-- **Offline First**: No cloud dependencies, works completely offline
+- **Local-First**: Works offline by default, optional cloud sync via rclone
+- **Cloud Sync**: Sync vault across devices with rclone (Google Drive, Dropbox, OneDrive, S3, etc.)
 - **Interactive TUI**: Terminal UI for visual credential management
 - **TOTP / 2FA Support**: Store TOTP secrets and generate 6-digit codes - no separate authenticator app needed
 
@@ -192,6 +193,7 @@ For complete security details, best practices, and migration guides, see [docs/0
 - [Troubleshooting](docs/04-troubleshooting/faq.md) - Common issues and solutions
 
 **Additional Resources**:
+- [Cloud Sync](docs/02-guides/sync-guide.md) - Sync vault across devices with rclone
 - [Health Checks](docs/05-operations/health-checks.md) - Doctor command diagnostics
 - [CI/CD Integration](docs/06-development/ci-cd.md) - GitHub Actions and pipeline examples
 - [Branch Workflow](docs/06-development/branch-workflow.md) - Git workflow for contributors
@@ -220,7 +222,7 @@ Pass-CLI offers system keychain integration (no GPG required), built-in clipboar
 
 ### Is my data stored in the cloud?
 
-No. Pass-CLI stores everything locally on your machine. There are no cloud dependencies or network calls.
+By default, no. Pass-CLI stores everything locally on your machine. However, you can optionally enable [cloud sync](docs/02-guides/sync-guide.md) via rclone to sync your encrypted vault across devices. Your vault is always encrypted before sync.
 
 ### How do I backup my vault?
 
