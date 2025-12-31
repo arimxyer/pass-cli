@@ -316,6 +316,7 @@ func (v *VaultService) LogAudit(eventType, outcome, credentialName string) {
 		EventType:      eventType,
 		Outcome:        outcome,
 		CredentialName: credentialName,
+		MachineID:      security.GetMachineID(), // ARI-50: Track source machine
 	}
 
 	// FR-026: Log errors to stderr but continue operation

@@ -16,11 +16,13 @@ import (
 
 // T057: AuditLogEntry represents a single security event with tamper-evident HMAC signature
 // Per data-model.md:256-262
+// ARI-50: Added MachineID for cross-device access pattern detection
 type AuditLogEntry struct {
 	Timestamp      time.Time `json:"timestamp"`       // Event time (FR-019, FR-020)
 	EventType      string    `json:"event_type"`      // Type of operation (see constants below)
 	Outcome        string    `json:"outcome"`         // "success" or "failure"
 	CredentialName string    `json:"credential_name"` // Service name (NOT password, FR-021)
+	MachineID      string    `json:"machine_id"`      // ARI-50: Source machine identifier (hostname)
 	HMACSignature  []byte    `json:"hmac_signature"`  // Tamper detection (FR-022)
 }
 
@@ -63,6 +65,17 @@ const (
 	OutcomeInProgress = "in_progress" // FR-015: For intermediate states during operations
 )
 
+// GetMachineID returns a stable identifier for the current machine.
+// ARI-50: Uses hostname for human-readable identification across devices.
+// Returns "unknown" if hostname cannot be determined.
+func GetMachineID() string {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return "unknown"
+	}
+	return hostname
+}
+
 // T059: AuditLogger manages tamper-evident audit logging
 // Per data-model.md:332-337
 type AuditLogger struct {
@@ -74,13 +87,16 @@ type AuditLogger struct {
 
 // T060: Sign calculates HMAC signature for audit log entry
 // Per data-model.md:291-305
+// ARI-50: Updated to include MachineID in signature
 func (e *AuditLogEntry) Sign(key []byte) error {
 	// Canonical serialization (order matters!)
-	data := fmt.Sprintf("%s|%s|%s|%s",
+	// ARI-50: Added MachineID to signature for cross-device verification
+	data := fmt.Sprintf("%s|%s|%s|%s|%s",
 		e.Timestamp.Format(time.RFC3339Nano),
 		e.EventType,
 		e.Outcome,
 		e.CredentialName,
+		e.MachineID,
 	)
 
 	mac := hmac.New(sha256.New, key)
@@ -92,13 +108,16 @@ func (e *AuditLogEntry) Sign(key []byte) error {
 
 // T061: Verify validates HMAC signature for audit log entry
 // Per data-model.md:307-326
+// ARI-50: Updated to include MachineID in verification
 func (e *AuditLogEntry) Verify(key []byte) error {
 	// Recalculate HMAC
-	data := fmt.Sprintf("%s|%s|%s|%s",
+	// ARI-50: Added MachineID to verification for cross-device support
+	data := fmt.Sprintf("%s|%s|%s|%s|%s",
 		e.Timestamp.Format(time.RFC3339Nano),
 		e.EventType,
 		e.Outcome,
 		e.CredentialName,
+		e.MachineID,
 	)
 
 	mac := hmac.New(sha256.New, key)

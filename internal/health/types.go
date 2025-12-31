@@ -69,3 +69,13 @@ type BackupFile struct {
 	AgeHours   float64   `json:"age_hours"`   // Age in hours
 	Status     string    `json:"status"`      // "recent", "old", "abandoned"
 }
+
+// SyncCheckDetails contains cloud sync health check results
+// ARI-53: Added for rclone sync status in doctor command
+type SyncCheckDetails struct {
+	Enabled         bool   `json:"enabled"`          // Sync enabled in config
+	Remote          string `json:"remote"`           // Configured remote (e.g., "gdrive:.pass-cli")
+	RcloneInstalled bool   `json:"rclone_installed"` // rclone binary found in PATH
+	RcloneVersion   string `json:"rclone_version"`   // rclone version (if installed)
+	Error           string `json:"error"`            // Error message if check failed
+}
