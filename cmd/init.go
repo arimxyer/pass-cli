@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -321,8 +320,7 @@ func askNewOrConnect() (string, error) {
 	fmt.Println()
 	fmt.Print("Enter choice (1/2) [1]: ")
 
-	reader := bufio.NewReader(os.Stdin)
-	response, err := reader.ReadString('\n')
+	response, err := readLineInput()
 	if err != nil {
 		return "", fmt.Errorf("failed to read choice: %w", err)
 	}
@@ -363,12 +361,10 @@ func runConnectFlow(vaultPath string) error {
 	fmt.Println("  onedrive:.pass-cli       (OneDrive)")
 	fmt.Print("\nRemote path: ")
 
-	reader := bufio.NewReader(os.Stdin)
-	remote, err := reader.ReadString('\n')
+	remote, err := readLineInput()
 	if err != nil {
 		return fmt.Errorf("failed to read remote: %w", err)
 	}
-	remote = strings.TrimSpace(remote)
 
 	if remote == "" {
 		return fmt.Errorf("no remote specified")
@@ -509,12 +505,10 @@ func offerSyncSetup() error {
 	fmt.Println("  onedrive:.pass-cli       (OneDrive)")
 	fmt.Print("\nRemote path: ")
 
-	reader := bufio.NewReader(os.Stdin)
-	remote, err := reader.ReadString('\n')
+	remote, err := readLineInput()
 	if err != nil {
 		return fmt.Errorf("failed to read remote: %w", err)
 	}
-	remote = strings.TrimSpace(remote)
 
 	if remote == "" {
 		fmt.Println("No remote specified, skipping sync setup.")

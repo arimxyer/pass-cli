@@ -40,8 +40,8 @@ func TestRecovery_InitWithRecovery(t *testing.T) {
 			"PASS_CLI_CONFIG="+configPath,
 		)
 
-		// Input: password, confirm, no keychain, no passphrase, decline verification
-		stdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n")
+		// Input: new vault, password, confirm, no keychain, no passphrase, decline verification, no sync
+		stdin := strings.NewReader("1\n" + testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n" + "n\n")
 		cmd.Stdin = stdin
 
 		output, err := cmd.CombinedOutput()
@@ -206,7 +206,7 @@ func TestRecovery_ChangePasswordWithRecovery(t *testing.T) {
 		testPassword := "Test@Password123"
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n") // password, confirm, no keychain, no passphrase, skip verification
+		initStdin := strings.NewReader("1\n" + testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n" + "n\n") // new vault, password, confirm, no keychain, no passphrase, skip verification, no sync
 		initCmd.Stdin = initStdin
 
 		output, err := initCmd.CombinedOutput()
@@ -267,7 +267,7 @@ func TestRecovery_ChangePasswordWithRecovery(t *testing.T) {
 		testPassword := "Test@Password123"
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n") // password, confirm, no keychain, no passphrase, skip verification
+		initStdin := strings.NewReader("1\n" + testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n" + "n\n" + "n\n") // new vault, password, confirm, no keychain, no passphrase, skip verification, no sync
 		initCmd.Stdin = initStdin
 
 		output, err := initCmd.CombinedOutput()
@@ -760,11 +760,13 @@ func TestRecovery_NoRecoveryFlag(t *testing.T) {
 		initCmd := exec.Command(binaryPath, "init", "--no-recovery")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
 
-		// Input: master password, confirm password, no keychain
+		// Input: new vault, master password, confirm password, no keychain, no sync
 		initStdin := strings.NewReader(
-			testPassword + "\n" + // master password
+			"1\n" + // new vault (ARI-54)
+				testPassword + "\n" + // master password
 				testPassword + "\n" + // confirm password
-				"n\n", // decline keychain
+				"n\n" + // decline keychain
+				"n\n", // decline sync (ARI-53)
 		)
 		initCmd.Stdin = initStdin
 
@@ -822,7 +824,7 @@ func TestRecovery_NoRecoveryFlag(t *testing.T) {
 
 		initCmd := exec.Command(binaryPath, "init", "--no-recovery")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n") // password, confirm, no keychain
+		initStdin := strings.NewReader("1\n" + testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n") // new vault, password, confirm, no keychain, no sync
 		initCmd.Stdin = initStdin
 
 		if output, err := initCmd.CombinedOutput(); err != nil {
@@ -858,7 +860,7 @@ func TestRecovery_NoRecoveryFlag(t *testing.T) {
 
 		initCmd := exec.Command(binaryPath, "init", "--no-recovery")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n") // password, confirm, no keychain
+		initStdin := strings.NewReader("1\n" + testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n") // new vault, password, confirm, no keychain, no sync
 		initCmd.Stdin = initStdin
 
 		if output, err := initCmd.CombinedOutput(); err != nil {
@@ -901,7 +903,7 @@ func TestRecovery_NoRecoveryFlag(t *testing.T) {
 		testPassword := "Test@Password123"
 		initCmd := exec.Command(binaryPath, "init", "--no-recovery")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
-		initStdin := strings.NewReader(testPassword + "\n" + testPassword + "\n" + "n\n") // password, confirm, no keychain
+		initStdin := strings.NewReader("1\n" + testPassword + "\n" + testPassword + "\n" + "n\n" + "n\n") // new vault, password, confirm, no keychain, no sync
 		initCmd.Stdin = initStdin
 
 		output, err := initCmd.CombinedOutput()
@@ -963,15 +965,17 @@ func TestRecovery_WithPassphrase(t *testing.T) {
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
 
-		// Input: master password, confirm password, no keychain, yes to passphrase, passphrase, confirm passphrase, no to verification
+		// Input: new vault, master password, confirm password, no keychain, yes to passphrase, passphrase, confirm passphrase, no to verification, no sync
 		initStdin := strings.NewReader(
-			testPassword + "\n" + // master password
+			"1\n" + // new vault (ARI-54)
+				testPassword + "\n" + // master password
 				testPassword + "\n" + // confirm password
 				"n\n" + // decline keychain
 				"y\n" + // yes to passphrase protection
 				testPassphrase + "\n" + // recovery passphrase
 				testPassphrase + "\n" + // confirm passphrase
-				"n\n", // skip verification
+				"n\n" + // skip verification
+				"n\n", // decline sync (ARI-53)
 		)
 		initCmd.Stdin = initStdin
 
@@ -1038,13 +1042,15 @@ func TestRecovery_WithPassphrase(t *testing.T) {
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
 
-		// Input: master password, confirm password, no keychain, no to passphrase, no to verification
+		// Input: new vault, master password, confirm password, no keychain, no to passphrase, no to verification, no sync
 		initStdin := strings.NewReader(
-			testPassword + "\n" + // master password
+			"1\n" + // new vault (ARI-54)
+				testPassword + "\n" + // master password
 				testPassword + "\n" + // confirm password
 				"n\n" + // decline keychain
 				"n\n" + // no to passphrase protection
-				"n\n", // skip verification
+				"n\n" + // skip verification
+				"n\n", // decline sync (ARI-53)
 		)
 		initCmd.Stdin = initStdin
 
@@ -1110,13 +1116,15 @@ func TestRecovery_SkipVerification(t *testing.T) {
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
 
-		// Input: master password, confirm password, no keychain, no passphrase, decline verification
+		// Input: new vault, master password, confirm password, no keychain, no passphrase, decline verification, no sync
 		initStdin := strings.NewReader(
-			testPassword + "\n" + // master password
+			"1\n" + // new vault (ARI-54)
+				testPassword + "\n" + // master password
 				testPassword + "\n" + // confirm password
 				"n\n" + // no keychain
 				"n\n" + // no to passphrase protection
-				"n\n", // decline verification
+				"n\n" + // decline verification
+				"n\n", // decline sync (ARI-53)
 		)
 		initCmd.Stdin = initStdin
 
@@ -1178,13 +1186,15 @@ func TestRecovery_SkipVerification(t *testing.T) {
 		initCmd := exec.Command(binaryPath, "init")
 		initCmd.Env = append(os.Environ(), "PASS_CONFIG_PATH="+configPath, "PASS_CLI_TEST=1")
 
-		// Input: master password, confirm password, no keychain, no passphrase, decline verification
+		// Input: new vault, master password, confirm password, no keychain, no passphrase, decline verification, no sync
 		initStdin := strings.NewReader(
-			testPassword + "\n" +
+			"1\n" + // new vault (ARI-54)
+				testPassword + "\n" +
 				testPassword + "\n" +
 				"n\n" + // no keychain
 				"n\n" + // no to passphrase
-				"n\n", // decline verification
+				"n\n" + // decline verification
+				"n\n", // decline sync (ARI-53)
 		)
 		initCmd.Stdin = initStdin
 
