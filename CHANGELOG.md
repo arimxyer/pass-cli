@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.0] - 2025-12-31
+
+### Added
+- **Sync Enable Command**: New `pass-cli sync enable` command to add cloud sync to existing vaults
+  - Interactive remote path configuration
+  - Validates rclone installation and remote connectivity
+  - Detects existing files on remote with `--force` option to overwrite
+  - Performs initial push after configuration
+- **Sync Health Check**: `pass-cli doctor` now reports sync status
+  - Checks rclone installation and version
+  - Validates remote configuration
+  - Reports sync enabled/disabled state
+- **Connect to Synced Vault**: `pass-cli init` now offers option to connect to existing synced vault
+  - Downloads vault from remote during initialization
+  - Validates downloaded vault with master password
+  - Configures sync automatically after successful connection
+- **Audit MachineID**: Audit log entries now include `MachineID` field (hostname)
+  - Enables tracking vault access across synced devices
+  - Included in HMAC signature for tamper detection
+
+### Changed
+- **Init Flow**: Now prompts to create new vault or connect to existing synced vault
+- **Config Management**: `saveSyncConfig` uses proper YAML marshaling instead of string concatenation
+
+### Fixed
+- Clipboard test reliability for parallel execution
+- Keychain backend detection for Linux Secret Service variants
+
 ## [0.15.0] - 2025-12-30
 
 ### Added
