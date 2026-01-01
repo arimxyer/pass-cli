@@ -90,9 +90,67 @@ rclone ls gdrive:
 rclone mkdir gdrive:.pass-cli
 ```
 
-## Configuration
+## Enabling Sync
 
-Enable sync in your pass-cli configuration file (`~/.pass-cli/config.yml`):
+There are two ways to enable sync on your vault:
+
+### Option 1: During Vault Initialization (Recommended for New Vaults)
+
+When running `pass-cli init` to create a new vault, you'll be offered the option to enable cloud sync:
+
+```bash
+pass-cli init
+
+# ... after vault creation ...
+Enable cloud sync? (requires rclone) (y/n) [n]: y
+
+Enter your rclone remote path.
+Examples:
+  gdrive:.pass-cli         (Google Drive)
+  dropbox:Apps/pass-cli    (Dropbox)
+  onedrive:.pass-cli       (OneDrive)
+
+Remote path: gdrive:.pass-cli
+```
+
+The sync configuration is automatically saved to your config file.
+
+### Option 2: On an Existing Vault
+
+To enable sync on a vault you've already created, use the `sync enable` command:
+
+```bash
+pass-cli sync enable
+```
+
+This command:
+1. Checks that your vault exists
+2. Verifies rclone is installed and configured
+3. Prompts you to enter your rclone remote path
+4. Tests connectivity to the remote
+5. Warns if the remote already contains files (use `--force` to overwrite)
+6. Performs an initial push of your vault to the remote
+7. Saves the configuration automatically
+
+**Examples:**
+
+```bash
+# Enable sync interactively
+pass-cli sync enable
+
+# Force overwrite if remote already has files
+pass-cli sync enable --force
+```
+
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--force` | Overwrite remote if it already contains vault files |
+
+### Manual Configuration
+
+You can also enable sync by editing your config file directly (`~/.pass-cli/config.yml`):
 
 ```yaml
 sync:
@@ -224,11 +282,40 @@ pass-cli list
 
 ## Connecting to an Existing Synced Vault
 
-If you already have pass-cli set up with sync on another device and want to connect from a new machine:
+If you already have pass-cli set up with sync on another device and want to connect from a new machine, use the guided flow during initialization:
 
-> **Important**: Do NOT run `pass-cli init` - this creates a new vault and overwrites your synced one on next push.
+> **Important**: When running `pass-cli init`, select "Connect to existing synced vault" instead of "Create new vault" to download your existing vault instead of creating a new one.
 
-### Step-by-Step Setup
+### Quick Setup
+
+When running `pass-cli init` on a new machine, you'll be prompted:
+
+```bash
+pass-cli init
+
+Is this a new installation or are you connecting to an existing vault?
+
+  [1] Create new vault (first time setup)
+  [2] Connect to existing synced vault (requires rclone)
+
+Enter choice (1/2) [1]: 2
+
+🔗 Connect to existing synced vault
+
+Enter your rclone remote path where your vault is stored.
+Examples:
+  gdrive:.pass-cli         (Google Drive)
+  dropbox:Apps/pass-cli    (Dropbox)
+  onedrive:.pass-cli       (OneDrive)
+
+Remote path: gdrive:.pass-cli
+✓ Vault downloaded
+✓ Vault unlocked successfully
+
+✅ Connected to synced vault!
+```
+
+### Step-by-Step Manual Setup
 
 **1. Install pass-cli and rclone on the new machine**:
 

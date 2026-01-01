@@ -26,12 +26,30 @@ To get started, run the init command:
 pass-cli init
 ```
 
-This walks you through creating your secure vault with a master password and recovery phrase.
+This walks you through choosing whether to create a new vault or connect to an existing synced vault, then sets up your secure vault with a master password and recovery phrase.
 
-### Example Walkthrough
+### First Choice: New or Existing Vault
+
+When you run `pass-cli init`, you're first asked if this is a new installation or if you're connecting to an existing vault:
 
 ```bash
 $ pass-cli init
+
+Is this a new installation or are you connecting to an existing vault?
+
+  [1] Create new vault (first time setup)
+  [2] Connect to existing synced vault (requires rclone)
+
+Enter choice (1/2) [1]: 1
+```
+
+Select option 1 for a new vault (default), or option 2 if you already have pass-cli set up on another device with cloud sync enabled.
+
+### Example Walkthrough (New Vault)
+
+```bash
+$ pass-cli init
+[... choose option 1 ...]
 
 🔐 Initializing new password vault
 📁 Vault location: /home/user/.pass-cli/vault.enc
@@ -179,6 +197,22 @@ With passphrase protection:
 - You need BOTH the 24 words AND the passphrase to recover
 - Store the passphrase separately from your recovery phrase
 - If you lose either, recovery is impossible
+
+#### Skip Cloud Sync Prompts
+
+If you don't want to set up cloud sync during initialization, use the `--no-sync` flag:
+
+```bash
+pass-cli init --no-sync
+```
+
+This skips the cloud sync setup prompts. You can enable sync later with:
+
+```bash
+pass-cli sync enable
+```
+
+See [Cloud Sync Guide](../02-guides/sync-guide) for details on setting up sync on existing vaults.
 
 ## Your First Credential
 

@@ -18,13 +18,14 @@ The doctor command runs a series of health checks and reports the status of your
 
 ## What It Checks
 
-The doctor command performs 5 comprehensive health checks:
+The doctor command performs 6 comprehensive health checks:
 
 1. **Version Check**: Compares your installed version against the latest GitHub release
 2. **Vault Check**: Verifies vault file existence, permissions, and integrity
 3. **Config Check**: Validates configuration file syntax and settings
 4. **Keychain Check**: Tests OS keychain integration (Windows/macOS/Linux)
 5. **Backup Check**: Verifies backup file accessibility and integrity
+6. **Sync Check** (if enabled): Verifies rclone installation, remote configuration, and connectivity
 
 ## Command Options
 
@@ -273,6 +274,85 @@ On Windows, ensure only your user account has read/write access.
 ```bash
 rm ~/.pass-cli/vault.enc.backup.2
 ```
+
+### Sync Check
+
+This check only appears if sync is enabled in your configuration.
+
+#### Sync Enabled and Working (Pass)
+
+**Symptom**:
+```text
+[PASS] Sync: Enabled and healthy
+  Remote: gdrive:.pass-cli
+  rclone installed: Yes
+```
+
+**Details**: Sync is properly configured and working. Your vault will sync automatically on operations.
+
+#### Rclone Not Installed (Error)
+
+**Symptom**:
+```text
+[FAIL] Sync: rclone not found
+  Recommendation: Install rclone to enable sync: https://rclone.org/install.sh
+```
+
+**Solution**: Install rclone using your package manager or the installation script:
+
+```bash
+# macOS
+brew install rclone
+
+# Windows
+scoop install rclone
+
+# Linux
+curl https://rclone.org/install.sh | sudo bash
+```
+
+#### Remote Not Configured (Error)
+
+**Symptom**:
+```text
+[FAIL] Sync: Remote not configured or invalid
+  Recommendation: Check sync.remote setting in ~/.pass-cli/config.yml
+```
+
+**Solution**: Verify the remote is properly configured:
+
+```bash
+# List configured remotes
+rclone listremotes
+
+# Test connectivity to your configured remote
+rclone ls gdrive:.pass-cli
+```
+
+#### Remote Connectivity Failed (Error)
+
+**Symptom**:
+```text
+[FAIL] Sync: Cannot reach remote 'gdrive:.pass-cli'
+  Recommendation: Check rclone configuration or network connectivity
+```
+
+**Solution**:
+
+1. Verify your rclone configuration:
+   ```bash
+   rclone config
+   ```
+
+2. Test remote connectivity:
+   ```bash
+   rclone ls gdrive:.pass-cli
+   ```
+
+3. Check network connectivity:
+   ```bash
+   ping google.com
+   ```
 
 ## Script Integration Examples
 
