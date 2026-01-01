@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 
 	"pass-cli/internal/config"
 	"pass-cli/internal/crypto"
@@ -436,7 +437,7 @@ func getVaultDir(vaultPath string) string {
 	return filepath.Dir(vaultPath)
 }
 
-// saveSyncConfig saves sync configuration to config file
+// saveSyncConfig saves sync configuration to config file using proper YAML marshaling
 func saveSyncConfig(remote string) error {
 	configPath, err := config.GetConfigPath()
 	if err != nil {
@@ -449,22 +450,30 @@ func saveSyncConfig(remote string) error {
 		return err
 	}
 
-	// Simple append/update for sync config
-	syncConfig := fmt.Sprintf("\nsync:\n  enabled: true\n  remote: \"%s\"\n", remote)
-
-	if len(content) == 0 {
-		content = []byte(syncConfig)
-	} else {
-		// Check if sync section already exists
-		if strings.Contains(string(content), "sync:") {
-			// Replace existing sync section (simplified - could be more robust)
-			// For now, just warn and skip
-			return nil
+	// Parse existing config as generic map to preserve all fields
+	var configMap map[string]interface{}
+	if len(content) > 0 {
+		if err := yaml.Unmarshal(content, &configMap); err != nil {
+			return fmt.Errorf("failed to parse config: %w", err)
 		}
-		content = append(content, []byte(syncConfig)...)
+	}
+	if configMap == nil {
+		configMap = make(map[string]interface{})
 	}
 
-	return os.WriteFile(configPath, content, 0600)
+	// Update sync section (overwrites if exists, creates if not)
+	configMap["sync"] = map[string]interface{}{
+		"enabled": true,
+		"remote":  remote,
+	}
+
+	// Marshal back to YAML
+	newContent, err := yaml.Marshal(configMap)
+	if err != nil {
+		return fmt.Errorf("failed to marshal config: %w", err)
+	}
+
+	return os.WriteFile(configPath, newContent, 0600)
 }
 
 // offerSyncSetup prompts user to set up cloud sync after vault creation
