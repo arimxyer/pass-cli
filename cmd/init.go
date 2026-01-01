@@ -3,9 +3,14 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 
+	"pass-cli/internal/config"
 	"pass-cli/internal/crypto"
 	"pass-cli/internal/recovery"
 	"pass-cli/internal/security"
@@ -16,6 +21,7 @@ var (
 	useKeychain bool
 	noAudit     bool // Flag to disable audit logging (enabled by default)
 	noRecovery  bool // T028: Flag to skip BIP39 recovery phrase generation
+	noSync      bool // ARI-53: Flag to skip cloud sync setup prompts
 )
 
 var initCmd = &cobra.Command{
@@ -50,6 +56,8 @@ func init() {
 	initCmd.Flags().BoolVar(&noAudit, "no-audit", false, "disable tamper-evident audit logging for vault operations")
 	// T028: Add --no-recovery flag (opt-out of BIP39 recovery)
 	initCmd.Flags().BoolVar(&noRecovery, "no-recovery", false, "skip BIP39 recovery phrase generation")
+	// ARI-53: Add --no-sync flag to skip sync setup prompts
+	initCmd.Flags().BoolVar(&noSync, "no-sync", false, "skip cloud sync setup prompts")
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
@@ -58,6 +66,18 @@ func runInit(cmd *cobra.Command, args []string) error {
 	// Check if vault already exists
 	if _, err := os.Stat(vaultPath); err == nil {
 		return fmt.Errorf("vault already exists at %s\n\nTo use a different location, configure vault_path in your config file:\n  ~/.pass-cli/config.yml", vaultPath)
+	}
+
+	// ARI-54: Ask first if connecting to existing vault or creating new
+	if !noSync {
+		choice, err := askNewOrConnect()
+		if err != nil {
+			return err
+		}
+		if choice == "connect" {
+			return runConnectFlow(vaultPath)
+		}
+		// choice == "new", continue with normal init
 	}
 
 	fmt.Println("🔐 Initializing new password vault")
@@ -263,6 +283,14 @@ func runInit(cmd *cobra.Command, args []string) error {
 		fmt.Printf("📊 Audit logging enabled: %s\n", auditLogPath)
 	}
 
+	// ARI-53: Offer sync setup (unless --no-sync flag)
+	if !noSync {
+		if err := offerSyncSetup(); err != nil {
+			// Non-fatal - sync setup is optional
+			fmt.Printf("⚠  Sync setup skipped: %v\n", err)
+		}
+	}
+
 	// Success message
 	fmt.Println("✅ Vault initialized successfully!")
 	fmt.Printf("📍 Location: %s\n", vaultPath)
@@ -279,5 +307,241 @@ func runInit(cmd *cobra.Command, args []string) error {
 	fmt.Println("   • Add a credential: pass-cli add <service>")
 	fmt.Println("   • View help: pass-cli --help")
 
+	return nil
+}
+
+// askNewOrConnect prompts user to choose between new vault or connecting to existing
+// ARI-54: First question in init flow
+func askNewOrConnect() (string, error) {
+	fmt.Println()
+	fmt.Println("Is this a new installation or are you connecting to an existing vault?")
+	fmt.Println()
+	fmt.Println("  [1] Create new vault (first time setup)")
+	fmt.Println("  [2] Connect to existing synced vault (requires rclone)")
+	fmt.Println()
+	fmt.Print("Enter choice (1/2) [1]: ")
+
+	response, err := readLineInput()
+	if err != nil {
+		return "", fmt.Errorf("failed to read choice: %w", err)
+	}
+
+	response = strings.TrimSpace(response)
+	if response == "2" {
+		return "connect", nil
+	}
+	return "new", nil
+}
+
+// runConnectFlow handles connecting to an existing synced vault
+// ARI-54: Download vault from remote instead of creating new
+func runConnectFlow(vaultPath string) error {
+	fmt.Println()
+	fmt.Println("🔗 Connect to existing synced vault")
+
+	// Check if rclone is installed
+	rclonePath, err := exec.LookPath("rclone")
+	if err != nil {
+		fmt.Println()
+		fmt.Println("rclone is required to connect to a synced vault.")
+		fmt.Println("Install rclone first:")
+		fmt.Println("  macOS:   brew install rclone")
+		fmt.Println("  Windows: scoop install rclone")
+		fmt.Println("  Linux:   curl https://rclone.org/install.sh | sudo bash")
+		fmt.Println()
+		fmt.Println("After installing, configure a remote with: rclone config")
+		return fmt.Errorf("rclone not installed")
+	}
+
+	// Prompt for remote
+	fmt.Println()
+	fmt.Println("Enter your rclone remote path where your vault is stored.")
+	fmt.Println("Examples:")
+	fmt.Println("  gdrive:.pass-cli         (Google Drive)")
+	fmt.Println("  dropbox:Apps/pass-cli    (Dropbox)")
+	fmt.Println("  onedrive:.pass-cli       (OneDrive)")
+	fmt.Print("\nRemote path: ")
+
+	remote, err := readLineInput()
+	if err != nil {
+		return fmt.Errorf("failed to read remote: %w", err)
+	}
+
+	if remote == "" {
+		return fmt.Errorf("no remote specified")
+	}
+
+	// Check remote and download vault
+	fmt.Println("Checking remote...")
+	vaultDir := getVaultDir(vaultPath)
+
+	// Ensure local directory exists
+	if err := os.MkdirAll(vaultDir, 0700); err != nil {
+		return fmt.Errorf("failed to create vault directory: %w", err)
+	}
+
+	// Pull vault from remote
+	// #nosec G204 -- rclonePath is from exec.LookPath
+	cmd := exec.Command(rclonePath, "sync", remote, vaultDir)
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to download vault from remote: %w", err)
+	}
+
+	// Verify vault was downloaded
+	if _, err := os.Stat(vaultPath); os.IsNotExist(err) {
+		return fmt.Errorf("no vault found at remote '%s'", remote)
+	}
+
+	fmt.Println("✓ Vault downloaded")
+
+	// Verify password works
+	fmt.Print("\nEnter master password: ")
+	password, err := readPassword()
+	if err != nil {
+		return fmt.Errorf("failed to read password: %w", err)
+	}
+	fmt.Println()
+	defer crypto.ClearBytes(password)
+
+	vaultSvc, err := vault.New(vaultPath)
+	if err != nil {
+		return fmt.Errorf("failed to open vault: %w", err)
+	}
+
+	if err := vaultSvc.Unlock(password); err != nil {
+		return fmt.Errorf("invalid password or corrupted vault: %w", err)
+	}
+
+	fmt.Println("✓ Vault unlocked successfully")
+
+	// Save sync config
+	if err := saveSyncConfig(remote); err != nil {
+		fmt.Printf("⚠  Warning: failed to save sync config: %v\n", err)
+		fmt.Println("   You can manually enable sync with:")
+		fmt.Printf("   pass-cli config set sync.remote %s\n", remote)
+	}
+
+	fmt.Println()
+	fmt.Println("✅ Connected to synced vault!")
+	fmt.Printf("📍 Location: %s\n", vaultPath)
+	fmt.Printf("☁️  Remote: %s\n", remote)
+	fmt.Println()
+	fmt.Println("Your vault will stay in sync across devices.")
+
+	return nil
+}
+
+// getVaultDir returns the directory containing the vault file
+func getVaultDir(vaultPath string) string {
+	return filepath.Dir(vaultPath)
+}
+
+// saveSyncConfig saves sync configuration to config file using proper YAML marshaling
+func saveSyncConfig(remote string) error {
+	configPath, err := config.GetConfigPath()
+	if err != nil {
+		return err
+	}
+
+	// Read existing config or create new
+	// #nosec G304 -- configPath is from config.GetConfigPath(), not user input
+	content, err := os.ReadFile(configPath)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	// Parse existing config as generic map to preserve all fields
+	var configMap map[string]interface{}
+	if len(content) > 0 {
+		if err := yaml.Unmarshal(content, &configMap); err != nil {
+			return fmt.Errorf("failed to parse config: %w", err)
+		}
+	}
+	if configMap == nil {
+		configMap = make(map[string]interface{})
+	}
+
+	// Update sync section (overwrites if exists, creates if not)
+	configMap["sync"] = map[string]interface{}{
+		"enabled": true,
+		"remote":  remote,
+	}
+
+	// Marshal back to YAML
+	newContent, err := yaml.Marshal(configMap)
+	if err != nil {
+		return fmt.Errorf("failed to marshal config: %w", err)
+	}
+
+	return os.WriteFile(configPath, newContent, 0600)
+}
+
+// offerSyncSetup prompts user to set up cloud sync after vault creation
+// ARI-53: Optional sync setup during init workflow (for new vaults)
+func offerSyncSetup() error {
+	fmt.Println()
+
+	// Ask if user wants to enable sync
+	setupSync, err := promptYesNo("Enable cloud sync? (requires rclone)", false)
+	if err != nil {
+		return fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if !setupSync {
+		return nil
+	}
+
+	// Check if rclone is installed
+	rclonePath, err := exec.LookPath("rclone")
+	if err != nil {
+		fmt.Println()
+		fmt.Println("rclone is not installed. To enable sync, install rclone first:")
+		fmt.Println("  macOS:   brew install rclone")
+		fmt.Println("  Windows: scoop install rclone")
+		fmt.Println("  Linux:   curl https://rclone.org/install.sh | sudo bash")
+		fmt.Println()
+		fmt.Println("After installing, configure a remote with: rclone config")
+		fmt.Println("Then run: pass-cli config set sync.enabled true")
+		fmt.Println("          pass-cli config set sync.remote <remote>:<path>")
+		return nil
+	}
+
+	fmt.Println()
+	fmt.Println("Enter your rclone remote path.")
+	fmt.Println("Examples:")
+	fmt.Println("  gdrive:.pass-cli         (Google Drive)")
+	fmt.Println("  dropbox:Apps/pass-cli    (Dropbox)")
+	fmt.Println("  onedrive:.pass-cli       (OneDrive)")
+	fmt.Print("\nRemote path: ")
+
+	remote, err := readLineInput()
+	if err != nil {
+		return fmt.Errorf("failed to read remote: %w", err)
+	}
+
+	if remote == "" {
+		fmt.Println("No remote specified, skipping sync setup.")
+		return nil
+	}
+
+	// Validate remote connectivity
+	fmt.Println("Checking remote connectivity...")
+	// #nosec G204 -- rclonePath is from exec.LookPath, remote is user input but validated
+	cmd := exec.Command(rclonePath, "lsd", remote)
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("⚠  Cannot reach remote '%s'. Please check your rclone configuration.\n", remote)
+		fmt.Println("   You can set up sync later with:")
+		fmt.Println("   pass-cli config set sync.enabled true")
+		fmt.Printf("   pass-cli config set sync.remote %s\n", remote)
+		return nil
+	}
+
+	// Save sync config
+	if err := saveSyncConfig(remote); err != nil {
+		return fmt.Errorf("failed to save sync config: %w", err)
+	}
+
+	fmt.Printf("☁️  Sync enabled with remote: %s\n", remote)
 	return nil
 }

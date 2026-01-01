@@ -3,6 +3,8 @@ package health
 import (
 	"context"
 	"time"
+
+	"pass-cli/internal/config"
 )
 
 // Exit codes for doctor command
@@ -54,12 +56,13 @@ type HealthReport struct {
 
 // CheckOptions contains configuration for health check execution
 type CheckOptions struct {
-	CurrentVersion  string // Current binary version
-	GitHubRepo      string // GitHub repository (format: owner/repo)
-	VaultPath       string // Path to vault file
-	VaultPathSource string // Source of vault path ("config" or "default")
-	VaultDir        string // Directory containing vault
-	ConfigPath      string // Path to config file
+	CurrentVersion  string            // Current binary version
+	GitHubRepo      string            // GitHub repository (format: owner/repo)
+	VaultPath       string            // Path to vault file
+	VaultPathSource string            // Source of vault path ("config" or "default")
+	VaultDir        string            // Directory containing vault
+	ConfigPath      string            // Path to config file
+	SyncConfig      config.SyncConfig // ARI-53: Sync configuration for health check
 }
 
 // DetermineExitCode maps health summary to exit code
@@ -82,6 +85,7 @@ func RunChecks(ctx context.Context, opts CheckOptions) HealthReport {
 		NewConfigChecker(opts.ConfigPath),
 		NewKeychainChecker(opts.VaultPath),
 		NewBackupChecker(opts.VaultDir),
+		NewSyncChecker(opts.SyncConfig), // ARI-53: Cloud sync health check
 	}
 
 	// Execute all checks

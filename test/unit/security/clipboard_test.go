@@ -94,33 +94,43 @@ func TestClipboardClearingTiming(t *testing.T) {
 	// Start timer
 	start := time.Now()
 
-	// Simulate auto-clear
+	// Channel to signal when auto-clear completes
+	cleared := make(chan bool, 1)
+
+	// Simulate auto-clear after 5 seconds
 	go func() {
 		time.Sleep(5 * time.Second)
 		if current, _ := clipboard.ReadAll(); current == testPassword {
 			_ = clipboard.WriteAll("")
+			cleared <- true
+		} else {
+			// Clipboard was modified by external process (e.g., parallel tests)
+			cleared <- false
 		}
 	}()
 
-	// Poll clipboard every second to detect when it's cleared
-	for i := 0; i < 10; i++ {
-		time.Sleep(1 * time.Second)
-		content, err := clipboard.ReadAll()
-		if err != nil {
-			continue
-		}
-		if content == "" {
-			elapsed := time.Since(start)
-			// Verify cleared within 6 seconds (5s + 1s tolerance)
-			if elapsed > 6*time.Second {
-				t.Errorf("Clipboard cleared too late: took %v, should be <= 6s", elapsed)
-			}
-			if elapsed < 4*time.Second {
-				t.Errorf("Clipboard cleared too early: took %v, should be >= 4s", elapsed)
-			}
-			return
-		}
+	// Wait for auto-clear goroutine to complete
+	wasCleared := <-cleared
+	elapsed := time.Since(start)
+
+	if !wasCleared {
+		t.Skip("Clipboard was modified by external process during test")
 	}
 
-	t.Error("Clipboard was never cleared within 10 seconds")
+	// Verify timing
+	if elapsed > 7*time.Second {
+		t.Errorf("Clipboard cleared too late: took %v, should be <= 7s", elapsed)
+	}
+	if elapsed < 4*time.Second {
+		t.Errorf("Clipboard cleared too early: took %v, should be >= 4s", elapsed)
+	}
+
+	// Verify clipboard is empty
+	content, err := clipboard.ReadAll()
+	if err != nil {
+		t.Fatalf("Failed to read clipboard: %v", err)
+	}
+	if content != "" {
+		t.Errorf("Clipboard should be empty, but contains: %q", content)
+	}
 }

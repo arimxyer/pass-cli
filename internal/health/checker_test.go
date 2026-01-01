@@ -50,32 +50,30 @@ audit_enabled: false
 		t.Errorf("Expected 0 errors, got %d", report.Summary.Errors)
 	}
 
-	// Allow keychain warning in CI environments where it's unavailable
-	keychainWarning := false
+	// If there are warnings, ensure they're only keychain or sync-related
+	// (sync may warn if rclone not installed, keychain may warn if unavailable in CI)
+	acceptableWarnings := 0
 	for _, check := range report.Checks {
-		if check.Name == "keychain" && check.Status == CheckWarning {
-			keychainWarning = true
+		if check.Status == CheckWarning && (check.Name == "keychain" || check.Name == "sync") {
+			acceptableWarnings++
 		}
 	}
-
-	// If there are warnings, ensure they're only keychain-related
-	if report.Summary.Warnings > 0 && !keychainWarning {
-		t.Errorf("Expected only keychain warnings, got %d warnings", report.Summary.Warnings)
-	}
-	if report.Summary.Warnings > 1 {
-		t.Errorf("Expected at most 1 warning (keychain), got %d", report.Summary.Warnings)
+	if report.Summary.Warnings > 0 && acceptableWarnings != report.Summary.Warnings {
+		t.Errorf("Expected only keychain/sync warnings, got %d warnings (%d acceptable)",
+			report.Summary.Warnings, acceptableWarnings)
 	}
 
-	// Should have 5 checks (version, vault, config, keychain, backup)
-	expectedChecks := 5
+	// Should have 6 checks (version, vault, config, keychain, backup, sync)
+	expectedChecks := 6
 	if len(report.Checks) != expectedChecks {
 		t.Errorf("Expected %d checks, got %d", expectedChecks, len(report.Checks))
 	}
 
-	// Verify all checks passed or have acceptable warnings (keychain only)
+	// Verify all checks passed or have acceptable warnings (keychain or sync only)
 	for _, check := range report.Checks {
-		// Apply De Morgan's law: !(A && B) == (!A || !B)
-		if check.Status != CheckPass && (check.Name != "keychain" || check.Status != CheckWarning) {
+		isAcceptableWarning := check.Status == CheckWarning &&
+			(check.Name == "keychain" || check.Name == "sync")
+		if check.Status != CheckPass && !isAcceptableWarning {
 			t.Errorf("Check %s did not pass: status=%s, message=%s",
 				check.Name, check.Status, check.Message)
 		}

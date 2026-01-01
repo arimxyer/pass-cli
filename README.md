@@ -53,7 +53,7 @@ For manual installation and other methods, see [docs/01-getting-started/manual-i
 ### Getting Started
 
 ```bash
-# Initialize vault (guided setup on first use)
+# Initialize vault (choose: new vault or connect to synced vault)
 pass-cli init
 
 # Add your first credential
@@ -138,7 +138,10 @@ pass-cli vault backup restore
 # View backup status
 pass-cli vault backup info
 
-# Health check
+# Enable cloud sync (on existing vault)
+pass-cli sync enable
+
+# Health check (includes sync status)
 pass-cli doctor
 ```
 

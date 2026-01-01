@@ -56,6 +56,22 @@ func readLine() (string, error) {
 	return testStdinScanner.Text(), nil
 }
 
+// readLineInput reads a line from stdin, using the shared scanner in test mode
+// or a fresh reader in normal mode. This is the general-purpose line reader
+// for user prompts that aren't passwords.
+func readLineInput() (string, error) {
+	if os.Getenv("PASS_CLI_TEST") == "1" {
+		return readLine()
+	}
+
+	reader := bufio.NewReader(os.Stdin)
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		return "", fmt.Errorf("failed to read input: %w", err)
+	}
+	return strings.TrimSpace(line), nil
+}
+
 // readPassword reads a password from stdin with asterisk masking.
 // Returns []byte for secure memory handling (no string conversion).
 func readPassword() ([]byte, error) {

@@ -542,7 +542,10 @@ func TestKeychain_Status(t *testing.T) {
 		// Verify backend name is displayed (platform-specific)
 		hasBackend := strings.Contains(stdout, "Windows Credential Manager") ||
 			strings.Contains(stdout, "macOS Keychain") ||
-			strings.Contains(stdout, "Linux Secret Service")
+			strings.Contains(stdout, "Linux Secret Service") ||
+			strings.Contains(stdout, "Secret Service API") ||
+			strings.Contains(stdout, "gnome-keyring") ||
+			strings.Contains(stdout, "kwallet")
 		if !hasBackend {
 			t.Errorf("Expected output to contain backend name, got: %s", stdout)
 		}

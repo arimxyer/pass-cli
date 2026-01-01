@@ -40,23 +40,28 @@ See [Configuration](#configuration) section for details on path expansion (envir
 
 ### init - Initialize Vault
 
-Create a new password vault.
+Create a new password vault or connect to an existing synced vault.
 
 #### Synopsis
 
 ```bash
-pass-cli init
+pass-cli init [flags]
 ```
 
 #### Description
 
-Creates a new encrypted vault at `~/.pass-cli/vault.enc` and stores the master password in your system keychain. You will be prompted to create a master password.
+Creates a new encrypted vault at `~/.pass-cli/vault.enc` or connects to an existing vault on a synced remote (via rclone). You will be prompted to choose between creating a new vault or connecting to an existing one.
+
+When creating a new vault, you'll be prompted to create a master password and optionally enable cloud sync. When connecting to an existing vault, pass-cli will download it from your configured rclone remote.
 
 #### Examples
 
 ```bash
-# Initialize with default location
+# Initialize vault (interactive - choose create new or connect to existing)
 pass-cli init
+
+# Skip sync setup prompts
+pass-cli init --no-sync
 
 # For custom vault location, configure in config file first:
 # Edit ~/.pass-cli/config.yml and add: vault_path: /custom/path/vault.enc
@@ -70,6 +75,7 @@ pass-cli init
 | `--no-audit` | bool | Disable tamper-evident audit logging (enabled by default) |
 | `--use-keychain` | bool | Store master password in OS keychain |
 | `--no-recovery` | bool | Skip BIP39 recovery phrase generation |
+| `--no-sync` | bool | Skip cloud sync setup prompts |
 
 #### Password Policy
 
@@ -1727,6 +1733,88 @@ Review the log file and investigate the flagged entries.
 
 ---
 
+### sync - Manage Cloud Sync
+
+Manage cloud synchronization for your pass-cli vault using rclone.
+
+#### Synopsis
+
+```bash
+pass-cli sync <subcommand>
+```
+
+#### Description
+
+Cloud sync uses rclone to synchronize your encrypted vault with cloud storage providers like Google Drive, Dropbox, OneDrive, and many others.
+
+Prerequisites:
+- rclone must be installed and configured with at least one remote
+- Run 'rclone config' to set up a remote if you haven't already
+
+#### Subcommands
+
+##### sync enable - Enable Cloud Sync on Existing Vault
+
+Enable cloud synchronization for an existing pass-cli vault.
+
+**Synopsis:**
+```bash
+pass-cli sync enable [flags]
+```
+
+**Description:**
+Configures an existing vault to sync with a cloud storage provider via rclone. Your encrypted vault will be pushed to the remote after setup.
+
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--force` | Overwrite remote if it already contains vault files |
+
+**Examples:**
+```bash
+# Enable sync interactively
+pass-cli sync enable
+
+# Force overwrite if remote already has files
+pass-cli sync enable --force
+```
+
+**Output:**
+```text
+Enter your rclone remote path.
+Examples:
+  gdrive:.pass-cli         (Google Drive)
+  dropbox:Apps/pass-cli    (Dropbox)
+  onedrive:.pass-cli       (OneDrive)
+
+Remote path: gdrive:.pass-cli
+Checking remote connectivity...
+
+✅ Sync enabled successfully!
+   Remote: gdrive:.pass-cli
+
+Your vault will now sync automatically on each operation.
+Use 'pass-cli doctor' to check sync status.
+```
+
+**Prerequisites:**
+- An existing pass-cli vault (run 'pass-cli init' first)
+- rclone installed and configured with at least one remote
+
+**Notes:**
+- Performs automatic validation of remote connectivity
+- Warns if remote already contains files (use `--force` to overwrite)
+- Performs initial push of vault to remote
+- Configuration is saved automatically
+
+#### See Also
+
+- [Cloud Sync Guide](../02-guides/sync-guide) - Comprehensive sync setup and usage
+- [Health Checks](../05-operations/health-checks) - Verify sync status with doctor command
+
+---
+
 ### doctor - System Health Check
 
 Run diagnostic checks on your pass-cli installation.
@@ -1747,6 +1835,7 @@ Performs comprehensive health checks on your vault, configuration, keychain inte
 3. **Config Check**: Validates configuration syntax and settings
 4. **Keychain Check**: Tests OS keychain integration status
 5. **Backup Check**: Verifies backup files exist and are accessible
+6. **Sync Check** (if enabled): Verifies rclone is installed, remote is configured, and connectivity works
 
 #### Flags
 

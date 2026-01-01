@@ -328,7 +328,7 @@ func TestIntegration_BackupRestore_Basic(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault (password must be 12+ characters)
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -377,7 +377,7 @@ func TestIntegration_BackupRestore_NoBackups(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -408,7 +408,7 @@ func TestIntegration_BackupRestore_CorruptedFallback(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -470,7 +470,7 @@ func TestIntegration_BackupRestore_ConfirmationPrompt(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -504,7 +504,7 @@ func TestIntegration_BackupRestore_ForceFlag(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -532,7 +532,7 @@ func TestIntegration_BackupRestore_DryRun(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -582,7 +582,7 @@ func TestIntegration_BackupCreate_Success(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -660,7 +660,7 @@ func TestIntegration_BackupCreate_MultipleBackups(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -737,7 +737,7 @@ func TestIntegration_BackupCreate_DiskFull(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -781,7 +781,7 @@ func TestIntegration_BackupCreate_PermissionDenied(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -833,7 +833,7 @@ func TestIntegration_BackupCreate_MissingDirectory(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault (creates directory structure)
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -912,7 +912,7 @@ func TestIntegration_BackupCreate_Errors(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -959,7 +959,7 @@ func TestIntegration_BackupRestore_Errors(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -986,7 +986,7 @@ func TestIntegration_BackupRestore_Errors(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -1016,7 +1016,7 @@ func TestIntegration_BackupRestore_Errors(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -1096,7 +1096,7 @@ func TestIntegration_BackupCommands_InvalidFlags(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1136,7 +1136,7 @@ func TestIntegration_BackupInfo_NoBackups(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1167,7 +1167,7 @@ func TestIntegration_BackupInfo_SingleAutomatic(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1195,7 +1195,7 @@ func TestIntegration_BackupInfo_MultipleManual(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1236,7 +1236,7 @@ func TestIntegration_BackupInfo_Mixed(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault (creates automatic backup)
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1273,7 +1273,7 @@ func TestIntegration_BackupInfo_CorruptedBackup(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1318,7 +1318,7 @@ func TestIntegration_BackupInfo_Verbose(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1354,7 +1354,7 @@ func TestIntegration_BackupOutput_SuccessMessages(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1472,7 +1472,7 @@ func TestIntegration_BackupOutput_ErrorMessages(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -1506,7 +1506,7 @@ func TestIntegration_BackupOutput_VerboseMode(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1591,7 +1591,7 @@ func TestIntegration_BackupOutput_WarningMessages(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1627,7 +1627,7 @@ func TestIntegration_BackupOutput_StructureConsistency(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1683,7 +1683,7 @@ func TestIntegration_BackupCreate_Performance(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1739,7 +1739,7 @@ func TestIntegration_BackupRestore_Performance(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1800,7 +1800,7 @@ func TestIntegration_BackupInfo_Performance(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1845,7 +1845,7 @@ func TestIntegration_BackupInfo_Performance_LargeVault(t *testing.T) {
 	defer cleanup()
 
 	// Initialize vault
-	_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+	_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 	if err != nil {
 		t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 	}
@@ -1898,7 +1898,7 @@ func TestIntegration_BackupPaths_WindowsVsUnix(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -1947,7 +1947,7 @@ func TestIntegration_BackupPaths_WindowsVsUnix(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -1976,7 +1976,7 @@ func TestIntegration_BackupPermissions_Platform(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -2039,7 +2039,7 @@ func TestIntegration_BackupPermissions_Platform(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -2083,7 +2083,7 @@ func TestIntegration_BackupDirectory_Platform(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault (should create directory)
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -2116,7 +2116,7 @@ func TestIntegration_BackupDirectory_Platform(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -2149,7 +2149,7 @@ func TestIntegration_BackupPaths_Normalization(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed: %v\nstderr: %s", err, stderr)
 		}
@@ -2187,7 +2187,7 @@ func TestIntegration_BackupPaths_Normalization(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed with spaces in path: %v\nstderr: %s", err, stderr)
 		}
@@ -2224,7 +2224,7 @@ func TestIntegration_BackupPaths_Normalization(t *testing.T) {
 		defer cleanup()
 
 		// Initialize vault
-		_, stderr, err := runCommandWithInput(t, "TestPassword123!\nTestPassword123!\nn\nn\nn\n", "--config", configPath, "init")
+		_, stderr, err := runCommandWithInput(t, "1\nTestPassword123!\nTestPassword123!\nn\nn\nn\nn\n", "--config", configPath, "init")
 		if err != nil {
 			t.Fatalf("init failed with special chars: %v\nstderr: %s", err, stderr)
 		}

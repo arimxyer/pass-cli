@@ -319,6 +319,7 @@ func TestAuditLogEntryWithPortableKey(t *testing.T) {
 		EventType:      "test_event",
 		Outcome:        "success",
 		CredentialName: "test-service",
+		MachineID:      "test-machine",
 	}
 
 	// Sign with derived key
@@ -354,6 +355,7 @@ func TestCrossOSAuditKeyDerivation(t *testing.T) {
 		EventType:      "credential_access",
 		Outcome:        "success",
 		CredentialName: "github",
+		MachineID:      "windows-pc",
 	}
 	if err := entry.Sign(windowsKey); err != nil {
 		t.Fatalf("Sign() failed: %v", err)

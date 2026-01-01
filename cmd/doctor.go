@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"pass-cli/internal/config"
 	"pass-cli/internal/health"
 
 	"github.com/fatih/color"
@@ -64,6 +65,9 @@ func runDoctor(cmd *cobra.Command, args []string) error {
 	// Get vault path with source
 	vaultPath, vaultSource := GetVaultPathWithSource()
 
+	// Load config for sync settings (ARI-53)
+	cfg, _ := config.Load()
+
 	// Build check options
 	opts := health.CheckOptions{
 		CurrentVersion:  version,
@@ -72,6 +76,7 @@ func runDoctor(cmd *cobra.Command, args []string) error {
 		VaultPathSource: vaultSource,
 		VaultDir:        filepath.Dir(vaultPath),
 		ConfigPath:      getConfigPath(),
+		SyncConfig:      cfg.Sync, // ARI-53: Pass sync config for health check
 	}
 
 	// Run all health checks

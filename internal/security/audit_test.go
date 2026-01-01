@@ -20,6 +20,7 @@ func TestAuditLogEntry_Sign(t *testing.T) {
 		EventType:      EventVaultUnlock,
 		Outcome:        OutcomeSuccess,
 		CredentialName: "",
+		MachineID:      "test-machine",
 	}
 
 	if err := entry.Sign(key); err != nil {
@@ -42,6 +43,7 @@ func TestAuditLogEntry_Verify(t *testing.T) {
 		EventType:      EventCredentialAccess,
 		Outcome:        OutcomeSuccess,
 		CredentialName: "example.com",
+		MachineID:      "test-machine",
 	}
 
 	// Sign entry
@@ -66,6 +68,7 @@ func TestAuditLogEntry_VerifyWithWrongKey(t *testing.T) {
 		EventType:      EventVaultUnlock,
 		Outcome:        OutcomeSuccess,
 		CredentialName: "",
+		MachineID:      "test-machine",
 	}
 
 	// Sign with key1
@@ -89,6 +92,7 @@ func TestAuditLogEntry_TamperDetection_ModifiedEventType(t *testing.T) {
 		EventType:      EventVaultUnlock,
 		Outcome:        OutcomeSuccess,
 		CredentialName: "",
+		MachineID:      "test-machine",
 	}
 
 	// Sign original
@@ -114,6 +118,7 @@ func TestAuditLogEntry_TamperDetection_ModifiedOutcome(t *testing.T) {
 		EventType:      EventCredentialAccess,
 		Outcome:        OutcomeSuccess,
 		CredentialName: "example.com",
+		MachineID:      "test-machine",
 	}
 
 	if err := entry.Sign(key); err != nil {
@@ -138,6 +143,7 @@ func TestAuditLogEntry_TamperDetection_ModifiedCredentialName(t *testing.T) {
 		EventType:      EventCredentialAccess,
 		Outcome:        OutcomeSuccess,
 		CredentialName: "original.com",
+		MachineID:      "test-machine",
 	}
 
 	if err := entry.Sign(key); err != nil {
@@ -162,6 +168,7 @@ func TestAuditLogEntry_TamperDetection_ModifiedTimestamp(t *testing.T) {
 		EventType:      EventVaultUnlock,
 		Outcome:        OutcomeSuccess,
 		CredentialName: "",
+		MachineID:      "test-machine",
 	}
 
 	if err := entry.Sign(key); err != nil {
@@ -174,6 +181,32 @@ func TestAuditLogEntry_TamperDetection_ModifiedTimestamp(t *testing.T) {
 	// Verify should fail
 	if err := entry.Verify(key); err == nil {
 		t.Error("Verify() should fail after tampering with Timestamp")
+	}
+}
+
+// ARI-50: Test tamper detection for MachineID field
+func TestAuditLogEntry_TamperDetection_ModifiedMachineID(t *testing.T) {
+	key := make([]byte, 32)
+	_, _ = rand.Read(key)
+
+	entry := &AuditLogEntry{
+		Timestamp:      time.Now(),
+		EventType:      EventCredentialAccess,
+		Outcome:        OutcomeSuccess,
+		CredentialName: "example.com",
+		MachineID:      "original-machine",
+	}
+
+	if err := entry.Sign(key); err != nil {
+		t.Fatalf("Sign() failed: %v", err)
+	}
+
+	// Tamper with machine ID
+	entry.MachineID = "tampered-machine"
+
+	// Verify should fail
+	if err := entry.Verify(key); err == nil {
+		t.Error("Verify() should fail after tampering with MachineID")
 	}
 }
 
@@ -250,6 +283,7 @@ func TestAuditLogEntry_NoPasswordLogging(t *testing.T) {
 		EventType:      EventCredentialAccess,
 		Outcome:        OutcomeSuccess,
 		CredentialName: "example.com",
+		MachineID:      "test-machine",
 		// Password field should NOT exist
 	}
 
@@ -282,6 +316,7 @@ func TestAuditLogger_Log_NoPasswordInOutput(t *testing.T) {
 		EventType:      EventCredentialAccess,
 		Outcome:        OutcomeSuccess,
 		CredentialName: "example.com",
+		MachineID:      "test-machine",
 	}
 
 	if err := logger.Log(entry); err != nil {
@@ -306,5 +341,27 @@ func TestAuditLogger_Log_NoPasswordInOutput(t *testing.T) {
 	logStr := string(content)
 	if len(logStr) == 0 {
 		t.Error("Log file is empty after Log()")
+	}
+}
+
+// ARI-50: Test GetMachineID function
+func TestGetMachineID(t *testing.T) {
+	machineID := GetMachineID()
+
+	// Should return non-empty string
+	if machineID == "" {
+		t.Error("GetMachineID() should return non-empty string")
+	}
+
+	// Should be consistent across calls
+	machineID2 := GetMachineID()
+	if machineID != machineID2 {
+		t.Errorf("GetMachineID() should be consistent: got %q then %q", machineID, machineID2)
+	}
+
+	// Should not return "unknown" on a normal system
+	// (unless hostname cannot be determined, which is rare)
+	if machineID == "unknown" {
+		t.Log("Warning: GetMachineID() returned 'unknown' - hostname may not be configured")
 	}
 }
