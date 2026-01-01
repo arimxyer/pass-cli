@@ -445,6 +445,7 @@ func saveSyncConfig(remote string) error {
 	}
 
 	// Read existing config or create new
+	// #nosec G304 -- configPath is from config.GetConfigPath(), not user input
 	content, err := os.ReadFile(configPath)
 	if err != nil && !os.IsNotExist(err) {
 		return err
