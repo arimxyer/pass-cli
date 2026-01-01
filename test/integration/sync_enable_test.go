@@ -48,8 +48,9 @@ func TestSyncEnable(t *testing.T) {
 
 		// Initialize vault first (with --no-sync to skip sync prompts)
 		initInput := helpers.BuildInitStdin(helpers.InitOptions{
-			Password: testPassword,
-			NoSync:   true,
+			Password:   testPassword,
+			NoSync:     true,
+			SkipVerify: true,
 		})
 		stdout, stderr, err := helpers.RunCmd(t, binaryPath, testConfigPath, initInput, "init", "--no-sync")
 		if err != nil {
