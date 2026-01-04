@@ -6,8 +6,21 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/zalando/go-keyring"
 	"pass-cli/internal/security"
 )
+
+// cleanupTestKeychain removes keychain entries created during tests
+func cleanupTestKeychain(t *testing.T, vaultPath string) {
+	t.Helper()
+	vaultID := filepath.Base(filepath.Dir(vaultPath))
+	t.Cleanup(func() {
+		_ = keyring.Delete(testKeychainService, "master-password-"+vaultID)
+		_ = keyring.Delete(testKeychainService, "master-password")
+		_ = keyring.Delete(testAuditKeychainService, vaultPath)
+		_ = keyring.Delete(testAuditKeychainService, vaultID)
+	})
+}
 
 // T015/T022/T034: Test that audit logging captures vault save operations
 func TestAuditLoggingForVaultSave(t *testing.T) {
@@ -20,6 +33,7 @@ func TestAuditLoggingForVaultSave(t *testing.T) {
 	tempDir := t.TempDir()
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	auditLogPath := filepath.Join(tempDir, "audit.log")
+	cleanupTestKeychain(t, vaultPath)
 
 	// Create vault service
 	vault, err := New(vaultPath)
@@ -95,6 +109,7 @@ func TestAuditCallback_AllEventsLogged(t *testing.T) {
 	tempDir := t.TempDir()
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	auditLogPath := filepath.Join(tempDir, "audit.log")
+	cleanupTestKeychain(t, vaultPath)
 
 	vault, err := New(vaultPath)
 	if err != nil {
@@ -161,6 +176,7 @@ func TestAuditCallback_VerificationFailedEvent(t *testing.T) {
 	tempDir := t.TempDir()
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	auditLogPath := filepath.Join(tempDir, "audit.log")
+	cleanupTestKeychain(t, vaultPath)
 
 	vault, err := New(vaultPath)
 	if err != nil {
@@ -199,6 +215,7 @@ func TestAuditCallback_NoSensitiveData(t *testing.T) {
 	tempDir := t.TempDir()
 	vaultPath := filepath.Join(tempDir, "vault.enc")
 	auditLogPath := filepath.Join(tempDir, "audit.log")
+	cleanupTestKeychain(t, vaultPath)
 
 	vault, err := New(vaultPath)
 	if err != nil {

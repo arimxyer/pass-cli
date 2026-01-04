@@ -9,7 +9,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/zalando/go-keyring"
 	"pass-cli/internal/storage"
+)
+
+const (
+	testKeychainService      = "pass-cli"
+	testAuditKeychainService = "pass-cli-audit"
 )
 
 func setupTestVault(t *testing.T) (*VaultService, string, func()) {
@@ -22,6 +28,8 @@ func setupTestVault(t *testing.T) (*VaultService, string, func()) {
 	}
 
 	vaultPath := filepath.Join(tempDir, "test.vault")
+	vaultID := filepath.Base(tempDir) // e.g., "vault-test-1234567890"
+
 	vault, err := New(vaultPath)
 	if err != nil {
 		_ = os.RemoveAll(tempDir)
@@ -30,6 +38,11 @@ func setupTestVault(t *testing.T) (*VaultService, string, func()) {
 
 	cleanup := func() {
 		vault.Lock()
+		// Clean up keychain entries to prevent pollution
+		_ = keyring.Delete(testKeychainService, "master-password-"+vaultID)
+		_ = keyring.Delete(testKeychainService, "master-password")
+		_ = keyring.Delete(testAuditKeychainService, vaultPath)
+		_ = keyring.Delete(testAuditKeychainService, vaultID)
 		_ = os.RemoveAll(tempDir)
 	}
 
@@ -46,6 +59,8 @@ func setupTestVaultWithStorage(t *testing.T) (*VaultService, *storage.StorageSer
 	}
 
 	vaultPath := filepath.Join(tempDir, "test.vault")
+	vaultID := filepath.Base(tempDir) // e.g., "vault-test-1234567890"
+
 	vault, err := New(vaultPath)
 	if err != nil {
 		_ = os.RemoveAll(tempDir)
@@ -54,6 +69,11 @@ func setupTestVaultWithStorage(t *testing.T) (*VaultService, *storage.StorageSer
 
 	cleanup := func() {
 		vault.Lock()
+		// Clean up keychain entries to prevent pollution
+		_ = keyring.Delete(testKeychainService, "master-password-"+vaultID)
+		_ = keyring.Delete(testKeychainService, "master-password")
+		_ = keyring.Delete(testAuditKeychainService, vaultPath)
+		_ = keyring.Delete(testAuditKeychainService, vaultID)
 		_ = os.RemoveAll(tempDir)
 	}
 
@@ -725,9 +745,18 @@ func TestPersistence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	vaultPath := filepath.Join(tempDir, "test.vault")
+	vaultID := filepath.Base(tempDir)
+
+	// Cleanup files and keychain entries
+	defer func() {
+		_ = keyring.Delete(testKeychainService, "master-password-"+vaultID)
+		_ = keyring.Delete(testKeychainService, "master-password")
+		_ = keyring.Delete(testAuditKeychainService, vaultPath)
+		_ = keyring.Delete(testAuditKeychainService, vaultID)
+		_ = os.RemoveAll(tempDir)
+	}()
 	password := "TestPassword123!"
 
 	// Create first vault instance
