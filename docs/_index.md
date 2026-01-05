@@ -10,7 +10,7 @@ cascade:
 
 ![Version](https://img.shields.io/github/v/release/arimxyer/pass-cli?label=Version) ![Last Updated](https://img.shields.io/github/last-commit/arimxyer/pass-cli?path=docs&label=Last%20Updated)
 
-Welcome to the **pass-cli** documentation. pass-cli is a secure, cross-platform CLI password and API key manager designed for developers.
+Welcome to the **pass-cli** documentation. A secure, cross-platform, always-free, and open-source alternative to 1password, bitwarden, etc., CLI password and API key manager for folks who live in the command line.
 
 ## Quick Links
 
