@@ -73,7 +73,7 @@ func (t *testVaultService) RecordFieldAccess(service, field string) error {
 }
 
 func (t *testVaultService) GetTOTPCode(service string) (string, int, error) {
-	return "", 0, fmt.Errorf("TOTP not configured")
+	return "123456", 25, nil
 }
 
 // Test helper functions
@@ -396,6 +396,125 @@ func TestSortUsageLocations_StableSort(t *testing.T) {
 		if !sorted[i].Timestamp.Equal(sorted[0].Timestamp) {
 			t.Errorf("Expected all timestamps to be equal")
 		}
+	}
+}
+
+// TestDetailView_ToggleTOTPVisibility verifies TOTP visibility toggle behavior
+func TestDetailView_ToggleTOTPVisibility(t *testing.T) {
+	testVault := &testVaultService{}
+	appState := models.NewAppState(testVault)
+
+	detailView := NewDetailView(appState)
+
+	// Initially TOTP should be hidden
+	if detailView.totpVisible {
+		t.Error("Expected TOTP to be hidden by default")
+	}
+
+	// Toggle visibility on
+	detailView.ToggleTOTPVisibility()
+	if !detailView.totpVisible {
+		t.Error("Expected TOTP to be visible after toggle")
+	}
+
+	// Toggle visibility off
+	detailView.ToggleTOTPVisibility()
+	if detailView.totpVisible {
+		t.Error("Expected TOTP to be hidden after second toggle")
+	}
+}
+
+// TestFormatTOTPField_Hidden verifies TOTP field formatting when hidden
+func TestFormatTOTPField_Hidden(t *testing.T) {
+	testVault := &testVaultService{}
+	appState := models.NewAppState(testVault)
+
+	detailView := NewDetailView(appState)
+	detailView.totpVisible = false
+
+	var b strings.Builder
+	cred := &vault.CredentialMetadata{
+		Service:    "GitHub",
+		HasTOTP:    true,
+		TOTPIssuer: "GitHub",
+	}
+
+	detailView.formatTOTPField(&b, cred)
+	result := b.String()
+
+	// Should show issuer and hint to reveal
+	if !strings.Contains(result, "GitHub") {
+		t.Error("Expected issuer 'GitHub' in output")
+	}
+	if !strings.Contains(result, "'T' to reveal") {
+		t.Error("Expected reveal hint in output")
+	}
+	if !strings.Contains(result, "'t' to copy") {
+		t.Error("Expected copy hint in output")
+	}
+	// Should NOT contain actual code
+	if strings.Contains(result, "123456") {
+		t.Error("Expected TOTP code to be hidden")
+	}
+}
+
+// TestFormatTOTPField_Visible verifies TOTP field formatting when visible
+func TestFormatTOTPField_Visible(t *testing.T) {
+	testVault := &testVaultService{}
+	appState := models.NewAppState(testVault)
+
+	detailView := NewDetailView(appState)
+	detailView.totpVisible = true
+
+	var b strings.Builder
+	cred := &vault.CredentialMetadata{
+		Service:    "GitHub",
+		HasTOTP:    true,
+		TOTPIssuer: "GitHub",
+	}
+
+	detailView.formatTOTPField(&b, cred)
+	result := b.String()
+
+	// Should show issuer
+	if !strings.Contains(result, "GitHub") {
+		t.Error("Expected issuer 'GitHub' in output")
+	}
+	// Should show TOTP code from mock (123456)
+	if !strings.Contains(result, "123456") {
+		t.Error("Expected TOTP code '123456' in output")
+	}
+	// Should show remaining seconds
+	if !strings.Contains(result, "25") && !strings.Contains(result, "remaining") {
+		t.Error("Expected remaining time in output")
+	}
+	// Should show hide hint
+	if !strings.Contains(result, "'T' to hide") {
+		t.Error("Expected hide hint in output")
+	}
+}
+
+// TestFormatTOTPField_NoIssuer verifies TOTP formatting when no issuer is set
+func TestFormatTOTPField_NoIssuer(t *testing.T) {
+	testVault := &testVaultService{}
+	appState := models.NewAppState(testVault)
+
+	detailView := NewDetailView(appState)
+	detailView.totpVisible = false
+
+	var b strings.Builder
+	cred := &vault.CredentialMetadata{
+		Service:    "AWS",
+		HasTOTP:    true,
+		TOTPIssuer: "", // No issuer
+	}
+
+	detailView.formatTOTPField(&b, cred)
+	result := b.String()
+
+	// Should show "configured" as fallback
+	if !strings.Contains(result, "configured") {
+		t.Error("Expected 'configured' fallback when no issuer")
 	}
 }
 

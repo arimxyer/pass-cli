@@ -36,6 +36,7 @@ type DetailView struct {
 
 	appState                *models.AppState
 	passwordVisible         bool   // Toggle for password visibility (false = masked)
+	totpVisible             bool   // Toggle for TOTP code visibility (false = hidden)
 	cachedCredentialService string // Cache last refreshed credential service to avoid unnecessary vault calls
 }
 
@@ -117,13 +118,7 @@ func (dv *DetailView) formatCredential(cred *vault.CredentialMetadata) string {
 
 	// TOTP field (if configured)
 	if cred.HasTOTP {
-		issuerDisplay := cred.TOTPIssuer
-		if issuerDisplay == "" {
-			issuerDisplay = "configured"
-		}
-		b.WriteString(fmt.Sprintf("%sTOTP:%s       %s  %s(Press 't' to copy code)%s\n",
-			colorWithBg("lightSlateGray"), textColor(), issuerDisplay,
-			colorWithBg("lightSlateGray"), textColor()))
+		dv.formatTOTPField(&b, cred)
 	}
 
 	// Notes (if present)
@@ -179,6 +174,33 @@ func (dv *DetailView) formatCredential(cred *vault.CredentialMetadata) string {
 	return b.String()
 }
 
+// formatTOTPField adds the TOTP field with optional code display and toggle hint.
+// When visible, fetches and displays current TOTP code with remaining seconds.
+func (dv *DetailView) formatTOTPField(b *strings.Builder, cred *vault.CredentialMetadata) {
+	issuerDisplay := cred.TOTPIssuer
+	if issuerDisplay == "" {
+		issuerDisplay = "configured"
+	}
+
+	if dv.totpVisible {
+		code, remaining, err := dv.appState.GetTOTPCode(cred.Service)
+		if err == nil {
+			b.WriteString(fmt.Sprintf("%sTOTP:%s       %s  %s[%s]%s  %s(%ds remaining, 'T' to hide, 't' to copy)%s\n",
+				colorWithBg("lightSlateGray"), textColor(), issuerDisplay,
+				colorWithBg("green"), code, textColor(),
+				colorWithBg("lightSlateGray"), remaining, textColor()))
+		} else {
+			b.WriteString(fmt.Sprintf("%sTOTP:%s       %s  %sError: %v%s\n",
+				colorWithBg("lightSlateGray"), textColor(), issuerDisplay,
+				colorWithBg("red"), err, textColor()))
+		}
+	} else {
+		b.WriteString(fmt.Sprintf("%sTOTP:%s       %s  %s('T' to reveal, 't' to copy)%s\n",
+			colorWithBg("lightSlateGray"), textColor(), issuerDisplay,
+			colorWithBg("lightSlateGray"), textColor()))
+	}
+}
+
 // formatPasswordField adds the password field with masking and toggle hint.
 // Fetches full credential to display password when visible.
 func (dv *DetailView) formatPasswordField(b *strings.Builder, cred *vault.CredentialMetadata) {
@@ -220,6 +242,15 @@ func (dv *DetailView) showEmptyState() {
 // Invalidates cache to force refresh with new password visibility state.
 func (dv *DetailView) TogglePasswordVisibility() {
 	dv.passwordVisible = !dv.passwordVisible
+	dv.cachedCredentialService = "" // Invalidate cache to force refresh
+	dv.Refresh()
+}
+
+// ToggleTOTPVisibility toggles the TOTP code display state and refreshes.
+// When visible, shows the current 6-digit code with remaining seconds.
+// Invalidates cache to force refresh with new TOTP visibility state.
+func (dv *DetailView) ToggleTOTPVisibility() {
+	dv.totpVisible = !dv.totpVisible
 	dv.cachedCredentialService = "" // Invalidate cache to force refresh
 	dv.Refresh()
 }

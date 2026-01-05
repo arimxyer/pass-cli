@@ -180,6 +180,9 @@ func (eh *EventHandler) handleGlobalKey(event *tcell.EventKey) *tcell.EventKey {
 		case 't':
 			eh.handleCopyTOTP()
 			return nil
+		case 'T':
+			eh.handleToggleTOTP()
+			return nil
 		}
 	}
 
@@ -328,6 +331,15 @@ func (eh *EventHandler) handleCopyTOTP() {
 	}
 }
 
+// handleToggleTOTP toggles TOTP code visibility in the detail view.
+func (eh *EventHandler) handleToggleTOTP() {
+	if eh.detailView == nil {
+		return
+	}
+
+	eh.detailView.ToggleTOTPVisibility()
+}
+
 // handleToggleDetailPanel toggles the detail panel visibility through three states.
 // Cycles: Auto (responsive) -> Hide -> Show -> Auto
 // Displays status bar message showing the new state.
@@ -430,6 +442,7 @@ func (eh *EventHandler) handleShowHelp() {
 	addShortcut("l", "Copy URL")
 	addShortcut("n", "Copy notes")
 	addShortcut("t", "Copy TOTP code")
+	addShortcut("T", "Toggle TOTP visibility")
 	row++ // Blank line (just skip row, don't add cells)
 
 	// View section

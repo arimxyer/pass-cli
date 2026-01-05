@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-01-05
+
+### Added
+- **TUI TOTP Visibility Toggle**: View TOTP codes directly in the detail panel
+  - Press `T` (Shift+t) to toggle TOTP code visibility
+  - Displays 6-digit code with remaining seconds countdown
+  - Press `t` to copy code to clipboard (unchanged)
+  - Updated help modal with new shortcut
+
 ## [0.16.0] - 2025-12-31
 
 ### Added
