@@ -185,19 +185,19 @@ func (dv *DetailView) formatTOTPField(b *strings.Builder, cred *vault.Credential
 	if dv.totpVisible {
 		code, remaining, err := dv.appState.GetTOTPCode(cred.Service)
 		if err == nil {
-			b.WriteString(fmt.Sprintf("%sTOTP:%s       %s  %s[%s]%s  %s(%ds remaining, 'T' to hide, 't' to copy)%s\n",
+			fmt.Fprintf(b, "%sTOTP:%s       %s  %s[%s]%s  %s(%ds remaining, 'T' to hide, 't' to copy)%s\n",
 				colorWithBg("lightSlateGray"), textColor(), issuerDisplay,
 				colorWithBg("green"), code, textColor(),
-				colorWithBg("lightSlateGray"), remaining, textColor()))
+				colorWithBg("lightSlateGray"), remaining, textColor())
 		} else {
-			b.WriteString(fmt.Sprintf("%sTOTP:%s       %s  %sError: %v%s\n",
+			fmt.Fprintf(b, "%sTOTP:%s       %s  %sError: %v%s\n",
 				colorWithBg("lightSlateGray"), textColor(), issuerDisplay,
-				colorWithBg("red"), err, textColor()))
+				colorWithBg("red"), err, textColor())
 		}
 	} else {
-		b.WriteString(fmt.Sprintf("%sTOTP:%s       %s  %s('T' to reveal, 't' to copy)%s\n",
+		fmt.Fprintf(b, "%sTOTP:%s       %s  %s('T' to reveal, 't' to copy)%s\n",
 			colorWithBg("lightSlateGray"), textColor(), issuerDisplay,
-			colorWithBg("lightSlateGray"), textColor()))
+			colorWithBg("lightSlateGray"), textColor())
 	}
 }
 
