@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>A secure, cross-platform command-line password manager designed for developers</strong>
+  <strong>A secure, cross-platform, always-free, and open-source alternative to 1password, bitwarden, etc., CLI password and API key manager for folks who live in the command line.</strong>
 </p>
 
 <p align="center">
