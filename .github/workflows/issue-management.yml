@@ -1,0 +1,79 @@
+name: Issue Management
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Auto-assign owner
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Auto-assign all new issues to repo owner
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              assignees: ['arimxyer']
+            });
+
+      - name: Auto-label based on title/body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const body = (issue.body || '').toLowerCase();
+            const labels = [];
+
+            // Bug indicators
+            if (title.includes('bug') || title.includes('error') || title.includes('fail') ||
+                title.includes('crash') || title.includes('broken') || title.includes('not working') ||
+                body.includes('expected behavior') || body.includes('actual behavior')) {
+              labels.push('bug');
+            }
+
+            // Feature request indicators
+            if (title.includes('feature') || title.includes('request') || title.includes('add') ||
+                title.includes('support') || title.includes('would be nice') ||
+                body.includes('feature request') || body.includes('would like')) {
+              labels.push('enhancement');
+            }
+
+            // Question indicators
+            if (title.includes('?') || title.includes('how to') || title.includes('how do') ||
+                title.includes('what is') || title.includes('does it') || title.includes('can i') ||
+                title.includes('is it possible')) {
+              labels.push('question');
+            }
+
+            // Documentation indicators
+            if (title.includes('doc') || title.includes('readme') || title.includes('typo') ||
+                body.includes('documentation')) {
+              labels.push('documentation');
+            }
+
+            // Apply labels if any were detected
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labels
+              });
+              console.log(`Applied labels: ${labels.join(', ')}`);
+            } else {
+              // If no labels detected, add 'needs-triage' for manual review
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['help wanted']
+              });
+              console.log('No auto-labels detected, added help wanted for triage');
+            }

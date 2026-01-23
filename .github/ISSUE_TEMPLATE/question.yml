@@ -1,0 +1,26 @@
+name: Question
+description: Ask a question about pass-cli
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're happy to help!
+
+        **Note:** For general usage questions, also check:
+        - [README](https://github.com/arimxyer/pass-cli#readme)
+        - [Documentation](https://arimxyer.github.io/pass-cli/)
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any relevant context, what you've tried, or related information
