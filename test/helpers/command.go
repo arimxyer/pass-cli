@@ -94,6 +94,27 @@ func MustListCredentials(t *testing.T, binaryPath, configPath, password string) 
 	return stdout
 }
 
+// RunCmdWithEnv executes pass-cli with explicit environment variables (no config path in env).
+// Use this to test the --config flag behavior specifically.
+func RunCmdWithEnv(t *testing.T, binaryPath, stdin string, envVars []string, args ...string) (stdout, stderr string, err error) {
+	t.Helper()
+
+	cmd := exec.Command(binaryPath, args...)
+	if stdin != "" {
+		cmd.Stdin = strings.NewReader(stdin)
+	}
+
+	var stdoutBuf, stderrBuf bytes.Buffer
+	cmd.Stdout = &stdoutBuf
+	cmd.Stderr = &stderrBuf
+
+	// Set only the specified environment variables (plus PATH for binary execution)
+	cmd.Env = append([]string{"PATH=" + os.Getenv("PATH"), "HOME=" + os.Getenv("HOME")}, envVars...)
+
+	err = cmd.Run()
+	return stdoutBuf.String(), stderrBuf.String(), err
+}
+
 // MustDeleteCredential deletes a credential or fails the test.
 func MustDeleteCredential(t *testing.T, binaryPath, configPath, password, service string) {
 	t.Helper()
