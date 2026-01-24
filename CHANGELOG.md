@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.2] - 2026-01-24
+
+### Fixed
+- **Config Flag Loading**: `--config` flag now works correctly without requiring a vault at the default location (#68, fixes #65)
+  - Config loading moved from `cobra.OnInitialize` to `PersistentPreRunE` to ensure flags are parsed first
+  - Users can now specify `vault_path` in a custom config file and use `--config` flag without creating a dummy vault
+- **Lightweight Commands**: `version` and `help` commands skip config loading for faster startup
+- **macOS CI**: Fixed integration test timeout by handling keychain environment requirements
+
 ## [0.16.1] - 2026-01-05
 
 ### Added

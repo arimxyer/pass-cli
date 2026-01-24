@@ -47,12 +47,14 @@ Thumbs.db
 # Tool directories (keep local only)
 .claude/skills
 .claude/settings.local.json
+.claude/hookify.*.local.md
 .serena/
 .mcp.json
 .opencode/
 .spec-workflow/approvals/
 .github/prompts/
 .spec-workflow/
+mise.toml
 
 # Development notes (keep local only)
 n-n-o-*.md
