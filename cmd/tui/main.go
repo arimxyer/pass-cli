@@ -97,8 +97,24 @@ func Run(vaultPath string) error {
 	return nil
 }
 
-// getDefaultVaultPath returns the default vault file path
+// getDefaultVaultPath returns the vault file path from config or default location.
+// This ensures TUI uses the same vault as CLI commands.
 func getDefaultVaultPath() string {
+	// Load config to check for vault_path setting
+	cfg, _ := config.Load()
+	if cfg != nil && cfg.VaultPath != "" {
+		// Expand ~ prefix if present
+		vaultPath := cfg.VaultPath
+		if len(vaultPath) > 0 && vaultPath[0] == '~' {
+			home, err := os.UserHomeDir()
+			if err == nil {
+				vaultPath = filepath.Join(home, vaultPath[1:])
+			}
+		}
+		return vaultPath
+	}
+
+	// Default vault path
 	home, err := os.UserHomeDir()
 	if err != nil {
 		// Fallback to current directory if home not available
