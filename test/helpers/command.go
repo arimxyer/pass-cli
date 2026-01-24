@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -97,8 +98,11 @@ func MustListCredentials(t *testing.T, binaryPath, configPath, password string) 
 // RunCmdWithEnv executes pass-cli with explicit environment variables (no config path in env).
 // Use this to test the --config flag behavior specifically.
 //
-// Only PATH is inherited from the real environment. Callers must explicitly set HOME
-// and any other required variables in envVars to ensure test isolation.
+// Inherits essential environment variables from the real environment:
+// - PATH: Required for binary execution
+// - On macOS: HOME, USER, TMPDIR (required for keychain access)
+//
+// Callers can override any of these via envVars.
 func RunCmdWithEnv(t *testing.T, binaryPath, stdin string, envVars []string, args ...string) (stdout, stderr string, err error) {
 	t.Helper()
 
@@ -111,9 +115,21 @@ func RunCmdWithEnv(t *testing.T, binaryPath, stdin string, envVars []string, arg
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
 
-	// Only inherit PATH for binary execution. Callers must explicitly provide
-	// HOME and other env vars to ensure proper test isolation.
-	cmd.Env = append([]string{"PATH=" + os.Getenv("PATH")}, envVars...)
+	// Build base environment with essential variables
+	baseEnv := []string{"PATH=" + os.Getenv("PATH")}
+
+	// On macOS, keychain access requires additional environment variables.
+	// These are tied to the user session and cannot be faked.
+	if runtime.GOOS == "darwin" {
+		baseEnv = append(baseEnv,
+			"HOME="+os.Getenv("HOME"),
+			"USER="+os.Getenv("USER"),
+			"TMPDIR="+os.Getenv("TMPDIR"),
+		)
+	}
+
+	// Append caller's env vars (which can override base vars)
+	cmd.Env = append(baseEnv, envVars...)
 
 	err = cmd.Run()
 	return stdoutBuf.String(), stderrBuf.String(), err

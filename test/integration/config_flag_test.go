@@ -5,6 +5,7 @@ package integration
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -117,13 +118,16 @@ func runCmdWithConfigFlag(t *testing.T, configPath, stdin string, args ...string
 	// Prepend --config flag to args
 	fullArgs := append([]string{"--config", configPath}, args...)
 
-	// Create a fake HOME to prevent reading global config (which might have sync enabled)
-	fakeHome := t.TempDir()
+	// Build environment variables
+	// On macOS, we cannot override HOME because it breaks keychain access
+	// (macOS keychain is tied to the user session, not the HOME directory).
+	// On other platforms, use a fake HOME to isolate from user's global config.
+	envVars := []string{"PASS_CLI_TEST=1"}
+	if runtime.GOOS != "darwin" {
+		fakeHome := t.TempDir()
+		envVars = append(envVars, "HOME="+fakeHome)
+	}
 
 	// Run WITHOUT setting PASS_CLI_CONFIG env var - use only the flag
-	// Also set HOME to isolate from user's global config
-	return helpers.RunCmdWithEnv(t, binaryPath, stdin, []string{
-		"PASS_CLI_TEST=1",
-		"HOME=" + fakeHome,
-	}, fullArgs...)
+	return helpers.RunCmdWithEnv(t, binaryPath, stdin, envVars, fullArgs...)
 }
