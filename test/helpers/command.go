@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -92,6 +93,46 @@ func MustListCredentials(t *testing.T, binaryPath, configPath, password string) 
 	}
 
 	return stdout
+}
+
+// RunCmdWithEnv executes pass-cli with explicit environment variables (no config path in env).
+// Use this to test the --config flag behavior specifically.
+//
+// Inherits essential environment variables from the real environment:
+// - PATH: Required for binary execution
+// - On macOS: HOME, USER, TMPDIR (required for keychain access)
+//
+// Callers can override any of these via envVars.
+func RunCmdWithEnv(t *testing.T, binaryPath, stdin string, envVars []string, args ...string) (stdout, stderr string, err error) {
+	t.Helper()
+
+	cmd := exec.Command(binaryPath, args...)
+	if stdin != "" {
+		cmd.Stdin = strings.NewReader(stdin)
+	}
+
+	var stdoutBuf, stderrBuf bytes.Buffer
+	cmd.Stdout = &stdoutBuf
+	cmd.Stderr = &stderrBuf
+
+	// Build base environment with essential variables
+	baseEnv := []string{"PATH=" + os.Getenv("PATH")}
+
+	// On macOS, keychain access requires additional environment variables.
+	// These are tied to the user session and cannot be faked.
+	if runtime.GOOS == "darwin" {
+		baseEnv = append(baseEnv,
+			"HOME="+os.Getenv("HOME"),
+			"USER="+os.Getenv("USER"),
+			"TMPDIR="+os.Getenv("TMPDIR"),
+		)
+	}
+
+	// Append caller's env vars (which can override base vars)
+	cmd.Env = append(baseEnv, envVars...)
+
+	err = cmd.Run()
+	return stdoutBuf.String(), stderrBuf.String(), err
 }
 
 // MustDeleteCredential deletes a credential or fails the test.

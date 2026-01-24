@@ -65,7 +65,8 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	// NOTE: Config loading moved to PersistentPreRunE to ensure --config flag is parsed first
+	// See issue #65: https://github.com/arimxyer/pass-cli/issues/65
 
 	// T037: Custom flag error handler for migration guidance
 	rootCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
@@ -286,13 +287,31 @@ func runRootCommand(cmd *cobra.Command, args []string) {
 // checkFirstRun detects first-run scenarios and triggers guided initialization
 // T065: PersistentPreRunE hook for first-run detection
 func checkFirstRun(cmd *cobra.Command, args []string) error {
+	// Lightweight commands don't need config loading or first-run detection.
+	// Skip early to improve startup time and avoid errors from malformed configs.
+	switch cmd.Name() {
+	case "version", "help":
+		return nil
+	}
+
+	// Initialize config FIRST - this must happen after flags are parsed
+	// so that --config flag is available. This fixes issue #65 where
+	// custom config files were not being loaded properly.
+	initConfig()
+
 	// Skip first-run check in test mode
 	if os.Getenv("PASS_CLI_TEST") == "1" {
 		return nil
 	}
 
-	// Detect first-run scenario (no longer uses vault flag)
-	state := vault.DetectFirstRun(cmd.Name(), "")
+	// Get custom vault path from config (now properly loaded)
+	var customVaultPath string
+	if viper.IsSet("vault_path") {
+		customVaultPath = viper.GetString("vault_path")
+	}
+
+	// Detect first-run scenario with custom vault path if configured
+	state := vault.DetectFirstRun(cmd.Name(), customVaultPath)
 
 	// If guided init should be triggered
 	if state.ShouldPrompt {
