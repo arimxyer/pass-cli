@@ -3,9 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>A secure, cross-platform, always-free, and open-source alternative to 1password, bitwarden, etc., CLI password and API key manager for folks who live in the command line.</strong>
-</p>
-
+  <strong>A secure, cross-platform, always-free, and open-source alternative to 1password, bitwarden, etc., Password and API key manager for folks who live in the command line. (CLI + TUI) </strong>
 <p align="center">
   <img src="https://img.shields.io/github/v/release/arimxyer/pass-cli?label=Version" alt="Version">
   <img src="https://img.shields.io/github/last-commit/arimxyer/pass-cli?label=Last%20Updated" alt="Last Updated">
