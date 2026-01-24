@@ -1,4 +1,4 @@
-﻿### 1. Communication Standards
+### 1. Communication Standards
 
 **Be concise and direct**:
 - Avoid preamble like "Great!", "Sure!", "Let me help"
@@ -10,162 +10,46 @@
 - Show before/after for changes
 - Confirm completion, don't elaborate unless asked
 
-### 2. Committing Work During Specs
+### 2. Committing Work
 
-**Commit frequently and often** when working through spec tasks:
+**Commit frequently** - after completing tasks, milestones, or before switching context.
 
-**When to commit**:
-- After completing each task
-- After completing each phase of a spec
-- After any significant milestone or working state
-- Before switching to a different task
-- When you update relevant spec documentation
+**Format**: `<type>: <description>` (feat:, fix:, docs:, refactor:, chore:)
+**Footer**: `Co-Authored-By: Claude <noreply@anthropic.com>`
 
-**Commit message format**:
-```
-<type>: <description>
-
-<body explaining changes>
-
-<phase reference if applicable>
-
-Generated with Claude Code
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
-**Examples**:
-```
-feat: Integrate tview view implementations into Model struct
-
-- Update Model view field types to tview variants
-- Update NewModel() to use tview view constructors
-- Fix view method calls for tview compatibility
-
-Phase 1 of tview-migration-remediation spec.
-
-Generated with Claude Code
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
-**Why commit frequently**:
-- Enables easy rollback to working states
-- Provides clear audit trail of implementation
-- Allows atomic changes that can be reviewed independently
-- Demonstrates systematic progress through spec tasks
-
-### 3. Accuracy and Transparency (CRITICAL)
-
-**Accurate assessments and transparency are the #1 priority in this repository.**
+### 3. Accuracy and Transparency
 
 **NEVER**:
 - Claim a task is complete when it's only partially done
 - Mark a task as completed if tests are failing
-- Skip steps in a task to save time
-- Take shortcuts that deviate from the spec
-- Implement differently than the spec describes
-- Ignore acceptance criteria in spec
 - Hide errors or issues you encounter
 
 **ALWAYS**:
 - Report the actual state of work, not aspirational state
-- If you discover incomplete work, STOP and document the gap
-- If you cannot complete a task, explain why clearly
-- If a spec has errors, surface them immediately
-- Follow the spec exactly as written - no interpretation
-- Execute all steps in a task, even if they seem redundant
 - Test thoroughly before marking tasks complete
-
-**If a spec exists, you MUST follow it with NO QUESTIONS ASKED, ONLY EXECUTION:**
-
-The spec represents deliberate planning and design. Thoroughness and time was taken to create the spec related documentation, so thoroughness and time should be taken when implementing the spec.
-
-**No shortcuts. No deviations. No assumptions.**
-
-If you think the spec is wrong, unclear, or could be improved:
-1. **STOP implementation**
-2. Document the specific issue
-3. Ask the user for clarification or correction
-4. Wait for spec update and approval
-5. THEN continue implementation
-
-**Do not reinterpret, optimize, or "improve" the spec on your own.** Execute it exactly as written.
+- If you cannot complete a task, explain why clearly
 
 ### 4. Handling Errors and Blockers
 
 **When compilation fails**:
 1. Read the error message carefully
 2. Identify which layer is affected
-3. Check if it's a type mismatch (common during migration)
-4. Fix at the source, not with workarounds
+3. Fix at the source, not with workarounds
 
 **When tests fail**:
 1. Run individually: `go test -v ./path/to/package -run TestName`
 2. Check if test needs updating for current framework/patterns
 3. Fix implementation OR update test (whichever is wrong)
 
-**When stuck on a task**:
-1. Re-read the task field
-2. Check the spec-docs for existing code to reference
-3. Read the relevant spec-docs to understand acceptance criteria
-4. Search codebase for similar patterns (use Grep, Glob, Search, or MCP-server tools if relevant)
-
-**When discovering incomplete work**:
-1. **STOP immediately** - Don't continue building on broken foundation
-2. Document the gap (what was claimed vs. what exists)
-3. Create remediation plan
-4. Get user approval before proceeding
-
----
-
-## Summary: Your Responsibilities
-
-**ALWAYS**:
-- Read docs before creating specs
-- Follow specs exactly as written - NO shortcuts, NO deviations
-- Report accurate state of work - transparency is #1 priority
-- Commit frequently (after each task, phase, milestone)
-- Update related documents when changing dependencies/frameworks
-- Update related documents when changing file organization
-- Respect architectural layers (never mix)
-- Write tests for all new code
-- Follow security standards strictly
-- Be concise and direct in communication
-- Update task checkboxes as you progress
-
-**NEVER**:
-- Take shortcuts or skip steps in spec tasks
-- Mark tasks complete if tests are failing, or shortcuts were taken
-- Reinterpret or "improve" specs on your own
-- Mix architectural layers
-- Store sensitive data insecurely
-- Skip testing or security checks
-- Work on multiple specs simultaneously
-- Claim work is done when it's only partial
-
-**Critical Rule**: If a spec exists, follow it exactly. No questions asked, only execution.
-
-**When in doubt**: Read the spec docs, check existing patterns, and ask the user a question if the information isn't 100% clear according to the existing documentation.
-
 ---
 
 # pass-cli Development Guidelines
-
-Auto-generated from all feature plans. Last updated: 2025-10-30
 
 ## Active Technologies
 - Cobra (CLI framework)
 - Viper (configuration management)
 - go-keyring (OS keychain integration)
-- spf13/pflag (flag parsing)
-- File-based storage (encrypted vault files, YAML config files, JSON metadata, audit logs)
-- Go 1.21+ + Go standard library (os, io, crypto/aes, crypto/rand, filepath), existing internal packages (crypto, storage, vault) (003-implement-atomic-save)
-- File-based encrypted vault storage (`vault.enc`), backup files (`vault.enc.backup`), temporary files (`vault.enc.tmp.TIMESTAMP.RANDOM`) (003-implement-atomic-save)
-- File-based encrypted vault storage (`vault.enc`), automatic backups (`.backup` suffix), manual backups (`.[timestamp].manual.backup` suffix) (001-add-manual-vault)
-- Markdown (GitHub Flavored), Hugo v0.134.3 Extended + Hugo Book theme (alex-shpak/hugo-book), Hugo static site generator (002-comprehensive-documentation-restructuring)
-- File-based (markdown files in docs/ directory, Hugo site in docsite/) (002-comprehensive-documentation-restructuring)
-- File-based encrypted vault storage (existing `vault.enc`), extends existing metadata JSON structure (003-bip39-mnemonic-based)
+- Go 1.21+
 
 ## Project Structure
 
@@ -173,34 +57,8 @@ Auto-generated from all feature plans. Last updated: 2025-10-30
 pass-cli/
 ├── cmd/                      # CLI commands (Cobra-based)
 │   ├── tui/                  # TUI components (rivo/tview)
-│   │   ├── components/       # UI components (sidebar, detail, header)
-│   │   ├── layout/           # Layout management
-│   │   ├── models/           # Data models and state
-│   │   ├── events/           # Event handling
-│   │   ├── styles/           # Visual styling
-│   │   ├── app.go            # Application setup
-│   │   └── main.go           # TUI entry point
 │   ├── root.go               # Root command and global flags
-│   ├── init.go               # Vault initialization
-│   ├── add.go                # Add credential
-│   ├── get.go                # Retrieve credential
-│   ├── update.go             # Update credential
-│   ├── delete.go             # Delete credential
-│   ├── list.go               # List credentials
-│   ├── generate.go           # Generate password
-│   ├── tui.go                # TUI command
-│   ├── usage.go              # Usage tracking
-│   ├── keychain.go           # Keychain commands (parent)
-│   ├── keychain_enable.go    # Enable keychain integration
-│   ├── keychain_status.go    # Keychain status
-│   ├── vault.go              # Vault commands (parent)
-│   ├── vault_remove.go       # Remove vault
-│   ├── change_password.go    # Change vault master password
-│   ├── verify_audit.go       # Verify audit log integrity
-│   ├── doctor.go             # System diagnostics
-│   ├── config.go             # Configuration management
-│   ├── version.go            # Version information
-│   └── helpers.go            # Shared command helpers
+│   └── ...                   # Individual command files
 ├── internal/                 # Internal library packages
 │   ├── vault/                # Vault operations and credential management
 │   ├── crypto/               # Encryption/decryption (AES-GCM, password clearing)
@@ -211,114 +69,50 @@ pass-cli/
 │   └── health/               # Health checks for doctor command
 ├── test/                     # Integration and unit tests
 │   ├── unit/                 # Unit tests
-│   ├── integration_test.go   # CLI integration tests
-│   ├── keychain_integration_test.go
-│   ├── keychain_enable_test.go
-│   ├── keychain_status_test.go
-│   ├── list_test.go          # List command tests
-│   ├── usage_test.go         # Usage tracking tests
-│   ├── doctor_test.go        # Doctor command tests
-│   ├── firstrun_test.go      # First-run detection tests
-│   ├── vault_metadata_test.go # Vault metadata tests
-│   ├── vault_remove_test.go  # Vault removal tests
-│   └── tui_integration_test.go # TUI integration tests
-├── specs/                    # Feature specifications (Speckit framework)
+│   ├── integration/          # Integration tests
+│   └── helpers/              # Test utilities
 ├── docs/                     # Documentation
-├── .specify/                 # Speckit framework configuration
 ├── main.go                   # Application entry point
 └── go.mod                    # Go module dependencies
 ```
 
-**Architecture**: Library-first design (Constitution Principle II). CLI commands (`cmd/`) are thin wrappers that delegate to `internal/` packages. Single-vault model with multi-location usage tracking per credential.
+**Architecture**: Library-first design. CLI commands (`cmd/`) are thin wrappers that delegate to `internal/` packages.
 
 ## Commands
 
-### Building
 ```bash
-go build -o pass-cli .              # Build binary
-go install .                        # Install to GOPATH
-```
-
-### Testing
-```bash
-go test ./...                       # Run all tests
-go test -race ./...                 # Run with race detection
-go test -v -tags=integration -timeout 5m ./test  # Integration tests
-go test -coverprofile=coverage.out ./...         # Coverage report
-go tool cover -html=coverage.out -o coverage.html
-```
-
-### Code Quality
-```bash
-go fmt ./...                        # Format code
-go vet ./...                        # Static analysis
-golangci-lint run                   # Linting (comprehensive)
-gosec ./...                         # Security scanning
-govulncheck ./...                   # Vulnerability checking
-```
-
-### Pre-Commit Checks
-```bash
-go fmt ./...
-go vet ./...
-golangci-lint run
-go test -race ./...
-gosec ./...
+# Use mise tasks for all CLI operations
+mise tasks                    # List available tasks
+mise run test                 # Run unit tests
+mise run test:integration     # Run integration tests
+mise run lint                 # Run linter
+mise run build                # Build binary
+mise run git <args>           # Git operations
+mise run gh <args>            # GitHub CLI operations
 ```
 
 ## Code Style
 
-**General Principles**:
-- Follow Go best practices and idioms (Effective Go, Go Code Review Comments)
-- Library-first architecture: business logic in `internal/`, CLI in `cmd/`
-- Security-first: No credentials logged, memory cleared with `crypto.ClearBytes()`, audit logging for all operations
-- Test-driven development (TDD): Write tests before implementation
-
-**Naming Conventions**:
-- Packages: lowercase, no underscores (e.g., `keychain`, `vault`, `crypto`)
-- Exported types: PascalCase (e.g., `VaultService`, `UsageRecord`)
-- Unexported functions: camelCase (e.g., `readPassword`, `logAudit`)
-- Error variables: Prefix with `Err` (e.g., `ErrVaultLocked`, `ErrCredentialNotFound`)
-
 **Password Handling**:
 - Use `[]byte` type (never `string`)
 - Apply `defer crypto.ClearBytes(password)` immediately after allocation
-- Example pattern:
-  ```go
-  password, err := readPassword()
-  if err != nil { return err }
-  defer crypto.ClearBytes(password)  // CRITICAL: clear on all paths
-  ```
 
 **Error Handling**:
 - Wrap errors with context: `fmt.Errorf("failed to unlock vault: %w", err)`
-- Platform-specific error messages for keychain operations (Windows/macOS/Linux)
 - Graceful degradation (e.g., keychain unavailable should not crash)
 
 **Testing**:
 - Unit tests: `internal/` packages
-- Integration tests: `test/` directory with real vault files and keychain operations
-- Security tests: Verify audit logging, password clearing, no credential leakage
-- Test tags: `-tags=integration` for integration tests
+- Integration tests: `test/integration/` with `-tags=integration`
+- Use `runtime.GOOS` for platform-specific test behavior
 
-**Commit Messages**:
-- Format: `<type>: <description>` (e.g., `feat:`, `fix:`, `docs:`, `refactor:`)
-- Include body for non-trivial changes
-- Reference spec phases when implementing specs
-- Footer: `Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>`
+## Platform-Specific Gotchas
 
-## Recent Changes
-- 003-bip39-mnemonic-based: Added Go 1.21+
-- 002-comprehensive-documentation-restructuring: Added Markdown (GitHub Flavored), Hugo v0.134.3 Extended + Hugo Book theme (alex-shpak/hugo-book), Hugo static site generator
-- 001-add-manual-vault: Added Go 1.21+
-  - Added `internal/storage/atomic_save.go` with temp file generation, verification, and cleanup functions
-  - Refactored `SaveVault()` to use atomic rename workflow (temp → verify → atomic rename × 2)
-  - Added verification step that decrypts temp file in-memory before commit
-  - Implemented orphaned temp file cleanup from crashed saves
-  - N-1 backup strategy with automatic cleanup after successful unlock
-  - Added custom error types: ErrVerificationFailed, ErrDiskSpaceExhausted, ErrPermissionDenied, ErrFilesystemNotAtomic
-  - Temp files use crypto/rand for unique names: `vault.enc.tmp.YYYYMMDD-HHMMSS.XXXXXX`
-  - All tests passing, 60.1% coverage on storage package
+**macOS keychain**: Tests that override `HOME` env var break keychain access (tied to user session). Use `runtime.GOOS != "darwin"` checks before setting fake HOME in integration tests.
+
+## Cobra Patterns
+
+**Config loading order**: `cobra.OnInitialize` runs BEFORE flags are parsed. For flag-dependent config (like `--config`), use `PersistentPreRunE` instead.
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
