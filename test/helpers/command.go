@@ -96,6 +96,9 @@ func MustListCredentials(t *testing.T, binaryPath, configPath, password string) 
 
 // RunCmdWithEnv executes pass-cli with explicit environment variables (no config path in env).
 // Use this to test the --config flag behavior specifically.
+//
+// Only PATH is inherited from the real environment. Callers must explicitly set HOME
+// and any other required variables in envVars to ensure test isolation.
 func RunCmdWithEnv(t *testing.T, binaryPath, stdin string, envVars []string, args ...string) (stdout, stderr string, err error) {
 	t.Helper()
 
@@ -108,8 +111,9 @@ func RunCmdWithEnv(t *testing.T, binaryPath, stdin string, envVars []string, arg
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
 
-	// Set only the specified environment variables (plus PATH for binary execution)
-	cmd.Env = append([]string{"PATH=" + os.Getenv("PATH"), "HOME=" + os.Getenv("HOME")}, envVars...)
+	// Only inherit PATH for binary execution. Callers must explicitly provide
+	// HOME and other env vars to ensure proper test isolation.
+	cmd.Env = append([]string{"PATH=" + os.Getenv("PATH")}, envVars...)
 
 	err = cmd.Run()
 	return stdoutBuf.String(), stderrBuf.String(), err

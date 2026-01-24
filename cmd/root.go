@@ -287,6 +287,13 @@ func runRootCommand(cmd *cobra.Command, args []string) {
 // checkFirstRun detects first-run scenarios and triggers guided initialization
 // T065: PersistentPreRunE hook for first-run detection
 func checkFirstRun(cmd *cobra.Command, args []string) error {
+	// Lightweight commands don't need config loading or first-run detection.
+	// Skip early to improve startup time and avoid errors from malformed configs.
+	switch cmd.Name() {
+	case "version", "help":
+		return nil
+	}
+
 	// Initialize config FIRST - this must happen after flags are parsed
 	// so that --config flag is available. This fixes issue #65 where
 	// custom config files were not being loaded properly.
