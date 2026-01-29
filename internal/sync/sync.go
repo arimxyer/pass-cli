@@ -267,6 +267,22 @@ func (s *Service) SmartPush(vaultPath string) error {
 	state.LastPushHash = localHash
 	state.LastPushTime = time.Now()
 
+	// Query actual remote metadata after push so next SmartPull sees current state.
+	// Using time.Now() would mismatch the provider's recorded ModTime.
+	remoteFiles, err := s.CheckRemoteMetadata()
+	if err == nil {
+		vaultFileName := filepath.Base(vaultPath)
+		for _, f := range remoteFiles {
+			if f.Name == vaultFileName {
+				state.RemoteModTime = f.ModTime
+				state.RemoteSize = f.Size
+				break
+			}
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "Warning: failed to refresh remote metadata after push: %v\n", err)
+	}
+
 	if err := SaveState(vaultDir, state); err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: failed to save sync state: %v\n", err)
 	}
