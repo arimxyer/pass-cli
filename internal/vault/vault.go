@@ -118,7 +118,8 @@ type VaultService struct {
 	rateLimiter *security.ValidationRateLimiter
 
 	// Smart sync service (nil if sync disabled)
-	syncService *intsync.Service
+	syncService          *intsync.Service
+	syncConflictDetected bool // prevents auto-push after conflict
 }
 
 // New creates a new VaultService
@@ -215,6 +216,7 @@ func (v *VaultService) SyncPull() error {
 	}
 	err := v.syncService.SmartPull(v.vaultPath)
 	if errors.Is(err, intsync.ErrSyncConflict) {
+		v.syncConflictDetected = true
 		fmt.Fprintf(os.Stderr, "Warning: %v\nUse `pass-cli sync resolve` to choose which version to keep.\n", err)
 		return nil // Don't block operation on conflict
 	}
@@ -984,7 +986,9 @@ func (v *VaultService) save() error {
 
 	// Smart push after successful save (errors are warnings only)
 	if v.syncService != nil && v.syncService.IsEnabled() {
-		if err := v.syncService.SmartPush(v.vaultPath); err != nil {
+		if v.syncConflictDetected {
+			fmt.Fprintf(os.Stderr, "Warning: skipping auto-push due to unresolved sync conflict. Use `pass-cli sync resolve` to resolve.\n")
+		} else if err := v.syncService.SmartPush(v.vaultPath); err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: sync push failed: %v\n", err)
 		}
 	}
