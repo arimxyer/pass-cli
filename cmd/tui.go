@@ -63,6 +63,11 @@ func runTUI(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	// Smart sync pull before unlock
+	if syncErr := vaultService.SyncPull(); syncErr != nil {
+		fmt.Fprintf(os.Stderr, "Warning: sync pull failed: %v\n", syncErr)
+	}
+
 	// Try keychain unlock first
 	err = vaultService.UnlockWithKeychain()
 	if err != nil {

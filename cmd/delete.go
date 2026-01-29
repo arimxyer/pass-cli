@@ -61,8 +61,8 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
 	}
 
-	// Sync pull before unlock to get latest version
-	maybeSyncPull(vaultPath)
+	// Smart sync pull before unlock to get latest version
+	syncPullBeforeUnlock(vaultService)
 
 	// Unlock vault
 	if err := unlockVault(vaultService); err != nil {
@@ -141,11 +141,6 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 	if skipped > 0 {
 		fmt.Printf("Skipped %d credential(s)\n", skipped)
-	}
-
-	// Sync push after successful writes (only if any credentials were deleted)
-	if deleted > 0 {
-		maybeSyncPush(vaultPath)
 	}
 
 	return nil

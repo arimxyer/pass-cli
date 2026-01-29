@@ -16,6 +16,7 @@ import (
 	"pass-cli/internal/recovery"
 	"pass-cli/internal/security"
 	"pass-cli/internal/storage"
+	intsync "pass-cli/internal/sync"
 
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/argon2"
@@ -115,6 +116,9 @@ type VaultService struct {
 
 	// T051a: Rate limiting for password validation (FR-024)
 	rateLimiter *security.ValidationRateLimiter
+
+	// Smart sync service (nil if sync disabled)
+	syncService *intsync.Service
 }
 
 // New creates a new VaultService
@@ -146,6 +150,12 @@ func New(vaultPath string) (*VaultService, error) {
 		unlocked:        false,
 		auditEnabled:    false,                               // T066: Default disabled per FR-025
 		rateLimiter:     security.NewValidationRateLimiter(), // T051a: Initialize rate limiter
+	}
+
+	// Initialize sync service from config (if sync enabled)
+	cfg, _ := config.Load()
+	if cfg != nil && cfg.Sync.Enabled {
+		v.syncService = intsync.NewService(cfg.Sync)
 	}
 
 	// T010: Load metadata file (if exists) to enable audit logging before vault unlock
@@ -195,6 +205,20 @@ func New(vaultPath string) (*VaultService, error) {
 	}
 
 	return v, nil
+}
+
+// SyncPull performs a smart sync pull if sync is enabled.
+// Should be called before unlocking the vault.
+func (v *VaultService) SyncPull() error {
+	if v.syncService == nil || !v.syncService.IsEnabled() {
+		return nil
+	}
+	err := v.syncService.SmartPull(v.vaultPath)
+	if errors.Is(err, intsync.ErrSyncConflict) {
+		fmt.Fprintf(os.Stderr, "Warning: %v\nUse `pass-cli sync resolve` to choose which version to keep.\n", err)
+		return nil // Don't block operation on conflict
+	}
+	return err
 }
 
 // GetStorageService returns the underlying storage service.
@@ -956,6 +980,13 @@ func (v *VaultService) save() error {
 	// T022: Pass audit callback for atomic save logging
 	if err := v.storageService.SaveVault(data, masterPasswordStr, v.createAuditCallback()); err != nil {
 		return fmt.Errorf("failed to save vault: %w", err)
+	}
+
+	// Smart push after successful save (errors are warnings only)
+	if v.syncService != nil && v.syncService.IsEnabled() {
+		if err := v.syncService.SmartPush(v.vaultPath); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: sync push failed: %v\n", err)
+		}
 	}
 
 	return nil
