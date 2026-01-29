@@ -96,7 +96,7 @@ func (s *Service) Pull(vaultDir string) error {
 		return fmt.Errorf("failed to create vault directory: %w", err)
 	}
 
-	if err := s.executor.RunNoOutput("rclone", "sync", s.config.Remote, vaultDir); err != nil {
+	if err := s.executor.RunNoOutput("rclone", "sync", s.config.Remote, vaultDir, "--exclude", syncStateFile); err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: sync pull failed: %v\n", err)
 		return nil
 	}
@@ -120,7 +120,7 @@ func (s *Service) Push(vaultDir string) error {
 		return fmt.Errorf("vault directory does not exist: %s", vaultDir)
 	}
 
-	if err := s.executor.RunNoOutput("rclone", "sync", vaultDir, s.config.Remote); err != nil {
+	if err := s.executor.RunNoOutput("rclone", "sync", vaultDir, s.config.Remote, "--exclude", syncStateFile); err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: sync push failed: %v\n", err)
 		return nil
 	}
