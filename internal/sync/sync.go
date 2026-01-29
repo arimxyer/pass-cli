@@ -49,8 +49,9 @@ type RemoteFileInfo struct {
 
 // Service provides vault synchronization using rclone.
 type Service struct {
-	config   config.SyncConfig
-	executor CommandExecutor
+	config          config.SyncConfig
+	executor        CommandExecutor
+	skipBinaryCheck bool // bypasses rclone PATH check when using mock executor in tests
 }
 
 // NewService creates a new sync service with the given configuration.
@@ -64,8 +65,9 @@ func NewService(cfg config.SyncConfig) *Service {
 // NewServiceWithExecutor creates a new sync service with a custom command executor (for testing).
 func NewServiceWithExecutor(cfg config.SyncConfig, executor CommandExecutor) *Service {
 	return &Service{
-		config:   cfg,
-		executor: executor,
+		config:          cfg,
+		executor:        executor,
+		skipBinaryCheck: true,
 	}
 }
 
@@ -76,6 +78,9 @@ func (s *Service) IsEnabled() bool {
 
 // IsRcloneInstalled checks if rclone is available in PATH.
 func (s *Service) IsRcloneInstalled() bool {
+	if s.skipBinaryCheck {
+		return true
+	}
 	_, err := exec.LookPath("rclone")
 	return err == nil
 }
