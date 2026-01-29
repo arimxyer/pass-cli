@@ -150,23 +150,50 @@ func TestSmartPush_PushesWhenChanged(t *testing.T) {
 	// Save state with different hash
 	_ = SaveState(tmpDir, &SyncState{LastPushHash: "old-hash"})
 
-	mock := &mockExecutor{}
+	// Mock lsjson response for post-push remote metadata query
+	remoteTime := time.Date(2026, 1, 29, 20, 0, 0, 0, time.UTC)
+	lsjsonOutput, _ := json.Marshal([]RemoteFileInfo{
+		{Name: "vault.enc", Size: 10, ModTime: remoteTime},
+	})
+	mock := &mockExecutor{runOutput: lsjsonOutput}
 	service := NewServiceWithExecutor(enabledConfig(), mock)
 
 	if err := service.SmartPush(vaultPath); err != nil {
 		t.Fatalf("SmartPush returned error: %v", err)
 	}
 
-	// Should have called rclone sync
+	// Should have called rclone sync (RunNoOutput) and lsjson (Run)
 	if len(mock.runNoOutCalls) != 1 {
-		t.Fatalf("expected 1 rclone call, got %d", len(mock.runNoOutCalls))
+		t.Fatalf("expected 1 RunNoOutput call (sync), got %d", len(mock.runNoOutCalls))
+	}
+	if len(mock.runCalls) != 1 {
+		t.Fatalf("expected 1 Run call (lsjson), got %d", len(mock.runCalls))
 	}
 
-	// Verify state was updated
+	// Verify --exclude .sync-state in sync args
+	syncArgs := mock.runNoOutCalls[0]
+	foundExclude := false
+	for i, arg := range syncArgs {
+		if arg == "--exclude" && i+1 < len(syncArgs) && syncArgs[i+1] == ".sync-state" {
+			foundExclude = true
+			break
+		}
+	}
+	if !foundExclude {
+		t.Errorf("expected --exclude .sync-state in sync args, got %v", syncArgs)
+	}
+
+	// Verify state was updated with hash and remote metadata
 	state, _ := LoadState(tmpDir)
 	expectedHash, _ := HashFile(vaultPath)
 	if state.LastPushHash != expectedHash {
 		t.Errorf("state hash = %q, want %q", state.LastPushHash, expectedHash)
+	}
+	if !state.RemoteModTime.Equal(remoteTime) {
+		t.Errorf("state RemoteModTime = %v, want %v", state.RemoteModTime, remoteTime)
+	}
+	if state.RemoteSize != 10 {
+		t.Errorf("state RemoteSize = %d, want 10", state.RemoteSize)
 	}
 }
 
