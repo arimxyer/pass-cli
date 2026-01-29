@@ -280,3 +280,70 @@ func (m *conflictMockExecutor) Run(name string, args ...string) ([]byte, error) 
 func (m *conflictMockExecutor) RunNoOutput(name string, args ...string) error {
 	return errors.New("should not be called during conflict")
 }
+
+// --- Benchmarks ---
+// These demonstrate that save() is purely local I/O (no network delay),
+// while SyncPush() incurs the sync cost exactly once.
+
+// slowMockExecutor simulates network latency for rclone operations.
+type slowMockExecutor struct {
+	delay time.Duration
+}
+
+func (m *slowMockExecutor) Run(name string, args ...string) ([]byte, error) {
+	time.Sleep(m.delay)
+	return []byte("[]"), nil
+}
+
+func (m *slowMockExecutor) RunNoOutput(name string, args ...string) error {
+	time.Sleep(m.delay)
+	return nil
+}
+
+func setupBenchVault(b *testing.B, delay time.Duration) *VaultService {
+	b.Helper()
+	tmpDir := b.TempDir()
+	vs, err := New(tmpDir + "/vault.enc")
+	if err != nil {
+		b.Fatalf("failed to create VaultService: %v", err)
+	}
+
+	mock := &slowMockExecutor{delay: delay}
+	cfg := config.SyncConfig{Enabled: true, Remote: "mock-remote:bucket"}
+	vs.syncService = intsync.NewServiceWithExecutor(cfg, mock)
+
+	masterPass := []byte("BenchP@ssw0rd123!")
+	if err := vs.Initialize(masterPass, false, "", ""); err != nil {
+		b.Fatalf("Initialize failed: %v", err)
+	}
+	if err := vs.Unlock([]byte("BenchP@ssw0rd123!")); err != nil {
+		b.Fatalf("Unlock failed: %v", err)
+	}
+
+	return vs
+}
+
+// BenchmarkSave_NoNetworkCost benchmarks save() which should be purely local.
+// With 200ms simulated network delay, save() should still be fast because
+// it no longer calls SmartPush.
+func BenchmarkSave_NoNetworkCost(b *testing.B) {
+	vs := setupBenchVault(b, 200*time.Millisecond)
+	defer vs.Lock()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = vs.AddCredential("bench-svc", "user", []byte("s3cretP@ss!"), "", "", "")
+	}
+}
+
+// BenchmarkSyncPush_IncursNetworkCost benchmarks SyncPush() which does
+// call rclone (with simulated 200ms delay per call).
+func BenchmarkSyncPush_IncursNetworkCost(b *testing.B) {
+	vs := setupBenchVault(b, 200*time.Millisecond)
+	defer vs.Lock()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		vs.SyncPush()
+	}
+}
