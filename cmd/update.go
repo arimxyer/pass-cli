@@ -344,6 +344,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 		fmt.Printf("🔐 TOTP configured\n")
 	}
 
+	syncPushAfterCommand(vaultService)
 	return nil
 }
 

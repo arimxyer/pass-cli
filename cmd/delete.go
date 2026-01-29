@@ -143,5 +143,6 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		fmt.Printf("Skipped %d credential(s)\n", skipped)
 	}
 
+	syncPushAfterCommand(vaultService)
 	return nil
 }

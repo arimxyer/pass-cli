@@ -82,7 +82,7 @@ func (m *vaultSyncMockExecutor) RunNoOutput(name string, args ...string) error {
 	return nil
 }
 
-func TestVaultSave_TriggersSmartPush(t *testing.T) {
+func TestVaultSave_DoesNotTriggerPush(t *testing.T) {
 	skipIfNoRclone(t)
 
 	recorder := &syncTestRecorder{}
@@ -102,15 +102,47 @@ func TestVaultSave_TriggersSmartPush(t *testing.T) {
 	}
 	defer vs.Lock()
 
-	// Add a credential (which triggers save → SmartPush)
+	// Reset recorder after unlock (Initialize calls save)
+	recorder.syncCalled = false
+
+	// Add a credential (triggers save but should NOT push)
 	err = vs.AddCredential("test-service", "user", []byte("s3cretP@ss!"), "", "", "")
 	if err != nil {
 		t.Fatalf("AddCredential failed: %v", err)
 	}
 
-	// SmartPush calls rclone sync via RunNoOutput
+	// save() should no longer call SmartPush — push is command-layer only
+	if recorder.syncCalled {
+		t.Error("expected save() to NOT call rclone sync, but it did")
+	}
+}
+
+func TestVaultSyncPush_CallsSmartPush(t *testing.T) {
+	skipIfNoRclone(t)
+
+	recorder := &syncTestRecorder{}
+	vs := setupVaultWithMockSync(t, recorder)
+
+	// Initialize and unlock
+	masterPass := []byte("TestP@ssw0rd123!")
+	err := vs.Initialize(masterPass, false, "", "")
+	if err != nil {
+		t.Fatalf("Initialize failed: %v", err)
+	}
+
+	err = vs.Unlock([]byte("TestP@ssw0rd123!"))
+	if err != nil {
+		t.Fatalf("Unlock failed: %v", err)
+	}
+	defer vs.Lock()
+
+	// Call SyncPush explicitly (as command layer would)
+	vs.SyncPush()
+
+	// SmartPush should hash the file and push if changed
+	// Since Initialize created the vault, the hash differs from empty state → push happens
 	if !recorder.syncCalled {
-		t.Error("expected rclone sync to be called after save, but it was not")
+		t.Error("expected SyncPush to call rclone sync, but it did not")
 	}
 }
 
@@ -139,7 +171,7 @@ func TestVaultSyncPull_CalledBeforeUnlock(t *testing.T) {
 	}
 }
 
-func TestVaultSave_SkipsPushOnConflict(t *testing.T) {
+func TestVaultSyncPush_SkipsOnConflict(t *testing.T) {
 	skipIfNoRclone(t)
 
 	recorder := &syncTestRecorder{}
@@ -161,17 +193,14 @@ func TestVaultSave_SkipsPushOnConflict(t *testing.T) {
 	// Simulate conflict detected
 	vs.syncConflictDetected = true
 
-	// Reset recorder to check only the AddCredential save
+	// Reset recorder
 	recorder.syncCalled = false
 
-	// Add credential (triggers save, but push should be skipped)
-	err = vs.AddCredential("conflict-test", "user", []byte("s3cretP@ss!"), "", "", "")
-	if err != nil {
-		t.Fatalf("AddCredential failed: %v", err)
-	}
+	// SyncPush should skip when conflict is detected
+	vs.SyncPush()
 
 	if recorder.syncCalled {
-		t.Error("expected rclone sync to be skipped when syncConflictDetected=true, but it was called")
+		t.Error("expected SyncPush to skip when syncConflictDetected=true, but it was called")
 	}
 }
 
@@ -250,4 +279,71 @@ func (m *conflictMockExecutor) Run(name string, args ...string) ([]byte, error) 
 
 func (m *conflictMockExecutor) RunNoOutput(name string, args ...string) error {
 	return errors.New("should not be called during conflict")
+}
+
+// --- Benchmarks ---
+// These demonstrate that save() is purely local I/O (no network delay),
+// while SyncPush() incurs the sync cost exactly once.
+
+// slowMockExecutor simulates network latency for rclone operations.
+type slowMockExecutor struct {
+	delay time.Duration
+}
+
+func (m *slowMockExecutor) Run(name string, args ...string) ([]byte, error) {
+	time.Sleep(m.delay)
+	return []byte("[]"), nil
+}
+
+func (m *slowMockExecutor) RunNoOutput(name string, args ...string) error {
+	time.Sleep(m.delay)
+	return nil
+}
+
+func setupBenchVault(b *testing.B, delay time.Duration) *VaultService {
+	b.Helper()
+	tmpDir := b.TempDir()
+	vs, err := New(tmpDir + "/vault.enc")
+	if err != nil {
+		b.Fatalf("failed to create VaultService: %v", err)
+	}
+
+	mock := &slowMockExecutor{delay: delay}
+	cfg := config.SyncConfig{Enabled: true, Remote: "mock-remote:bucket"}
+	vs.syncService = intsync.NewServiceWithExecutor(cfg, mock)
+
+	masterPass := []byte("BenchP@ssw0rd123!")
+	if err := vs.Initialize(masterPass, false, "", ""); err != nil {
+		b.Fatalf("Initialize failed: %v", err)
+	}
+	if err := vs.Unlock([]byte("BenchP@ssw0rd123!")); err != nil {
+		b.Fatalf("Unlock failed: %v", err)
+	}
+
+	return vs
+}
+
+// BenchmarkSave_NoNetworkCost benchmarks save() which should be purely local.
+// With 200ms simulated network delay, save() should still be fast because
+// it no longer calls SmartPush.
+func BenchmarkSave_NoNetworkCost(b *testing.B) {
+	vs := setupBenchVault(b, 200*time.Millisecond)
+	defer vs.Lock()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = vs.AddCredential("bench-svc", "user", []byte("s3cretP@ss!"), "", "", "")
+	}
+}
+
+// BenchmarkSyncPush_IncursNetworkCost benchmarks SyncPush() which does
+// call rclone (with simulated 200ms delay per call).
+func BenchmarkSyncPush_IncursNetworkCost(b *testing.B) {
+	vs := setupBenchVault(b, 200*time.Millisecond)
+	defer vs.Lock()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		vs.SyncPush()
+	}
 }

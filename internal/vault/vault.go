@@ -223,6 +223,21 @@ func (v *VaultService) SyncPull() error {
 	return err
 }
 
+// SyncPush performs a smart sync push if sync is enabled.
+// Should be called once at the end of a command, not per-save.
+func (v *VaultService) SyncPush() {
+	if v.syncService == nil || !v.syncService.IsEnabled() {
+		return
+	}
+	if v.syncConflictDetected {
+		fmt.Fprintf(os.Stderr, "Warning: skipping push due to unresolved sync conflict. Use `pass-cli sync resolve` to resolve.\n")
+		return
+	}
+	if err := v.syncService.SmartPush(v.vaultPath); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: sync push failed: %v\n", err)
+	}
+}
+
 // GetStorageService returns the underlying storage service.
 // Used by CLI commands that need direct access to storage operations.
 func (v *VaultService) GetStorageService() *storage.StorageService {
@@ -982,15 +997,6 @@ func (v *VaultService) save() error {
 	// T022: Pass audit callback for atomic save logging
 	if err := v.storageService.SaveVault(data, masterPasswordStr, v.createAuditCallback()); err != nil {
 		return fmt.Errorf("failed to save vault: %w", err)
-	}
-
-	// Smart push after successful save (errors are warnings only)
-	if v.syncService != nil && v.syncService.IsEnabled() {
-		if v.syncConflictDetected {
-			fmt.Fprintf(os.Stderr, "Warning: skipping auto-push due to unresolved sync conflict. Use `pass-cli sync resolve` to resolve.\n")
-		} else if err := v.syncService.SmartPush(v.vaultPath); err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: sync push failed: %v\n", err)
-		}
 	}
 
 	return nil

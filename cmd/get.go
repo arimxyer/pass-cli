@@ -386,5 +386,6 @@ func outputNormalMode(cred *vault.Credential, vaultService *vault.VaultService, 
 		}
 	}
 
+	syncPushAfterCommand(vaultService)
 	return nil
 }
