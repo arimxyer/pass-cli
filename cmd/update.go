@@ -139,8 +139,8 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create vault service at %s: %w", vaultPath, err)
 	}
 
-	// Sync pull before unlock to get latest version
-	maybeSyncPull(vaultPath)
+	// Smart sync pull before unlock to get latest version
+	syncPullBeforeUnlock(vaultService)
 
 	// Unlock vault
 	if err := unlockVault(vaultService); err != nil {
@@ -343,9 +343,6 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	} else if updateTOTPURI != "" {
 		fmt.Printf("🔐 TOTP configured\n")
 	}
-
-	// Sync push after successful write
-	maybeSyncPush(vaultPath)
 
 	return nil
 }

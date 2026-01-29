@@ -44,6 +44,11 @@ func Run(vaultPath string) error {
 		return fmt.Errorf("failed to initialize vault service: %w", err)
 	}
 
+	// 2a. Smart sync pull before unlock
+	if syncErr := vaultService.SyncPull(); syncErr != nil {
+		fmt.Fprintf(os.Stderr, "Warning: sync pull failed: %v\n", syncErr)
+	}
+
 	// 3. Check metadata to see if keychain is enabled (T019)
 	metadata, err := vaultService.LoadMetadata()
 	if err != nil {
