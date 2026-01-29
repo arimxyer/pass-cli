@@ -382,6 +382,12 @@ func syncPullBeforeUnlock(vaultService *vault.VaultService) {
 	}
 }
 
+// syncPushAfterCommand performs a smart sync push after a command completes.
+// This ensures local changes are pushed to remote once per command, not per-save.
+func syncPushAfterCommand(vaultService *vault.VaultService) {
+	vaultService.SyncPush()
+}
+
 // T031: displayMnemonic formats 24-word mnemonic as 4x6 grid
 // Used during vault initialization to display recovery phrase
 func displayMnemonic(mnemonic string) {

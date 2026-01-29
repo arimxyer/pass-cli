@@ -99,6 +99,9 @@ func Run(vaultPath string) error {
 		return fmt.Errorf("TUI error: %w", err)
 	}
 
+	// Push any changes made during the TUI session
+	vaultService.SyncPush()
+
 	return nil
 }
 

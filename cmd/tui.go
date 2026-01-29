@@ -168,7 +168,12 @@ func launchTUI(vaultService *vault.VaultService) error {
 	app.SetRoot(pageManager.Pages, true)
 
 	// Run application (blocking)
-	return app.Run()
+	runErr := app.Run()
+
+	// Push any changes made during the TUI session
+	vaultService.SyncPush()
+
+	return runErr
 }
 
 // promptForMasterPassword prompts the user for the master password
