@@ -260,6 +260,7 @@ Credential passwords must meet the same complexity requirements as master passwo
 - Passing password via `-p` flag is insecure (visible in shell history)
 - Use `pass-cli generate` to create strong random passwords that meet policy requirements
 - Usage tracking begins when credential is first accessed
+- **Sync**: Pushes changes after completion (displays `Syncing... done` when sync is enabled)
 
 ---
 
@@ -381,6 +382,7 @@ $ pass-cli get github --totp
 - Clipboard auto-clears after 5 seconds
 - Usage tracking records current directory
 - Accessing a credential updates the "last accessed" timestamp
+- **Sync**: Read-only — does not trigger a sync push (even with sync enabled)
 
 ---
 
@@ -556,6 +558,7 @@ Password updated successfully!
 - At least one field must be updated
 - Updating password clears usage history
 - Original values preserved if not specified
+- **Sync**: Pushes changes after completion (displays `Syncing... done` when sync is enabled)
 
 ---
 
@@ -604,6 +607,7 @@ Credential 'github' deleted successfully!
 - Deletion is permanent (no undo)
 - Confirmation required unless using `--force`
 - Credential completely removed from vault
+- **Sync**: Pushes changes after completion (displays `Syncing... done` when sync is enabled)
 
 ---
 

@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.2] - 2026-01-31
+
+### Changed
+- **Sync: Skip push on reads** — `get` command no longer triggers a sync push, eliminating unnecessary file hashing and network round-trips on every read
+- **Sync: Skip push on read-only TUI sessions** — browsing credentials without editing no longer triggers a push on exit
+- **Sync: "Syncing... done" feedback** — write commands (`add`, `update`, `delete`) and TUI write sessions now show sync progress on stderr
+- **Sync: SmartPush returns status** — `SmartPush` now returns whether a push was actually performed, avoiding redundant hash checks
+
+### Fixed
+- **CI: Skip duplicate CI on tag pushes** — tag pushes no longer trigger a redundant CI run (the commit already passed CI on main)
+
+### Infrastructure
+- **GitHub tag ruleset** — `v*` tags now require all CI status checks to pass before creation
+
+## [0.17.1] - 2026-01-29
+
+### Changed
+- **Sync: Move push to command layer** — sync push moved from vault `save()` to individual command handlers, reducing unnecessary pushes during multi-save operations
+
+## [0.17.0] - 2026-01-29
+
+### Added
+- **Smart sync with change detection** — `SmartPush` hashes local vault and compares to last push hash, skipping network calls when nothing changed; `SmartPull` checks remote metadata before pulling
+
 ## [0.16.2] - 2026-01-24
 
 ### Fixed

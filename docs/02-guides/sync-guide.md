@@ -11,7 +11,8 @@ Synchronize your vault across multiple devices using rclone. This enables seamle
 Pass-CLI integrates with [rclone](https://rclone.org/) to sync your vault directory to cloud storage providers. The sync feature:
 
 - **Pulls** the latest vault from the cloud before any operation (once per session)
-- **Pushes** changes to the cloud after write operations (add, update, delete)
+- **Pushes** changes to the cloud after write operations (add, update, delete) with "Syncing... done" feedback
+- **Skips push on reads** - `get` and `list` commands never trigger a push, keeping reads fast
 - **Works offline** - operations continue if sync fails (with warning)
 - **Supports 70+ cloud providers** via rclone (Google Drive, Dropbox, OneDrive, S3, etc.)
 
@@ -30,7 +31,7 @@ Pass-CLI integrates with [rclone](https://rclone.org/) to sync your vault direct
 └─────────────┘
 ```
 
-**Session-aware sync**: Pull only happens once per CLI session to avoid unnecessary network calls. Push happens immediately after every write operation.
+**Smart sync**: Pull happens before unlock to ensure you have the latest vault. Push only happens after write operations (`add`, `update`, `delete`) — read-only commands like `get` and `list` never trigger a push. When a push occurs, you'll see `Syncing... done` feedback on stderr. In the TUI, push only happens if you made changes during your session.
 
 ## Prerequisites
 
@@ -191,15 +192,15 @@ remote: "myserver:/home/user/.pass-cli"
 Once configured, sync happens automatically:
 
 ```bash
-# First command in session - pulls from cloud
+# Any command that unlocks the vault - pulls from cloud first
 pass-cli list
 
-# Subsequent reads - no sync (already pulled this session)
+# Read commands - no push (fast, no network overhead)
 pass-cli get github
 
 # Write operations - push to cloud after completion
 pass-cli add newservice --username user --password pass
-# Output: [sync] Pushed changes to remote
+# Output: Syncing... done
 ```
 
 ### Manual Sync
