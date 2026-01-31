@@ -1,55 +1,12 @@
-### 1. Communication Standards
-
-**Be concise and direct**:
-- Avoid preamble like "Great!", "Sure!", "Let me help"
-- State facts and actions clearly
-- Only explain when complexity requires it
-
-**When reporting progress**:
-- Use file paths with line numbers: `cmd/tui/model.go:54`
-- Show before/after for changes
-- Confirm completion, don't elaborate unless asked
-
-### 2. Committing Work
-
-**Commit frequently** - after completing tasks, milestones, or before switching context.
-
-**Format**: `<type>: <description>` (feat:, fix:, docs:, refactor:, chore:)
-**Footer**: `Co-Authored-By: Claude <noreply@anthropic.com>`
-
-### 3. Accuracy and Transparency
-
-**NEVER**:
-- Claim a task is complete when it's only partially done
-- Mark a task as completed if tests are failing
-- Hide errors or issues you encounter
-
-**ALWAYS**:
-- Report the actual state of work, not aspirational state
-- Test thoroughly before marking tasks complete
-- If you cannot complete a task, explain why clearly
-
-### 4. Handling Errors and Blockers
-
-**When compilation fails**:
-1. Read the error message carefully
-2. Identify which layer is affected
-3. Fix at the source, not with workarounds
-
-**When tests fail**:
-1. Run individually: `go test -v ./path/to/package -run TestName`
-2. Check if test needs updating for current framework/patterns
-3. Fix implementation OR update test (whichever is wrong)
-
----
-
 # pass-cli Development Guidelines
 
 ## Active Technologies
-- Cobra (CLI framework)
-- Viper (configuration management)
+- Go 1.25+
+- Cobra (CLI framework), Viper (configuration management)
+- rivo/tview + tcell (TUI)
 - go-keyring (OS keychain integration)
-- Go 1.21+
+- pquerna/otp + qrterminal (TOTP/QR support)
+- rclone (cloud sync via CLI, not a Go dependency)
 
 ## Project Structure
 
@@ -64,6 +21,7 @@ pass-cli/
 │   ├── crypto/               # Encryption/decryption (AES-GCM, password clearing)
 │   ├── keychain/             # OS keychain integration (Windows/macOS/Linux)
 │   ├── security/             # Audit logging with HMAC signatures
+│   ├── sync/                 # Cloud sync via rclone (SmartPull/SmartPush)
 │   ├── storage/              # File operations
 │   ├── config/               # Configuration handling
 │   └── health/               # Health checks for doctor command
@@ -87,6 +45,9 @@ mise run test                 # Run unit tests
 mise run test:integration     # Run integration tests
 mise run lint                 # Run linter
 mise run build                # Build binary
+mise run fmt                  # Format code
+mise run vet                  # Run go vet
+mise run test:all             # Run unit + integration tests
 mise run git <args>           # Git operations
 mise run gh <args>            # GitHub CLI operations
 ```
@@ -114,5 +75,17 @@ mise run gh <args>            # GitHub CLI operations
 
 **Config loading order**: `cobra.OnInitialize` runs BEFORE flags are parsed. For flag-dependent config (like `--config`), use `PersistentPreRunE` instead.
 
-<!-- MANUAL ADDITIONS START -->
-<!-- MANUAL ADDITIONS END -->
+## Sync Architecture
+
+- Vault is a single encrypted file — all pushes/pulls transfer one file regardless of change count
+- `SmartPush` hashes local file, skips network if hash matches `LastPushHash` in `.sync-state`
+- `SmartPull` runs before unlock, `SmartPush` runs after command completes (synchronous, blocks prompt)
+- `RecordFieldAccess` (called by `get`) writes usage timestamps, changing vault hash and triggering push
+- Two network round-trips per push: `rclone sync` + `rclone lsjson --hash`
+- Async push risks: silent failures, false conflicts (kill between push and SaveState), partial uploads on some backends
+
+## Environment Setup
+
+- **Required**: Go 1.25+, mise, golangci-lint v2.5+
+- **For sync**: rclone configured with a remote
+- **Linux CI/tests**: dbus-x11, gnome-keyring (for keychain tests)
