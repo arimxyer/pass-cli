@@ -223,19 +223,28 @@ func (v *VaultService) SyncPull() error {
 	return err
 }
 
+// IsSyncEnabled returns true if sync is configured and enabled.
+func (v *VaultService) IsSyncEnabled() bool {
+	return v.syncService != nil && v.syncService.IsEnabled()
+}
+
 // SyncPush performs a smart sync push if sync is enabled.
 // Should be called once at the end of a command, not per-save.
-func (v *VaultService) SyncPush() {
+// Returns true if a push was actually performed.
+func (v *VaultService) SyncPush() bool {
 	if v.syncService == nil || !v.syncService.IsEnabled() {
-		return
+		return false
 	}
 	if v.syncConflictDetected {
 		fmt.Fprintf(os.Stderr, "Warning: skipping push due to unresolved sync conflict. Use `pass-cli sync resolve` to resolve.\n")
-		return
+		return false
 	}
-	if err := v.syncService.SmartPush(v.vaultPath); err != nil {
+	pushed, err := v.syncService.SmartPush(v.vaultPath)
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: sync push failed: %v\n", err)
+		return false
 	}
+	return pushed
 }
 
 // GetStorageService returns the underlying storage service.

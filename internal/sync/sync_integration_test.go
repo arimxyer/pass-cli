@@ -94,7 +94,7 @@ func TestIntegration_SmartPush_ThenSmartPull(t *testing.T) {
 	})
 
 	// SmartPush
-	if err := svc.SmartPush(vaultPath); err != nil {
+	if _, err := svc.SmartPush(vaultPath); err != nil {
 		t.Fatalf("SmartPush failed: %v", err)
 	}
 
@@ -156,7 +156,7 @@ func TestIntegration_SmartPull_NoChanges(t *testing.T) {
 		{Name: "vault.enc", Size: 13, ModTime: remoteTime},
 	})
 
-	if err := svc.SmartPush(vaultPath); err != nil {
+	if _, err := svc.SmartPush(vaultPath); err != nil {
 		t.Fatalf("SmartPush failed: %v", err)
 	}
 
@@ -197,7 +197,7 @@ func TestIntegration_ConflictDetection(t *testing.T) {
 		{Name: "vault.enc", Size: 16, ModTime: pushTime},
 	})
 
-	if err := svc.SmartPush(vaultPath); err != nil {
+	if _, err := svc.SmartPush(vaultPath); err != nil {
 		t.Fatalf("SmartPush failed: %v", err)
 	}
 

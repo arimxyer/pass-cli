@@ -71,6 +71,9 @@ type AppState struct {
 	// Search state
 	searchState *SearchState
 
+	// Write tracking for sync optimization
+	hasWriteOperations bool
+
 	// Notification callbacks
 	onCredentialsChanged func()      // Called when credentials are loaded/modified
 	onSelectionChanged   func()      // Called when selection changes
@@ -216,6 +219,8 @@ func (s *AppState) AddCredential(service, username, password, category, url, not
 		return wrappedErr
 	}
 
+	s.MarkWriteOperation()
+
 	// Reload credentials without holding lock
 	creds, err := s.vault.ListCredentialsWithMetadata()
 	if err != nil {
@@ -263,6 +268,8 @@ func (s *AppState) UpdateCredential(service string, opts UpdateCredentialOpts) e
 		return wrappedErr
 	}
 
+	s.MarkWriteOperation()
+
 	// Reload credentials without holding lock
 	creds, err := s.vault.ListCredentialsWithMetadata()
 	if err != nil {
@@ -293,6 +300,8 @@ func (s *AppState) DeleteCredential(service string) error {
 		s.notifyError(wrappedErr)
 		return wrappedErr
 	}
+
+	s.MarkWriteOperation()
 
 	// Reload credentials without holding lock
 	creds, err := s.vault.ListCredentialsWithMetadata()
@@ -527,6 +536,20 @@ func (s *AppState) notifyError(err error) {
 	if callback != nil {
 		callback(err)
 	}
+}
+
+// MarkWriteOperation records that a write operation occurred during this session.
+func (s *AppState) MarkWriteOperation() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.hasWriteOperations = true
+}
+
+// HasWriteOperations returns true if any write operations occurred during this session.
+func (s *AppState) HasWriteOperations() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.hasWriteOperations
 }
 
 // updateCategories extracts unique categories from credentials.

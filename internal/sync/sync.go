@@ -231,14 +231,15 @@ func (s *Service) SmartPull(vaultPath string) error {
 }
 
 // SmartPush checks if local vault has changed and only pushes if needed.
-func (s *Service) SmartPush(vaultPath string) error {
+// Returns true if a push was actually performed.
+func (s *Service) SmartPush(vaultPath string) (bool, error) {
 	if !s.IsEnabled() {
-		return nil
+		return false, nil
 	}
 
 	if !s.IsRcloneInstalled() {
 		fmt.Fprintf(os.Stderr, "Warning: sync enabled but rclone not found in PATH\n")
-		return nil
+		return false, nil
 	}
 
 	vaultDir := filepath.Dir(vaultPath)
@@ -247,7 +248,7 @@ func (s *Service) SmartPush(vaultPath string) error {
 	localHash, err := HashFile(vaultPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: failed to hash vault for sync: %v\n", err)
-		return nil
+		return false, nil
 	}
 
 	// 2. Load state
@@ -259,13 +260,13 @@ func (s *Service) SmartPush(vaultPath string) error {
 
 	// 3. Skip if unchanged
 	if localHash == state.LastPushHash {
-		return nil
+		return false, nil
 	}
 
 	// 4. Push
 	if err := s.executor.RunNoOutput("rclone", "sync", vaultDir, s.config.Remote, "--exclude", syncStateFile); err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: sync push failed: %v\n", err)
-		return nil
+		return false, nil
 	}
 
 	// 5. Update state
@@ -292,7 +293,7 @@ func (s *Service) SmartPush(vaultPath string) error {
 		fmt.Fprintf(os.Stderr, "Warning: failed to save sync state: %v\n", err)
 	}
 
-	return nil
+	return true, nil
 }
 
 // GetVaultDir returns the directory containing the vault file.

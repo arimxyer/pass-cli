@@ -384,8 +384,17 @@ func syncPullBeforeUnlock(vaultService *vault.VaultService) {
 
 // syncPushAfterCommand performs a smart sync push after a command completes.
 // This ensures local changes are pushed to remote once per command, not per-save.
+// Shows "Syncing... done" feedback on stderr when a push actually occurs.
 func syncPushAfterCommand(vaultService *vault.VaultService) {
-	vaultService.SyncPush()
+	if !vaultService.IsSyncEnabled() {
+		return
+	}
+	fmt.Fprint(os.Stderr, "Syncing...")
+	if vaultService.SyncPush() {
+		fmt.Fprintln(os.Stderr, " done")
+	} else {
+		fmt.Fprint(os.Stderr, "\r\033[K")
+	}
 }
 
 // T031: displayMnemonic formats 24-word mnemonic as 4x6 grid

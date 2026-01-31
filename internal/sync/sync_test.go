@@ -115,7 +115,7 @@ func TestPush_Disabled(t *testing.T) {
 
 func TestSmartPush_Disabled(t *testing.T) {
 	service := NewService(config.SyncConfig{Enabled: false})
-	if err := service.SmartPush("/tmp/vault.enc"); err != nil {
+	if _, err := service.SmartPush("/tmp/vault.enc"); err != nil {
 		t.Errorf("SmartPush disabled returned error: %v", err)
 	}
 }
@@ -132,7 +132,7 @@ func TestSmartPush_SkipsWhenUnchanged(t *testing.T) {
 	mock := &mockExecutor{}
 	service := NewServiceWithExecutor(enabledConfig(), mock)
 
-	if err := service.SmartPush(vaultPath); err != nil {
+	if _, err := service.SmartPush(vaultPath); err != nil {
 		t.Fatalf("SmartPush returned error: %v", err)
 	}
 
@@ -158,7 +158,7 @@ func TestSmartPush_PushesWhenChanged(t *testing.T) {
 	mock := &mockExecutor{runOutput: lsjsonOutput}
 	service := NewServiceWithExecutor(enabledConfig(), mock)
 
-	if err := service.SmartPush(vaultPath); err != nil {
+	if _, err := service.SmartPush(vaultPath); err != nil {
 		t.Fatalf("SmartPush returned error: %v", err)
 	}
 

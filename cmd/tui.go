@@ -170,8 +170,15 @@ func launchTUI(vaultService *vault.VaultService) error {
 	// Run application (blocking)
 	runErr := app.Run()
 
-	// Push any changes made during the TUI session
-	vaultService.SyncPush()
+	// Push any changes made during the TUI session (only if writes occurred)
+	if appState.HasWriteOperations() && vaultService.IsSyncEnabled() {
+		fmt.Fprint(os.Stderr, "Syncing...")
+		if vaultService.SyncPush() {
+			fmt.Fprintln(os.Stderr, " done")
+		} else {
+			fmt.Fprint(os.Stderr, "\r\033[K")
+		}
+	}
 
 	return runErr
 }
