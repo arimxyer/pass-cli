@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/arimxyer/pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/vault"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/term"
-	"pass-cli/internal/config"
-	"pass-cli/internal/vault"
 )
 
 var (

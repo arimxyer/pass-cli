@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"pass-cli/internal/keychain"
-	"pass-cli/internal/vault"
-	"pass-cli/test/helpers"
+	"github.com/arimxyer/pass-cli/internal/keychain"
+	"github.com/arimxyer/pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/test/helpers"
 )
 
 // T014: Integration test for corrupted metadata fallback

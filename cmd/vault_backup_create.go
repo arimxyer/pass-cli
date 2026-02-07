@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"pass-cli/internal/security"
+	"github.com/arimxyer/pass-cli/internal/security"
 )
 
 var (
@@ -86,8 +86,8 @@ func runVaultBackupCreate(cmd *cobra.Command, args []string) error {
 		// Check both the error string and common patterns
 		errStr := err.Error()
 		if strings.Contains(errStr, "no space left on device") ||
-		   strings.Contains(errStr, "insufficient disk space") ||
-		   strings.Contains(errStr, "disk full") {
+			strings.Contains(errStr, "insufficient disk space") ||
+			strings.Contains(errStr, "disk full") {
 			return fmt.Errorf("insufficient disk space for backup\n\nFree up disk space and try again")
 		}
 		return fmt.Errorf("failed to create backup: %w", err)

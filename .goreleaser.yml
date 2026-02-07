@@ -17,9 +17,9 @@ builds:
     # Version information injected at build time
     ldflags:
       - -s -w
-      - -X pass-cli/cmd.version={{.Version}}
-      - -X pass-cli/cmd.commit={{.ShortCommit}}
-      - -X pass-cli/cmd.date={{.Date}}
+      - -X github.com/arimxyer/pass-cli/cmd.version={{.Version}}
+      - -X github.com/arimxyer/pass-cli/cmd.commit={{.ShortCommit}}
+      - -X github.com/arimxyer/pass-cli/cmd.date={{.Date}}
 
     # Target platforms
     goos:

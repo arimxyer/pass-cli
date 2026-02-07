@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"pass-cli/test/helpers"
+	"github.com/arimxyer/pass-cli/test/helpers"
 )
 
 // T005-T014: Integration tests for usage command (User Story 1)

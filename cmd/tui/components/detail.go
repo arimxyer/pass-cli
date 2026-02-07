@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"pass-cli/cmd/tui/models"
-	"pass-cli/cmd/tui/styles"
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/cmd/tui/styles"
+	"github.com/arimxyer/pass-cli/internal/vault"
 
 	"github.com/atotto/clipboard"
 	"github.com/rivo/tview"

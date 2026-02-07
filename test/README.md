@@ -164,7 +164,7 @@ Each test:
 The `test/helpers` package provides utilities for integration tests:
 
 ```go
-import "pass-cli/test/helpers"
+import "github.com/arimxyer/pass-cli/test/helpers"
 
 // SetupTestVault creates a vault with automatic cleanup
 // VaultID will be "test-vault"

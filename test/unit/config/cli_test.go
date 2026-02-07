@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/config"
 )
 
 // T017: Integration test for loading terminal config from YAML

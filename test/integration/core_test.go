@@ -5,9 +5,9 @@ package integration
 import (
 	"bytes"
 	"fmt"
+	"github.com/arimxyer/pass-cli/test/helpers"
 	"os"
 	"os/exec"
-	"pass-cli/test/helpers"
 	"path/filepath"
 	"runtime"
 	"strings"

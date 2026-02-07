@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 )
 
 func TestNewStorageService(t *testing.T) {

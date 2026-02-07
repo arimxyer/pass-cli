@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/config"
 )
 
 // setupMockRclone creates a mock rclone script in a temp directory and returns

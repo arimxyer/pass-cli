@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 // Test helper - createTestCredentialMetadata creates test credential metadata

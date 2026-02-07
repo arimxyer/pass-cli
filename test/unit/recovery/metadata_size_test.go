@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 // T071: Validate SC-007 metadata size constraint
@@ -39,7 +39,7 @@ func TestMetadataSize(t *testing.T) {
 		}
 
 		actualSize := len(jsonBytes)
-		const specLimit = 520 // SC-007 original constraint
+		const specLimit = 520       // SC-007 original constraint
 		const practicalLimit = 1024 // Realistic limit for metadata
 
 		// Log actual size for monitoring

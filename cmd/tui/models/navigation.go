@@ -1,8 +1,8 @@
 package models
 
 import (
+	"github.com/arimxyer/pass-cli/cmd/tui/styles"
 	"github.com/rivo/tview"
-	"pass-cli/cmd/tui/styles"
 )
 
 // FocusableComponent represents components that can receive focus.

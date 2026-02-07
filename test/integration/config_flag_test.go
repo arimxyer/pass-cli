@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"pass-cli/test/helpers"
+	"github.com/arimxyer/pass-cli/test/helpers"
 )
 
 // TestIntegration_ConfigFlagWithoutDefaultVault tests issue #65:

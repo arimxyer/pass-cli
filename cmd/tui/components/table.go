@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/cmd/tui/styles"
+	"github.com/arimxyer/pass-cli/internal/vault"
 	"github.com/rivo/tview"
-	"pass-cli/cmd/tui/models"
-	"pass-cli/cmd/tui/styles"
-	"pass-cli/internal/vault"
 )
 
 // CredentialTable wraps tview.Table to display credentials in tabular format.

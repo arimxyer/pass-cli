@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"pass-cli/cmd/tui/models"
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/internal/vault"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"

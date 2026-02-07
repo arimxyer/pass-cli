@@ -2,9 +2,9 @@
 package layout
 
 import (
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/internal/config"
 	"github.com/rivo/tview"
-	"pass-cli/cmd/tui/models"
-	"pass-cli/internal/config"
 )
 
 // MinTerminalWidth is the minimum terminal width (columns) required for usable interface.
@@ -216,8 +216,8 @@ func (lm *LayoutManager) HandleResize(width, height int) {
 //   - Small: Table only (full width)
 //   - Medium: Sidebar (20 cols) + Table (flex)
 //   - Large: Sidebar + Table + Detail (position determined by determineDetailPosition)
-//     - Horizontal (detail on right): Sidebar (20 cols) + Table (flex) + Detail (40 cols)
-//     - Vertical (detail on bottom): Sidebar (20 cols) + (Table above Detail stacked vertically)
+//   - Horizontal (detail on right): Sidebar (20 cols) + Table (flex) + Detail (40 cols)
+//   - Vertical (detail on bottom): Sidebar (20 cols) + (Table above Detail stacked vertically)
 //
 // Manual overrides (detailPanelOverride) take precedence over responsive breakpoints.
 func (lm *LayoutManager) RebuildLayout() {
@@ -304,8 +304,8 @@ func (lm *LayoutManager) RebuildLayout() {
 			// Create right area with table and detail stacked vertically
 			rightArea := tview.NewFlex().
 				SetDirection(tview.FlexRow).
-				AddItem(tableArea, 0, 2, true).      // Table gets 2/3 height
-				AddItem(lm.detailView, 0, 1, false)  // Detail gets 1/3 height
+				AddItem(tableArea, 0, 2, true).     // Table gets 2/3 height
+				AddItem(lm.detailView, 0, 1, false) // Detail gets 1/3 height
 
 			if showSidebar {
 				// Sidebar + (Table above Detail)

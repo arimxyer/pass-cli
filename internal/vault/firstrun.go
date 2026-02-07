@@ -10,10 +10,10 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/arimxyer/pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/recovery"
+	"github.com/arimxyer/pass-cli/internal/security"
 	"golang.org/x/term"
-	"pass-cli/internal/crypto"
-	"pass-cli/internal/recovery"
-	"pass-cli/internal/security"
 )
 
 // Errors for first-run detection and guided initialization

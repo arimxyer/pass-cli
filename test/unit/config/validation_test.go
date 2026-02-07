@@ -3,7 +3,7 @@ package config_test
 import (
 	"testing"
 
-	"pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/config"
 )
 
 // T028: Integration test for custom keybindings in TUI event handling

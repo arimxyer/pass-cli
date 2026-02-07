@@ -29,6 +29,7 @@ const (
 //   - Nonce: 12 bytes (for AES-GCM)
 //   - Auth tag: 16 bytes (for AES-GCM authentication)
 //   - Encrypted data: minimal JSON structure
+//
 // Total: ~100 bytes minimum for a structurally valid (but potentially empty) vault
 const minValidVaultSize = 100
 

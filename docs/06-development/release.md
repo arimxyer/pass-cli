@@ -98,9 +98,9 @@ GoReleaser injects version information at build time via ldflags:
 ```yaml
 ldflags:
   - -s -w  # Strip debug info (reduces binary size)
-  - -X pass-cli/cmd.version={{.Version}}
-  - -X pass-cli/cmd.commit={{.ShortCommit}}
-  - -X pass-cli/cmd.date={{.Date}}
+  - -X github.com/arimxyer/pass-cli/cmd.version={{.Version}}
+  - -X github.com/arimxyer/pass-cli/cmd.commit={{.ShortCommit}}
+  - -X github.com/arimxyer/pass-cli/cmd.date={{.Date}}
 ```
 
 ### Supported Platforms

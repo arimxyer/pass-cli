@@ -221,9 +221,9 @@ DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # Build with ldflags
 go build -ldflags="-s -w \
-  -X pass-cli/cmd.version=${VERSION} \
-  -X pass-cli/cmd.commit=${COMMIT} \
-  -X pass-cli/cmd.date=${DATE}" \
+  -X github.com/arimxyer/pass-cli/cmd.version=${VERSION} \
+  -X github.com/arimxyer/pass-cli/cmd.commit=${COMMIT} \
+  -X github.com/arimxyer/pass-cli/cmd.date=${DATE}" \
   -o pass-cli .
 
 # Verify version info

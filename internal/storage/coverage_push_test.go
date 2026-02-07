@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 )
 
 // TestSaveVaultWithIterations_RestoreOnFailure tests backup restoration when save fails

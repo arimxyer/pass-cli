@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"pass-cli/internal/recovery"
+	"github.com/arimxyer/pass-cli/internal/recovery"
 )
 
 // T056: Memory Clearing Verification Tests

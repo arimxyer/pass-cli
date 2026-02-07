@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/arimxyer/pass-cli/internal/vault"
 	"os"
-	"pass-cli/internal/vault"
 	"sort"
 
 	"github.com/spf13/cobra"

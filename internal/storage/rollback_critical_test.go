@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 )
 
 // TestSaveVault_RollbackFailure tests the CRITICAL scenario where both

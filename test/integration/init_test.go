@@ -1,4 +1,5 @@
 //go:build integration
+
 package integration
 
 import (
@@ -10,11 +11,11 @@ import (
 	"strings"
 	"testing"
 
-	"pass-cli/internal/crypto"
-	"pass-cli/internal/keychain"
-	"pass-cli/internal/storage"
-	"pass-cli/internal/vault"
-	"pass-cli/test/helpers"
+	"github.com/arimxyer/pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/keychain"
+	"github.com/arimxyer/pass-cli/internal/storage"
+	"github.com/arimxyer/pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/test/helpers"
 )
 
 // TestCLI_InitCreatesV2VaultByDefault verifies that `pass-cli init` creates

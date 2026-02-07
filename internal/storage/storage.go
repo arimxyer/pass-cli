@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 )
 
 const (

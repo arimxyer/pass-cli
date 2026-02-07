@@ -6,8 +6,8 @@ import (
 	"crypto/rand"
 	"strings"
 
-	"pass-cli/internal/crypto"
-	"pass-cli/internal/shared"
+	"github.com/arimxyer/pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/shared"
 
 	"github.com/tyler-smith/go-bip39"
 )

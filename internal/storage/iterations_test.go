@@ -3,7 +3,7 @@ package storage
 import (
 	"testing"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 )
 
 // TestGetIterations_NewVault tests getting iterations from newly initialized vault

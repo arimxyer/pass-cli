@@ -3,9 +3,9 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/arimxyer/pass-cli/internal/recovery"
+	"github.com/arimxyer/pass-cli/internal/vault"
 	"os"
-	"pass-cli/internal/recovery"
-	"pass-cli/internal/vault"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -25,7 +25,6 @@ var (
 	testStdinScanner *bufio.Scanner
 	scannerOnce      sync.Once
 )
-
 
 // readLine reads a line from stdin in test mode using the shared scanner
 // This prevents multiple readers from conflicting when reading piped stdin

@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"pass-cli/internal/storage"
+	"github.com/arimxyer/pass-cli/internal/storage"
 )
 
 var (

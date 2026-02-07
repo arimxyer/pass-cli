@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/arimxyer/pass-cli/internal/storage"
 	"github.com/zalando/go-keyring"
-	"pass-cli/internal/storage"
 )
 
 const (

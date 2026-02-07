@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"pass-cli/cmd"
-	"pass-cli/cmd/tui"
+	"github.com/arimxyer/pass-cli/cmd"
+	"github.com/arimxyer/pass-cli/cmd/tui"
 )
 
 func main() {

@@ -9,7 +9,7 @@ import (
 	"github.com/rivo/tview"
 	"github.com/stretchr/testify/require"
 
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 // MockVaultService is a mock implementation of VaultService for testing.

@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"pass-cli/cmd/tui/models"
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 // TestDetailView_Refresh_CachesCredentialService verifies that Refresh() caches the last credential service

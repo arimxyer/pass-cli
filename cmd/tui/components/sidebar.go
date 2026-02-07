@@ -3,11 +3,11 @@ package components
 import (
 	"sort"
 
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/cmd/tui/styles"
+	"github.com/arimxyer/pass-cli/internal/vault"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"pass-cli/cmd/tui/models"
-	"pass-cli/cmd/tui/styles"
-	"pass-cli/internal/vault"
 )
 
 // NodeReference identifies the type and value of a tree node.

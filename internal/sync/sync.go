@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/config"
 )
 
 // ErrSyncConflict indicates both local and remote have changed since last sync.

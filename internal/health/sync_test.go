@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/config"
 )
 
 // ARI-53: Tests for SyncChecker

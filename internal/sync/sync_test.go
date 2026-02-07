@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/config"
 )
 
 // mockExecutor records calls and returns configured responses.

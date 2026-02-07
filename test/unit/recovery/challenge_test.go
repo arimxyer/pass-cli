@@ -3,7 +3,7 @@ package recovery_test
 import (
 	"testing"
 
-	"pass-cli/internal/recovery"
+	"github.com/arimxyer/pass-cli/internal/recovery"
 )
 
 // T014: Unit test for SelectVerifyPositions()
