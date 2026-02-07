@@ -3,7 +3,7 @@ package security_test
 import (
 	"testing"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 )
 
 // TestMemoryClearing verifies that password bytes are cleared after vault operations.

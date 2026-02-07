@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"pass-cli/internal/security"
+	"github.com/arimxyer/pass-cli/internal/security"
 )
 
 var verifyAuditCmd = &cobra.Command{

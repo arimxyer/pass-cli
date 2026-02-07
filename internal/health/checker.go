@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/config"
 )
 
 // Exit codes for doctor command

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"pass-cli/internal/recovery"
+	"github.com/arimxyer/pass-cli/internal/recovery"
 
 	"github.com/tyler-smith/go-bip39"
 )

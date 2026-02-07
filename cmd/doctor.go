@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"pass-cli/internal/config"
-	"pass-cli/internal/health"
+	"github.com/arimxyer/pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/health"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"

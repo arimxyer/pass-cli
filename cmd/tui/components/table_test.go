@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"pass-cli/cmd/tui/models"
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 // TestNewCredentialTable verifies CredentialTable creation.

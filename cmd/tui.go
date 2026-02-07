@@ -8,13 +8,13 @@ import (
 	"github.com/rivo/tview"
 	"github.com/spf13/cobra"
 
-	"pass-cli/cmd/tui/components"
-	"pass-cli/cmd/tui/events"
-	"pass-cli/cmd/tui/layout"
-	"pass-cli/cmd/tui/models"
-	"pass-cli/cmd/tui/styles"
-	"pass-cli/internal/config"
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/cmd/tui/components"
+	"github.com/arimxyer/pass-cli/cmd/tui/events"
+	"github.com/arimxyer/pass-cli/cmd/tui/layout"
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/cmd/tui/styles"
+	"github.com/arimxyer/pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 var tuiCmd = &cobra.Command{

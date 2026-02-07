@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tyler-smith/go-bip39"
 
-	"pass-cli/internal/recovery"
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/internal/recovery"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 // T015: Unit test for VerifyBackup()

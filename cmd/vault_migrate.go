@@ -5,9 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"pass-cli/internal/crypto"
-	"pass-cli/internal/recovery"
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/recovery"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 var vaultMigrateCmd = &cobra.Command{

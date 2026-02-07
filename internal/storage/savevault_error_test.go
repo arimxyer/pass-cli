@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 )
 
 // TestSaveVault_DifferentPassword tests SaveVault succeeds with different password (password change scenario)

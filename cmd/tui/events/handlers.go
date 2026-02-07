@@ -6,10 +6,10 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 
-	"pass-cli/cmd/tui/components"
-	"pass-cli/cmd/tui/layout"
-	"pass-cli/cmd/tui/models"
-	"pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/cmd/tui/components"
+	"github.com/arimxyer/pass-cli/cmd/tui/layout"
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/internal/config"
 )
 
 // EventHandler manages global keyboard shortcuts with focus-aware input protection.

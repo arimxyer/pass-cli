@@ -10,9 +10,9 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 
-	"pass-cli/internal/crypto"
-	"pass-cli/internal/storage"
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/storage"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 var (

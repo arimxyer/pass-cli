@@ -11,8 +11,8 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 
-	"pass-cli/internal/security"
-	"pass-cli/internal/storage"
+	"github.com/arimxyer/pass-cli/internal/security"
+	"github.com/arimxyer/pass-cli/internal/storage"
 )
 
 var (

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 )
 
 // TestSaveVault_ErrorMessage_VerificationFailed verifies FR-011 compliance

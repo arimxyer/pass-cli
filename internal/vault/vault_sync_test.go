@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"pass-cli/internal/config"
-	intsync "pass-cli/internal/sync"
+	"github.com/arimxyer/pass-cli/internal/config"
+	intsync "github.com/arimxyer/pass-cli/internal/sync"
 )
 
 // mockSyncService wraps a real sync.Service but tracks calls via a mock executor.
@@ -19,9 +19,9 @@ type syncTestRecorder struct {
 	// lsjsonCalled tracks whether Run was called with "lsjson" (used by both SmartPull and SmartPush)
 	lsjsonCalled bool
 	// syncCalled tracks whether RunNoOutput was called with "sync" (the actual rclone sync)
-	syncCalled   bool
-	lsjsonErr    error
-	syncErr      error
+	syncCalled bool
+	lsjsonErr  error
+	syncErr    error
 }
 
 func (r *syncTestRecorder) recordLsjson() {

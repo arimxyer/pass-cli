@@ -7,10 +7,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"pass-cli/internal/crypto"
-	"pass-cli/internal/recovery"
-	"pass-cli/internal/security"
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/recovery"
+	"github.com/arimxyer/pass-cli/internal/security"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 var (

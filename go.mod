@@ -1,4 +1,4 @@
-module pass-cli
+module github.com/arimxyer/pass-cli
 
 go 1.25.1
 

@@ -74,9 +74,9 @@ var DraculaTheme = ColorScheme{
 // NordTheme provides a Nord-inspired color scheme (cool blues and grays).
 var NordTheme = ColorScheme{
 	// Backgrounds
-	Background:      tcell.NewRGBColor(46, 52, 64),   // #2e3440
-	BackgroundLight: tcell.NewRGBColor(59, 66, 82),   // #3b4252
-	BackgroundDark:  tcell.NewRGBColor(36, 42, 54),   // #242a36
+	Background:      tcell.NewRGBColor(46, 52, 64), // #2e3440
+	BackgroundLight: tcell.NewRGBColor(59, 66, 82), // #3b4252
+	BackgroundDark:  tcell.NewRGBColor(36, 42, 54), // #242a36
 
 	// Borders
 	BorderColor:    tcell.NewRGBColor(136, 192, 208), // #88c0d0 (frost cyan)
@@ -106,9 +106,9 @@ var NordTheme = ColorScheme{
 // GruvboxTheme provides a Gruvbox dark color scheme (warm retro vibes).
 var GruvboxTheme = ColorScheme{
 	// Backgrounds
-	Background:      tcell.NewRGBColor(40, 40, 40),  // #282828
-	BackgroundLight: tcell.NewRGBColor(60, 56, 54),  // #3c3836
-	BackgroundDark:  tcell.NewRGBColor(29, 32, 33),  // #1d2021
+	Background:      tcell.NewRGBColor(40, 40, 40), // #282828
+	BackgroundLight: tcell.NewRGBColor(60, 56, 54), // #3c3836
+	BackgroundDark:  tcell.NewRGBColor(29, 32, 33), // #1d2021
 
 	// Borders
 	BorderColor:    tcell.NewRGBColor(142, 192, 124), // #8ec07c (aqua)
@@ -138,9 +138,9 @@ var GruvboxTheme = ColorScheme{
 // MonokaiTheme provides a Monokai-inspired color scheme (vibrant and colorful).
 var MonokaiTheme = ColorScheme{
 	// Backgrounds
-	Background:      tcell.NewRGBColor(39, 40, 34),  // #272822
-	BackgroundLight: tcell.NewRGBColor(49, 51, 45),  // #31332d
-	BackgroundDark:  tcell.NewRGBColor(29, 30, 24),  // #1d1e18
+	Background:      tcell.NewRGBColor(39, 40, 34), // #272822
+	BackgroundLight: tcell.NewRGBColor(49, 51, 45), // #31332d
+	BackgroundDark:  tcell.NewRGBColor(29, 30, 24), // #1d1e18
 
 	// Borders
 	BorderColor:    tcell.NewRGBColor(102, 217, 239), // #66d9ef (cyan)

@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/config"
 )
 
 // SyncChecker verifies cloud sync configuration and rclone availability

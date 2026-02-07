@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 )
 
 // TestSaveVault_RollbackOnSecondRenameFail tests the critical rollback path

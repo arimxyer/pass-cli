@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 )
 
 // TestRandomHexSuffix tests hex suffix generation

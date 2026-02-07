@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"pass-cli/test/helpers"
+	"github.com/arimxyer/pass-cli/test/helpers"
 )
 
 // TestSyncEnable tests the sync enable command

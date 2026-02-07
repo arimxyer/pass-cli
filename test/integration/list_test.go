@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"pass-cli/test/helpers"
+	"github.com/arimxyer/pass-cli/test/helpers"
 )
 
 // T024-T028: Integration tests for list --by-project command (User Story 2)

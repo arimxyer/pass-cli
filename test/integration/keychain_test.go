@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"pass-cli/internal/keychain"
-	"pass-cli/internal/vault"
-	"pass-cli/test/helpers"
+	"github.com/arimxyer/pass-cli/internal/keychain"
+	"github.com/arimxyer/pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/test/helpers"
 )
 
 // TestKeychain_FullWorkflow tests the complete keychain integration workflow

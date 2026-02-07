@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 var (

@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"pass-cli/internal/config"
-	"pass-cli/internal/security"
-	"pass-cli/internal/sync"
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/security"
+	"github.com/arimxyer/pass-cli/internal/sync"
+	"github.com/arimxyer/pass-cli/internal/vault"
 )
 
 // TestSyncConfigValidation tests that sync configuration is properly validated

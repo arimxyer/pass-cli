@@ -6,8 +6,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"pass-cli/internal/config"
-	intsync "pass-cli/internal/sync"
+	"github.com/arimxyer/pass-cli/internal/config"
+	intsync "github.com/arimxyer/pass-cli/internal/sync"
 
 	"github.com/spf13/cobra"
 )

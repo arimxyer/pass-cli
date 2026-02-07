@@ -3,7 +3,7 @@ package recovery
 import (
 	"strings"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 
 	"github.com/tyler-smith/go-bip39"
 )

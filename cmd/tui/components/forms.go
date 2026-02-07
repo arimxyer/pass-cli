@@ -8,13 +8,13 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/cmd/tui/styles"
+	"github.com/arimxyer/pass-cli/internal/security"
+	"github.com/arimxyer/pass-cli/internal/vault"
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"pass-cli/cmd/tui/models"
-	"pass-cli/cmd/tui/styles"
-	"pass-cli/internal/security"
-	"pass-cli/internal/vault"
 )
 
 // normalizeCategory converts the "Uncategorized" UI label to empty string for storage.

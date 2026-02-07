@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"pass-cli/internal/crypto"
+	"github.com/arimxyer/pass-cli/internal/crypto"
 )
 
 // mockFileSystem is a test double for FileSystem that allows error injection
@@ -33,7 +33,6 @@ func (m *mockFileSystem) OpenFile(name string, flag int, perm os.FileMode) (*os.
 	}
 	return m.osFileSystem.OpenFile(name, flag, perm)
 }
-
 
 func TestGenerateManualBackupPath(t *testing.T) {
 	cryptoService := crypto.NewCryptoService()
@@ -504,7 +503,7 @@ func TestListBackups(t *testing.T) {
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) &&
 		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr ||
-		len(s) > len(substr)+1 && findSubstring(s, substr)))
+			len(s) > len(substr)+1 && findSubstring(s, substr)))
 }
 
 func findSubstring(s, substr string) bool {

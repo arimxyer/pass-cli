@@ -27,11 +27,11 @@ type Config struct {
 
 // TerminalConfig represents terminal size warning configuration
 type TerminalConfig struct {
-	WarningEnabled       bool   `mapstructure:"warning_enabled"`
-	MinWidth             int    `mapstructure:"min_width"`
-	MinHeight            int    `mapstructure:"min_height"`
-	DetailPosition       string `mapstructure:"detail_position"`
-	DetailAutoThreshold  int    `mapstructure:"detail_auto_threshold"`
+	WarningEnabled      bool   `mapstructure:"warning_enabled"`
+	MinWidth            int    `mapstructure:"min_width"`
+	MinHeight           int    `mapstructure:"min_height"`
+	DetailPosition      string `mapstructure:"detail_position"`
+	DetailAutoThreshold int    `mapstructure:"detail_auto_threshold"`
 }
 
 // SyncConfig represents rclone sync configuration for cross-device vault synchronization

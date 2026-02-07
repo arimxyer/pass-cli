@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/internal/config"
 )
 
 // configCmd represents the config command

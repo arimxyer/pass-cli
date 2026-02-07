@@ -3,7 +3,7 @@ package models
 import (
 	"strings"
 
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/internal/vault"
 
 	"github.com/rivo/tview"
 )

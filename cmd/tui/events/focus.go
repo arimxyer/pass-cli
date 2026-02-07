@@ -3,9 +3,9 @@ package events
 import (
 	"fmt"
 
-	"pass-cli/cmd/tui/components"
-	"pass-cli/cmd/tui/layout"
-	"pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/cmd/tui/components"
+	"github.com/arimxyer/pass-cli/cmd/tui/layout"
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
 )
 
 // IsComponentVisible checks if a component is visible in the current layout mode.

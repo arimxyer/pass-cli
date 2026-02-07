@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/arimxyer/pass-cli/internal/security"
 	"github.com/zalando/go-keyring"
-	"pass-cli/internal/security"
 )
 
 // cleanupTestKeychain removes keychain entries created during tests

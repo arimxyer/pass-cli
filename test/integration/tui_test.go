@@ -14,7 +14,7 @@ import (
 
 	"github.com/zalando/go-keyring"
 
-	"pass-cli/test/helpers"
+	"github.com/arimxyer/pass-cli/test/helpers"
 )
 
 // TestIntegration_TUILaunchDetection verifies TUI launches with no args
@@ -137,7 +137,6 @@ func TestIntegration_TUIVaultPath(t *testing.T) {
 		if err := initCmd.Run(); err != nil {
 			t.Fatalf("Failed to initialize custom vault: %v", err)
 		}
-
 
 		// Verify vault was created at custom path
 		if _, err := os.Stat(customVaultPath); os.IsNotExist(err) {

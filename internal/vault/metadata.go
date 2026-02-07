@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"pass-cli/internal/shared"
+	"github.com/arimxyer/pass-cli/internal/shared"
 )
 
 // Metadata represents vault configuration stored in .meta.json

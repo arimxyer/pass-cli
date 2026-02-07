@@ -6,9 +6,9 @@ import (
 
 	"github.com/rivo/tview"
 
-	"pass-cli/cmd/tui/models"
-	"pass-cli/cmd/tui/styles"
-	"pass-cli/internal/config"
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/cmd/tui/styles"
+	"github.com/arimxyer/pass-cli/internal/config"
 )
 
 // FocusContext represents the current focus context for determining which shortcuts to display.

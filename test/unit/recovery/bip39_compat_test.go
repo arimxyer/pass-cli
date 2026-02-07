@@ -7,7 +7,7 @@ import (
 
 	"github.com/tyler-smith/go-bip39"
 
-	"pass-cli/internal/recovery"
+	"github.com/arimxyer/pass-cli/internal/recovery"
 )
 
 // T058: BIP39 Compatibility Test

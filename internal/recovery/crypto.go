@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"pass-cli/internal/shared"
+	"github.com/arimxyer/pass-cli/internal/shared"
 
 	"golang.org/x/crypto/argon2"
 )

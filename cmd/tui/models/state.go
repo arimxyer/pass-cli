@@ -8,7 +8,7 @@ import (
 	"sort"
 	"sync"
 
-	"pass-cli/internal/vault"
+	"github.com/arimxyer/pass-cli/internal/vault"
 
 	"github.com/rivo/tview"
 )

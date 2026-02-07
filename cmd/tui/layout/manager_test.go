@@ -3,7 +3,7 @@ package layout
 import (
 	"testing"
 
-	"pass-cli/cmd/tui/models"
+	"github.com/arimxyer/pass-cli/cmd/tui/models"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
