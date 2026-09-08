@@ -61,6 +61,12 @@ archives:
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
 
+    # winget and Scoop can only consume .zip archives, and .zip is the native
+    # archive format on Windows; tar.gz stays the default everywhere else.
+    format_overrides:
+      - goos: windows
+        formats: [ zip ]
+
     # Files to include in archive (essential docs only)
     # Full documentation available at https://reyamira.github.io/pass-cli/
     files:
